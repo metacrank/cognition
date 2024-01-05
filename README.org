@@ -1,4 +1,4 @@
 #+title: Uforth
 
-* uForth
-uForth aims to be a small implementation of something like the forth programming language.
+* Stem
+stem aims to be a small implementation of something like the forth programming language.
