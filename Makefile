@@ -5,7 +5,7 @@
 # @version 0.1
 
 all:
-	cc *.c -o stem
+	cc *.c -o stem -lm
 
 clean:
 	rm stem

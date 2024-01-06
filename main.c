@@ -3,57 +3,51 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define MAX 50
-#define JUSTDO(a)                                                              \
-  if (!(a)) {                                                                  \
-    perror(#a);                                                                \
-    exit(1);                                                                   \
-  }
-
 extern ht_t *WORD_TABLE;
 extern array_t *STACK;
 extern char *INBUF;
 extern parser_t *PARSER;
 
-/** char *get_line  FILE *f
- * reads an arbitrarily long line of text or until EOF
- * caller must free the pointer returned after use
- */
-char *get_line(FILE *f) {
-  int len = MAX;
-  char buf[MAX], *e = NULL, *ret;
-  JUSTDO(ret = calloc(MAX, 1));
-  while (fgets(buf, MAX, f)) {
-    if (len - strlen(ret) < MAX)
-      JUSTDO(ret = realloc(ret, len *= 2));
-    strcat(ret, buf);
-    if ((e = strrchr(ret, '\n')))
-      break;
-  }
-  if (e)
-    *e = '\0';
-  return ret;
+void usage() {
+  printf("Usage: stem [-hv] [file]\n");
+  exit(1);
+}
+
+void version() {
+  printf("Author: Preston Pan, MIT License 2023\n");
+  printf("stem, version 1.0\n");
+  exit(0);
 }
 
 int main(int argc, char **argv) {
-  PARSER = init_parser("");
   value_t *v;
+  size_t len;
+
+  if (argc < 2) {
+    usage();
+  }
+
+  if (strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "--help") == 0) {
+    usage();
+  } else if (strcmp(argv[1], "-v") == 0 || strcmp(argv[1], "--version") == 0) {
+    version();
+  }
+
+  FILE *fp = fopen(argv[1], "rb");
+  ssize_t bytes_read = getdelim(&INBUF, &len, '\0', fp);
+
+  PARSER = init_parser(INBUF);
   STACK = init_array(10);
   WORD_TABLE = init_ht(500);
 
-  printf("exit to exit REPL;\n");
   while (1) {
-    printf("> ");
-    INBUF = get_line(stdin);
-    parser_reset(PARSER, INBUF);
-    while (1) {
-      v = parser_get_next(PARSER);
-      if (v == NULL)
-        break;
-      eval(v);
-    }
-    free(INBUF);
+    v = parser_get_next(PARSER);
+    if (v == NULL)
+      break;
+    eval(v);
   }
+
+  free(INBUF);
   ht_free(WORD_TABLE);
   array_free(STACK);
   free(PARSER);

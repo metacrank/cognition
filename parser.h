@@ -14,7 +14,7 @@ struct ARRAY_STRUCT {
 };
 
 struct VALUE_STRUCT {
-  enum { VWORD, VINT, VFLOAT, VSTR, VQUOTE } type;
+  enum { VWORD, VINT, VFLOAT, VSTR, VQUOTE, VERR } type;
   union {
     long double int_float;
     array_t *quote;
