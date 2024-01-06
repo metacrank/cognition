@@ -91,7 +91,7 @@ value_t *value_copy(value_t *v) {
 }
 
 void value_free(value_t *v) {
-  if (v->type == VSTR || v->type == VSTR || v->type == VWORD) {
+  if (v->type == VSTR || v->type == VWORD) {
     string_free(v->str_word);
   }
   if (v->type == VQUOTE) {
@@ -177,7 +177,7 @@ value_t *parse_num(parser_t *p) {
   value_t *retv;
   string_t *s = init_string(NULL);
   bool is_float = false;
-  while (isdigit(p->c) || p->c == '.') {
+  while (isdigit(p->c) || (p->c == '.') && !is_float) {
     if (p->c == '.')
       is_float = true;
     string_append(s, p->c);
@@ -268,7 +268,7 @@ value_t *sll_get(sll_t *l, string_t *k) {
   }
   return NULL;
 }
-/* TODO */
+
 void sll_free(sll_t *l) {
   node_t *cur = l->head;
   node_t *tmp;
@@ -711,6 +711,122 @@ bool eval_builtins(value_t *v) {
     } else if ((v1->type == VINT || v1->type == VFLOAT) &&
                (v2->type == VINT || v2->type == VFLOAT)) {
       retval->int_float = v1->int_float != v2->int_float;
+    } else {
+      value_free(v);
+      array_append(STACK, v1);
+      array_append(STACK, v2);
+      return eval_error();
+    }
+    array_append(STACK, retval);
+    value_free(v1);
+    value_free(v2);
+  } else if (strcmp(str, "<=") == 0) {
+    v2 = array_pop(STACK);
+    if (v2 == NULL) {
+      value_free(v);
+      return eval_error();
+    }
+    v1 = array_pop(STACK);
+    if (v1 == NULL) {
+      value_free(v);
+      array_append(STACK, v2);
+      return eval_error();
+    }
+
+    retval = init_value(VINT);
+    if (v1->type == VSTR && v2->type == VSTR ||
+        v1->type == VWORD && v2->type == VWORD) {
+      retval->int_float = strcmp(v1->str_word->value, v2->str_word->value) <= 0;
+    } else if ((v1->type == VINT || v1->type == VFLOAT) &&
+               (v2->type == VINT || v2->type == VFLOAT)) {
+      retval->int_float = v1->int_float <= v2->int_float;
+    } else {
+      value_free(v);
+      array_append(STACK, v1);
+      array_append(STACK, v2);
+      return eval_error();
+    }
+    array_append(STACK, retval);
+    value_free(v1);
+    value_free(v2);
+  } else if (strcmp(str, "<") == 0) {
+    v2 = array_pop(STACK);
+    if (v2 == NULL) {
+      value_free(v);
+      return eval_error();
+    }
+    v1 = array_pop(STACK);
+    if (v1 == NULL) {
+      value_free(v);
+      array_append(STACK, v2);
+      return eval_error();
+    }
+
+    retval = init_value(VINT);
+    if (v1->type == VSTR && v2->type == VSTR ||
+        v1->type == VWORD && v2->type == VWORD) {
+      retval->int_float = strcmp(v1->str_word->value, v2->str_word->value) < 0;
+    } else if ((v1->type == VINT || v1->type == VFLOAT) &&
+               (v2->type == VINT || v2->type == VFLOAT)) {
+      retval->int_float = v1->int_float < v2->int_float;
+    } else {
+      value_free(v);
+      array_append(STACK, v1);
+      array_append(STACK, v2);
+      return eval_error();
+    }
+    array_append(STACK, retval);
+    value_free(v1);
+    value_free(v2);
+  } else if (strcmp(str, ">") == 0) {
+    v2 = array_pop(STACK);
+    if (v2 == NULL) {
+      value_free(v);
+      return eval_error();
+    }
+    v1 = array_pop(STACK);
+    if (v1 == NULL) {
+      value_free(v);
+      array_append(STACK, v2);
+      return eval_error();
+    }
+
+    retval = init_value(VINT);
+    if (v1->type == VSTR && v2->type == VSTR ||
+        v1->type == VWORD && v2->type == VWORD) {
+      retval->int_float = strcmp(v1->str_word->value, v2->str_word->value) > 0;
+    } else if ((v1->type == VINT || v1->type == VFLOAT) &&
+               (v2->type == VINT || v2->type == VFLOAT)) {
+      retval->int_float = v1->int_float > v2->int_float;
+    } else {
+      value_free(v);
+      array_append(STACK, v1);
+      array_append(STACK, v2);
+      return eval_error();
+    }
+    array_append(STACK, retval);
+    value_free(v1);
+    value_free(v2);
+  } else if (strcmp(str, ">=") == 0) {
+    v2 = array_pop(STACK);
+    if (v2 == NULL) {
+      value_free(v);
+      return eval_error();
+    }
+    v1 = array_pop(STACK);
+    if (v1 == NULL) {
+      value_free(v);
+      array_append(STACK, v2);
+      return eval_error();
+    }
+
+    retval = init_value(VINT);
+    if (v1->type == VSTR && v2->type == VSTR ||
+        v1->type == VWORD && v2->type == VWORD) {
+      retval->int_float = strcmp(v1->str_word->value, v2->str_word->value) >= 0;
+    } else if ((v1->type == VINT || v1->type == VFLOAT) &&
+               (v2->type == VINT || v2->type == VFLOAT)) {
+      retval->int_float = v1->int_float >= v2->int_float;
     } else {
       value_free(v);
       array_append(STACK, v1);
