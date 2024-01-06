@@ -131,9 +131,41 @@ value_t *parse_string(parser_t *p) {
   value_t *retv = init_value(VSTR);
   parser_move(p);
   string_t *s = init_string(NULL);
-  while (p->c != '"' && p->c != '\0') {
-    string_append(s, p->c);
-    parser_move(p);
+  bool escaped = false;
+  while (escaped || p->c != '"' && p->c != '\0') {
+    if (p->c == '\\') {
+      escaped = true;
+      parser_move(p);
+      continue;
+    }
+    if (escaped) {
+      switch (p->c) {
+      case '"':
+        string_append(s, '"');
+        break;
+      case 'n':
+        string_append(s, '\n');
+        break;
+      case 'r':
+        string_append(s, '\r');
+        break;
+      case 't':
+        string_append(s, '\t');
+        break;
+      case '\\':
+        string_append(s, '\\');
+        break;
+      default:
+        string_append(s, p->c);
+        break;
+      }
+      parser_move(p);
+      escaped = false;
+    } else {
+      string_append(s, p->c);
+      parser_move(p);
+      escaped = false;
+    }
   }
   parser_move(p);
   retv->str_word = s;
@@ -520,17 +552,19 @@ bool eval_builtins(value_t *v) {
       value_free(v);
       return eval_error();
     }
-    parser_t *tmp_p = init_parser(v1->str_word->value);
-    value_t *cur;
-    while (1) {
-      cur = parser_get_next(tmp_p);
-      if (cur == NULL)
-        break;
-      eval(cur);
-    }
-    free(tmp_p);
+    value_t *TMP_VALUE = v;
+    value_t *TMP_CUR;
+    char *s = malloc(strlen(v1->str_word->value) + 1);
+    strcpy(s, v1->str_word->value);
     value_free(v1);
-
+    parser_t *TMP_P = init_parser(s);
+    while (1) {
+      TMP_CUR = parser_get_next(TMP_P);
+      if (TMP_CUR == NULL)
+        break;
+      eval(TMP_CUR);
+    }
+    free(TMP_P);
   } else if (strcmp(str, ".") == 0) {
     v1 = array_pop(STACK);
     if (v1 == NULL) {
@@ -971,7 +1005,6 @@ bool eval_builtins(value_t *v) {
     array_free(STACK);
     free(INBUF);
     free(PARSER);
-    value_free(v);
     exit(0);
   } else if (strcmp(str, "read") == 0) {
     v1 = array_pop(STACK);
@@ -987,9 +1020,58 @@ bool eval_builtins(value_t *v) {
     }
     printf("%s", v1->str_word->value);
     retval = init_value(VSTR);
-    retval->str_word = init_string(get_line(stdin));
+    char *a = get_line(stdin);
+    retval->str_word = init_string(a);
     array_append(STACK, retval);
     value_free(v1);
+    free(a);
+  } else if (strcmp(str, "fread") == 0) {
+    v1 = array_pop(STACK);
+    if (v1 == NULL) {
+      value_free(v);
+      return eval_error();
+    }
+    if (v1->type != VSTR) {
+      value_free(v);
+      array_append(STACK, v1);
+      return eval_error();
+    }
+    char *val;
+    size_t len;
+    FILE *fp = fopen(v1->str_word->value, "rb");
+    if (!fp) {
+      value_free(v);
+      array_append(STACK, v1);
+      return eval_error();
+    }
+    ssize_t bytes_read = getdelim(&val, &len, '\0', fp);
+    fclose(fp);
+    retval = init_value(VSTR);
+    retval->str_word = init_string(val);
+    array_append(STACK, retval);
+    value_free(v1);
+  } else if (strcmp(str, "fwrite") == 0) {
+    v1 = array_pop(STACK);
+    if (v1 == NULL) {
+      value_free(v);
+      return eval_error();
+    }
+    if (v1->type != VSTR) {
+      value_free(v);
+      array_append(STACK, v1);
+      return eval_error();
+    }
+    char *val;
+    size_t len;
+    FILE *fp = fopen(v1->str_word->value, "w+");
+    if (!fp) {
+      value_free(v);
+      array_append(STACK, v1);
+      return eval_error();
+    }
+    fprintf(fp, "%s", v1->str_word->value);
+    value_free(v1);
+    fclose(fp);
   } else if (strcmp(str, "vat") == 0) {
     v2 = array_pop(STACK);
     if (v2 == NULL) {
