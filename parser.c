@@ -691,6 +691,35 @@ bool eval_builtins(value_t *v) {
     array_append(STACK, retval);
     value_free(v1);
     value_free(v2);
+  } else if (strcmp(str, "!=") == 0) {
+    v2 = array_pop(STACK);
+    if (v2 == NULL) {
+      value_free(v);
+      return eval_error();
+    }
+    v1 = array_pop(STACK);
+    if (v1 == NULL) {
+      value_free(v);
+      array_append(STACK, v2);
+      return eval_error();
+    }
+
+    retval = init_value(VINT);
+    if (v1->type == VSTR && v2->type == VSTR ||
+        v1->type == VWORD && v2->type == VWORD) {
+      retval->int_float = strcmp(v1->str_word->value, v2->str_word->value) != 0;
+    } else if ((v1->type == VINT || v1->type == VFLOAT) &&
+               (v2->type == VINT || v2->type == VFLOAT)) {
+      retval->int_float = v1->int_float != v2->int_float;
+    } else {
+      value_free(v);
+      array_append(STACK, v1);
+      array_append(STACK, v2);
+      return eval_error();
+    }
+    array_append(STACK, retval);
+    value_free(v1);
+    value_free(v2);
   } else if (strcmp(str, "if") == 0) {
     v3 = array_pop(STACK);
     if (v3 == NULL) {
@@ -791,6 +820,14 @@ bool eval_builtins(value_t *v) {
     retval = value_copy(v1);
     array_append(STACK, v1);
     array_append(STACK, retval);
+  } else if (strcmp(str, "discard") == 0) {
+    v1 = array_pop(STACK);
+    if (v1 == NULL) {
+      value_free(v);
+      return eval_error();
+    }
+
+    value_free(v1);
   } else if (strcmp(str, "type") == 0) {
     v1 = array_pop(STACK);
     if (v1 == NULL) {
