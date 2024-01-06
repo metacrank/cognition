@@ -50,9 +50,9 @@ names functions and automatically changes what those functions do.
 Looping in this language is done via recursion. Because the language is stack-based, recursion is not more memory efficient
 than looping if using tail recursion. For example, the REPL for this language is implemented like so:
 #+begin_example
-loop [ "> " read evalstr loop ] func loop
+loop [ "> " . read strquote eval loop ] func loop
 #+end_example
-Where read takes in a string and prints it before reading a value, evalstr evaluates a string, and loop is the function that calls
+Where read takes in a string and prints it before reading a value, strquote turns a string into a quote, and loop is the function that calls
 itself.
 
 *** Curry, Compose, Qstack, Quote

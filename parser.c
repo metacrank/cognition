@@ -15,6 +15,7 @@
   }
 
 array_t *STACK;
+array_t *EVAL_STACK;
 ht_t *WORD_TABLE;
 char *INBUF;
 parser_t *PARSER;
@@ -332,6 +333,8 @@ value_t *ht_get(ht_t *h, string_t *key) {
   return sll_get(h->buckets[hash(h, key->value)], key);
 }
 
+bool ht_exists(ht_t *h, string_t *key) { return ht_get(h, key) != NULL; }
+
 void ht_free(ht_t *h) {
   for (int i = 0; i < h->size; i++) {
     sll_free(h->buckets[i]);
@@ -358,7 +361,7 @@ void print_value(value_t *v) {
     printf("%Lf\n", v->int_float);
     break;
   case VSTR:
-    printf("%s\n", v->str_word->value);
+    printf("%s", v->str_word->value);
     break;
   case VWORD:
     printf("W: %s\n", v->str_word->value);
@@ -397,6 +400,9 @@ bool eval_error() {
   return true;
 }
 
+/* TODO: rotr, rotl, dip, map, filter, errstr, join (for strings), switch
+ * (for quotes), split (split array, string, word into two), del (deleting
+ * entries from quotes, strings, words) */
 bool eval_builtins(value_t *v) {
   char *str = v->str_word->value;
   value_t *v1;
@@ -535,13 +541,14 @@ bool eval_builtins(value_t *v) {
       array_append(STACK, v1);
       return eval_error();
     }
-    CUR_FREE_VAL = v1;
-    CUR_FREE_VAL_OP = v;
+    array_append(EVAL_STACK, v);
+    array_append(EVAL_STACK, v1);
     if (v1->type == VQUOTE) {
       for (int i = 0; i < v1->quote->size; i++) {
         eval(value_copy(v1->quote->items[i]));
       }
-      value_free(v1);
+      value_free(array_pop(EVAL_STACK));
+      array_pop(EVAL_STACK);
     } else {
       eval(v1);
     }
@@ -950,6 +957,32 @@ bool eval_builtins(value_t *v) {
 
     array_append(v2->quote, v1);
     array_append(STACK, v2);
+  } else if (strcmp(str, "keep") == 0) {
+    v2 = array_pop(STACK);
+    if (v2 == NULL) {
+      value_free(v);
+      return eval_error();
+    }
+    v1 = array_pop(STACK);
+    if (v1 == NULL) {
+      value_free(v);
+      array_append(STACK, v2);
+      return eval_error();
+    }
+
+    array_append(STACK, value_copy(v1));
+    array_append(EVAL_STACK, v);
+    array_append(EVAL_STACK, v2);
+    if (v2->type == VQUOTE) {
+      for (int i = 0; i < v2->quote->size; i++) {
+        eval(value_copy(v2->quote->items[i]));
+      }
+      value_free(array_pop(EVAL_STACK));
+      array_pop(EVAL_STACK);
+    } else {
+      eval(v1);
+    }
+    array_append(STACK, v1);
   } else if (strcmp(str, "len") == 0) {
     v1 = array_pop(STACK);
     if (v1 == NULL) {
@@ -977,6 +1010,35 @@ bool eval_builtins(value_t *v) {
     retval = value_copy(v1);
     array_append(STACK, v1);
     array_append(STACK, retval);
+  } else if (strcmp(str, "isdef") == 0) {
+    v1 = array_pop(STACK);
+    if (v1 == NULL) {
+      value_free(v);
+      return eval_error();
+    }
+
+    retval = init_value(VINT);
+    if (v1->type != VWORD) {
+      retval->int_float = 0;
+    } else {
+      retval->int_float = ht_exists(WORD_TABLE, v1->str_word);
+    }
+    array_append(STACK, v1);
+    array_append(STACK, retval);
+  } else if (strcmp(str, "swap") == 0) {
+    v2 = array_pop(STACK);
+    if (v2 == NULL) {
+      value_free(v);
+      return eval_error();
+    }
+    v1 = array_pop(STACK);
+    if (v1 == NULL) {
+      array_append(STACK, v2);
+      value_free(v);
+      return eval_error();
+    }
+    array_append(STACK, v2);
+    array_append(STACK, v1);
   } else if (strcmp(str, "dsc") == 0) {
     v1 = array_pop(STACK);
     if (v1 == NULL) {
@@ -1012,32 +1074,14 @@ bool eval_builtins(value_t *v) {
     array_free(STACK);
     free(INBUF);
     free(PARSER);
-    if (CUR_FREE_VAL) {
-      value_free(CUR_FREE_VAL);
-    }
-    if (CUR_FREE_VAL_OP) {
-      value_free(CUR_FREE_VAL_OP);
-    }
+    array_free(EVAL_STACK);
     value_free(v);
     exit(0);
   } else if (strcmp(str, "read") == 0) {
-    v1 = array_pop(STACK);
-    if (v1 == NULL) {
-      value_free(v);
-      return eval_error();
-    }
-
-    if (v1->type != VSTR) {
-      value_free(v);
-      array_append(STACK, v1);
-      return eval_error();
-    }
-    printf("%s", v1->str_word->value);
     retval = init_value(VSTR);
     char *a = get_line(stdin);
     retval->str_word = init_string(a);
     array_append(STACK, retval);
-    value_free(v1);
     free(a);
   } else if (strcmp(str, "fread") == 0) {
     v1 = array_pop(STACK);
@@ -1064,6 +1108,7 @@ bool eval_builtins(value_t *v) {
     retval->str_word = init_string(val);
     array_append(STACK, retval);
     value_free(v1);
+    free(val);
   } else if (strcmp(str, "fwrite") == 0) {
     v1 = array_pop(STACK);
     if (v1 == NULL) {
