@@ -18,6 +18,8 @@ array_t *STACK;
 ht_t *WORD_TABLE;
 char *INBUF;
 parser_t *PARSER;
+value_t *CUR_FREE_VAL;
+value_t *CUR_FREE_VAL_OP;
 
 array_t *init_array(size_t size) {
   array_t *a = calloc(1, sizeof(array_t));
@@ -533,6 +535,8 @@ bool eval_builtins(value_t *v) {
       array_append(STACK, v1);
       return eval_error();
     }
+    CUR_FREE_VAL = v1;
+    CUR_FREE_VAL_OP = v;
     if (v1->type == VQUOTE) {
       for (int i = 0; i < v1->quote->size; i++) {
         eval(value_copy(v1->quote->items[i]));
@@ -541,7 +545,7 @@ bool eval_builtins(value_t *v) {
     } else {
       eval(v1);
     }
-  } else if (strcmp(str, "evalstr") == 0) {
+  } else if (strcmp(str, "strquote") == 0) {
     v1 = array_pop(STACK);
     if (v1 == NULL) {
       value_free(v);
@@ -552,19 +556,22 @@ bool eval_builtins(value_t *v) {
       value_free(v);
       return eval_error();
     }
-    value_t *TMP_VALUE = v;
-    value_t *TMP_CUR;
+    retval = init_value(VQUOTE);
+    retval->quote = init_array(10);
     char *s = malloc(strlen(v1->str_word->value) + 1);
     strcpy(s, v1->str_word->value);
-    value_free(v1);
-    parser_t *TMP_P = init_parser(s);
+    parser_t *p = init_parser(s);
+    value_t *cur;
     while (1) {
-      TMP_CUR = parser_get_next(TMP_P);
-      if (TMP_CUR == NULL)
+      cur = parser_get_next(p);
+      if (cur == NULL)
         break;
-      eval(TMP_CUR);
+      array_append(retval->quote, cur);
     }
-    free(TMP_P);
+    array_append(STACK, retval);
+    value_free(v1);
+    free(p->source);
+    free(p);
   } else if (strcmp(str, ".") == 0) {
     v1 = array_pop(STACK);
     if (v1 == NULL) {
@@ -871,22 +878,22 @@ bool eval_builtins(value_t *v) {
     value_free(v1);
     value_free(v2);
   } else if (strcmp(str, "if") == 0) {
+    v1 = array_pop(STACK);
+    if (v1 == NULL) {
+      value_free(v);
+      return eval_error();
+    }
     v3 = array_pop(STACK);
     if (v3 == NULL) {
       value_free(v);
+      array_append(STACK, v1);
       return eval_error();
     }
     v2 = array_pop(STACK);
     if (v2 == NULL) {
       value_free(v);
       array_append(STACK, v3);
-      return eval_error();
-    }
-    v1 = array_pop(STACK);
-    if (v1 == NULL) {
-      value_free(v);
-      array_append(STACK, v2);
-      array_append(STACK, v3);
+      array_append(STACK, v1);
       return eval_error();
     }
 
@@ -970,7 +977,7 @@ bool eval_builtins(value_t *v) {
     retval = value_copy(v1);
     array_append(STACK, v1);
     array_append(STACK, retval);
-  } else if (strcmp(str, "discard") == 0) {
+  } else if (strcmp(str, "dsc") == 0) {
     v1 = array_pop(STACK);
     if (v1 == NULL) {
       value_free(v);
@@ -1005,6 +1012,13 @@ bool eval_builtins(value_t *v) {
     array_free(STACK);
     free(INBUF);
     free(PARSER);
+    if (CUR_FREE_VAL) {
+      value_free(CUR_FREE_VAL);
+    }
+    if (CUR_FREE_VAL_OP) {
+      value_free(CUR_FREE_VAL_OP);
+    }
+    value_free(v);
     exit(0);
   } else if (strcmp(str, "read") == 0) {
     v1 = array_pop(STACK);
@@ -1123,6 +1137,7 @@ bool eval_ht(value_t *v) {
   value_t *func = ht_get(WORD_TABLE, v->str_word);
   if (func == NULL)
     return false;
+  value_free(v);
   if (func->type == VQUOTE) {
     for (int i = 0; i < func->quote->size; i++) {
       eval(value_copy(func->quote->items[i]));
@@ -1130,7 +1145,6 @@ bool eval_ht(value_t *v) {
   } else {
     eval(value_copy(func));
   }
-  value_free(v);
   return true;
 }
 

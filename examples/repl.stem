@@ -1,2 +1,2 @@
-"Welcome to the REPL; exit to exit" .
-loop [ "> " read evalstr loop ] func loop
+"Welcome to the REPL; exit to exit"
+loop [ "> " read strquote eval loop ] func loop
