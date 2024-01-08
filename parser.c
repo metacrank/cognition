@@ -1012,10 +1012,6 @@ bool eval_builtins(value_t *v) {
 
     array_append(v2->quote, v1);
     array_append(STACK, v2);
-  } else if (strcmp(str, "clear") == 0) {
-    for (int i = 0; i < STACK->size; i++) {
-      value_free(array_pop(STACK));
-    }
   } else if (strcmp(str, "del") == 0) {
     v2 = array_pop(STACK);
     if (v2 == NULL) {
@@ -1065,6 +1061,33 @@ bool eval_builtins(value_t *v) {
       for (int i = 0; i < v2->quote->size; i++) {
         eval(value_copy(v2->quote->items[i]));
       }
+      value_free(array_pop(EVAL_STACK));
+      array_pop(EVAL_STACK);
+    } else {
+      eval(v1);
+    }
+    array_append(STACK, v1);
+  } else if (strcmp(str, "dip") == 0) {
+    v2 = array_pop(STACK);
+    if (v2 == NULL) {
+      value_free(v);
+      return eval_error();
+    }
+    v1 = array_pop(STACK);
+    if (v1 == NULL) {
+      value_free(v);
+      array_append(STACK, v2);
+      return eval_error();
+    }
+
+    if (v2->type == VQUOTE) {
+      array_append(EVAL_STACK, v);
+      array_append(EVAL_STACK, v1);
+      array_append(EVAL_STACK, v2);
+      for (int i = 0; i < v2->quote->size; i++) {
+        eval(value_copy(v2->quote->items[i]));
+      }
+      value_free(array_pop(EVAL_STACK));
       value_free(array_pop(EVAL_STACK));
       array_pop(EVAL_STACK);
     } else {
@@ -1182,7 +1205,7 @@ bool eval_builtins(value_t *v) {
       array_append(STACK, v1);
       return eval_error();
     }
-    char *val;
+    char *val = NULL;
     size_t len;
     FILE *fp = fopen(v1->str_word->value, "rb");
     if (!fp) {

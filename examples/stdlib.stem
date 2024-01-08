@@ -1,0 +1,2 @@
+evalstr [ strquote eval ] func
+include [ fread evalstr ] func

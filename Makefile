@@ -9,4 +9,7 @@ all:
 
 clean:
 	rm stem
+
+install:
+	cp stem /usr/local/bin/
 # end

@@ -1,1 +1,4 @@
-loop [ "> " . read strquote eval loop ] func loop
+"./stdlib.stem" fread strquote eval
+"./math.stem" include
+
+repl [ "> " . read strquote eval repl ] func repl
