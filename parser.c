@@ -19,8 +19,6 @@ array_t *EVAL_STACK;
 ht_t *WORD_TABLE;
 char *INBUF;
 parser_t *PARSER;
-value_t *CUR_FREE_VAL;
-value_t *CUR_FREE_VAL_OP;
 
 array_t *init_array(size_t size) {
   array_t *a = calloc(1, sizeof(array_t));
@@ -87,6 +85,7 @@ value_t *value_copy(value_t *v) {
     a->int_float = v->int_float;
   } else if (v->type == VSTR || v->type == VWORD) {
     a->str_word = string_copy(v->str_word);
+    a->escaped = v->escaped;
   } else if (v->type == VQUOTE) {
     a->quote = array_copy(v->quote);
   }
@@ -357,6 +356,8 @@ unsigned long hash(ht_t *h, char *key) {
 void print_value(value_t *v) {
   switch (v->type) {
   case VINT:
+    printf("%.0Lf\n", v->int_float);
+    break;
   case VFLOAT:
     printf("%Lf\n", v->int_float);
     break;
@@ -541,13 +542,16 @@ bool eval_builtins(value_t *v) {
       array_append(STACK, v1);
       return eval_error();
     }
-    array_append(EVAL_STACK, v);
-    array_append(EVAL_STACK, v1);
     if (v1->type == VQUOTE) {
+      array_append(EVAL_STACK, v);
+      array_append(EVAL_STACK, v1);
       for (int i = 0; i < v1->quote->size; i++) {
         eval(value_copy(v1->quote->items[i]));
       }
-      value_free(array_pop(EVAL_STACK));
+      value_t *vf = array_pop(EVAL_STACK);
+      if (vf) {
+        value_free(vf);
+      }
       array_pop(EVAL_STACK);
     } else {
       eval(v1);
@@ -797,7 +801,7 @@ bool eval_builtins(value_t *v) {
     array_append(STACK, retval);
     value_free(v1);
     value_free(v2);
-  } else if (strcmp(str, "<") == 0) {
+  } else if (strcmp(str, "<=") == 0) {
     v2 = array_pop(STACK);
     if (v2 == NULL) {
       value_free(v);
@@ -813,10 +817,10 @@ bool eval_builtins(value_t *v) {
     retval = init_value(VINT);
     if (v1->type == VSTR && v2->type == VSTR ||
         v1->type == VWORD && v2->type == VWORD) {
-      retval->int_float = strcmp(v1->str_word->value, v2->str_word->value) < 0;
+      retval->int_float = strcmp(v1->str_word->value, v2->str_word->value) <= 0;
     } else if ((v1->type == VINT || v1->type == VFLOAT) &&
                (v2->type == VINT || v2->type == VFLOAT)) {
-      retval->int_float = v1->int_float < v2->int_float;
+      retval->int_float = v1->int_float <= v2->int_float;
     } else {
       value_free(v);
       array_append(STACK, v1);
@@ -826,6 +830,39 @@ bool eval_builtins(value_t *v) {
     array_append(STACK, retval);
     value_free(v1);
     value_free(v2);
+  } else if (strcmp(str, "stoi") == 0) {
+    v1 = array_pop(STACK);
+    if (v1 == NULL) {
+      value_free(v);
+      return eval_error();
+    }
+
+    retval = init_value(VINT);
+    retval->int_float = atoi(v1->str_word->value);
+    array_append(STACK, retval);
+    value_free(v1);
+  } else if (strcmp(str, "isnum") == 0) {
+    v1 = array_pop(STACK);
+    if (v1 == NULL) {
+      value_free(v);
+      return eval_error();
+    }
+
+    retval = init_value(VINT);
+
+    bool isnum = true;
+    for (int i = 0; i < v1->str_word->length; i++) {
+      if (isspace(v1->str_word->value[i])) {
+        continue;
+      } else if (!isdigit(v1->str_word->value[i])) {
+        isnum = false;
+        break;
+      }
+    }
+    retval->int_float = isnum;
+
+    array_append(STACK, v1);
+    array_append(STACK, retval);
   } else if (strcmp(str, ">") == 0) {
     v2 = array_pop(STACK);
     if (v2 == NULL) {
@@ -885,52 +922,70 @@ bool eval_builtins(value_t *v) {
     value_free(v1);
     value_free(v2);
   } else if (strcmp(str, "if") == 0) {
-    v1 = array_pop(STACK);
-    if (v1 == NULL) {
-      value_free(v);
-      return eval_error();
-    }
     v3 = array_pop(STACK);
     if (v3 == NULL) {
       value_free(v);
-      array_append(STACK, v1);
       return eval_error();
     }
     v2 = array_pop(STACK);
     if (v2 == NULL) {
       value_free(v);
       array_append(STACK, v3);
-      array_append(STACK, v1);
       return eval_error();
     }
 
-    if (v3->type != VINT) {
+    v1 = array_pop(STACK);
+    if (v1 == NULL) {
+      value_free(v);
+      array_append(STACK, v2);
+      array_append(STACK, v3);
+      return eval_error();
+    }
+
+    if (v1->type != VINT) {
+      array_append(STACK, v1);
+      array_append(STACK, v2);
+      array_append(STACK, v3);
       value_free(v);
       return eval_error();
     }
 
-    if (v3->int_float) {
-      if (v1->type == VQUOTE) {
-        for (int i = 0; i < v1->quote->size; i++) {
-          eval(value_copy(v1->quote->items[i]));
-        }
-        value_free(v1);
-      } else {
-        eval(v1);
-      }
-      value_free(v2);
-    } else {
+    if (v1->int_float) {
+      value_free(v3);
+      value_free(v1);
       if (v2->type == VQUOTE) {
+
+        array_append(EVAL_STACK, v2);
+        array_append(EVAL_STACK, v);
         for (int i = 0; i < v2->quote->size; i++) {
           eval(value_copy(v2->quote->items[i]));
         }
-        value_free(v2);
+        array_pop(EVAL_STACK);
+        value_t *vf = array_pop(EVAL_STACK);
+        if (vf) {
+          value_free(vf);
+        }
       } else {
         eval(v2);
       }
+    } else {
+      value_free(v2);
       value_free(v1);
+      if (v3->type == VQUOTE) {
+        array_append(EVAL_STACK, v3);
+        array_append(EVAL_STACK, v);
+        for (int i = 0; i < v3->quote->size; i++) {
+          eval(value_copy(v3->quote->items[i]));
+        }
+        array_pop(EVAL_STACK);
+        value_t *vf = array_pop(EVAL_STACK);
+        if (vf) {
+          value_free(vf);
+        }
+      } else {
+        eval(v3);
+      }
     }
-    value_free(v3);
   } else if (strcmp(str, "clear") == 0) {
     for (int i = 0; i < STACK->size; i++) {
       value_free(array_pop(STACK));
@@ -957,6 +1012,39 @@ bool eval_builtins(value_t *v) {
 
     array_append(v2->quote, v1);
     array_append(STACK, v2);
+  } else if (strcmp(str, "clear") == 0) {
+    for (int i = 0; i < STACK->size; i++) {
+      value_free(array_pop(STACK));
+    }
+  } else if (strcmp(str, "del") == 0) {
+    v2 = array_pop(STACK);
+    if (v2 == NULL) {
+      value_free(v);
+      return eval_error();
+    }
+    v1 = array_pop(STACK);
+    if (v1 == NULL) {
+      array_append(STACK, v2);
+      value_free(v);
+      return eval_error();
+    }
+
+    if (v2->type != VINT) {
+      array_append(STACK, v1);
+      array_append(STACK, v2);
+      return eval_error();
+    }
+    switch (v1->type) {
+    case VQUOTE:
+      break;
+    case VSTR:
+      break;
+    case VWORD:
+      break;
+    default:
+      value_free(v1);
+      break;
+    }
   } else if (strcmp(str, "keep") == 0) {
     v2 = array_pop(STACK);
     if (v2 == NULL) {
@@ -971,9 +1059,9 @@ bool eval_builtins(value_t *v) {
     }
 
     array_append(STACK, value_copy(v1));
-    array_append(EVAL_STACK, v);
-    array_append(EVAL_STACK, v2);
     if (v2->type == VQUOTE) {
+      array_append(EVAL_STACK, v);
+      array_append(EVAL_STACK, v2);
       for (int i = 0; i < v2->quote->size; i++) {
         eval(value_copy(v2->quote->items[i]));
       }
@@ -1150,13 +1238,6 @@ bool eval_builtins(value_t *v) {
       array_append(STACK, v2);
       return eval_error();
     }
-    if (v2->type == VINT || v2->type == VFLOAT) {
-      value_free(v);
-      array_append(STACK, v1);
-      array_append(STACK, v2);
-      return eval_error();
-    }
-
     if (v2->type == VQUOTE) {
       if (v2->quote->size <= v1->int_float) {
         value_free(v);
@@ -1167,10 +1248,28 @@ bool eval_builtins(value_t *v) {
       array_append(STACK, v2);
       array_append(STACK, value_copy(v2->quote->items[(int)v1->int_float]));
       value_free(v1);
+    } else if (v2->type == VSTR) {
+      if (v2->str_word->length <= v1->int_float) {
+        value_free(v);
+        array_append(STACK, v1);
+        array_append(STACK, v2);
+        return eval_error();
+      }
+      char *a = (char[]){v2->str_word->value[(int)v1->int_float], '\0'};
+      string_t *s = init_string(a);
+      retval = init_value(VINT);
+      retval->str_word = s;
+      array_append(STACK, v2);
+      array_append(STACK, retval);
+      value_free(v1);
     } else {
+      array_append(STACK, v1);
+      array_append(STACK, v2);
       value_free(v);
       return eval_error();
     }
+  } else if (strcmp(str, "nop") == 0) {
+
   } else {
     return false;
   }

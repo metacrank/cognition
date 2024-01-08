@@ -1,2 +1,1 @@
-"Welcome to the REPL; exit to exit\n" .
 loop [ "> " . read strquote eval loop ] func loop

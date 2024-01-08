@@ -61,7 +61,6 @@ int main(int argc, char **argv) {
   ht_free(WORD_TABLE);
   array_free(STACK);
   free(PARSER);
-  free(INBUF);
   array_free(EVAL_STACK);
   return 0;
 }
