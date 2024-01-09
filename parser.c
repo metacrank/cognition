@@ -7,18 +7,16 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define MAX 50
-#define JUSTDO(a)                                                              \
-  if (!(a)) {                                                                  \
-    perror(#a);                                                                \
-    exit(1);                                                                   \
-  }
-
 array_t *STACK;
 array_t *EVAL_STACK;
 ht_t *WORD_TABLE;
 char *INBUF;
 parser_t *PARSER;
+
+ht_t *FLIT;
+ht_t *OBJ_FREE_TABLE;
+
+void func_free(void *f) {}
 
 array_t *init_array(size_t size) {
   array_t *a = calloc(1, sizeof(array_t));
@@ -92,12 +90,17 @@ value_t *value_copy(value_t *v) {
   return a;
 }
 
-void value_free(value_t *v) {
+void value_free(void *vtmp) {
+  value_t *v = (value_t *)vtmp;
   if (v->type == VSTR || v->type == VWORD) {
     string_free(v->str_word);
   }
   if (v->type == VQUOTE) {
     array_free(v->quote);
+  }
+  if (v->type == VCUSTOM) {
+    void (*freefunc)(void *) = ht_get(FLIT, v->str_word);
+    freefunc(v->custom);
   }
   free(v);
 }
@@ -243,7 +246,7 @@ value_t *parser_get_next(parser_t *p) {
   }
 }
 
-node_t *init_node(string_t *key, value_t *value) {
+node_t *init_node(string_t *key, void *value) {
   node_t *n = calloc(1, sizeof(node_t));
   n->key = key;
   n->value = value;
@@ -251,9 +254,9 @@ node_t *init_node(string_t *key, value_t *value) {
   return n;
 }
 
-void node_free(node_t *n) {
+void node_free(node_t *n, void (*freefunc)(void *)) {
   string_free(n->key);
-  value_free(n->value);
+  freefunc(n->value);
   free(n);
 }
 
@@ -264,7 +267,7 @@ sll_t *init_sll() {
   return l;
 }
 
-void sll_add(sll_t *l, string_t *s, value_t *v) {
+void sll_add(sll_t *l, string_t *s, void *v) {
   if (l->head == NULL) {
     node_t *n = init_node(s, v);
     l->head = n;
@@ -273,7 +276,7 @@ void sll_add(sll_t *l, string_t *s, value_t *v) {
   }
   node_t *cur = l->head;
   while (cur->next != NULL) {
-    if (strcmp(s->value, cur->value->str_word->value) == 0) {
+    if (strcmp(s->value, cur->key->value) == 0) {
       value_free(cur->value);
       string_free(s);
       cur->value = v;
@@ -281,7 +284,7 @@ void sll_add(sll_t *l, string_t *s, value_t *v) {
     }
     cur = cur->next;
   }
-  if (strcmp(s->value, cur->value->str_word->value) == 0) {
+  if (strcmp(s->value, cur->key->value) == 0) {
     value_free(cur->value);
     string_free(s);
     cur->value = v;
@@ -291,7 +294,32 @@ void sll_add(sll_t *l, string_t *s, value_t *v) {
   cur->next = n;
 }
 
-value_t *sll_get(sll_t *l, string_t *k) {
+void sll_add_func(sll_t *l, string_t *s, void *v) {
+  if (l->head == NULL) {
+    node_t *n = init_node(s, v);
+    l->head = n;
+    l->size++;
+    return;
+  }
+  node_t *cur = l->head;
+  while (cur->next != NULL) {
+    if (strcmp(s->value, cur->key->value) == 0) {
+      string_free(s);
+      cur->value = v;
+      return;
+    }
+    cur = cur->next;
+  }
+  if (strcmp(s->value, cur->key->value) == 0) {
+    string_free(s);
+    cur->value = v;
+    return;
+  }
+  node_t *n = init_node(s, v);
+  cur->next = n;
+}
+
+void *sll_get(sll_t *l, string_t *k) {
   if (l->head == NULL)
     return NULL;
   node_t *cur = l->head;
@@ -303,13 +331,13 @@ value_t *sll_get(sll_t *l, string_t *k) {
   return NULL;
 }
 
-void sll_free(sll_t *l) {
+void sll_free(sll_t *l, void (*func)(void *)) {
   node_t *cur = l->head;
   node_t *tmp;
   while (cur != NULL) {
     tmp = cur;
     cur = cur->next;
-    node_free(tmp);
+    node_free(tmp, func);
   }
   free(l);
 }
@@ -324,19 +352,23 @@ ht_t *init_ht(size_t size) {
   return h;
 }
 
-void ht_add(ht_t *h, string_t *key, value_t *v) {
+void ht_add(ht_t *h, string_t *key, void *v) {
   sll_add(h->buckets[hash(h, key->value)], key, v);
 }
 
-value_t *ht_get(ht_t *h, string_t *key) {
+void ht_add_func(ht_t *h, string_t *key, void *v) {
+  sll_add_func(h->buckets[hash(h, key->value)], key, v);
+}
+
+void *ht_get(ht_t *h, string_t *key) {
   return sll_get(h->buckets[hash(h, key->value)], key);
 }
 
 bool ht_exists(ht_t *h, string_t *key) { return ht_get(h, key) != NULL; }
 
-void ht_free(ht_t *h) {
+void ht_free(ht_t *h, void (*func)(void *)) {
   for (int i = 0; i < h->size; i++) {
-    sll_free(h->buckets[i]);
+    sll_free(h->buckets[i], func);
   }
   free(h->buckets);
   free(h);
@@ -351,953 +383,6 @@ unsigned long hash(ht_t *h, char *key) {
     hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
 
   return hash % h->size;
-}
-
-void print_value(value_t *v) {
-  switch (v->type) {
-  case VINT:
-    printf("%.0Lf\n", v->int_float);
-    break;
-  case VFLOAT:
-    printf("%Lf\n", v->int_float);
-    break;
-  case VSTR:
-    printf("%s", v->str_word->value);
-    break;
-  case VWORD:
-    printf("W: %s\n", v->str_word->value);
-    break;
-  case VQUOTE:
-    printf("Q:\n");
-    for (int i = 0; i < v->quote->size; i++) {
-      print_value(v->quote->items[i]);
-    }
-    break;
-  case VERR:
-    printf("STACK ERR\n");
-    break;
-  }
-}
-
-char *get_line(FILE *f) {
-  int len = MAX;
-  char buf[MAX], *e = NULL, *ret;
-  JUSTDO(ret = calloc(MAX, 1));
-  while (fgets(buf, MAX, f)) {
-    if (len - strlen(ret) < MAX)
-      JUSTDO(ret = realloc(ret, len *= 2));
-    strcat(ret, buf);
-    if ((e = strrchr(ret, '\n')))
-      break;
-  }
-  if (e)
-    *e = '\0';
-  return ret;
-}
-
-bool eval_error() {
-  value_t *v = init_value(VERR);
-  array_append(STACK, v);
-  return true;
-}
-
-/* TODO: rotr, rotl, dip, map, filter, errstr, join (for strings), switch
- * (for quotes), split (split array, string, word into two), del (deleting
- * entries from quotes, strings, words) */
-bool eval_builtins(value_t *v) {
-  char *str = v->str_word->value;
-  value_t *v1;
-  value_t *v2;
-  value_t *v3;
-  value_t *retval;
-  if (strcmp(str, "func") == 0) {
-    v2 = array_pop(STACK);
-    if (v2 == NULL) {
-      value_free(v);
-      return eval_error();
-    }
-    v1 = array_pop(STACK);
-    if (v1 == NULL) {
-      value_free(v);
-      array_append(STACK, v2);
-      return eval_error();
-    }
-    if (v1->type != VWORD) {
-      value_free(v);
-      return eval_error();
-    }
-    ht_add(WORD_TABLE, string_copy(v1->str_word), v2);
-    value_free(v1);
-  } else if (strcmp(str, "+") == 0) {
-    v2 = array_pop(STACK);
-    if (v2 == NULL) {
-      value_free(v);
-      return eval_error();
-    }
-    v1 = array_pop(STACK);
-    if (v1 == NULL) {
-      value_free(v);
-      array_append(STACK, v2);
-      return eval_error();
-    }
-    retval = init_value(VFLOAT);
-    if (v1->type == VINT && v2->type == VINT) {
-      retval->type = VINT;
-    }
-    if (v1->type != VINT && v1->type != VFLOAT ||
-        v2->type != VINT && v2->type != VFLOAT) {
-      array_append(STACK, v1);
-      array_append(STACK, v2);
-      value_free(v);
-      return eval_error();
-    }
-    retval->int_float = v1->int_float + v2->int_float;
-    array_append(STACK, retval);
-    value_free(v1);
-    value_free(v2);
-  } else if (strcmp(str, "-") == 0) {
-    v2 = array_pop(STACK);
-    if (v2 == NULL) {
-      value_free(v);
-      return eval_error();
-    }
-    v1 = array_pop(STACK);
-    if (v1 == NULL) {
-      value_free(v);
-      array_append(STACK, v2);
-      return eval_error();
-    }
-    retval = init_value(VFLOAT);
-    if (v1->type == VINT && v2->type == VINT) {
-      retval->type = VINT;
-    }
-    retval->int_float = v1->int_float - v2->int_float;
-    array_append(STACK, retval);
-    value_free(v1);
-    value_free(v2);
-  } else if (strcmp(str, "/") == 0) {
-    v2 = array_pop(STACK);
-    if (v2 == NULL) {
-      value_free(v);
-      return eval_error();
-    }
-    v1 = array_pop(STACK);
-    if (v1 == NULL) {
-      value_free(v);
-      array_append(STACK, v2);
-      return eval_error();
-    }
-    retval = init_value(VFLOAT);
-    if (v1->type == VINT && v2->type == VINT) {
-      retval->type = VINT;
-    }
-    retval->int_float = v1->int_float / v2->int_float;
-    array_append(STACK, retval);
-    value_free(v1);
-    value_free(v2);
-  } else if (strcmp(str, "*") == 0) {
-    v2 = array_pop(STACK);
-    if (v2 == NULL) {
-      value_free(v);
-      return eval_error();
-    }
-    v1 = array_pop(STACK);
-    if (v1 == NULL) {
-      value_free(v);
-      array_append(STACK, v2);
-      return eval_error();
-    }
-    retval = init_value(VFLOAT);
-    if (v1->type == VINT && v2->type == VINT) {
-      retval->type = VINT;
-    }
-    retval->int_float = v1->int_float * v2->int_float;
-    array_append(STACK, retval);
-    value_free(v1);
-    value_free(v2);
-  } else if (strcmp(str, "pow") == 0) {
-    v2 = array_pop(STACK);
-    if (v2 == NULL) {
-      value_free(v);
-      return eval_error();
-    }
-    v1 = array_pop(STACK);
-    if (v1 == NULL) {
-      value_free(v);
-      array_append(STACK, v2);
-      return eval_error();
-    }
-    retval = init_value(VFLOAT);
-    if (v1->type == VINT && v2->type == VINT) {
-      retval->type = VINT;
-    }
-    retval->int_float = powl(v1->int_float, v2->int_float);
-    array_append(STACK, retval);
-    value_free(v1);
-    value_free(v2);
-  } else if (strcmp(str, "eval") == 0) {
-    v1 = array_pop(STACK);
-    if (v1 == NULL) {
-      value_free(v);
-      array_append(STACK, v1);
-      return eval_error();
-    }
-    if (v1->type == VQUOTE) {
-      array_append(EVAL_STACK, v);
-      array_append(EVAL_STACK, v1);
-      for (int i = 0; i < v1->quote->size; i++) {
-        eval(value_copy(v1->quote->items[i]));
-      }
-      value_t *vf = array_pop(EVAL_STACK);
-      if (vf) {
-        value_free(vf);
-      }
-      array_pop(EVAL_STACK);
-    } else {
-      eval(v1);
-    }
-  } else if (strcmp(str, "strquote") == 0) {
-    v1 = array_pop(STACK);
-    if (v1 == NULL) {
-      value_free(v);
-      return eval_error();
-    }
-    if (v1->type != VSTR) {
-      array_append(STACK, v1);
-      value_free(v);
-      return eval_error();
-    }
-    retval = init_value(VQUOTE);
-    retval->quote = init_array(10);
-    char *s = malloc(strlen(v1->str_word->value) + 1);
-    strcpy(s, v1->str_word->value);
-    parser_t *p = init_parser(s);
-    value_t *cur;
-    while (1) {
-      cur = parser_get_next(p);
-      if (cur == NULL)
-        break;
-      array_append(retval->quote, cur);
-    }
-    array_append(STACK, retval);
-    value_free(v1);
-    free(p->source);
-    free(p);
-  } else if (strcmp(str, ".") == 0) {
-    v1 = array_pop(STACK);
-    if (v1 == NULL) {
-      value_free(v);
-      return eval_error();
-    }
-    print_value(v1);
-    value_free(v1);
-  } else if (strcmp(str, "qstack") == 0) {
-    retval = init_value(VQUOTE);
-    retval->quote = array_copy(STACK);
-    array_append(STACK, retval);
-  } else if (strcmp(str, "?") == 0) {
-    for (int i = 0; i < STACK->size; i++) {
-      print_value(STACK->items[i]);
-    }
-  } else if (strcmp(str, "sin") == 0) {
-    v1 = array_pop(STACK);
-    if (v1 == NULL) {
-      value_free(v);
-      return eval_error();
-    }
-    retval = init_value(VFLOAT);
-    retval->int_float = sinhl(v1->int_float);
-    array_append(STACK, retval);
-    value_free(v1);
-  } else if (strcmp(str, "cos") == 0) {
-    v1 = array_pop(STACK);
-    if (v1 == NULL) {
-      value_free(v);
-      return eval_error();
-    }
-    retval = init_value(VFLOAT);
-    retval->int_float = coshl(v1->int_float);
-    array_append(STACK, retval);
-    value_free(v1);
-  } else if (strcmp(str, "exp") == 0) {
-    v1 = array_pop(STACK);
-    if (v1 == NULL) {
-      value_free(v);
-      return eval_error();
-    }
-    retval = init_value(VFLOAT);
-    retval->int_float = expl(v1->int_float);
-    array_append(STACK, retval);
-    value_free(v1);
-  } else if (strcmp(str, "floor") == 0) {
-    v1 = array_pop(STACK);
-    if (v1 == NULL) {
-      value_free(v);
-      return eval_error();
-    }
-    retval = init_value(VFLOAT);
-    retval->int_float = floor(v1->int_float);
-    array_append(STACK, retval);
-    value_free(v1);
-  } else if (strcmp(str, "ceil") == 0) {
-    v1 = array_pop(STACK);
-    if (v1 == NULL) {
-      value_free(v);
-      return eval_error();
-    }
-    retval = init_value(VFLOAT);
-    retval->int_float = ceil(v1->int_float);
-    array_append(STACK, retval);
-    value_free(v1);
-  } else if (strcmp(str, "ln") == 0) {
-    v1 = array_pop(STACK);
-    if (v1 == NULL) {
-      value_free(v);
-      return eval_error();
-    }
-    retval = init_value(VFLOAT);
-    retval->int_float = logl(v1->int_float);
-    array_append(STACK, retval);
-    value_free(v1);
-  } else if (strcmp(str, "ssize") == 0) {
-    retval = init_value(VINT);
-    retval->int_float = STACK->size;
-    array_append(STACK, retval);
-  } else if (strcmp(str, "compose") == 0) {
-    v2 = array_pop(STACK);
-    if (v2 == NULL) {
-      value_free(v);
-      return eval_error();
-    }
-    v1 = array_pop(STACK);
-    if (v1 == NULL) {
-      value_free(v);
-      array_append(STACK, v2);
-      return eval_error();
-    }
-
-    if (v2->type == VSTR && v1->type == VSTR) {
-      retval = init_value(VSTR);
-      string_concat(v1->str_word, v2->str_word);
-      retval->str_word = string_copy(v1->str_word);
-      value_free(v1);
-      value_free(v2);
-    } else if (v2->type == VWORD && v1->type == VWORD) {
-      retval = init_value(VWORD);
-      string_concat(v1->str_word, v2->str_word);
-      retval->str_word = string_copy(v1->str_word);
-      value_free(v1);
-      value_free(v2);
-    } else if (v2->type == VQUOTE && v1->type == VQUOTE) {
-      retval = v1;
-      array_extend(v1->quote, v2->quote);
-      free(v2->quote);
-      free(v2);
-    } else {
-      value_free(v);
-      array_append(STACK, v1);
-      array_append(STACK, v2);
-      return eval_error();
-    }
-    array_append(STACK, retval);
-  } else if (strcmp(str, "wtostr") == 0) {
-    v1 = array_pop(STACK);
-    if (v1 == NULL) {
-      value_free(v);
-      return eval_error();
-    }
-
-    if (v1->type != VWORD) {
-      value_free(v);
-      array_append(STACK, v1);
-      return eval_error();
-    }
-    v1->type = VSTR;
-    array_append(STACK, v1);
-  } else if (strcmp(str, "=") == 0) {
-    v2 = array_pop(STACK);
-    if (v2 == NULL) {
-      value_free(v);
-      return eval_error();
-    }
-    v1 = array_pop(STACK);
-    if (v1 == NULL) {
-      value_free(v);
-      array_append(STACK, v2);
-      return eval_error();
-    }
-
-    retval = init_value(VINT);
-    if (v1->type == VSTR && v2->type == VSTR ||
-        v1->type == VWORD && v2->type == VWORD) {
-      retval->int_float = strcmp(v1->str_word->value, v2->str_word->value) == 0;
-    } else if ((v1->type == VINT || v1->type == VFLOAT) &&
-               (v2->type == VINT || v2->type == VFLOAT)) {
-      retval->int_float = v1->int_float == v2->int_float;
-    } else {
-      value_free(v);
-      array_append(STACK, v1);
-      array_append(STACK, v2);
-      return eval_error();
-    }
-    array_append(STACK, retval);
-    value_free(v1);
-    value_free(v2);
-  } else if (strcmp(str, "!=") == 0) {
-    v2 = array_pop(STACK);
-    if (v2 == NULL) {
-      value_free(v);
-      return eval_error();
-    }
-    v1 = array_pop(STACK);
-    if (v1 == NULL) {
-      value_free(v);
-      array_append(STACK, v2);
-      return eval_error();
-    }
-
-    retval = init_value(VINT);
-    if (v1->type == VSTR && v2->type == VSTR ||
-        v1->type == VWORD && v2->type == VWORD) {
-      retval->int_float = strcmp(v1->str_word->value, v2->str_word->value) != 0;
-    } else if ((v1->type == VINT || v1->type == VFLOAT) &&
-               (v2->type == VINT || v2->type == VFLOAT)) {
-      retval->int_float = v1->int_float != v2->int_float;
-    } else {
-      value_free(v);
-      array_append(STACK, v1);
-      array_append(STACK, v2);
-      return eval_error();
-    }
-    array_append(STACK, retval);
-    value_free(v1);
-    value_free(v2);
-  } else if (strcmp(str, "<=") == 0) {
-    v2 = array_pop(STACK);
-    if (v2 == NULL) {
-      value_free(v);
-      return eval_error();
-    }
-    v1 = array_pop(STACK);
-    if (v1 == NULL) {
-      value_free(v);
-      array_append(STACK, v2);
-      return eval_error();
-    }
-
-    retval = init_value(VINT);
-    if (v1->type == VSTR && v2->type == VSTR ||
-        v1->type == VWORD && v2->type == VWORD) {
-      retval->int_float = strcmp(v1->str_word->value, v2->str_word->value) <= 0;
-    } else if ((v1->type == VINT || v1->type == VFLOAT) &&
-               (v2->type == VINT || v2->type == VFLOAT)) {
-      retval->int_float = v1->int_float <= v2->int_float;
-    } else {
-      value_free(v);
-      array_append(STACK, v1);
-      array_append(STACK, v2);
-      return eval_error();
-    }
-    array_append(STACK, retval);
-    value_free(v1);
-    value_free(v2);
-  } else if (strcmp(str, "<=") == 0) {
-    v2 = array_pop(STACK);
-    if (v2 == NULL) {
-      value_free(v);
-      return eval_error();
-    }
-    v1 = array_pop(STACK);
-    if (v1 == NULL) {
-      value_free(v);
-      array_append(STACK, v2);
-      return eval_error();
-    }
-
-    retval = init_value(VINT);
-    if (v1->type == VSTR && v2->type == VSTR ||
-        v1->type == VWORD && v2->type == VWORD) {
-      retval->int_float = strcmp(v1->str_word->value, v2->str_word->value) <= 0;
-    } else if ((v1->type == VINT || v1->type == VFLOAT) &&
-               (v2->type == VINT || v2->type == VFLOAT)) {
-      retval->int_float = v1->int_float <= v2->int_float;
-    } else {
-      value_free(v);
-      array_append(STACK, v1);
-      array_append(STACK, v2);
-      return eval_error();
-    }
-    array_append(STACK, retval);
-    value_free(v1);
-    value_free(v2);
-  } else if (strcmp(str, "stoi") == 0) {
-    v1 = array_pop(STACK);
-    if (v1 == NULL) {
-      value_free(v);
-      return eval_error();
-    }
-
-    retval = init_value(VINT);
-    retval->int_float = atoi(v1->str_word->value);
-    array_append(STACK, retval);
-    value_free(v1);
-  } else if (strcmp(str, "isnum") == 0) {
-    v1 = array_pop(STACK);
-    if (v1 == NULL) {
-      value_free(v);
-      return eval_error();
-    }
-
-    retval = init_value(VINT);
-
-    bool isnum = true;
-    for (int i = 0; i < v1->str_word->length; i++) {
-      if (isspace(v1->str_word->value[i])) {
-        continue;
-      } else if (!isdigit(v1->str_word->value[i])) {
-        isnum = false;
-        break;
-      }
-    }
-    retval->int_float = isnum;
-
-    array_append(STACK, v1);
-    array_append(STACK, retval);
-  } else if (strcmp(str, ">") == 0) {
-    v2 = array_pop(STACK);
-    if (v2 == NULL) {
-      value_free(v);
-      return eval_error();
-    }
-    v1 = array_pop(STACK);
-    if (v1 == NULL) {
-      value_free(v);
-      array_append(STACK, v2);
-      return eval_error();
-    }
-
-    retval = init_value(VINT);
-    if (v1->type == VSTR && v2->type == VSTR ||
-        v1->type == VWORD && v2->type == VWORD) {
-      retval->int_float = strcmp(v1->str_word->value, v2->str_word->value) > 0;
-    } else if ((v1->type == VINT || v1->type == VFLOAT) &&
-               (v2->type == VINT || v2->type == VFLOAT)) {
-      retval->int_float = v1->int_float > v2->int_float;
-    } else {
-      value_free(v);
-      array_append(STACK, v1);
-      array_append(STACK, v2);
-      return eval_error();
-    }
-    array_append(STACK, retval);
-    value_free(v1);
-    value_free(v2);
-  } else if (strcmp(str, ">=") == 0) {
-    v2 = array_pop(STACK);
-    if (v2 == NULL) {
-      value_free(v);
-      return eval_error();
-    }
-    v1 = array_pop(STACK);
-    if (v1 == NULL) {
-      value_free(v);
-      array_append(STACK, v2);
-      return eval_error();
-    }
-
-    retval = init_value(VINT);
-    if (v1->type == VSTR && v2->type == VSTR ||
-        v1->type == VWORD && v2->type == VWORD) {
-      retval->int_float = strcmp(v1->str_word->value, v2->str_word->value) >= 0;
-    } else if ((v1->type == VINT || v1->type == VFLOAT) &&
-               (v2->type == VINT || v2->type == VFLOAT)) {
-      retval->int_float = v1->int_float >= v2->int_float;
-    } else {
-      value_free(v);
-      array_append(STACK, v1);
-      array_append(STACK, v2);
-      return eval_error();
-    }
-    array_append(STACK, retval);
-    value_free(v1);
-    value_free(v2);
-  } else if (strcmp(str, "if") == 0) {
-    v3 = array_pop(STACK);
-    if (v3 == NULL) {
-      value_free(v);
-      return eval_error();
-    }
-    v2 = array_pop(STACK);
-    if (v2 == NULL) {
-      value_free(v);
-      array_append(STACK, v3);
-      return eval_error();
-    }
-
-    v1 = array_pop(STACK);
-    if (v1 == NULL) {
-      value_free(v);
-      array_append(STACK, v2);
-      array_append(STACK, v3);
-      return eval_error();
-    }
-
-    if (v1->type != VINT) {
-      array_append(STACK, v1);
-      array_append(STACK, v2);
-      array_append(STACK, v3);
-      value_free(v);
-      return eval_error();
-    }
-
-    if (v1->int_float) {
-      value_free(v3);
-      value_free(v1);
-      if (v2->type == VQUOTE) {
-
-        array_append(EVAL_STACK, v2);
-        array_append(EVAL_STACK, v);
-        for (int i = 0; i < v2->quote->size; i++) {
-          eval(value_copy(v2->quote->items[i]));
-        }
-        array_pop(EVAL_STACK);
-        value_t *vf = array_pop(EVAL_STACK);
-        if (vf) {
-          value_free(vf);
-        }
-      } else {
-        eval(v2);
-      }
-    } else {
-      value_free(v2);
-      value_free(v1);
-      if (v3->type == VQUOTE) {
-        array_append(EVAL_STACK, v3);
-        array_append(EVAL_STACK, v);
-        for (int i = 0; i < v3->quote->size; i++) {
-          eval(value_copy(v3->quote->items[i]));
-        }
-        array_pop(EVAL_STACK);
-        value_t *vf = array_pop(EVAL_STACK);
-        if (vf) {
-          value_free(vf);
-        }
-      } else {
-        eval(v3);
-      }
-    }
-  } else if (strcmp(str, "clear") == 0) {
-    for (int i = 0; i < STACK->size; i++) {
-      value_free(array_pop(STACK));
-    }
-  } else if (strcmp(str, "curry") == 0) {
-    v2 = array_pop(STACK);
-    if (v2 == NULL) {
-      value_free(v);
-      return eval_error();
-    }
-    v1 = array_pop(STACK);
-    if (v1 == NULL) {
-      value_free(v);
-      array_append(STACK, v2);
-      return eval_error();
-    }
-
-    if (v2->type != VQUOTE) {
-      value_free(v);
-      array_append(STACK, v1);
-      array_append(STACK, v2);
-      return eval_error();
-    }
-
-    array_append(v2->quote, v1);
-    array_append(STACK, v2);
-  } else if (strcmp(str, "del") == 0) {
-    v2 = array_pop(STACK);
-    if (v2 == NULL) {
-      value_free(v);
-      return eval_error();
-    }
-    v1 = array_pop(STACK);
-    if (v1 == NULL) {
-      array_append(STACK, v2);
-      value_free(v);
-      return eval_error();
-    }
-
-    if (v2->type != VINT) {
-      array_append(STACK, v1);
-      array_append(STACK, v2);
-      return eval_error();
-    }
-    switch (v1->type) {
-    case VQUOTE:
-      break;
-    case VSTR:
-      break;
-    case VWORD:
-      break;
-    default:
-      value_free(v1);
-      break;
-    }
-  } else if (strcmp(str, "keep") == 0) {
-    v2 = array_pop(STACK);
-    if (v2 == NULL) {
-      value_free(v);
-      return eval_error();
-    }
-    v1 = array_pop(STACK);
-    if (v1 == NULL) {
-      value_free(v);
-      array_append(STACK, v2);
-      return eval_error();
-    }
-
-    array_append(STACK, value_copy(v1));
-    if (v2->type == VQUOTE) {
-      array_append(EVAL_STACK, v);
-      array_append(EVAL_STACK, v2);
-      for (int i = 0; i < v2->quote->size; i++) {
-        eval(value_copy(v2->quote->items[i]));
-      }
-      value_free(array_pop(EVAL_STACK));
-      array_pop(EVAL_STACK);
-    } else {
-      eval(v1);
-    }
-    array_append(STACK, v1);
-  } else if (strcmp(str, "dip") == 0) {
-    v2 = array_pop(STACK);
-    if (v2 == NULL) {
-      value_free(v);
-      return eval_error();
-    }
-    v1 = array_pop(STACK);
-    if (v1 == NULL) {
-      value_free(v);
-      array_append(STACK, v2);
-      return eval_error();
-    }
-
-    if (v2->type == VQUOTE) {
-      array_append(EVAL_STACK, v);
-      array_append(EVAL_STACK, v1);
-      array_append(EVAL_STACK, v2);
-      for (int i = 0; i < v2->quote->size; i++) {
-        eval(value_copy(v2->quote->items[i]));
-      }
-      value_free(array_pop(EVAL_STACK));
-      value_free(array_pop(EVAL_STACK));
-      array_pop(EVAL_STACK);
-    } else {
-      eval(v1);
-    }
-    array_append(STACK, v1);
-  } else if (strcmp(str, "len") == 0) {
-    v1 = array_pop(STACK);
-    if (v1 == NULL) {
-      value_free(v);
-      return eval_error();
-    }
-
-    retval = init_value(VINT);
-    if (v1->type == VINT || v1->type == VFLOAT) {
-      retval->int_float = 1;
-    } else if (v1->type == VSTR || v1->type == VWORD) {
-      retval->int_float = strlen(v1->str_word->value);
-    } else if (v1->type == VQUOTE) {
-      retval->int_float = v1->quote->size;
-    }
-    array_append(STACK, v1);
-    array_append(STACK, retval);
-  } else if (strcmp(str, "dup") == 0) {
-    v1 = array_pop(STACK);
-    if (v1 == NULL) {
-      value_free(v);
-      return eval_error();
-    }
-
-    retval = value_copy(v1);
-    array_append(STACK, v1);
-    array_append(STACK, retval);
-  } else if (strcmp(str, "isdef") == 0) {
-    v1 = array_pop(STACK);
-    if (v1 == NULL) {
-      value_free(v);
-      return eval_error();
-    }
-
-    retval = init_value(VINT);
-    if (v1->type != VWORD) {
-      retval->int_float = 0;
-    } else {
-      retval->int_float = ht_exists(WORD_TABLE, v1->str_word);
-    }
-    array_append(STACK, v1);
-    array_append(STACK, retval);
-  } else if (strcmp(str, "swap") == 0) {
-    v2 = array_pop(STACK);
-    if (v2 == NULL) {
-      value_free(v);
-      return eval_error();
-    }
-    v1 = array_pop(STACK);
-    if (v1 == NULL) {
-      array_append(STACK, v2);
-      value_free(v);
-      return eval_error();
-    }
-    array_append(STACK, v2);
-    array_append(STACK, v1);
-  } else if (strcmp(str, "dsc") == 0) {
-    v1 = array_pop(STACK);
-    if (v1 == NULL) {
-      value_free(v);
-      return eval_error();
-    }
-
-    value_free(v1);
-  } else if (strcmp(str, "type") == 0) {
-    v1 = array_pop(STACK);
-    if (v1 == NULL) {
-      value_free(v);
-      return eval_error();
-    }
-
-    retval = init_value(VINT);
-    retval->int_float = v1->type;
-    array_append(STACK, v1);
-    array_append(STACK, retval);
-  } else if (strcmp(str, "quote") == 0) {
-    v1 = array_pop(STACK);
-    if (v1 == NULL) {
-      value_free(v);
-      return eval_error();
-    }
-
-    retval = init_value(VQUOTE);
-    retval->quote = init_array(10);
-    array_append(retval->quote, v1);
-    array_append(STACK, retval);
-  } else if (strcmp(str, "exit") == 0) {
-    ht_free(WORD_TABLE);
-    array_free(STACK);
-    free(INBUF);
-    free(PARSER);
-    array_free(EVAL_STACK);
-    value_free(v);
-    exit(0);
-  } else if (strcmp(str, "read") == 0) {
-    retval = init_value(VSTR);
-    char *a = get_line(stdin);
-    retval->str_word = init_string(a);
-    array_append(STACK, retval);
-    free(a);
-  } else if (strcmp(str, "fread") == 0) {
-    v1 = array_pop(STACK);
-    if (v1 == NULL) {
-      value_free(v);
-      return eval_error();
-    }
-    if (v1->type != VSTR) {
-      value_free(v);
-      array_append(STACK, v1);
-      return eval_error();
-    }
-    char *val = NULL;
-    size_t len;
-    FILE *fp = fopen(v1->str_word->value, "rb");
-    if (!fp) {
-      value_free(v);
-      array_append(STACK, v1);
-      return eval_error();
-    }
-    ssize_t bytes_read = getdelim(&val, &len, '\0', fp);
-    fclose(fp);
-    retval = init_value(VSTR);
-    retval->str_word = init_string(val);
-    array_append(STACK, retval);
-    value_free(v1);
-    free(val);
-  } else if (strcmp(str, "fwrite") == 0) {
-    v1 = array_pop(STACK);
-    if (v1 == NULL) {
-      value_free(v);
-      return eval_error();
-    }
-    if (v1->type != VSTR) {
-      value_free(v);
-      array_append(STACK, v1);
-      return eval_error();
-    }
-    char *val;
-    size_t len;
-    FILE *fp = fopen(v1->str_word->value, "w+");
-    if (!fp) {
-      value_free(v);
-      array_append(STACK, v1);
-      return eval_error();
-    }
-    fprintf(fp, "%s", v1->str_word->value);
-    value_free(v1);
-    fclose(fp);
-  } else if (strcmp(str, "vat") == 0) {
-    v2 = array_pop(STACK);
-    if (v2 == NULL) {
-      value_free(v);
-      return eval_error();
-    }
-    v1 = array_pop(STACK);
-    if (v1 == NULL) {
-      value_free(v);
-      array_append(STACK, v2);
-      return eval_error();
-    }
-
-    if (v1->type != VINT) {
-      value_free(v);
-      array_append(STACK, v1);
-      array_append(STACK, v2);
-      return eval_error();
-    }
-    if (v2->type == VQUOTE) {
-      if (v2->quote->size <= v1->int_float) {
-        value_free(v);
-        array_append(STACK, v1);
-        array_append(STACK, v2);
-        return eval_error();
-      }
-      array_append(STACK, v2);
-      array_append(STACK, value_copy(v2->quote->items[(int)v1->int_float]));
-      value_free(v1);
-    } else if (v2->type == VSTR) {
-      if (v2->str_word->length <= v1->int_float) {
-        value_free(v);
-        array_append(STACK, v1);
-        array_append(STACK, v2);
-        return eval_error();
-      }
-      char *a = (char[]){v2->str_word->value[(int)v1->int_float], '\0'};
-      string_t *s = init_string(a);
-      retval = init_value(VINT);
-      retval->str_word = s;
-      array_append(STACK, v2);
-      array_append(STACK, retval);
-      value_free(v1);
-    } else {
-      array_append(STACK, v1);
-      array_append(STACK, v2);
-      value_free(v);
-      return eval_error();
-    }
-  } else if (strcmp(str, "nop") == 0) {
-
-  } else {
-    return false;
-  }
-  value_free(v);
-  return true;
 }
 
 bool eval_ht(value_t *v) {
@@ -1315,6 +400,20 @@ bool eval_ht(value_t *v) {
   return true;
 }
 
+bool eval_builtins(value_t *v) {
+  if (v->type != VSTR && v->type != VWORD) {
+    printf("what the fuck\n");
+  }
+  void (*func)(value_t *) = ht_get(FLIT, v->str_word);
+  if (func == NULL)
+    return false;
+  array_append(EVAL_STACK, v);
+  func(v);
+  array_pop(EVAL_STACK);
+  value_free(v);
+  return true;
+}
+
 void eval(value_t *v) {
   switch (v->type) {
   case VINT:
@@ -1322,6 +421,7 @@ void eval(value_t *v) {
   case VSTR:
   case VQUOTE:
   case VERR:
+  case VCUSTOM:
     array_append(STACK, v);
     break;
   case VWORD:
@@ -1335,6 +435,5 @@ void eval(value_t *v) {
         }
       }
     }
-    break;
   }
 }

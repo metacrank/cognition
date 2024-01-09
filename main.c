@@ -1,14 +1,17 @@
+#include "builtins.h"
 #include "parser.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-
 extern ht_t *WORD_TABLE;
+
 extern array_t *STACK;
 extern char *INBUF;
 extern parser_t *PARSER;
 extern array_t *EVAL_STACK;
+extern ht_t *OBJ_FREE_TABLE;
+extern ht_t *FLIT;
 
 void usage() {
   printf("Usage: stem [-hv] [file]\n");
@@ -51,6 +54,11 @@ int main(int argc, char **argv) {
   STACK = init_array(10);
   WORD_TABLE = init_ht(500);
   EVAL_STACK = init_array(10);
+  FLIT = init_ht(500);
+  OBJ_FREE_TABLE = init_ht(500);
+
+  add_funcs();
+
   while (1) {
     v = parser_get_next(PARSER);
     if (v == NULL)
@@ -59,7 +67,9 @@ int main(int argc, char **argv) {
   }
 
   free(INBUF);
-  ht_free(WORD_TABLE);
+  ht_free(WORD_TABLE, value_free);
+  ht_free(FLIT, func_free);
+  ht_free(OBJ_FREE_TABLE, func_free);
   array_free(STACK);
   free(PARSER);
   array_free(EVAL_STACK);

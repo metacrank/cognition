@@ -14,12 +14,13 @@ struct ARRAY_STRUCT {
 };
 
 struct VALUE_STRUCT {
-  enum { VWORD, VINT, VFLOAT, VSTR, VQUOTE, VERR } type;
+  enum { VWORD, VINT, VFLOAT, VSTR, VQUOTE, VERR, VCUSTOM } type;
   union {
     long double int_float;
     array_t *quote;
     string_t *str_word;
   };
+  void *custom;
   bool escaped;
 };
 
@@ -31,7 +32,7 @@ typedef struct PARSER_STRUCT {
 
 typedef struct NODE_STRUCT {
   string_t *key;
-  value_t *value;
+  void *value;
   struct NODE_STRUCT *next;
 } node_t;
 
@@ -45,6 +46,8 @@ typedef struct {
   size_t size;
 } ht_t;
 
+void func_free(void *f);
+
 array_t *init_array(size_t size);
 
 void array_append(array_t *a, value_t *v);
@@ -53,13 +56,15 @@ value_t *array_pop(array_t *a);
 
 array_t *array_copy(array_t *a);
 
+void array_extend(array_t *a1, array_t *a2);
+
 void array_free(array_t *a);
 
 value_t *init_value(int type);
 
 value_t *value_copy(value_t *v);
 
-void value_free(value_t *v);
+void value_free(void *v);
 
 parser_t *init_parser(char *source);
 
@@ -71,23 +76,25 @@ void parser_skip_whitespace(parser_t *p);
 
 value_t *parser_get_next(parser_t *p);
 
-node_t *init_node(string_t *key, value_t *v);
+node_t *init_node(string_t *key, void *v);
 
 sll_t *init_sll();
 
-void sll_add(sll_t *l, string_t *key, value_t *v);
+void sll_add(sll_t *l, string_t *key, void *v);
 
-value_t *sll_get(sll_t *l, string_t *key);
+void *sll_get(sll_t *l, string_t *key);
 
-void sll_free(sll_t *l);
+void sll_free(sll_t *l, void (*freefunc)(void *));
 
 ht_t *init_ht(size_t size);
 
-void ht_add(ht_t *h, string_t *key, value_t *v);
+void ht_add(ht_t *h, string_t *key, void *v);
 
-value_t *ht_get(ht_t *h, string_t *key);
+void *ht_get(ht_t *h, string_t *key);
 
-void ht_free(ht_t *h);
+bool ht_exists(ht_t *h, string_t *key);
+
+void ht_free(ht_t *h, void (*freefunc)(void *));
 
 unsigned long hash(ht_t *h, char *key);
 
