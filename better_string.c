@@ -9,9 +9,10 @@ string_t *init_string(char *s) {
     die("malloc in init_string");
   /* If we pass in NULL we assume that we want to append things to this in the
    * future */
-  if (s == NULL) {
+  if (s == NULL || strcmp(s, "") == 0) {
     str->bufsize = 10;
     str->value = calloc(str->bufsize, sizeof(char));
+    str->value[0] = '\0';
     if (str->value == NULL)
       die("calloc in init_string");
     str->length = 0;

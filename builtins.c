@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define MAX 50
+#define MAX 1000
 #define JUSTDO(a)                                                              \
   if (!(a)) {                                                                  \
     perror(#a);                                                                \
@@ -20,7 +20,7 @@ extern char *INBUF;
 extern parser_t *PARSER;
 
 extern ht_t *FLIT;
-extern ht_t *OBJ_FREE_TABLE;
+extern ht_t *OBJ_TABLE;
 
 /* TODO: rotr, rotl, dip, map, filter, errstr, join (for strings), switch
  * (for quotes), split (split array, string, word into two), del (deleting
@@ -43,6 +43,7 @@ char *get_line(FILE *f) {
 }
 
 void print_value(value_t *v) {
+  custom_t *c;
   switch (v->type) {
   case VINT:
     printf("%.0Lf\n", v->int_float);
@@ -66,7 +67,8 @@ void print_value(value_t *v) {
     printf("STACK ERR\n");
     break;
   case VCUSTOM:
-    printf("CUSTOM VALUE\n");
+    c = ht_get(OBJ_TABLE, v->str_word);
+    c->printfunc(v->custom);
     break;
   }
 }
@@ -398,7 +400,7 @@ void stemexit(value_t *v) {
   free(INBUF);
   free(PARSER);
   array_free(EVAL_STACK);
-  ht_free(OBJ_FREE_TABLE, func_free);
+  ht_free(OBJ_TABLE, func_free);
   exit(0);
 }
 
@@ -1036,6 +1038,17 @@ void add_func(ht_t *h, void (*func)(value_t *), char *key) {
   string_t *s = init_string(key);
   ht_add(h, s, func);
 }
+
+void add_obj(ht_t *h, ht_t *h2, void (*printfunc)(void *),
+             void (*freefunc)(void *), void *(*copyfunc)(void *),
+             void (*createfunc)(void *), char *key) {
+
+  custom_t *c = init_custom(printfunc, freefunc, copyfunc);
+  ht_add(h, init_string(key), c);
+  ht_add(h2, init_string(key), createfunc);
+}
+
+void add_objs() {}
 
 void add_funcs() {
   add_func(FLIT, period, ".");

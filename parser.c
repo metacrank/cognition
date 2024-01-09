@@ -14,7 +14,7 @@ char *INBUF;
 parser_t *PARSER;
 
 ht_t *FLIT;
-ht_t *OBJ_FREE_TABLE;
+ht_t *OBJ_TABLE;
 
 void func_free(void *f) {}
 
@@ -86,6 +86,10 @@ value_t *value_copy(value_t *v) {
     a->escaped = v->escaped;
   } else if (v->type == VQUOTE) {
     a->quote = array_copy(v->quote);
+  } else if (v->type == VCUSTOM) {
+    custom_t *c = ht_get(OBJ_TABLE, a->str_word);
+    a->custom = c->copyfunc(v->custom);
+    a->str_word = string_copy(v->str_word);
   }
   return a;
 }
@@ -99,11 +103,22 @@ void value_free(void *vtmp) {
     array_free(v->quote);
   }
   if (v->type == VCUSTOM) {
-    void (*freefunc)(void *) = ht_get(FLIT, v->str_word);
+    void (*freefunc)(void *) = ht_get(OBJ_TABLE, v->str_word);
     freefunc(v->custom);
   }
   free(v);
 }
+
+custom_t *init_custom(void (*printfunc)(void *), void (*freefunc)(void *),
+                      void *(*copyfunc)(void *)) {
+  custom_t *c = calloc(1, sizeof(custom_t));
+  c->printfunc = printfunc;
+  c->freefunc = freefunc;
+  c->copyfunc = copyfunc;
+  return c;
+}
+
+void custom_free(void *c) { free(c); }
 
 parser_t *init_parser(char *source) {
   parser_t *p = calloc(1, sizeof(parser_t));
@@ -401,9 +416,6 @@ bool eval_ht(value_t *v) {
 }
 
 bool eval_builtins(value_t *v) {
-  if (v->type != VSTR && v->type != VWORD) {
-    printf("what the fuck\n");
-  }
   void (*func)(value_t *) = ht_get(FLIT, v->str_word);
   if (func == NULL)
     return false;

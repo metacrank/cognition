@@ -46,6 +46,12 @@ typedef struct {
   size_t size;
 } ht_t;
 
+typedef struct {
+  void (*printfunc)(void *);
+  void *(*copyfunc)(void *);
+  void (*freefunc)(void *);
+} custom_t;
+
 void func_free(void *f);
 
 array_t *init_array(size_t size);
@@ -65,6 +71,10 @@ value_t *init_value(int type);
 value_t *value_copy(value_t *v);
 
 void value_free(void *v);
+
+custom_t *init_custom(void (*)(void *), void (*)(void *), void *(*)(void *));
+
+void custom_free(void *);
 
 parser_t *init_parser(char *source);
 
