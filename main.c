@@ -47,10 +47,7 @@ int main(int argc, char **argv) {
   }
 
   ssize_t bytes_read = getdelim(&INBUF, &len, '\0', FP);
-  if (FP != NULL) {
-    fflush(FP);
-    fclose(FP);
-  }
+  fclose(FP);
 
   PARSER = init_parser(INBUF);
   STACK = init_array(10);

@@ -1,6 +1,7 @@
 #include "builtins.h"
 #include "parser.h"
 #include <ctype.h>
+#include <dlfcn.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -731,6 +732,31 @@ void ltequals(value_t *v) {
   value_free(v1);
   value_free(v2);
 }
+void clib(value_t *v) {
+  value_t *v1 = array_pop(STACK);
+  void *handle = dlopen(v1->str_word->value, RTLD_LAZY);
+  if (!handle) {
+    array_append(STACK, v1);
+    eval_error();
+    return;
+  }
+  dlerror();
+  void (*af)(void);
+  void (*aobjs)(void);
+  char *error;
+  *(void **)(&af) = dlsym(handle, "add_funcs");
+  *(void **)(&aobjs) = dlsym(handle, "add_objs");
+  if ((error = dlerror()) != NULL) {
+    value_free(v1);
+    fprintf(stderr, "%s\n", error);
+    eval_error();
+    return;
+  } else {
+    (*af)();
+    (*aobjs)();
+    value_free(v1);
+  }
+}
 
 void gthan(value_t *v) {
   value_t *v2 = array_pop(STACK);
@@ -1096,4 +1122,5 @@ void add_funcs() {
   add_func(FLIT, swap, "swap");
   add_func(FLIT, isdef, "isdef");
   add_func(FLIT, dsc, "dsc");
+  add_func(FLIT, clib, "clib");
 }
