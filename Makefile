@@ -1,15 +1,26 @@
-##
-# Project Title
-#
-# @file
-# @version 0.1
+CC := gcc 
+SRCDIR := src
+BUILDDIR := build
+TARGET := bin/stem
+SRCEXT := c
+SOURCES := $(shell find $(SRCDIR) -type f -name *.$(SRCEXT))
+OBJECTS := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.o))
+CFLAGS :=
+LIB := -L lib -lm
+INC := -I include
 
-all:
-	cc *.c -o stem -lm
+$(TARGET): $(OBJECTS)
+	@echo " Linking..."
+	@echo " $(CC) $^ -o $(TARGET) $(LIB)"; $(CC) $^ -o $(TARGET) $(LIB) -O3
+
+$(BUILDDIR)/%.o: $(SRCDIR)/%.$(SRCEXT)
+	@echo " Building..."
+	@mkdir -p $(BUILDDIR)
+	@echo " $(CC) $(CFLAGS) $(INC) -c -o $@ $<"; $(CC) $(CFLAGS) $(INC) -c -o $@ $< -save-temps -O3
 
 clean:
-	rm stem
+	@echo " Cleaning..."; 
+	@echo " $(RM) -r $(BUILDDIR) $(TARGET)"; $(RM) -r $(BUILDDIR) $(TARGET)
 
 install:
-	cp stem /usr/local/bin/
-# end
+	cp $(TARGET) /usr/local/bin/

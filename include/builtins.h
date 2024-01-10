@@ -1,6 +1,6 @@
 #ifndef BUILTINS_H_
 #define BUILTINS_H_
-#include "./parser.h"
+#include <stem.h>
 
 void stemadd(value_t *v);
 void stemsub(value_t *v);

@@ -1,10 +1,10 @@
-#include "parser.h"
-#include "macros.h"
 #include <ctype.h>
+#include <macros.h>
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stem.h>
 #include <string.h>
 
 array_t *STACK;
@@ -394,7 +394,7 @@ unsigned long hash(ht_t *h, char *key) {
   unsigned long hash = 5381;
   int c;
 
-  while (c = *key++)
+  while ((c = *key++))
     hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
 
   return hash % h->size;

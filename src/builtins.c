@@ -1,10 +1,10 @@
-#include "builtins.h"
-#include "parser.h"
+#include <builtins.h>
 #include <ctype.h>
 #include <dlfcn.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stem.h>
 #include <string.h>
 
 #define MAX 1000
@@ -151,6 +151,7 @@ void stemmul(value_t *v) {
   value_free(v1);
   value_free(v2);
 }
+
 void stemdiv(value_t *v) {
   value_t *v2 = array_pop(STACK);
   if (v2 == NULL) {
@@ -192,6 +193,7 @@ void stemfunc(value_t *v) {
   ht_add(WORD_TABLE, string_copy(v1->str_word), v2);
   value_free(v1);
 }
+
 void nop(value_t *v) {}
 
 void stempow(value_t *v) {
@@ -284,6 +286,7 @@ void stemln(value_t *v) {
   array_append(STACK, retval);
   value_free(v1);
 }
+
 void stemceil(value_t *v) {
   value_t *v1 = array_pop(STACK);
   if (v1 == NULL) {
@@ -295,6 +298,7 @@ void stemceil(value_t *v) {
   array_append(STACK, retval);
   value_free(v1);
 }
+
 void stemfloor(value_t *v) {
   value_t *v1 = array_pop(STACK);
   if (v1 == NULL) {
@@ -359,6 +363,7 @@ void curry(value_t *v) {
   array_append(v2->quote, v1);
   array_append(STACK, v2);
 }
+
 void stemfread(value_t *v) {
   value_t *v1 = array_pop(STACK);
   if (v1 == NULL) {
@@ -386,6 +391,7 @@ void stemfread(value_t *v) {
   value_free(v1);
   free(val);
 }
+
 void stemread(value_t *v) {
   value_t *retval = init_value(VSTR);
   char *a = get_line(stdin);
@@ -417,6 +423,7 @@ void quote(value_t *v) {
   array_append(retval->quote, v1);
   array_append(STACK, retval);
 }
+
 void stemtype(value_t *v) {
   value_t *v1 = array_pop(STACK);
   if (v1 == NULL) {
@@ -439,6 +446,7 @@ void dsc(value_t *v) {
 
   value_free(v1);
 }
+
 void swap(value_t *v) {
   value_t *v2 = array_pop(STACK);
   if (v2 == NULL) {
@@ -499,8 +507,8 @@ void period(value_t *v) {
   print_value(v1);
   value_free(v1);
 }
-void stemlen(value_t *v) {
 
+void stemlen(value_t *v) {
   value_t *v1 = array_pop(STACK);
   if (v1 == NULL) {
     eval_error();
@@ -605,8 +613,9 @@ void del(value_t *v) {
 }
 
 void clear(value_t *v) {
-  for (int i = 0; i < STACK->size; i++) {
-    value_free(array_pop(STACK));
+  while (STACK->size != 0) {
+    value_t *v1 = array_pop(STACK);
+    value_free(v1);
   }
 }
 
@@ -672,6 +681,7 @@ void stemif(value_t *v) {
     }
   }
 }
+
 void gtequals(value_t *v) {
   value_t *v2 = array_pop(STACK);
   if (v2 == NULL) {
@@ -702,6 +712,7 @@ void gtequals(value_t *v) {
   value_free(v1);
   value_free(v2);
 }
+
 void ltequals(value_t *v) {
   value_t *v2 = array_pop(STACK);
   if (v2 == NULL) {
@@ -732,6 +743,7 @@ void ltequals(value_t *v) {
   value_free(v1);
   value_free(v2);
 }
+
 void clib(value_t *v) {
   value_t *v1 = array_pop(STACK);
   void *handle = dlopen(v1->str_word->value, RTLD_LAZY);
@@ -850,6 +862,7 @@ void equals(value_t *v) {
   value_free(v1);
   value_free(v2);
 }
+
 void nequals(value_t *v) {
   value_t *v2 = array_pop(STACK);
   if (v2 == NULL) {
@@ -979,6 +992,7 @@ void ssize(value_t *v) {
   retval->int_float = STACK->size;
   array_append(STACK, retval);
 }
+
 void qstack(value_t *v) {
   value_t *retval = init_value(VQUOTE);
   retval->quote = array_copy(STACK);

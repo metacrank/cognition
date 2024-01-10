@@ -2,4 +2,6 @@
 .idea
 *.log
 tmp/
-stem
+/bin/**
+/build/**
+compile_commands.json

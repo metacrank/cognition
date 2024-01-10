@@ -1,5 +1,5 @@
-#include "better_string.h"
-#include "macros.h"
+#include <better_string.h>
+#include <macros.h>
 #include <stdlib.h>
 #include <string.h>
 

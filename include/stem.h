@@ -1,6 +1,6 @@
 #ifndef PARSER_H_
 #define PARSER_H_
-#include "better_string.h"
+#include <better_string.h>
 #include <stdbool.h>
 #include <stdlib.h>
 
