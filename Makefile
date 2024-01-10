@@ -1,7 +1,7 @@
 CC := gcc 
 SRCDIR := src
 BUILDDIR := build
-TARGET := bin/stem
+TARGET := stem
 SRCEXT := c
 SOURCES := $(shell find $(SRCDIR) -type f -name *.$(SRCEXT))
 OBJECTS := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.o))
@@ -24,3 +24,6 @@ clean:
 
 install:
 	cp $(TARGET) /usr/local/bin/
+
+doc:
+	doxygen
