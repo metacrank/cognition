@@ -76,6 +76,12 @@ custom_t *init_custom(void (*)(void *), void (*)(void *), void *(*)(void *));
 
 void custom_free(void *);
 
+void add_func(ht_t *h, void (*func)(value_t *), char *key);
+
+void add_obj(ht_t *h, ht_t *h2, void (*printfunc)(void *),
+             void (*freefunc)(void *), void *(*copyfunc)(void *),
+             void (*createfunc)(void *), char *key);
+
 parser_t *init_parser(char *source);
 
 void parser_reset(parser_t *p, char *source);
@@ -84,13 +90,25 @@ void parser_move(parser_t *p);
 
 void parser_skip_whitespace(parser_t *p);
 
+value_t *parse_string(parser_t *p);
+
+value_t *parse_quote(parser_t *p);
+
+value_t *parse_word(parser_t *p);
+
+value_t *parse_num(parser_t *p);
+
+void parser_error(parser_t *p);
+
 value_t *parser_get_next(parser_t *p);
 
 node_t *init_node(string_t *key, void *v);
 
+void node_free(node_t *n, void (*freefunc)(void *));
+
 sll_t *init_sll();
 
-void sll_add(sll_t *l, string_t *key, void *v);
+void sll_add(sll_t *l, string_t *key, void *v, void (*freefunc)(void *));
 
 void *sll_get(sll_t *l, string_t *key);
 
@@ -98,7 +116,7 @@ void sll_free(sll_t *l, void (*freefunc)(void *));
 
 ht_t *init_ht(size_t size);
 
-void ht_add(ht_t *h, string_t *key, void *v);
+void ht_add(ht_t *h, string_t *key, void *v, void (*freefunc)(void *));
 
 void *ht_get(ht_t *h, string_t *key);
 

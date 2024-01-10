@@ -49,6 +49,8 @@ void ssize(value_t *v);
 void qstack(value_t *v);
 void vat(value_t *v);
 void stemfwrite(value_t *v);
+void stemsleep(value_t *v);
 
+void add_objs();
 void add_funcs();
 #endif // BUILTINS_H_

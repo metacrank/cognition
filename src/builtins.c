@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <stem.h>
 #include <string.h>
+#include <unistd.h>
 
 #define MAX 1000
 #define JUSTDO(a)                                                              \
@@ -190,7 +191,7 @@ void stemfunc(value_t *v) {
     eval_error();
     return;
   }
-  ht_add(WORD_TABLE, string_copy(v1->str_word), v2);
+  ht_add(WORD_TABLE, string_copy(v1->str_word), v2, value_free);
   value_free(v1);
 }
 
@@ -766,6 +767,7 @@ void clib(value_t *v) {
   } else {
     (*af)();
     (*aobjs)();
+    dlclose(handle);
     value_free(v1);
   }
 }
@@ -1074,18 +1076,19 @@ void stemfwrite(value_t *v) {
   fclose(fp);
 }
 
-void add_func(ht_t *h, void (*func)(value_t *), char *key) {
-  string_t *s = init_string(key);
-  ht_add(h, s, func);
-}
+void stemsleep(value_t *v) {
+  value_t *v1 = array_pop(STACK);
+  if (v1 == NULL) {
+    eval_error();
+    return;
+  }
+  if (v1->type != VINT && v1->type != VFLOAT) {
+    array_append(STACK, v1);
+    eval_error();
+  }
 
-void add_obj(ht_t *h, ht_t *h2, void (*printfunc)(void *),
-             void (*freefunc)(void *), void *(*copyfunc)(void *),
-             void (*createfunc)(void *), char *key) {
-
-  custom_t *c = init_custom(printfunc, freefunc, copyfunc);
-  ht_add(h, init_string(key), c);
-  ht_add(h2, init_string(key), createfunc);
+  sleep(v1->int_float);
+  value_free(v1);
 }
 
 void add_objs() {}
@@ -1137,4 +1140,5 @@ void add_funcs() {
   add_func(FLIT, isdef, "isdef");
   add_func(FLIT, dsc, "dsc");
   add_func(FLIT, clib, "clib");
+  add_func(FLIT, stemsleep, "sleep");
 }

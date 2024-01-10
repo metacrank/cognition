@@ -20,9 +20,13 @@ void func_free(void *f) {}
 
 array_t *init_array(size_t size) {
   array_t *a = calloc(1, sizeof(array_t));
+  if (!a)
+    die("calloc on array");
   a->size = 0;
   a->capacity = size;
   a->items = calloc(a->capacity, sizeof(value_t *));
+  if (!a->items)
+    die("calloc on a->items");
   return a;
 }
 
@@ -60,9 +64,13 @@ void array_free(array_t *a) {
 
 array_t *array_copy(array_t *a) {
   array_t *b = calloc(1, sizeof(array_t));
+  if (!b)
+    die("calloc on array");
   b->size = a->size;
   b->capacity = a->capacity;
   b->items = calloc(b->capacity, sizeof(value_t *));
+  if (!b->items)
+    die("calloc on b->items");
   for (int i = 0; i < a->size; i++) {
     b->items[i] = value_copy(a->items[i]);
   }
@@ -71,6 +79,8 @@ array_t *array_copy(array_t *a) {
 
 value_t *init_value(int type) {
   value_t *v = calloc(1, sizeof(value_t));
+  if (!v)
+    die("calloc on value");
   v->type = type;
   v->escaped = false;
   return v;
@@ -112,6 +122,8 @@ void value_free(void *vtmp) {
 custom_t *init_custom(void (*printfunc)(void *), void (*freefunc)(void *),
                       void *(*copyfunc)(void *)) {
   custom_t *c = calloc(1, sizeof(custom_t));
+  if (!c)
+    die("calloc on custom");
   c->printfunc = printfunc;
   c->freefunc = freefunc;
   c->copyfunc = copyfunc;
@@ -120,8 +132,23 @@ custom_t *init_custom(void (*printfunc)(void *), void (*freefunc)(void *),
 
 void custom_free(void *c) { free(c); }
 
+void add_func(ht_t *h, void (*func)(value_t *), char *key) {
+  ht_add(h, init_string(key), func, value_free);
+}
+
+void add_obj(ht_t *h, ht_t *h2, void (*printfunc)(void *),
+             void (*freefunc)(void *), void *(*copyfunc)(void *),
+             void (*createfunc)(void *), char *key) {
+
+  custom_t *c = init_custom(printfunc, freefunc, copyfunc);
+  ht_add(h, init_string(key), c, custom_free);
+  ht_add(h2, init_string(key), createfunc, value_free);
+}
+
 parser_t *init_parser(char *source) {
   parser_t *p = calloc(1, sizeof(parser_t));
+  if (!p)
+    die("calloc on parser");
   p->i = 0;
   p->source = source;
   p->c = source[0];
@@ -263,6 +290,8 @@ value_t *parser_get_next(parser_t *p) {
 
 node_t *init_node(string_t *key, void *value) {
   node_t *n = calloc(1, sizeof(node_t));
+  if (!n)
+    die("calloc on node");
   n->key = key;
   n->value = value;
   n->next = NULL;
@@ -277,12 +306,14 @@ void node_free(node_t *n, void (*freefunc)(void *)) {
 
 sll_t *init_sll() {
   sll_t *l = calloc(1, sizeof(sll_t));
+  if (!l)
+    die("calloc on linked list");
   l->size = 0;
   l->head = NULL;
   return l;
 }
 
-void sll_add(sll_t *l, string_t *s, void *v) {
+void sll_add(sll_t *l, string_t *s, void *v, void (*freefunc)(void *)) {
   if (l->head == NULL) {
     node_t *n = init_node(s, v);
     l->head = n;
@@ -292,7 +323,7 @@ void sll_add(sll_t *l, string_t *s, void *v) {
   node_t *cur = l->head;
   while (cur->next != NULL) {
     if (strcmp(s->value, cur->key->value) == 0) {
-      value_free(cur->value);
+      freefunc(cur->value);
       string_free(s);
       cur->value = v;
       return;
@@ -301,31 +332,6 @@ void sll_add(sll_t *l, string_t *s, void *v) {
   }
   if (strcmp(s->value, cur->key->value) == 0) {
     value_free(cur->value);
-    string_free(s);
-    cur->value = v;
-    return;
-  }
-  node_t *n = init_node(s, v);
-  cur->next = n;
-}
-
-void sll_add_func(sll_t *l, string_t *s, void *v) {
-  if (l->head == NULL) {
-    node_t *n = init_node(s, v);
-    l->head = n;
-    l->size++;
-    return;
-  }
-  node_t *cur = l->head;
-  while (cur->next != NULL) {
-    if (strcmp(s->value, cur->key->value) == 0) {
-      string_free(s);
-      cur->value = v;
-      return;
-    }
-    cur = cur->next;
-  }
-  if (strcmp(s->value, cur->key->value) == 0) {
     string_free(s);
     cur->value = v;
     return;
@@ -359,20 +365,20 @@ void sll_free(sll_t *l, void (*func)(void *)) {
 
 ht_t *init_ht(size_t size) {
   ht_t *h = calloc(1, sizeof(ht_t));
+  if (!h)
+    die("calloc on hash table");
   h->size = size;
   h->buckets = calloc(h->size, sizeof(sll_t *));
+  if (!h->buckets)
+    die("calloc on hash table array");
   for (int i = 0; i < size; i++) {
     h->buckets[i] = init_sll();
   }
   return h;
 }
 
-void ht_add(ht_t *h, string_t *key, void *v) {
-  sll_add(h->buckets[hash(h, key->value)], key, v);
-}
-
-void ht_add_func(ht_t *h, string_t *key, void *v) {
-  sll_add_func(h->buckets[hash(h, key->value)], key, v);
+void ht_add(ht_t *h, string_t *key, void *v, void (*freefunc)(void *)) {
+  sll_add(h->buckets[hash(h, key->value)], key, v, freefunc);
 }
 
 void *ht_get(ht_t *h, string_t *key) {
