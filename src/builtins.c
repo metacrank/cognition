@@ -548,7 +548,7 @@ void dip(value_t *v) {
       eval(value_copy(v2->quote->items[i]));
     }
     value_free(array_pop(EVAL_STACK));
-    value_free(array_pop(EVAL_STACK));
+    array_pop(EVAL_STACK);
   } else {
     eval(v1);
   }

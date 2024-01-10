@@ -1,0 +1,19 @@
+fib [
+  dup 1 <= [ ] [
+    dup 1 - fib
+    swap
+    dup 2 - fib
+    swap
+    dsc
+    +
+  ] if
+] func
+
+main [
+  dup 10 <= [
+    dup fib .
+    1 + main
+  ] [ exit ] if
+] func
+
+0 main
