@@ -7,4 +7,5 @@ tmp/
 /.cache/**
 /html/**
 /latex/**
+stem
 compile_commands.json
