@@ -5,4 +5,6 @@ tmp/
 /bin/**
 /build/**
 /.cache/**
+/html/**
+/latex/**
 compile_commands.json
