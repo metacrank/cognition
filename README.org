@@ -1,5 +1,7 @@
 #+title: Stem
 
+* Credits
+Big thanks to Andrei Sova for contributing ~fib.stem~ in the ~examples/~ directory.
 * Introduction
 Stem aims to be a small implementation of something like the forth programming language,
 meaning it operates on a virtual stack. There are words, quotes, and literal types in this
