@@ -161,6 +161,25 @@ void parser_reset(parser_t *p, char *source) {
   p->c = source[0];
 }
 
+parser_t *parser_pp(char *s) {
+  parser_t *p = init_parser(s);
+  string_t *rstr = init_string(NULL);
+  while (p->c != '\0') {
+    if (p->c == '#') {
+      while (p->c != '\n' && p->c != '\0') {
+        parser_move(p);
+      }
+    } else {
+      string_append(rstr, p->c);
+      parser_move(p);
+    }
+  }
+  free(p->source);
+  parser_reset(p, rstr->value);
+  free(rstr);
+  return p;
+}
+
 void parser_move(parser_t *p) {
   if (p->i < strlen(p->source) && p->c != '\0') {
     p->i++;

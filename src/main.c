@@ -49,7 +49,7 @@ int main(int argc, char **argv) {
   ssize_t bytes_read = getdelim(&INBUF, &len, '\0', FP);
   fclose(FP);
 
-  PARSER = init_parser(INBUF);
+  PARSER = parser_pp(INBUF);
   STACK = init_array(10);
   WORD_TABLE = init_ht(500);
   EVAL_STACK = init_array(10);
@@ -65,7 +65,7 @@ int main(int argc, char **argv) {
     eval(v);
   }
 
-  free(INBUF);
+  free(PARSER->source);
   ht_free(WORD_TABLE, value_free);
   ht_free(FLIT, func_free);
   ht_free(OBJ_TABLE, custom_free);

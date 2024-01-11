@@ -6,11 +6,11 @@
 
 /*! @brief An array implementation of the string data structure */
 typedef struct STRING_STRUCT {
-  /*! length of string */
+  /*! @brief length of string */
   size_t length;
-  /*! Size of current value buffer */
+  /*! @brief Size of current value buffer */
   size_t bufsize;
-  /*! String used for the */
+  /*! @brief String value of struct */
   char *value;
 } string_t;
 

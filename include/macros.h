@@ -74,7 +74,7 @@
 #define CRESET "\e[0m"
 #define COLOR_RESET "\e[0m"
 
-/* Die in case of catastrophic memory problem */
+/*! Die in case of catastrophic memory problem */
 void die(char *message);
 
 #endif

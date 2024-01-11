@@ -327,7 +327,7 @@ void strquote(value_t *v) {
   retval->quote = init_array(10);
   char *s = malloc(strlen(v1->str_word->value) + 1);
   strcpy(s, v1->str_word->value);
-  parser_t *p = init_parser(s);
+  parser_t *p = parser_pp(s);
   value_t *cur;
   while (1) {
     cur = parser_get_next(p);
@@ -405,7 +405,7 @@ void stemexit(value_t *v) {
   ht_free(WORD_TABLE, value_free);
   ht_free(FLIT, func_free);
   array_free(STACK);
-  free(INBUF);
+  free(PARSER->source);
   free(PARSER);
   array_free(EVAL_STACK);
   ht_free(OBJ_TABLE, func_free);

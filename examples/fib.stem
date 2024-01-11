@@ -1,3 +1,4 @@
+# Author: Andrei Sova 2023
 fib [
   dup 1 <= [ ] [
     dup 1 - fib
