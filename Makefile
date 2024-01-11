@@ -27,3 +27,7 @@ install:
 
 doc:
 	doxygen
+
+site:
+	doxygen
+	rsync -uvrP --delete-after "html/" root@nullring.xyz:/var/www/stemdoc
