@@ -7,9 +7,7 @@
 #include <unistd.h>
 
 extern ht_t *WORD_TABLE;
-
 extern array_t *STACK;
-extern char *INBUF;
 extern parser_t *PARSER;
 extern array_t *EVAL_STACK;
 extern ht_t *OBJ_TABLE;
@@ -29,7 +27,9 @@ void version() {
 int main(int argc, char **argv) {
   value_t *v;
   size_t len;
+  char *buf;
 
+  /* Parsing arguments */
   if (argc < 2) {
     usage();
   }
@@ -40,16 +40,18 @@ int main(int argc, char **argv) {
     version();
   }
 
+  /* Read code from file */
   FILE *FP = fopen(argv[1], "rb");
 
   if (!FP) {
     usage();
   }
 
-  ssize_t bytes_read = getdelim(&INBUF, &len, '\0', FP);
+  ssize_t bytes_read = getdelim(&buf, &len, '\0', FP);
   fclose(FP);
 
-  PARSER = parser_pp(INBUF);
+  /* Set up global variables */
+  PARSER = parser_pp(buf);
   STACK = init_array(10);
   WORD_TABLE = init_ht(500);
   EVAL_STACK = init_array(10);
@@ -58,6 +60,7 @@ int main(int argc, char **argv) {
 
   add_funcs();
 
+  /* parse and eval loop */
   while (1) {
     v = parser_get_next(PARSER);
     if (v == NULL)
@@ -65,6 +68,7 @@ int main(int argc, char **argv) {
     eval(v);
   }
 
+  /* Free all global variables */
   free(PARSER->source);
   ht_free(WORD_TABLE, value_free);
   ht_free(FLIT, func_free);

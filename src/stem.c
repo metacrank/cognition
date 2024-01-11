@@ -7,10 +7,10 @@
 #include <stem.h>
 #include <string.h>
 
+/* Global variables defined */
 array_t *STACK;
 array_t *EVAL_STACK;
 ht_t *WORD_TABLE;
-char *INBUF;
 parser_t *PARSER;
 
 ht_t *FLIT;
@@ -165,7 +165,7 @@ parser_t *parser_pp(char *s) {
   parser_t *p = init_parser(s);
   string_t *rstr = init_string(NULL);
   while (p->c != '\0') {
-    if (p->c == '#') {
+    if (p->c == '#') { /* Comment character is # in stem */
       while (p->c != '\n' && p->c != '\0') {
         parser_move(p);
       }

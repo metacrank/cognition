@@ -1,7 +1,7 @@
 #ifndef BUILTINS_H_
 #define BUILTINS_H_
 #include <stem.h>
-
+/* TODO: comment this entire thing */
 void stemadd(value_t *v);
 void stemsub(value_t *v);
 void stemmul(value_t *v);

@@ -8,6 +8,7 @@
 #include <string.h>
 #include <unistd.h>
 
+/* macros taken from stackoverflow */
 #define MAX 1000
 #define JUSTDO(a)                                                              \
   if (!(a)) {                                                                  \
@@ -18,7 +19,6 @@
 extern array_t *STACK;
 extern array_t *EVAL_STACK;
 extern ht_t *WORD_TABLE;
-extern char *INBUF;
 extern parser_t *PARSER;
 
 extern ht_t *FLIT;
@@ -28,6 +28,7 @@ extern ht_t *OBJ_TABLE;
  * (for quotes), split (split array, string, word into two), del (deleting
  * entries from quotes, strings, words) */
 
+/* taken from stackoverflow */
 char *get_line(FILE *f) {
   int len = MAX;
   char buf[MAX], *e = NULL, *ret;
