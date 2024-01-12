@@ -570,16 +570,16 @@ void keep(value_t *v) {
   }
 
   array_append(STACK, value_copy(v1));
-  if (v2->type == VQUOTE) {
-    array_append(EVAL_STACK, v2);
-    for (int i = 0; i < v2->quote->size; i++) {
-      eval(value_copy(v2->quote->items[i]));
+  if (v1->type == VQUOTE) {
+    array_append(EVAL_STACK, v1);
+    for (int i = 0; i < v1->quote->size; i++) {
+      eval(value_copy(v1->quote->items[i]));
     }
     value_free(array_pop(EVAL_STACK));
   } else {
     eval(v1);
   }
-  array_append(STACK, v1);
+  array_append(STACK, v2);
 }
 
 void del(value_t *v) {
