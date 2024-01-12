@@ -1,2 +1,11 @@
 evalstr [ strquote eval ] func
 include [ fread evalstr ] func
+
+# Author of loop function: Andrei S
+loop [
+  swap dup 0 > [
+    swap
+    dup eval
+    swap 1 - swap loop
+  ] [ dsc dsc ] if
+] func

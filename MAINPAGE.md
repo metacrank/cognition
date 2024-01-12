@@ -42,3 +42,9 @@ Let's take a closer look at the quote:
 `.` takes the first thing off the stack and prints it. In this case, it would print a prompt `> ` every REPL loop. `read` reads a value from stdin,
 then `strquote` turns that string into a quote. `eval` pops the first thing off the stack and evaluates the quote in the same way calling a function
 does, and then finally `repl` gets called again at the end so we can loop forever.
+
+## Factorial
+Let's take a closer look at the factorial function:
+```
+
+```
