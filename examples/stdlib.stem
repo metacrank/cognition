@@ -9,3 +9,12 @@ loop [
     swap 1 - swap loop
   ] [ dsc dsc ] if
 ] func
+
+# Author: Matthew H
+dupd [ [ dup ] keep ] func
+over [ dupd swap ] func
+dup2 [ over over ] func
+dip2 [ swap [ dip ] dip ] func
+
+loop-times [ dup2 [ swap [ ] if ] dip2
+dup [ 1 - loop-times ] [ dsc dsc ] if ] func
