@@ -24,6 +24,8 @@ clean:
 
 install:
 	cp $(TARGET) /usr/local/bin/
+	mkdir -p /usr/local/lib/share/stem/
+	cp -r stemlib/ /usr/local/share/stem/stdlib/
 
 doc:
 	doxygen
