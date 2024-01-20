@@ -1,0 +1,60 @@
+#!/usr/local/bin/stem
+# Author: Preston Pan
+evalstr [ strquote eval ] func
+include [ fread evalstr ] func
+
+neg [ 0 swap - ] func
+
+# Author of loop function: Andrei S
+loop [
+  swap dup 0 > [
+    swap
+    dup eval
+    swap 1 - swap loop
+  ] [ dsc dsc ] if
+] func
+
+
+swapd [ [ swap ] keep ] func
+swapt [ [ [ swap ] keep ] keep ] func
+
+dscd [ swap dsc ] func
+dsct [ swapd swap dsc ] func
+
+dsc3 [ dsc dsc dsc ] func
+
+# Author: Matthew H
+dupd [ [ dup ] keep ] func
+dupt [ [ [ dup ] keep ] keep ] func
+dupq [ [ [ [ dup ] keep ] keep ] keep ] func
+
+over [ dupd swap ] func
+over2 [ dupt swapd swap ] func
+over3 [ dupq swapt swapd swap ] func
+
+dup2 [ over over ] func
+dup3 [ over2 over2 over2 ] func
+dup4 [ over3 over3 over3 over3 ] func
+
+dip2 [ swap [ dip ] dip ] func
+dip3 [ swap [ dip ] dip ] func
+while [  dup2 [ [ ] if ] dip2 over [ while ] [ dsc dsc ] if ] func
+when [ [ ] if ] func
+
+loop-times [ dup2 [ swap [ ] if ] dip2
+dup [ 1 - loop-times ] [ dsc dsc ] if ] func
+
+
+# d>base [ [ pow * "" swap ] keep2
+
+# [ [ over ] [ [ dup2 / floor * swap over - ] keep [ [ "0" "1" "2" "3" "4" "5" "6" "7" "8" "9" "↊" "↋" ] vat swap + ] with dip2 ] while dsc2 dup len(str-len) ] dip
+# - dup2 tail [ head "." ] dip + + ] func
+
+# Author: Preston Pan
+map [ [ ] over2 over2 len 0 swap [ dup4 swap vat over2 eval dscd dscd quote compose swap 1 + dsct dsct dsct over3 swap over3 swap ] swap loop-times dsc3 dscd dscd ] func
+filter [ [ ] over2 over2 len 0 swap [ dup4 swap vat over2 eval dscd dscd [ quote compose ] when swap 1 + dsct dsct dsct over3 swap over3 swap ] swap loop-times dsc3 dscd dscd ] func
+
+# [map][quote][valnew][1]
+
+# [map][quote][val][map][quote][0]
+# [val][map][quote][map][1]

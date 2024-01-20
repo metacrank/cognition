@@ -1,6 +1,6 @@
 "./stdlib.stem" fread strquote eval
 "./math.stem" include
 
-"You can make your own REPL by changing the code!" dsc
+# You can make your own REPL by changing the code!
 
 repl [ "> " . read strquote eval repl ] func repl

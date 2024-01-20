@@ -1,4 +1,4 @@
-# Introduction {#mainpage}
+# Introduction
 Stem aims to be a minimal interpreted stack based programming language
 that allows for metaprogramming and a foreign language interface. It features
 a C API that is elegant and simple. Additionally, garbage collection is
