@@ -1012,6 +1012,7 @@ void qstack(value_t *v) {
 }
 
 void vat(value_t *v) {
+  value_t *retval;
   value_t *v2 = array_pop(STACK);
   if (v2 == NULL) {
     eval_error("EMTPY STACK");
@@ -1040,7 +1041,7 @@ void vat(value_t *v) {
     array_append(STACK, v2);
     array_append(STACK, value_copy(v2->quote->items[(int)v1->int_float]));
     value_free(v1);
-  } else if (v2->type == VSTR) {
+  } else if (v2->type == VSTR || v2->type == VWORD) {
     if (v2->str_word->length <= v1->int_float) {
       array_append(STACK, v1);
       array_append(STACK, v2);
@@ -1049,7 +1050,11 @@ void vat(value_t *v) {
     }
     char *a = (char[]){v2->str_word->value[(int)v1->int_float], '\0'};
     string_t *s = init_string(a);
-    value_t *retval = init_value(VSTR);
+    if (v2->type == VWORD) {
+      retval = init_value(VWORD);
+    } else {
+      retval = init_value(VSTR);
+    }
     retval->str_word = s;
     array_append(STACK, v2);
     array_append(STACK, retval);
