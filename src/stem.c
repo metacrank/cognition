@@ -91,7 +91,7 @@ value_t *value_copy(value_t *v) {
   a->type = v->type;
   if (v->type == VINT || v->type == VFLOAT) {
     a->int_float = v->int_float;
-  } else if (v->type == VSTR || v->type == VWORD) {
+  } else if (v->type == VSTR || v->type == VWORD || v->type == VERR) {
     a->str_word = string_copy(v->str_word);
     a->escaped = v->escaped;
   } else if (v->type == VQUOTE) {

@@ -1,0 +1,7 @@
+"./stdlib.stem" fread strquote eval
+
+unQstack [ map [ len vat ] ] func
+
+[ 1 2 3 4 ] unQstack
+?
+
