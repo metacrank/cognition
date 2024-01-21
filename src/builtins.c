@@ -920,22 +920,6 @@ void nequals(value_t *v) {
   value_free(v2);
 }
 
-void wtostr(value_t *v) {
-  value_t *v1 = array_pop(STACK);
-  if (v1 == NULL) {
-    eval_error("EMPTY STACK");
-    return;
-  }
-
-  if (v1->type != VWORD) {
-    array_append(STACK, v1);
-    eval_error("INCORRECT TYPE ARGUMENT");
-    return;
-  }
-  v1->type = VSTR;
-  array_append(STACK, v1);
-}
-
 void compose(value_t *v) {
   value_t *v2 = array_pop(STACK);
   if (v2 == NULL) {
@@ -1134,13 +1118,13 @@ void undef(value_t *v) {
   value_free(v1);
 }
 
-void errtostr(value_t *v) {
+void tostr(value_t *v) {
   value_t *v1 = array_pop(STACK);
   if (v1 == NULL) {
     eval_error("EMPTY STACK");
     return;
   }
-  if (v1->type == VERR)
+  if (v1->type == VERR || v1->type == VWORD)
     v1->type = VSTR;
   else {
     array_append(STACK, v1);
@@ -1177,7 +1161,6 @@ void add_funcs() {
   add_func(FLIT, stoi, "stoi");
   add_func(FLIT, isnum, "isnum");
   add_func(FLIT, compose, "compose");
-  add_func(FLIT, stemfwrite, "wtostr");
   add_func(FLIT, lthan, "<");
   add_func(FLIT, ltequals, "<=");
   add_func(FLIT, gthan, ">");
@@ -1201,5 +1184,5 @@ void add_funcs() {
   add_func(FLIT, clib, "clib");
   add_func(FLIT, stemsleep, "sleep");
   add_func(FLIT, undef, "undef");
-  add_func(FLIT, errtostr, "errtostr");
+  add_func(FLIT, tostr, "tostr");
 }
