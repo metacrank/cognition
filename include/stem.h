@@ -197,6 +197,9 @@ void sll_add(sll_t *l, string_t *key, void *v, void (*freefunc)(void *));
 /*! Gets value by key from singly linked list. */
 void *sll_get(sll_t *l, string_t *key);
 
+/*! deletes item from singly linked list */
+void sll_delete(sll_t *l, string_t *k, void (*freefunc)(void *));
+
 /*! Frees singly linked list */
 void sll_free(sll_t *l, void (*freefunc)(void *));
 
@@ -209,6 +212,9 @@ void ht_add(ht_t *h, string_t *key, void *v, void (*freefunc)(void *));
 
 /*! Gets value from hash table by key */
 void *ht_get(ht_t *h, string_t *key);
+
+/*! Deletes item from hash table */
+void ht_delete(ht_t *h, string_t *key, void (*freefunc)(void *));
 
 /*! returns true if key exists in hash table. false otherwise */
 bool ht_exists(ht_t *h, string_t *key);

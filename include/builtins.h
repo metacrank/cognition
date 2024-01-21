@@ -154,6 +154,10 @@ void stemfwrite(value_t *v);
 /*! @brief [VINT/VFLOAT] sleep; sleeps for an amount of seconds. */
 void stemsleep(value_t *v);
 
+void stemcut(value_t *v);
+
+void undef(value_t *v);
+
 /*! @brief adds all the custom objects defined to OBJ_TABLE */
 void add_objs();
 

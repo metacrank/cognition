@@ -21,6 +21,7 @@ swapt [ [ [ swap ] keep ] keep ] func
 dscd [ swap dsc ] func
 dsct [ swapd swap dsc ] func
 
+dsc2 [ dsc dsc ] func
 dsc3 [ dsc dsc dsc ] func
 
 # Author: Matthew H
@@ -42,7 +43,7 @@ while [  dup2 [ [ ] if ] dip2 over [ while ] [ dsc dsc ] if ] func
 when [ [ ] if ] func
 
 loop-times [ dup2 [ swap [ ] if ] dip2
-dup [ 1 - loop-times ] [ dsc dsc ] if ] func
+dup [ 1 - loop-times ] [ dsc2 ] if ] func
 
 
 # d>base [ [ pow * "" swap ] keep2
@@ -51,10 +52,8 @@ dup [ 1 - loop-times ] [ dsc dsc ] if ] func
 # - dup2 tail [ head "." ] dip + + ] func
 
 # Author: Preston Pan
-map [ [ ] over2 over2 len 0 swap [ dup4 swap vat over2 eval dscd dscd quote compose swap 1 + dsct dsct dsct over3 swap over3 swap ] swap loop-times dsc3 dscd dscd ] func
-filter [ [ ] over2 over2 len 0 swap [ dup4 swap vat over2 eval dscd dscd [ quote compose ] when swap 1 + dsct dsct dsct over3 swap over3 swap ] swap loop-times dsc3 dscd dscd ] func
+map [ [ ] over2 over2 len 0 swap
+[ dup4 swap vat over2 eval dscd dscd quote compose swap 1 + dsct dsct dsct over3 swap over3 swap ] swap loop-times dsc3 dscd dscd ] func
 
-# [map][quote][valnew][1]
-
-# [map][quote][val][map][quote][0]
-# [val][map][quote][map][1]
+filter [ [ ] over2 over2 len 0 swap
+[ dup4 swap vat dup over3 eval dsct dsct [ quote compose ] [ dsc ] if swap 1 + dsct dsct dsct over3 swap over3 swap ] swap loop-times dsc3 dscd dscd ] func

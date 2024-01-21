@@ -8,13 +8,13 @@ fib [
     dsc
     +
   ] if
-] func
+] def
 
 main [
   dup 10 <= [
     dup fib .
     1 + main
   ] [ exit ] if
-] func
+] def
 
 0 main

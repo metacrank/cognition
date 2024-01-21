@@ -3,4 +3,4 @@
 
 # You can make your own REPL by changing the code!
 
-repl [ "> " . read strquote eval repl ] func repl
+repl [ "> " . read strquote eval repl ] def repl

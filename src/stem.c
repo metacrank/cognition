@@ -106,7 +106,7 @@ value_t *value_copy(value_t *v) {
 
 void value_free(void *vtmp) {
   value_t *v = (value_t *)vtmp;
-  if (v->type == VSTR || v->type == VWORD) {
+  if (v->type == VSTR || v->type == VWORD || v->type == VERR) {
     string_free(v->str_word);
   }
   if (v->type == VQUOTE) {
@@ -244,6 +244,9 @@ value_t *parse_quote(parser_t *p) {
   parser_move(p);
   parser_skip_whitespace(p);
   while (p->c != ']') {
+    if (p->c == '\0') {
+      parser_error(p);
+    }
     array_append(retv->quote, parser_get_next(p));
     parser_skip_whitespace(p);
   }
@@ -251,7 +254,10 @@ value_t *parse_quote(parser_t *p) {
   return retv;
 }
 
-void parser_error(parser_t *p) { exit(1); }
+void parser_error(parser_t *p) {
+  fprintf(stderr, "PARSER ERROR!\n");
+  exit(1);
+}
 
 value_t *parse_word(parser_t *p) {
   value_t *retv = init_value(VWORD);
@@ -371,6 +377,27 @@ void *sll_get(sll_t *l, string_t *k) {
   return NULL;
 }
 
+void sll_delete(sll_t *l, string_t *k, void (*freefunc)(void *)) {
+  node_t *cur = l->head;
+  node_t *tmp;
+  if (cur == NULL)
+    return;
+  if (strcmp(cur->key->value, k->value) == 0) {
+    node_free(cur, freefunc);
+    l->head = NULL;
+    return;
+  }
+  while (cur->next != NULL) {
+    if (strcmp(cur->next->key->value, k->value) == 0) {
+      tmp = cur->next->next;
+      node_free(cur->next, freefunc);
+      cur->next = tmp;
+      return;
+    }
+    cur = cur->next;
+  }
+}
+
 void sll_free(sll_t *l, void (*func)(void *)) {
   node_t *cur = l->head;
   node_t *tmp;
@@ -405,6 +432,10 @@ void *ht_get(ht_t *h, string_t *key) {
 }
 
 bool ht_exists(ht_t *h, string_t *key) { return ht_get(h, key) != NULL; }
+
+void ht_delete(ht_t *h, string_t *key, void (*freefunc)(void *)) {
+  sll_delete(h->buckets[hash(h, key->value)], key, freefunc);
+}
 
 void ht_free(ht_t *h, void (*func)(void *)) {
   for (int i = 0; i < h->size; i++) {
