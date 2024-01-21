@@ -401,12 +401,12 @@ void stemfread(value_t *v) {
     eval_error("EMPTY STACK");
     return;
   }
-  char *val = NULL;
-  size_t len;
+  char *val = "";
+  size_t len = 0;
   FILE *fp = fopen(v1->str_word->value, "rb");
   if (!fp) {
     array_append(STACK, v1);
-    eval_error("INCORRECT TYPE ARGUMENT");
+    eval_error("FREAD ERROR");
     return;
   }
   ssize_t bytes_read = getdelim(&val, &len, '\0', fp);
@@ -593,8 +593,8 @@ void dip(value_t *v) {
     return;
   }
 
+  array_append(EVAL_STACK, v1);
   if (v2->type == VQUOTE) {
-    array_append(EVAL_STACK, v1);
     array_append(EVAL_STACK, v2);
     for (int i = 0; i < v2->quote->size; i++) {
       eval(value_copy(v2->quote->items[i]));
@@ -951,6 +951,7 @@ void compose(value_t *v) {
   } else if (v2->type == VQUOTE && v1->type == VQUOTE) {
     retval = v1;
     array_extend(v1->quote, v2->quote);
+    free(v2->quote->items);
     free(v2->quote);
     free(v2);
   } else {
@@ -1169,7 +1170,7 @@ void stemcut(value_t *v) {
     for (int i = v1->int_float; i < v2->quote->size; i++) {
       array_append(r2->quote, v2->quote->items[i]);
     }
-    // [ a b c ] 1 cut => [ a ] [ b c ]
+    /* [ a b c ] 1 cut => [ a ] [ b c ] */
     break;
   default:
     array_append(STACK, v2);

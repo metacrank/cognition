@@ -12,6 +12,9 @@ about memory allocation while the implementation remains extremely simple.
 install `doxygen` as an optional dependency. If you are on a BSD or MacOS, you
 must use `gmake`.
 
+# Documentation
+Builtin function definitions and the C API in general are documented [here](https://stemdoc.nullring.xyz).
+
 # Quickstart
 Because this is a stack based language, all operations are done in reverse polish. For example, to add two numbers together:
 ```
@@ -26,12 +29,12 @@ to the action of adding two numbers when called.
 
 Let's look at a real example of a REPL implementation in this language:
 ```
-repl [ "> " . read strquote eval repl ] func
+repl [ "> " . read strquote eval repl ] def
 repl
 ```
 `repl` is a word, which means it is a literal, and everything that is a literal gets pushed onto the stack.
-Everything between the `[` and `]` is an element in a quote. Then, we see the `func` word. If a word is already bound to a function,
-the function gets called instead of getting pushed to the stack, so the `func` function gets called, which takes the top two
+Everything between the `[` and `]` is an element in a quote. Then, we see the `def` word. If a word is already bound to a function,
+the function gets called instead of getting pushed to the stack, so the `def` function gets called, which takes the top two
 elements off the stack, and creates a function called `repl` where now every time `repl` is called in the future, the quote is evaluated
 instead.
 
@@ -46,5 +49,5 @@ does, and then finally `repl` gets called again at the end so we can loop foreve
 ## Factorial
 Let's take a closer look at the factorial function:
 ```
-
+factorial [ dup 0 <= [ 1 + ] [ dup 1 - factorial * ] if ] def
 ```
