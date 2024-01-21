@@ -1,2 +1,0 @@
-factorial [ dup 0 <= [ 1 + ] [ dup 1 - factorial * ] if ] def
-PI 3.1415926 def

@@ -553,6 +553,33 @@ void stemlen(value_t *v) {
   array_append(STACK, retval);
 }
 
+/* void dip(value_t *v) { */
+/*   value_t *v2 = array_pop(STACK); */
+/*   if (v2 == NULL) { */
+/*     eval_error("EMPTY STACK"); */
+/*     return; */
+/*   } */
+/*   value_t *v1 = array_pop(STACK); */
+/*   if (v1 == NULL) { */
+/*     array_append(STACK, v2); */
+/*     eval_error("EMPTY STACK"); */
+/*     return; */
+/*   } */
+
+/*   if (v2->type == VQUOTE) { */
+/*     array_append(EVAL_STACK, v1); */
+/*     array_append(EVAL_STACK, v2); */
+/*     for (int i = 0; i < v2->quote->size; i++) { */
+/*       eval(value_copy(v2->quote->items[i])); */
+/*     } */
+/*     value_free(array_pop(EVAL_STACK)); */
+/*     array_pop(EVAL_STACK); */
+/*   } else { */
+/*     eval(v2); */
+/*   } */
+/*   array_append(STACK, v1); */
+/* } */
+
 void dip(value_t *v) {
   value_t *v2 = array_pop(STACK);
   if (v2 == NULL) {
@@ -574,31 +601,6 @@ void dip(value_t *v) {
     }
     value_free(array_pop(EVAL_STACK));
     array_pop(EVAL_STACK);
-  } else {
-    eval(v1);
-  }
-  array_append(STACK, v1);
-}
-
-void keep(value_t *v) {
-  value_t *v2 = array_pop(STACK);
-  if (v2 == NULL) {
-    eval_error("EMPTY STACK");
-    return;
-  }
-  value_t *v1 = array_pop(STACK);
-  if (v1 == NULL) {
-    array_append(STACK, v2);
-    eval_error("EMPTY STACK");
-    return;
-  }
-
-  if (v2->type == VQUOTE) {
-    array_append(EVAL_STACK, v2);
-    for (int i = 0; i < v2->quote->size; i++) {
-      eval(value_copy(v2->quote->items[i]));
-    }
-    value_free(array_pop(EVAL_STACK));
   } else {
     eval(v2);
   }
@@ -1169,7 +1171,6 @@ void add_funcs() {
   add_func(FLIT, equals, "=");
   add_func(FLIT, stemif, "if");
   add_func(FLIT, clear, "clear");
-  add_func(FLIT, keep, "keep");
   add_func(FLIT, dip, "dip");
   add_func(FLIT, stemlen, "len");
   add_func(FLIT, quote, "quote");
