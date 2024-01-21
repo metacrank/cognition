@@ -1049,7 +1049,7 @@ void vat(value_t *v) {
     }
     char *a = (char[]){v2->str_word->value[(int)v1->int_float], '\0'};
     string_t *s = init_string(a);
-    value_t *retval = init_value(VINT);
+    value_t *retval = init_value(VSTR);
     retval->str_word = s;
     array_append(STACK, v2);
     array_append(STACK, retval);
@@ -1102,7 +1102,81 @@ void stemsleep(value_t *v) {
   value_free(v1);
 }
 
-void stemcut(value_t *v) { value_t *v1 = array_pop(STACK); }
+void stemcut(value_t *v) {
+  value_t *v1 = array_pop(STACK);
+  value_t *r1;
+  value_t *r2;
+  if (v1 == NULL) {
+    eval_error("EMPTY STACK");
+    return;
+  }
+  value_t *v2 = array_pop(STACK);
+  if (v2 == NULL) {
+    array_append(STACK, v1);
+    eval_error("EMPTY STACK");
+    return;
+  }
+  if (v1->type != VINT) {
+    array_append(STACK, v1);
+    array_append(STACK, v2);
+    eval_error("INCORRECT TYPE ARGUMENT");
+    return;
+  }
+  switch (v2->type) {
+  case VWORD:
+  case VSTR:
+    if (v1->int_float >= v2->str_word->length) {
+      array_append(STACK, v1);
+      array_append(STACK, v2);
+      eval_error("INDEX ERROR");
+      return;
+    }
+    if (v2->type == VSTR) {
+      r1 = init_value(VSTR);
+      r2 = init_value(VSTR);
+    } else {
+      r1 = init_value(VWORD);
+      r2 = init_value(VWORD);
+    }
+    r1->str_word = init_string("");
+    r2->str_word = init_string("");
+    for (int i = 0; i < v1->int_float; i++) {
+      string_append(r1->str_word, v2->str_word->value[i]);
+    }
+    for (int i = v1->int_float; i < v2->str_word->length; i++) {
+      string_append(r2->str_word, v2->str_word->value[i]);
+    }
+    break;
+  case VQUOTE:
+    if (v1->int_float >= v2->quote->size) {
+      array_append(STACK, v1);
+      array_append(STACK, v2);
+      eval_error("INDEX ERROR");
+      return;
+    }
+    r1 = init_value(VQUOTE);
+    r1->quote = init_array(10);
+    r2 = init_value(VQUOTE);
+    r2->quote = init_array(10);
+    for (int i = 0; i < v1->int_float; i++) {
+      array_append(r1->quote, v2->quote->items[i]);
+    }
+    for (int i = v1->int_float; i < v2->quote->size; i++) {
+      array_append(r2->quote, v2->quote->items[i]);
+    }
+    // [ a b c ] 1 cut => [ a ] [ b c ]
+    break;
+  default:
+    array_append(STACK, v2);
+    array_append(STACK, v1);
+    eval_error("INCORRECT TYPE ARGUMENT");
+    return;
+  }
+  array_append(STACK, r1);
+  array_append(STACK, r2);
+  value_free(v1);
+  value_free(v2);
+}
 
 void undef(value_t *v) {
   value_t *v1 = array_pop(STACK);
@@ -1186,4 +1260,5 @@ void add_funcs() {
   add_func(FLIT, stemsleep, "sleep");
   add_func(FLIT, undef, "undef");
   add_func(FLIT, tostr, "tostr");
+  add_func(FLIT, stemcut, "cut");
 }
