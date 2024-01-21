@@ -1,0 +1,10 @@
+"./stdlib.stem" fread strquote eval
+
+
+unQstack [
+      len len [ dup 1 - dip vat ] swap loop-times
+] def
+
+[ 1 2 3 4 ] unQstack
+?
+
