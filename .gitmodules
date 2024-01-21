@@ -3,4 +3,4 @@
 	url = https://github.com/jothepro/doxygen-awesome-css.git
 [submodule "stemlib"]
 	path = stemlib
-	url = https://github.com/ret2pop/stemlib
+	url = git@github.com:ret2pop/stemlib

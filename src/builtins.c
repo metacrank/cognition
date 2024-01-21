@@ -1033,7 +1033,7 @@ void vat(value_t *v) {
     return;
   }
   if (v2->type == VQUOTE) {
-    if (v2->quote->size <= v1->int_float) {
+    if (v2->quote->size <= v1->int_float || v1->int_float < 0) {
       array_append(STACK, v1);
       array_append(STACK, v2);
       eval_error("INDEX ERROR");
@@ -1043,7 +1043,7 @@ void vat(value_t *v) {
     array_append(STACK, value_copy(v2->quote->items[(int)v1->int_float]));
     value_free(v1);
   } else if (v2->type == VSTR || v2->type == VWORD) {
-    if (v2->str_word->length <= v1->int_float) {
+    if (v2->str_word->length <= v1->int_float || v1->int_float < 0) {
       array_append(STACK, v1);
       array_append(STACK, v2);
       eval_error("INDEX ERROR");
@@ -1131,7 +1131,7 @@ void stemcut(value_t *v) {
   switch (v2->type) {
   case VWORD:
   case VSTR:
-    if (v1->int_float >= v2->str_word->length) {
+    if (v1->int_float >= v2->str_word->length || v1->int_float < 0) {
       array_append(STACK, v1);
       array_append(STACK, v2);
       eval_error("INDEX ERROR");
@@ -1154,7 +1154,7 @@ void stemcut(value_t *v) {
     }
     break;
   case VQUOTE:
-    if (v1->int_float >= v2->quote->size) {
+    if (v1->int_float >= v2->quote->size || v1->int_float < 0) {
       array_append(STACK, v1);
       array_append(STACK, v2);
       eval_error("INDEX ERROR");
