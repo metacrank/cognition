@@ -1100,7 +1100,7 @@ void stemsleep(value_t *v) {
   value_free(v1);
 }
 
-void stemcut(value_t *v) {}
+void stemcut(value_t *v) { value_t *v1 = array_pop(STACK); }
 
 void undef(value_t *v) {
   value_t *v1 = array_pop(STACK);
@@ -1114,7 +1114,7 @@ void undef(value_t *v) {
     return;
   }
   ht_delete(WORD_TABLE, v1->str_word, value_free);
-  ht_delete(FLIT, v1->str_word, value_free);
+  ht_delete(FLIT, v1->str_word, func_free);
   value_free(v1);
 }
 

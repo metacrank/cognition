@@ -106,6 +106,8 @@ value_t *value_copy(value_t *v) {
 
 void value_free(void *vtmp) {
   value_t *v = (value_t *)vtmp;
+  if (v == NULL)
+    return;
   if (v->type == VSTR || v->type == VWORD || v->type == VERR) {
     string_free(v->str_word);
   }
@@ -245,6 +247,7 @@ value_t *parse_quote(parser_t *p) {
   parser_skip_whitespace(p);
   while (p->c != ']') {
     if (p->c == '\0') {
+      value_free(retv);
       parser_error(p);
     }
     array_append(retv->quote, parser_get_next(p));
@@ -255,17 +258,26 @@ value_t *parse_quote(parser_t *p) {
 }
 
 void parser_error(parser_t *p) {
-  fprintf(stderr, "PARSER ERROR!\n");
+  fprintf(stderr, "PARSER ERROR: unclosed `[` or `\"` \n");
+  free(PARSER->source);
+  ht_free(WORD_TABLE, value_free);
+  ht_free(FLIT, func_free);
+  ht_free(OBJ_TABLE, custom_free);
+  array_free(STACK);
+  free(PARSER);
+  array_free(EVAL_STACK);
   exit(1);
 }
 
 value_t *parse_word(parser_t *p) {
   value_t *retv = init_value(VWORD);
   string_t *s = init_string(NULL);
+  retv->str_word = s;
   if (p->c == '\\') {
     retv->escaped = true;
     parser_move(p);
     if (isspace(p->c) || p->c == '\0') {
+      value_free(retv);
       parser_error(p);
     }
   }
@@ -273,7 +285,6 @@ value_t *parse_word(parser_t *p) {
     string_append(s, p->c);
     parser_move(p);
   }
-  retv->str_word = s;
   return retv;
 }
 
