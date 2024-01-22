@@ -25,9 +25,8 @@ extern parser_t *PARSER;
 extern ht_t *FLIT;
 extern ht_t *OBJ_TABLE;
 
-/* TODO: rotr, rotl, dip, map, filter, errstr, join (for strings), switch
- * (for quotes), split (split array, string, word into two), del (deleting
- * entries from quotes, strings, words) */
+/* TODO: switch (for quotes), del (deleting entries from quotes, strings, words)
+ */
 
 /* taken from stackoverflow */
 char *get_line(FILE *f) {
@@ -400,7 +399,7 @@ void curry(value_t *v) {
     return;
   }
 
-  array_append(v2->quote, v1);
+  array_curry(v2->quote, v1);
   array_append(STACK, v2);
 }
 
@@ -566,33 +565,6 @@ void stemlen(value_t *v) {
   array_append(STACK, v1);
   array_append(STACK, retval);
 }
-
-/* void dip(value_t *v) { */
-/*   value_t *v2 = array_pop(STACK); */
-/*   if (v2 == NULL) { */
-/*     eval_error("EMPTY STACK"); */
-/*     return; */
-/*   } */
-/*   value_t *v1 = array_pop(STACK); */
-/*   if (v1 == NULL) { */
-/*     array_append(STACK, v2); */
-/*     eval_error("EMPTY STACK"); */
-/*     return; */
-/*   } */
-
-/*   if (v2->type == VQUOTE) { */
-/*     array_append(EVAL_STACK, v1); */
-/*     array_append(EVAL_STACK, v2); */
-/*     for (int i = 0; i < v2->quote->size; i++) { */
-/*       eval(value_copy(v2->quote->items[i])); */
-/*     } */
-/*     value_free(array_pop(EVAL_STACK)); */
-/*     array_pop(EVAL_STACK); */
-/*   } else { */
-/*     eval(v2); */
-/*   } */
-/*   array_append(STACK, v1); */
-/* } */
 
 void dip(value_t *v) {
   value_t *v2 = array_pop(STACK);

@@ -111,6 +111,9 @@ array_t *init_array(size_t size);
 /*! appends element to back of array */
 void array_append(array_t *a, value_t *v);
 
+/*! appends element to front of array */
+void array_curry(array_t *a, value_t *v);
+
 /*! pops last element off of array */
 value_t *array_pop(array_t *a);
 

@@ -51,3 +51,5 @@ Let's take a closer look at the factorial function:
 ```
 factorial [ dup 0 <= [ 1 + ] [ dup 1 - factorial * ] if ] def
 ```
+we check if the input is less than or equal to zero, and if it is, we add one to the input and it is our output.
+Otherwise, we multiply that input by itself minus one.

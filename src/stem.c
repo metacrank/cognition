@@ -39,6 +39,18 @@ void array_append(array_t *a, value_t *v) {
   a->size++;
 }
 
+void array_curry(array_t *a, value_t *v) {
+  if (a->size >= a->capacity - 3) {
+    a->capacity = a->capacity * 2;
+    a->items = realloc(a->items, a->capacity * sizeof(value_t *));
+  }
+  for (int i = a->size - 1; i >= 0; i--) {
+    a->items[i + 1] = a->items[i];
+  }
+  a->items[0] = v;
+  a->size++;
+}
+
 value_t *array_pop(array_t *a) {
   if (a->size > 0) {
     value_t *v = a->items[a->size - 1];
