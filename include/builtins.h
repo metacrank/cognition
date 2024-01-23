@@ -18,6 +18,8 @@ void stemdiv(value_t *v);
  * [quote] */
 void stemfunc(value_t *v);
 
+void steminsert(value_t *v);
+
 /*! @brief takes first number to the power of the second, pushes result on the
  * stack */
 void stempow(value_t *v);

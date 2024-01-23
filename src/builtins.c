@@ -332,7 +332,6 @@ void stemfloor(value_t *v) {
 void stemeval(value_t *v) {
   value_t *v1 = array_pop(STACK);
   if (v1 == NULL) {
-    array_append(STACK, v1);
     eval_error("EMPTY STACK");
     return;
   }
@@ -348,6 +347,28 @@ void stemeval(value_t *v) {
   } else {
     eval(v1);
   }
+}
+
+void unglue(value_t *v) {
+  value_t *v1 = array_pop(STACK);
+  if (v1 == NULL) {
+    eval_error("EMPTY STACK");
+    return;
+  }
+  if (v1->type != VWORD) {
+    array_append(STACK, v1);
+    eval_error("EMPTY STACK");
+    return;
+  }
+  value_t *value = ht_get(WORD_TABLE, v1->str_word);
+  if (!value) {
+    array_append(STACK, v1);
+    eval_error("UNBOUND WORD");
+    return;
+  }
+  value = value_copy(value);
+  array_append(STACK, value);
+  value_free(v1);
 }
 
 void strquote(value_t *v) {
@@ -399,7 +420,54 @@ void curry(value_t *v) {
     return;
   }
 
-  array_curry(v2->quote, v1);
+  array_add(v2->quote, v1, 0);
+  array_append(STACK, v2);
+}
+
+void steminsert(value_t *v) {
+  value_t *v3 = array_pop(STACK);
+  if (v3 == NULL) {
+    eval_error("EMPTY STACK");
+    return;
+  }
+  value_t *v2 = array_pop(STACK);
+  if (v2 == NULL) {
+    array_append(STACK, v3);
+    eval_error("EMPTY STACK");
+    return;
+  }
+  value_t *v1 = array_pop(STACK);
+  if (v1 == NULL) {
+    array_append(STACK, v2);
+    array_append(STACK, v3);
+    eval_error("EMTPY STACK");
+    return;
+  }
+
+  if (v1->type != VINT) {
+    array_append(STACK, v1);
+    array_append(STACK, v2);
+    array_append(STACK, v3);
+    eval_error("INCORRECT TYPE ARGUMENT");
+    return;
+  }
+
+  if (v3->type != VQUOTE) {
+    array_append(STACK, v1);
+    array_append(STACK, v2);
+    array_append(STACK, v3);
+    eval_error("INCORRECT TYPE ARGUMENT");
+    return;
+  }
+  if (v1->int_float < 0 || v1->int_float >= v3->quote->size) {
+    array_append(STACK, v1);
+    array_append(STACK, v2);
+    array_append(STACK, v3);
+    eval_error("INDEX ERROR");
+    return;
+  }
+
+  array_add(v3->quote, v2, (int)v1->int_float);
   array_append(STACK, v2);
 }
 
@@ -1253,4 +1321,6 @@ void add_funcs() {
   add_func(FLIT, undef, "undef");
   add_func(FLIT, tostr, "tostr");
   add_func(FLIT, stemcut, "cut");
+  add_func(FLIT, steminsert, "insert");
+  add_func(FLIT, unglue, "unglue");
 }
