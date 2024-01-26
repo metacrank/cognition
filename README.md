@@ -21,4 +21,4 @@ repository.
 
 # Documentation
 See the [Doxygen generated documentation](https://stemdoc.nullring.xyz) for the C API documentation and
-[my blog post](https://ret2pop.nullring.xyz/stem.html).
+[my blog post](https://ret2pop.nullring.xyz/blog/stem.html).
