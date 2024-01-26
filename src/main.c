@@ -22,8 +22,8 @@ void usage() {
 
 /*! prints version and exits */
 void version() {
-  printf("Author: Preston Pan, MIT License 2023\n");
-  printf("stem, version 1.2 alpha\n");
+  printf("Author: Preston Pan, MIT License 2024\n");
+  printf("stem, version 1.3 alpha\n");
   exit(0);
 }
 

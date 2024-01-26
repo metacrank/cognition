@@ -3,21 +3,27 @@
 #include <stem.h>
 
 /*! @brief adds two numbers together, pushes result on the stack */
+/*! call in stem with num1 num2 + => num */
 void stemadd(value_t *v);
 
 /*! @brief subtracts two numbers together, pushes result on the stack */
+/*! call in stem with num1 num2 - => num */
 void stemsub(value_t *v);
 
 /*! @brief multiplies two numbers together, pushes result on the stack */
+/*! call in stem with num1 num2 * => num */
 void stemmul(value_t *v);
 
 /*! @brief divides two numbers together, pushes result on the stack */
+/*! call in stem with num1 num2 / => num */
 void stemdiv(value_t *v);
 
-/*! @brief [word] [quote] func, creates function with name [word] and value
- * [quote] */
+/*! @brief creates function with name [word] and value [quote] */
+/*! call with `word value def`. */
 void stemfunc(value_t *v);
 
+/* @brief Inserts a value into a string or quote. */
+/* call with `[quote/string] value index insert` */
 void steminsert(value_t *v);
 
 /*! @brief takes first number to the power of the second, pushes result on the

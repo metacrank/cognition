@@ -195,6 +195,62 @@ void stemdiv(value_t *v) {
   value_free(v2);
 }
 
+void stemand(value_t *v) {
+  value_t *v2 = array_pop(STACK);
+  if (v2 == NULL) {
+    eval_error("EMPTY STACK");
+    return;
+  }
+  value_t *v1 = array_pop(STACK);
+  if (v1 == NULL) {
+    array_append(STACK, v2);
+    eval_error("EMPTY STACK");
+    return;
+  }
+  if (v1->type != VINT && v1->type != VFLOAT && v2->type != VINT &&
+      v2->type != VFLOAT) {
+    array_append(STACK, v1);
+    array_append(STACK, v2);
+    eval_error("INCORRECT TYPE ARGUMENT");
+    return;
+  }
+
+  v1->int_float = v1->int_float && v2->int_float;
+  if (v2->type == VFLOAT)
+    v1->type = VFLOAT;
+
+  array_append(STACK, v1);
+  value_free(v2);
+}
+
+void stemor(value_t *v) {
+  value_t *v2 = array_pop(STACK);
+  if (v2 == NULL) {
+    eval_error("EMPTY STACK");
+    return;
+  }
+  value_t *v1 = array_pop(STACK);
+  if (v1 == NULL) {
+    array_append(STACK, v2);
+    eval_error("EMPTY STACK");
+    return;
+  }
+  if (v1->type != VINT && v1->type != VFLOAT && v2->type != VINT &&
+      v2->type != VFLOAT) {
+    array_append(STACK, v1);
+    array_append(STACK, v2);
+    eval_error("INCORRECT TYPE ARGUMENT");
+    return;
+  }
+
+  v1->int_float = v1->int_float || v2->int_float;
+  if (v2->type == VFLOAT)
+    v1->type = VFLOAT;
+
+  array_append(STACK, v1);
+  value_free(v2);
+}
+
 void stemfunc(value_t *v) {
   value_t *v2 = array_pop(STACK);
   if (v2 == NULL) {
@@ -1206,6 +1262,7 @@ void stemcut(value_t *v) {
     for (int i = v1->int_float; i < v2->str_word->length; i++) {
       string_append(r2->str_word, v2->str_word->value[i]);
     }
+    value_free(v2);
     break;
   case VQUOTE:
     if (v1->int_float >= v2->quote->size || v1->int_float < 0) {
@@ -1218,13 +1275,16 @@ void stemcut(value_t *v) {
     r1->quote = init_array(10);
     r2 = init_value(VQUOTE);
     r2->quote = init_array(10);
-    for (int i = 0; i < v1->int_float; i++) {
+    for (int i = 0; i < v1->int_float + 1; i++) {
       array_append(r1->quote, v2->quote->items[i]);
     }
-    for (int i = v1->int_float; i < v2->quote->size; i++) {
+    for (int i = v1->int_float + 1; i < v2->quote->size; i++) {
       array_append(r2->quote, v2->quote->items[i]);
     }
     /* [ a b c ] 1 cut => [ a ] [ b c ] */
+    free(v2->quote->items);
+    free(v2->quote);
+    free(v2);
     break;
   default:
     array_append(STACK, v2);
@@ -1235,7 +1295,6 @@ void stemcut(value_t *v) {
   array_append(STACK, r1);
   array_append(STACK, r2);
   value_free(v1);
-  value_free(v2);
 }
 
 void undef(value_t *v) {
@@ -1323,4 +1382,6 @@ void add_funcs() {
   add_func(FLIT, stemcut, "cut");
   add_func(FLIT, steminsert, "insert");
   add_func(FLIT, unglue, "unglue");
+  add_func(FLIT, stemand, "and");
+  add_func(FLIT, stemor, "or");
 }

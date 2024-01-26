@@ -447,16 +447,22 @@ ht_t *init_ht(size_t size) {
 }
 
 void ht_add(ht_t *h, string_t *key, void *v, void (*freefunc)(void *)) {
+  if (key == NULL)
+    return;
   sll_add(h->buckets[hash(h, key->value)], key, v, freefunc);
 }
 
 void *ht_get(ht_t *h, string_t *key) {
+  if (key == NULL)
+    return NULL;
   return sll_get(h->buckets[hash(h, key->value)], key);
 }
 
 bool ht_exists(ht_t *h, string_t *key) { return ht_get(h, key) != NULL; }
 
 void ht_delete(ht_t *h, string_t *key, void (*freefunc)(void *)) {
+  if (key == NULL)
+    return;
   sll_delete(h->buckets[hash(h, key->value)], key, freefunc);
 }
 
