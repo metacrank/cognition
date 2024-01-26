@@ -18,3 +18,7 @@ sudo make install
 To generate the html documentation, one must first install `doxygen` as an optional dependency.
 If you are on a BSD or MacOS, you must use `gmake`. Also, you obviously need `git` to clone this
 repository.
+
+# Documentation
+See the [Doxygen generated documentation](https://stemdoc.nullring.xyz) for the C API documentation and
+[my blog post](https://ret2pop.nullring.xyz/stem.html).
