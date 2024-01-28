@@ -1327,6 +1327,73 @@ void tostr(value_t *v) {
   }
   array_append(STACK, v1);
 }
+
+void include(value_t *v) {
+  value_t *v1 = array_pop(STACK);
+  if (v1 == NULL) {
+    eval_error("EMPTY STACK");
+    return;
+  }
+  if (v1->type != VSTR) {
+    array_append(STACK, v1);
+    eval_error("EMPTY STACK");
+    return;
+  }
+  char *val = "";
+  size_t len = 0;
+  string_t *strval = init_string("/usr/local/share/stem/stemlib/");
+  string_concat(strval, v1->str_word);
+  FILE *fp = fopen(strval->value, "rb");
+  string_free(strval);
+  if (!fp) {
+    array_append(STACK, v1);
+    eval_error("FREAD ERROR");
+    return;
+  }
+  ssize_t bytes_read = getdelim(&val, &len, '\0', fp);
+  fclose(fp);
+
+  value_t *retval = init_value(VQUOTE);
+  retval->quote = init_array(10);
+  parser_t *p = parser_pp(val);
+  value_t *cur;
+  while (1) {
+    cur = parser_get_next(p);
+    if (cur == NULL)
+      break;
+    array_append(retval->quote, cur);
+  }
+  array_append(STACK, retval);
+  value_free(v1);
+  free(p->source);
+  free(p);
+}
+
+void uncurry(value_t *v) {
+  value_t *v1 = array_pop(STACK);
+  if (v1 == NULL) {
+    eval_error("EMPTY STACK");
+    return;
+  }
+  if (v1->type != VQUOTE) {
+    array_append(STACK, v1);
+    eval_error("EMPTY STACK");
+    return;
+  }
+  if (v1->quote->size <= 0) {
+    array_append(STACK, v1);
+    eval_error("INDEX ERROR");
+    return;
+  }
+  value_t *retval = v1->quote->items[0];
+  for (int i = 1; i < v1->quote->size; i++) {
+    v1->quote->items[i - 1] = v1->quote->items[i];
+  }
+  v1->quote->size--;
+  array_append(STACK, v1);
+  array_append(STACK, retval);
+}
+
 void add_objs() {}
 
 void add_funcs() {
@@ -1384,4 +1451,6 @@ void add_funcs() {
   add_func(FLIT, unglue, "unglue");
   add_func(FLIT, stemand, "and");
   add_func(FLIT, stemor, "or");
+  add_func(FLIT, include, "include");
+  add_func(FLIT, uncurry, "uncurry");
 }
