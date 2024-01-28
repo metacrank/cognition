@@ -7,6 +7,11 @@ operations is put in the hands of the maintainers of the builtin functions
 and FLI library maintainers. Therefore, the end user does not need to worry
 about memory allocation while the implementation remains extremely simple.
 
+# Motivation
+This language was designed after I heard about stack based programming languages
+from my friend Matthew Hinton. I made it according to his description, and made
+choices along the way in the design process according to what I thought was logical.
+
 # Installation
 In the terminal:
 ``` sh
