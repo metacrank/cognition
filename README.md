@@ -27,3 +27,13 @@ repository.
 # Documentation
 See the [Doxygen generated documentation](https://stemdoc.nullring.xyz) for the C API documentation and
 [my blog post](https://ret2pop.nullring.xyz/blog/stem.html).
+
+# Task List
+- [ ] Write a library for stem to test the FLI
+- [ ] Write a line editor with said library
+- [ ] ed clone with stem configuration
+- [ ] Stem to C transpiler
+- [ ] Stem compiler for other lower level backends
+
+and of course, the ever-present:
+- [ ] fix all bugs

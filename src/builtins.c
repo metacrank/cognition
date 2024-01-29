@@ -40,6 +40,8 @@ char *get_line(FILE *f) {
     if ((e = strrchr(ret, '\n')))
       break;
   }
+  /* stackoverflow code patch: clearerr */
+  clearerr(f);
   if (e)
     *e = '\0';
   return ret;
@@ -558,7 +560,6 @@ void stemfread(value_t *v) {
 void stemread(value_t *v) {
   value_t *retval = init_value(VSTR);
   char *a = get_line(stdin);
-  clearerr(stdin);
   retval->str_word = init_string(a);
   array_append(STACK, retval);
   free(a);
