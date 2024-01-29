@@ -311,7 +311,7 @@ void stemsin(value_t *v) {
     array_append(STACK, v1);
     eval_error("INVALID TYPE ARGUMENT");
   }
-  v1->int_float = sinhl(v1->int_float);
+  v1->int_float = sinl(v1->int_float);
   array_append(STACK, v1);
 }
 
@@ -325,7 +325,7 @@ void stemcos(value_t *v) {
     array_append(STACK, v1);
     eval_error("INVALID TYPE ARGUMENT");
   }
-  v1->int_float = coshl(v1->int_float);
+  v1->int_float = cosl(v1->int_float);
   array_append(STACK, v1);
 }
 
@@ -558,6 +558,7 @@ void stemfread(value_t *v) {
 void stemread(value_t *v) {
   value_t *retval = init_value(VSTR);
   char *a = get_line(stdin);
+  clearerr(stdin);
   retval->str_word = init_string(a);
   array_append(STACK, retval);
   free(a);

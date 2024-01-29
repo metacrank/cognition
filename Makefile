@@ -24,7 +24,7 @@ clean:
 
 install:
 	cp $(TARGET) /usr/local/bin/
-	mkdir -p /usr/local/lib/share/stem/
+	mkdir -p /usr/local/share/stem/
 	cp -r stemlib/ /usr/local/share/stem/
 
 doc:

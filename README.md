@@ -15,7 +15,7 @@ choices along the way in the design process according to what I thought was logi
 # Installation
 In the terminal:
 ``` sh
-git clone https://github.com/ret2pop/stem
+git clone --recurse-submodules https://github.com/ret2pop/stem
 cd stem/
 make
 sudo make install

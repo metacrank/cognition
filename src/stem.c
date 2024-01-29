@@ -331,6 +331,8 @@ value_t *parser_get_next(parser_t *p) {
     return parse_quote(p);
   case '\0':
     return NULL;
+  case EOF:
+    return NULL;
   default:
     return parse_word(p);
   }
