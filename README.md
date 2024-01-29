@@ -32,7 +32,7 @@ See the [Doxygen generated documentation](https://stemdoc.nullring.xyz) for the 
 - [ ] Write a library for stem to test the FLI
 - [ ] Write a line editor with said library
 - [ ] ed clone with stem configuration
-- [ ] Stem to C transpiler
+- [ ] Stem to C transpiler (In progress on local branch)
 - [ ] Stem compiler for other lower level backends
 
 and of course, the ever-present:
