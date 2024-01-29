@@ -5,7 +5,7 @@ TARGET := stem
 SRCEXT := c
 SOURCES := $(shell find $(SRCDIR) -type f -name *.$(SRCEXT))
 OBJECTS := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.o))
-CFLAGS :=
+CFLAGS := -fpic
 LIB := -L lib -lm
 INC := -I include
 
@@ -22,13 +22,15 @@ clean:
 	@echo " Cleaning..."; 
 	@echo " $(RM) -r $(BUILDDIR) $(TARGET)"; $(RM) -r $(BUILDDIR) $(TARGET)
 
-install:
+lib: $(OBJECTS)
+	$(CC) -shared -o build/stem.so build/stem.o build/better_string.o build/macros.o
+
+install: $(TARGET) build/stem.so
+	cp -r include/ /usr/include/stemlib
 	cp $(TARGET) /usr/local/bin/
+	cp build/stem.so /usr/local/lib/
 	mkdir -p /usr/local/share/stem/
 	cp -r stemlib/ /usr/local/share/stem/
-
-doc:
-	doxygen
 
 site:
 	doxygen

@@ -18,6 +18,7 @@ In the terminal:
 git clone --recurse-submodules https://github.com/ret2pop/stem
 cd stem/
 make
+make lib
 sudo make install
 ```
 To generate the html documentation, one must first install `doxygen` as an optional dependency.
@@ -30,8 +31,7 @@ See the [Doxygen generated documentation](https://stemdoc.nullring.xyz) for the 
 
 # Task List
 - [ ] Write a library for stem to test the FLI
-- [ ] Write a line editor with said library
-- [ ] ed clone with stem configuration
+- [ ] basic text editor with stem configuration with said library
 - [ ] Stem to C transpiler (In progress on local branch)
 - [ ] Stem compiler for other lower level backends
 
