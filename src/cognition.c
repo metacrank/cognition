@@ -1,27 +1,23 @@
+#include "better_string.h"
+#include <cognition.h>
 #include <ctype.h>
 #include <macros.h>
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stem.h>
 #include <string.h>
 
 /* Global variables defined */
-array_t *STACK;
-array_t *EVAL_STACK;
-ht_t *WORD_TABLE;
-parser_t *PARSER;
-
-ht_t *FLIT;
-ht_t *OBJ_TABLE;
+stack_t *STACK;
+stack_t *EVAL_STACK;
 
 void func_free(void *f) {}
 
-array_t *init_array(size_t size) {
-  array_t *a = calloc(1, sizeof(array_t));
+stack_t *init_stack(size_t size) {
+  stack_t *a = calloc(1, sizeof(stack_t));
   if (!a)
-    die("calloc on array");
+    die("calloc on stack");
   a->size = 0;
   a->capacity = size;
   a->items = calloc(a->capacity, sizeof(value_t *));
@@ -30,7 +26,7 @@ array_t *init_array(size_t size) {
   return a;
 }
 
-void array_append(array_t *a, value_t *v) {
+void stack_push(stack_t *a, value_t *v) {
   if (a->size >= a->capacity - 2) {
     a->capacity = a->capacity * 2;
     a->items = realloc(a->items, a->capacity * sizeof(value_t *));
@@ -39,7 +35,7 @@ void array_append(array_t *a, value_t *v) {
   a->size++;
 }
 
-void array_add(array_t *a, value_t *v, int index) {
+void stack_add(stack_t *a, value_t *v, int index) {
   if (a->size >= a->capacity - 3) {
     a->capacity = a->capacity * 2;
     a->items = realloc(a->items, a->capacity * sizeof(value_t *));
@@ -51,40 +47,50 @@ void array_add(array_t *a, value_t *v, int index) {
   a->size++;
 }
 
-value_t *array_pop(array_t *a) {
+void *stack_pop(stack_t *a) {
   if (a->size > 0) {
-    value_t *v = a->items[a->size - 1];
+    void *v = a->items[a->size - 1];
     a->size--;
     return v;
   }
   return NULL;
 }
 
-void array_extend(array_t *a, array_t *b) {
+void *stack_peek(stack_t *s) {
+  if (s->size > 0) {
+    void *v = s->items[s->size - 1];
+    return v;
+  }
+  return NULL;
+}
+
+void stack_extend(stack_t *a, stack_t *b) {
   for (int i = 0; i < b->size; i++) {
-    array_append(a, b->items[i]);
+    stack_push(a, b->items[i]);
   }
 }
 
-void array_free(array_t *a) {
-  for (int i = 0; i < a->size; i++) {
-    value_free(a->items[i]);
+void stack_free(void *a, void (*freefunc)(void *)) {
+  stack_t *s = a;
+  for (int i = 0; i < s->size; i++) {
+    freefunc(s->items[i]);
   }
-  free(a->items);
-  free(a);
+  free(s->items);
+  free(s);
 }
 
-array_t *array_copy(array_t *a) {
-  array_t *b = calloc(1, sizeof(array_t));
+void *stack_copy(void *a, void *(*copyfunc)(void *)) {
+  stack_t *b = calloc(1, sizeof(stack_t));
   if (!b)
-    die("calloc on array");
-  b->size = a->size;
-  b->capacity = a->capacity;
+    die("calloc on stack");
+  stack_t *s = a;
+  b->size = s->size;
+  b->capacity = s->capacity;
   b->items = calloc(b->capacity, sizeof(value_t *));
   if (!b->items)
     die("calloc on b->items");
-  for (int i = 0; i < a->size; i++) {
-    b->items[i] = value_copy(a->items[i]);
+  for (int i = 0; i < s->size; i++) {
+    b->items[i] = copyfunc(s->items[i]);
   }
   return b;
 }
@@ -98,36 +104,40 @@ value_t *init_value(int type) {
   return v;
 }
 
-value_t *value_copy(value_t *v) {
+void *value_copy(void *v) {
   value_t *a = init_value(VINT);
-  a->type = v->type;
-  if (v->type == VINT || v->type == VFLOAT) {
-    a->int_float = v->int_float;
-  } else if (v->type == VSTR || v->type == VWORD || v->type == VERR) {
-    a->str_word = string_copy(v->str_word);
-    a->escaped = v->escaped;
-  } else if (v->type == VQUOTE) {
-    a->quote = array_copy(v->quote);
-  } else if (v->type == VCUSTOM) {
-    custom_t *c = ht_get(OBJ_TABLE, a->str_word);
-    a->custom = c->copyfunc(v->custom);
-    a->str_word = string_copy(v->str_word);
+  value_t *v1 = v;
+  contain_t *container = stack_peek(STACK);
+  a->type = v1->type;
+  if (v1->type == VINT || v1->type == VFLOAT) {
+    a->int_float = v1->int_float;
+  } else if (v1->type == VWORD || v1->type == VERR) {
+    a->str_word = string_copy(v1->str_word);
+    a->escaped = v1->escaped;
+  } else if (v1->type == VSTACK) {
+    a->quote = stack_copy(v1->quote, value_copy);
+  } else if (v1->type == VCUSTOM) {
+    ht_t *ot = container->obj_table;
+    custom_t *c = ht_get(ot, a->str_word);
+    a->custom = c->copyfunc(v1->custom);
+    a->str_word = string_copy(v1->str_word);
   }
   return a;
 }
 
 void value_free(void *vtmp) {
   value_t *v = (value_t *)vtmp;
+  contain_t *c = stack_peek(STACK);
   if (v == NULL)
     return;
-  if (v->type == VSTR || v->type == VWORD || v->type == VERR) {
+  if (v->type == VWORD || v->type == VERR) {
     string_free(v->str_word);
   }
-  if (v->type == VQUOTE) {
-    array_free(v->quote);
+  if (v->type == VSTACK) {
+    contain_free(v->quote);
   }
   if (v->type == VCUSTOM) {
-    void (*freefunc)(void *) = ht_get(OBJ_TABLE, v->str_word);
+    void (*freefunc)(void *) = ht_get(c->obj_table, v->str_word);
     freefunc(v->custom);
   }
   free(v);
@@ -157,6 +167,29 @@ void add_obj(ht_t *h, ht_t *h2, void (*printfunc)(void *),
   custom_t *c = init_custom(printfunc, freefunc, copyfunc);
   ht_add(h, init_string(key), c, custom_free);
   ht_add(h2, init_string(key), createfunc, value_free);
+}
+
+contain_t *init_container(ht_t *h, ht_t *flit, ht_t *ot, int (*cranks)[2],
+                          size_t crank_size) {
+  contain_t *c = calloc(1, sizeof(contain_t));
+  c->stack = init_stack(10);
+  c->err_stack = init_stack(10);
+  c->flit = flit;
+  c->word_table = h;
+  c->cranks = cranks;
+  c->faliases = init_stack(10);
+  c->delims = init_string(NULL);
+  c->ignored = init_string(NULL);
+  return c;
+}
+
+void contain_free(void *con) {
+  contain_t *c = con;
+  ht_free(c->word_table, value_free);
+  ht_free(c->obj_table, custom_free);
+  ht_free(c->flit, func_free);
+  stack_free(c->stack, value_free);
+  stack_free(c->err_stack, value_free);
 }
 
 parser_t *init_parser(char *source) {
@@ -201,134 +234,43 @@ void parser_move(parser_t *p) {
   }
 }
 
-void parser_skip_whitespace(parser_t *p) {
-  while (isspace(p->c)) {
-    parser_move(p);
-  }
-}
-
-value_t *parse_string(parser_t *p) {
-  value_t *retv = init_value(VSTR);
-  parser_move(p);
-  string_t *s = init_string(NULL);
-  bool escaped = false;
-  while (escaped || p->c != '"' && p->c != '\0') {
-    if (p->c == '\\') {
-      escaped = true;
-      parser_move(p);
-      continue;
-    }
-    if (escaped) {
-      switch (p->c) {
-      case '"':
-        string_append(s, '"');
-        break;
-      case 'n':
-        string_append(s, '\n');
-        break;
-      case 'r':
-        string_append(s, '\r');
-        break;
-      case 't':
-        string_append(s, '\t');
-        break;
-      case '\\':
-        string_append(s, '\\');
-        break;
-      default:
-        string_append(s, p->c);
-        break;
-      }
-      parser_move(p);
-      escaped = false;
-    } else {
-      string_append(s, p->c);
-      parser_move(p);
-      escaped = false;
+bool isdelim(parser_t *p) {
+  for (int i = 0; i < p->delims->length; i++) {
+    if (p->delims->value[i] == p->c) {
+      return true;
     }
   }
-  parser_move(p);
-  retv->str_word = s;
-  return retv;
-}
-
-value_t *parse_quote(parser_t *p) {
-  value_t *retv = init_value(VQUOTE);
-  retv->quote = init_array(10);
-  parser_move(p);
-  parser_skip_whitespace(p);
-  while (p->c != ']') {
-    if (p->c == '\0') {
-      value_free(retv);
-      parser_error(p);
-    }
-    array_append(retv->quote, parser_get_next(p));
-    parser_skip_whitespace(p);
-  }
-  parser_move(p);
-  return retv;
-}
-
-void parser_error(parser_t *p) {
-  fprintf(stderr, "PARSER ERROR: unclosed `[` or `\"` \n");
-  free(PARSER->source);
-  ht_free(WORD_TABLE, value_free);
-  ht_free(FLIT, func_free);
-  ht_free(OBJ_TABLE, custom_free);
-  array_free(STACK);
-  free(PARSER);
-  array_free(EVAL_STACK);
-  exit(1);
+  return false;
 }
 
 value_t *parse_word(parser_t *p) {
-  value_t *retv = init_value(VWORD);
-  string_t *s = init_string(NULL);
-  retv->str_word = s;
-  if (p->c == '\\') {
-    retv->escaped = true;
-    parser_move(p);
-    if (isspace(p->c) || p->c == '\0') {
-      value_free(retv);
-      parser_error(p);
-    }
-  }
-  while (!isspace(p->c) && p->c != '\0') {
-    string_append(s, p->c);
+  string_t *strval = init_string(NULL);
+  value_t *retval = init_value(VWORD);
+  retval->str_word = strval;
+  while (!isdelim(p)) {
+    string_append(strval, p->c);
     parser_move(p);
   }
-  return retv;
+  parser_move(p);
 }
 
-value_t *parse_num(parser_t *p) {
-  value_t *retv;
-  string_t *s = init_string(NULL);
-  bool is_float = false;
-  while (isdigit(p->c) || (p->c == '.') && !is_float) {
-    if (p->c == '.')
-      is_float = true;
-    string_append(s, p->c);
+bool isignore(parser_t *p) {
+  for (int i = 0; i < p->ignored->length; i++) {
+    if (p->ignored->value[i] == p->c)
+      return true;
+  }
+  return false;
+}
+
+void parser_skip_ignore(parser_t *p) {
+  while (isignore(p) && p->c != '\0') {
     parser_move(p);
   }
-  if (is_float)
-    retv = init_value(VFLOAT);
-  else
-    retv = init_value(VINT);
-  retv->int_float = atof(s->value);
-  string_free(s);
-  return retv;
 }
 
 value_t *parser_get_next(parser_t *p) {
-  parser_skip_whitespace(p);
-  if (isdigit(p->c)) {
-    return parse_num(p);
-  }
+  parser_skip_ignore(p);
   switch (p->c) {
-  case '"':
-    return parse_string(p);
-  case '[':
-    return parse_quote(p);
   case '\0':
     return NULL;
   case EOF:
@@ -441,7 +383,7 @@ ht_t *init_ht(size_t size) {
   h->size = size;
   h->buckets = calloc(h->size, sizeof(sll_t *));
   if (!h->buckets)
-    die("calloc on hash table array");
+    die("calloc on hash table stack");
   for (int i = 0; i < size; i++) {
     h->buckets[i] = init_sll();
   }
@@ -488,11 +430,12 @@ unsigned long hash(ht_t *h, char *key) {
 }
 
 bool eval_ht(value_t *v) {
-  value_t *func = ht_get(WORD_TABLE, v->str_word);
+  contain_t *cur = stack_peek(STACK);
+  value_t *func = ht_get(cur->word_table, v->str_word);
   if (func == NULL)
     return false;
   value_free(v);
-  if (func->type == VQUOTE) {
+  if (func->type == VSTACK) {
     for (int i = 0; i < func->quote->size; i++) {
       eval(value_copy(func->quote->items[i]));
     }
@@ -503,34 +446,66 @@ bool eval_ht(value_t *v) {
 }
 
 bool eval_builtins(value_t *v) {
-  void (*func)(value_t *) = ht_get(FLIT, v->str_word);
+  contain_t *cur = stack_peek(STACK);
+  void (*func)(value_t *) = ht_get(cur->flit, v->str_word);
   if (func == NULL)
     return false;
-  array_append(EVAL_STACK, v);
+  stack_push(EVAL_STACK, v);
   func(v);
-  array_pop(EVAL_STACK);
+  stack_pop(EVAL_STACK);
   value_free(v);
   return true;
 }
 
-void eval(value_t *v) {
+void inc_crank() {
+  contain_t *cur = stack_peek(STACK);
+  int(*cranks)[2] = cur->cranks;
+  for (int i = 0; i < cur->crank_size; i++) {
+    cranks[i][0]++;
+    if (cranks[i][0] >= cranks[i][1]) {
+      cranks[i][0] = 0;
+    }
+  }
+}
+
+bool isfalias(value_t *v) {
+  contain_t *c = stack_peek(STACK);
+  for (int i = 0; i < c->falias_size; i++) {
+    if (strcmp(c->faliases[i]->value, v->str_word->value) == 0)
+      return true;
+  }
+  return false;
+}
+
+void evalf() {
+  contain_t *cur = stack_peek(STACK);
+  stack_t *stack = cur->stack;
+  value_t *v = stack_pop(cur->stack);
+  for (int i = 0; i < v->quote->stack->size; i++) {
+  }
+}
+
+void eval(parser_t *p, value_t *v) {
+  contain_t *cur = stack_peek(STACK);
   switch (v->type) {
   case VINT:
   case VFLOAT:
-  case VSTR:
-  case VQUOTE:
+  case VSTACK:
   case VERR:
   case VCUSTOM:
-    array_append(STACK, v);
+    stack_push(cur->stack, v);
     break;
   case VWORD:
-    if (v->escaped) {
-      v->escaped = false;
-      array_append(STACK, v);
+    inc_crank();
+    if (isfalias(v)) {
+      value_free(v);
+    }
+    if (0) {
+      stack_push(cur->stack, v);
     } else {
       if (!eval_builtins(v)) {
         if (!eval_ht(v)) {
-          array_append(STACK, v);
+          stack_push(cur->stack, v);
         }
       }
     }

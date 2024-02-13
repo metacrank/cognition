@@ -1,11 +1,11 @@
 #include <builtins.h>
+#include <cognition.h>
 #include <ctype.h>
 #include <dlfcn.h>
 #include <macros.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stem.h>
 #include <string.h>
 #include <unistd.h>
 
@@ -17,8 +17,8 @@
     exit(1);                                                                   \
   }
 
-extern array_t *STACK;
-extern array_t *EVAL_STACK;
+extern stack_t *STACK;
+extern stack_t *EVAL_STACK;
 extern ht_t *WORD_TABLE;
 extern parser_t *PARSER;
 
@@ -82,25 +82,25 @@ void print_value(value_t *v) {
 void eval_error(char *s) {
   value_t *v = init_value(VERR);
   v->str_word = init_string(s);
-  array_append(STACK, v);
+  stack_push(STACK, v);
 }
 
 void stemadd(value_t *v) {
-  value_t *v2 = array_pop(STACK);
+  value_t *v2 = stack_pop(STACK);
   if (v2 == NULL) {
     eval_error("EMPTY STACK");
     return;
   }
-  value_t *v1 = array_pop(STACK);
+  value_t *v1 = stack_pop(STACK);
   if (v1 == NULL) {
-    array_append(STACK, v2);
+    stack_push(STACK, v2);
     eval_error("EMPTY STACK");
     return;
   }
   if (v1->type != VINT && v1->type != VFLOAT && v2->type != VINT &&
       v2->type != VFLOAT) {
-    array_append(STACK, v1);
-    array_append(STACK, v2);
+    stack_push(STACK, v1);
+    stack_push(STACK, v2);
     eval_error("INCORRECT TYPE ARGUMENT");
     return;
   }
@@ -109,26 +109,26 @@ void stemadd(value_t *v) {
   if (v2->type == VFLOAT)
     v1->type = VFLOAT;
 
-  array_append(STACK, v1);
+  stack_push(STACK, v1);
   value_free(v2);
 }
 
 void stemsub(value_t *v) {
-  value_t *v2 = array_pop(STACK);
+  value_t *v2 = stack_pop(STACK);
   if (v2 == NULL) {
     eval_error("EMPTY STACK");
     return;
   }
-  value_t *v1 = array_pop(STACK);
+  value_t *v1 = stack_pop(STACK);
   if (v1 == NULL) {
-    array_append(STACK, v2);
+    stack_push(STACK, v2);
     eval_error("EMPTY STACK");
     return;
   }
   if (v1->type != VINT && v1->type != VFLOAT && v2->type != VINT &&
       v2->type != VFLOAT) {
-    array_append(STACK, v1);
-    array_append(STACK, v2);
+    stack_push(STACK, v1);
+    stack_push(STACK, v2);
     eval_error("INCORRECT TYPE ARGUMENT");
     return;
   }
@@ -137,26 +137,26 @@ void stemsub(value_t *v) {
   if (v2->type == VFLOAT)
     v1->type = VFLOAT;
 
-  array_append(STACK, v1);
+  stack_push(STACK, v1);
   value_free(v2);
 }
 
 void stemmul(value_t *v) {
-  value_t *v2 = array_pop(STACK);
+  value_t *v2 = stack_pop(STACK);
   if (v2 == NULL) {
     eval_error("EMPTY STACK");
     return;
   }
-  value_t *v1 = array_pop(STACK);
+  value_t *v1 = stack_pop(STACK);
   if (v1 == NULL) {
-    array_append(STACK, v2);
+    stack_push(STACK, v2);
     eval_error("EMPTY STACK");
     return;
   }
   if (v1->type != VINT && v1->type != VFLOAT && v2->type != VINT &&
       v2->type != VFLOAT) {
-    array_append(STACK, v1);
-    array_append(STACK, v2);
+    stack_push(STACK, v1);
+    stack_push(STACK, v2);
     eval_error("INCORRECT TYPE ARGUMENT");
     return;
   }
@@ -165,26 +165,26 @@ void stemmul(value_t *v) {
   if (v2->type == VFLOAT)
     v1->type = VFLOAT;
 
-  array_append(STACK, v1);
+  stack_push(STACK, v1);
   value_free(v2);
 }
 
 void stemdiv(value_t *v) {
-  value_t *v2 = array_pop(STACK);
+  value_t *v2 = stack_pop(STACK);
   if (v2 == NULL) {
     eval_error("EMPTY STACK");
     return;
   }
-  value_t *v1 = array_pop(STACK);
+  value_t *v1 = stack_pop(STACK);
   if (v1 == NULL) {
-    array_append(STACK, v2);
+    stack_push(STACK, v2);
     eval_error("EMPTY STACK");
     return;
   }
   if (v1->type != VINT && v1->type != VFLOAT && v2->type != VINT &&
       v2->type != VFLOAT) {
-    array_append(STACK, v1);
-    array_append(STACK, v2);
+    stack_push(STACK, v1);
+    stack_push(STACK, v2);
     eval_error("INCORRECT TYPE ARGUMENT");
     return;
   }
@@ -193,26 +193,26 @@ void stemdiv(value_t *v) {
   if (v2->type == VFLOAT)
     v1->type = VFLOAT;
 
-  array_append(STACK, v1);
+  stack_push(STACK, v1);
   value_free(v2);
 }
 
 void stemand(value_t *v) {
-  value_t *v2 = array_pop(STACK);
+  value_t *v2 = stack_pop(STACK);
   if (v2 == NULL) {
     eval_error("EMPTY STACK");
     return;
   }
-  value_t *v1 = array_pop(STACK);
+  value_t *v1 = stack_pop(STACK);
   if (v1 == NULL) {
-    array_append(STACK, v2);
+    stack_push(STACK, v2);
     eval_error("EMPTY STACK");
     return;
   }
   if (v1->type != VINT && v1->type != VFLOAT && v2->type != VINT &&
       v2->type != VFLOAT) {
-    array_append(STACK, v1);
-    array_append(STACK, v2);
+    stack_push(STACK, v1);
+    stack_push(STACK, v2);
     eval_error("INCORRECT TYPE ARGUMENT");
     return;
   }
@@ -221,26 +221,26 @@ void stemand(value_t *v) {
   if (v2->type == VFLOAT)
     v1->type = VFLOAT;
 
-  array_append(STACK, v1);
+  stack_push(STACK, v1);
   value_free(v2);
 }
 
 void stemor(value_t *v) {
-  value_t *v2 = array_pop(STACK);
+  value_t *v2 = stack_pop(STACK);
   if (v2 == NULL) {
     eval_error("EMPTY STACK");
     return;
   }
-  value_t *v1 = array_pop(STACK);
+  value_t *v1 = stack_pop(STACK);
   if (v1 == NULL) {
-    array_append(STACK, v2);
+    stack_push(STACK, v2);
     eval_error("EMPTY STACK");
     return;
   }
   if (v1->type != VINT && v1->type != VFLOAT && v2->type != VINT &&
       v2->type != VFLOAT) {
-    array_append(STACK, v1);
-    array_append(STACK, v2);
+    stack_push(STACK, v1);
+    stack_push(STACK, v2);
     eval_error("INCORRECT TYPE ARGUMENT");
     return;
   }
@@ -249,19 +249,19 @@ void stemor(value_t *v) {
   if (v2->type == VFLOAT)
     v1->type = VFLOAT;
 
-  array_append(STACK, v1);
+  stack_push(STACK, v1);
   value_free(v2);
 }
 
 void stemfunc(value_t *v) {
-  value_t *v2 = array_pop(STACK);
+  value_t *v2 = stack_pop(STACK);
   if (v2 == NULL) {
     eval_error("EMPTY STACK");
     return;
   }
-  value_t *v1 = array_pop(STACK);
+  value_t *v1 = stack_pop(STACK);
   if (v1 == NULL) {
-    array_append(STACK, v2);
+    stack_push(STACK, v2);
     eval_error("EMPTY STACK");
     return;
   }
@@ -276,21 +276,21 @@ void stemfunc(value_t *v) {
 void nop(value_t *v) {}
 
 void stempow(value_t *v) {
-  value_t *v2 = array_pop(STACK);
+  value_t *v2 = stack_pop(STACK);
   if (v2 == NULL) {
     eval_error("EMPTY STACK");
     return;
   }
-  value_t *v1 = array_pop(STACK);
+  value_t *v1 = stack_pop(STACK);
   if (v1 == NULL) {
-    array_append(STACK, v2);
+    stack_push(STACK, v2);
     eval_error("EMPTY STACK");
     return;
   }
   if (v1->type != VINT && v1->type != VFLOAT && v2->type != VINT &&
       v2->type != VFLOAT) {
-    array_append(STACK, v1);
-    array_append(STACK, v2);
+    stack_push(STACK, v1);
+    stack_push(STACK, v2);
     eval_error("INCORRECT TYPE ARGUMENT");
     return;
   }
@@ -299,106 +299,106 @@ void stempow(value_t *v) {
   if (v2->type == VFLOAT)
     v1->type = VFLOAT;
 
-  array_append(STACK, v1);
+  stack_push(STACK, v1);
   value_free(v2);
 }
 
 void stemsin(value_t *v) {
-  value_t *v1 = array_pop(STACK);
+  value_t *v1 = stack_pop(STACK);
   if (v1 == NULL) {
     eval_error("EMPTY STACK");
     return;
   }
   if (v1->type != VINT && v1->type != VFLOAT) {
-    array_append(STACK, v1);
+    stack_push(STACK, v1);
     eval_error("INVALID TYPE ARGUMENT");
   }
   v1->int_float = sinl(v1->int_float);
-  array_append(STACK, v1);
+  stack_push(STACK, v1);
 }
 
 void stemcos(value_t *v) {
-  value_t *v1 = array_pop(STACK);
+  value_t *v1 = stack_pop(STACK);
   if (v1 == NULL) {
     eval_error("EMPTY STACK");
     return;
   }
   if (v1->type != VINT && v1->type != VFLOAT) {
-    array_append(STACK, v1);
+    stack_push(STACK, v1);
     eval_error("INVALID TYPE ARGUMENT");
   }
   v1->int_float = cosl(v1->int_float);
-  array_append(STACK, v1);
+  stack_push(STACK, v1);
 }
 
 void stemexp(value_t *v) {
-  value_t *v1 = array_pop(STACK);
+  value_t *v1 = stack_pop(STACK);
   if (v1 == NULL) {
     eval_error("EMPTY STACK");
     return;
   }
   if (v1->type != VINT && v1->type != VFLOAT) {
-    array_append(STACK, v1);
+    stack_push(STACK, v1);
     eval_error("INVALID TYPE ARGUMENT");
   }
   v1->int_float = expl(v1->int_float);
-  array_append(STACK, v1);
+  stack_push(STACK, v1);
 }
 
 void stemln(value_t *v) {
-  value_t *v1 = array_pop(STACK);
+  value_t *v1 = stack_pop(STACK);
   if (v1 == NULL) {
     eval_error("EMPTY STACK");
     return;
   }
   if (v1->type != VINT && v1->type != VFLOAT) {
-    array_append(STACK, v1);
+    stack_push(STACK, v1);
     eval_error("INVALID TYPE ARGUMENT");
   }
   v1->int_float = logl(v1->int_float);
-  array_append(STACK, v1);
+  stack_push(STACK, v1);
 }
 
 void stemceil(value_t *v) {
-  value_t *v1 = array_pop(STACK);
+  value_t *v1 = stack_pop(STACK);
   if (v1 == NULL) {
     eval_error("EMPTY STACK");
     return;
   }
   if (v1->type != VINT && v1->type != VFLOAT) {
-    array_append(STACK, v1);
+    stack_push(STACK, v1);
     eval_error("INVALID TYPE ARGUMENT");
   }
   v1->int_float = ceil(v1->int_float);
-  array_append(STACK, v1);
+  stack_push(STACK, v1);
 }
 
 void stemfloor(value_t *v) {
-  value_t *v1 = array_pop(STACK);
+  value_t *v1 = stack_pop(STACK);
   if (v1 == NULL) {
     eval_error("EMPTY STACK");
     return;
   }
   if (v1->type != VINT && v1->type != VFLOAT) {
-    array_append(STACK, v1);
+    stack_push(STACK, v1);
     eval_error("INVALID TYPE ARGUMENT");
   }
   v1->int_float = floor(v1->int_float);
-  array_append(STACK, v1);
+  stack_push(STACK, v1);
 }
 
 void stemeval(value_t *v) {
-  value_t *v1 = array_pop(STACK);
+  value_t *v1 = stack_pop(STACK);
   if (v1 == NULL) {
     eval_error("EMPTY STACK");
     return;
   }
   if (v1->type == VQUOTE) {
-    array_append(EVAL_STACK, v1);
+    stack_push(EVAL_STACK, v1);
     for (int i = 0; i < v1->quote->size; i++) {
       eval(value_copy(v1->quote->items[i]));
     }
-    value_t *vf = array_pop(EVAL_STACK);
+    value_t *vf = stack_pop(EVAL_STACK);
     if (vf) {
       value_free(vf);
     }
@@ -408,40 +408,40 @@ void stemeval(value_t *v) {
 }
 
 void unglue(value_t *v) {
-  value_t *v1 = array_pop(STACK);
+  value_t *v1 = stack_pop(STACK);
   if (v1 == NULL) {
     eval_error("EMPTY STACK");
     return;
   }
   if (v1->type != VWORD) {
-    array_append(STACK, v1);
+    stack_push(STACK, v1);
     eval_error("EMPTY STACK");
     return;
   }
   value_t *value = ht_get(WORD_TABLE, v1->str_word);
   if (!value) {
-    array_append(STACK, v1);
+    stack_push(STACK, v1);
     eval_error("UNBOUND WORD");
     return;
   }
   value = value_copy(value);
-  array_append(STACK, value);
+  stack_push(STACK, value);
   value_free(v1);
 }
 
 void strquote(value_t *v) {
-  value_t *v1 = array_pop(STACK);
+  value_t *v1 = stack_pop(STACK);
   if (v1 == NULL) {
     eval_error("EMPTY STACK");
     return;
   }
   if (v1->type != VSTR) {
-    array_append(STACK, v1);
+    stack_push(STACK, v1);
     eval_error("INCORRECT TYPE ARGUMENT");
     return;
   }
   value_t *retval = init_value(VQUOTE);
-  retval->quote = init_array(10);
+  retval->quote = init_stack(10);
   char *s = malloc(strlen(v1->str_word->value) + 1);
   strcpy(s, v1->str_word->value);
   parser_t *p = parser_pp(s);
@@ -450,93 +450,93 @@ void strquote(value_t *v) {
     cur = parser_get_next(p);
     if (cur == NULL)
       break;
-    array_append(retval->quote, cur);
+    stack_push(retval->quote, cur);
   }
-  array_append(STACK, retval);
+  stack_push(STACK, retval);
   value_free(v1);
   free(p->source);
   free(p);
 }
 
 void curry(value_t *v) {
-  value_t *v2 = array_pop(STACK);
+  value_t *v2 = stack_pop(STACK);
   if (v2 == NULL) {
     eval_error("EMPTY STACK");
     return;
   }
-  value_t *v1 = array_pop(STACK);
+  value_t *v1 = stack_pop(STACK);
   if (v1 == NULL) {
-    array_append(STACK, v2);
+    stack_push(STACK, v2);
     eval_error("EMTPY STACK");
     return;
   }
 
   if (v2->type != VQUOTE) {
-    array_append(STACK, v1);
-    array_append(STACK, v2);
+    stack_push(STACK, v1);
+    stack_push(STACK, v2);
     eval_error("INCORRECT TYPE ARGUMENT");
     return;
   }
 
-  array_add(v2->quote, v1, 0);
-  array_append(STACK, v2);
+  stack_add(v2->quote, v1, 0);
+  stack_push(STACK, v2);
 }
 
 void steminsert(value_t *v) {
-  value_t *v3 = array_pop(STACK);
+  value_t *v3 = stack_pop(STACK);
   if (v3 == NULL) {
     eval_error("EMPTY STACK");
     return;
   }
-  value_t *v2 = array_pop(STACK);
+  value_t *v2 = stack_pop(STACK);
   if (v2 == NULL) {
-    array_append(STACK, v3);
+    stack_push(STACK, v3);
     eval_error("EMPTY STACK");
     return;
   }
-  value_t *v1 = array_pop(STACK);
+  value_t *v1 = stack_pop(STACK);
   if (v1 == NULL) {
-    array_append(STACK, v2);
-    array_append(STACK, v3);
+    stack_push(STACK, v2);
+    stack_push(STACK, v3);
     eval_error("EMTPY STACK");
     return;
   }
 
   if (v1->type != VINT) {
-    array_append(STACK, v1);
-    array_append(STACK, v2);
-    array_append(STACK, v3);
+    stack_push(STACK, v1);
+    stack_push(STACK, v2);
+    stack_push(STACK, v3);
     eval_error("INCORRECT TYPE ARGUMENT");
     return;
   }
 
   if (v3->type != VQUOTE) {
-    array_append(STACK, v1);
-    array_append(STACK, v2);
-    array_append(STACK, v3);
+    stack_push(STACK, v1);
+    stack_push(STACK, v2);
+    stack_push(STACK, v3);
     eval_error("INCORRECT TYPE ARGUMENT");
     return;
   }
   if (v1->int_float < 0 || v1->int_float >= v3->quote->size) {
-    array_append(STACK, v1);
-    array_append(STACK, v2);
-    array_append(STACK, v3);
+    stack_push(STACK, v1);
+    stack_push(STACK, v2);
+    stack_push(STACK, v3);
     eval_error("INDEX ERROR");
     return;
   }
 
-  array_add(v3->quote, v2, (int)v1->int_float);
-  array_append(STACK, v2);
+  stack_add(v3->quote, v2, (int)v1->int_float);
+  stack_push(STACK, v2);
 }
 
 void stemfread(value_t *v) {
-  value_t *v1 = array_pop(STACK);
+  value_t *v1 = stack_pop(STACK);
   if (v1 == NULL) {
     eval_error("EMPTY STACK");
     return;
   }
   if (v1->type != VSTR) {
-    array_append(STACK, v1);
+    stack_push(STACK, v1);
     eval_error("EMPTY STACK");
     return;
   }
@@ -544,7 +544,7 @@ void stemfread(value_t *v) {
   size_t len = 0;
   FILE *fp = fopen(v1->str_word->value, "rb");
   if (!fp) {
-    array_append(STACK, v1);
+    stack_push(STACK, v1);
     eval_error("FREAD ERROR");
     return;
   }
@@ -552,7 +552,7 @@ void stemfread(value_t *v) {
   fclose(fp);
   value_t *retval = init_value(VSTR);
   retval->str_word = init_string(val);
-  array_append(STACK, retval);
+  stack_push(STACK, retval);
   value_free(v1);
   free(val);
 }
@@ -561,36 +561,36 @@ void stemread(value_t *v) {
   value_t *retval = init_value(VSTR);
   char *a = get_line(stdin);
   retval->str_word = init_string(a);
-  array_append(STACK, retval);
+  stack_push(STACK, retval);
   free(a);
 }
 
 void stemexit(value_t *v) {
   ht_free(WORD_TABLE, value_free);
   ht_free(FLIT, func_free);
-  array_free(STACK);
+  stack_free(STACK);
   free(PARSER->source);
   free(PARSER);
-  array_free(EVAL_STACK);
+  stack_free(EVAL_STACK);
   ht_free(OBJ_TABLE, func_free);
   exit(0);
 }
 
 void quote(value_t *v) {
-  value_t *v1 = array_pop(STACK);
+  value_t *v1 = stack_pop(STACK);
   if (v1 == NULL) {
     eval_error("EMPTY STACK");
     return;
   }
 
   value_t *retval = init_value(VQUOTE);
-  retval->quote = init_array(10);
-  array_append(retval->quote, v1);
-  array_append(STACK, retval);
+  retval->quote = init_stack(10);
+  stack_push(retval->quote, v1);
+  stack_push(STACK, retval);
 }
 
 void stemtype(value_t *v) {
-  value_t *v1 = array_pop(STACK);
+  value_t *v1 = stack_pop(STACK);
   if (v1 == NULL) {
     eval_error("EMPTY STACK");
     return;
@@ -598,12 +598,12 @@ void stemtype(value_t *v) {
 
   value_t *retval = init_value(VINT);
   retval->int_float = v1->type;
-  array_append(STACK, v1);
-  array_append(STACK, retval);
+  stack_push(STACK, v1);
+  stack_push(STACK, retval);
 }
 
 void dsc(value_t *v) {
-  value_t *v1 = array_pop(STACK);
+  value_t *v1 = stack_pop(STACK);
   if (v1 == NULL) {
     eval_error("EMPTY STACK");
     return;
@@ -613,23 +613,23 @@ void dsc(value_t *v) {
 }
 
 void swap(value_t *v) {
-  value_t *v2 = array_pop(STACK);
+  value_t *v2 = stack_pop(STACK);
   if (v2 == NULL) {
     eval_error("EMPTY STACK");
     return;
   }
-  value_t *v1 = array_pop(STACK);
+  value_t *v1 = stack_pop(STACK);
   if (v1 == NULL) {
-    array_append(STACK, v2);
+    stack_push(STACK, v2);
     eval_error("EMPTY STACK");
     return;
   }
-  array_append(STACK, v2);
-  array_append(STACK, v1);
+  stack_push(STACK, v2);
+  stack_push(STACK, v1);
 }
 
 void isdef(value_t *v) {
-  value_t *v1 = array_pop(STACK);
+  value_t *v1 = stack_pop(STACK);
   if (v1 == NULL) {
     eval_error("EMPTY STACK");
     return;
@@ -641,20 +641,20 @@ void isdef(value_t *v) {
   } else {
     retval->int_float = ht_exists(WORD_TABLE, v1->str_word);
   }
-  array_append(STACK, v1);
-  array_append(STACK, retval);
+  stack_push(STACK, v1);
+  stack_push(STACK, retval);
 }
 
 void stemdup(value_t *v) {
-  value_t *v1 = array_pop(STACK);
+  value_t *v1 = stack_pop(STACK);
   if (v1 == NULL) {
     eval_error("EMPTY STACK");
     return;
   }
 
   value_t *retval = value_copy(v1);
-  array_append(STACK, v1);
-  array_append(STACK, retval);
+  stack_push(STACK, v1);
+  stack_push(STACK, retval);
 }
 
 void questionmark(value_t *v) {
@@ -664,7 +664,7 @@ void questionmark(value_t *v) {
 }
 
 void period(value_t *v) {
-  value_t *v1 = array_pop(STACK);
+  value_t *v1 = stack_pop(STACK);
   if (v1 == NULL) {
     eval_error("EMPTY STACK");
     return;
@@ -674,7 +674,7 @@ void period(value_t *v) {
 }
 
 void stemlen(value_t *v) {
-  value_t *v1 = array_pop(STACK);
+  value_t *v1 = stack_pop(STACK);
   if (v1 == NULL) {
     eval_error("EMPTY STACK");
     return;
@@ -688,53 +688,53 @@ void stemlen(value_t *v) {
   } else if (v1->type == VQUOTE) {
     retval->int_float = v1->quote->size;
   }
-  array_append(STACK, v1);
-  array_append(STACK, retval);
+  stack_push(STACK, v1);
+  stack_push(STACK, retval);
 }
 
 void dip(value_t *v) {
-  value_t *v2 = array_pop(STACK);
+  value_t *v2 = stack_pop(STACK);
   if (v2 == NULL) {
     eval_error("EMPTY STACK");
     return;
   }
-  value_t *v1 = array_pop(STACK);
+  value_t *v1 = stack_pop(STACK);
   if (v1 == NULL) {
-    array_append(STACK, v2);
+    stack_push(STACK, v2);
     eval_error("EMPTY STACK");
     return;
   }
 
-  array_append(EVAL_STACK, v1);
+  stack_push(EVAL_STACK, v1);
   if (v2->type == VQUOTE) {
-    array_append(EVAL_STACK, v2);
+    stack_push(EVAL_STACK, v2);
     for (int i = 0; i < v2->quote->size; i++) {
       eval(value_copy(v2->quote->items[i]));
     }
-    value_free(array_pop(EVAL_STACK));
-    array_pop(EVAL_STACK);
+    value_free(stack_pop(EVAL_STACK));
+    stack_pop(EVAL_STACK);
   } else {
     eval(v2);
   }
-  array_append(STACK, v1);
+  stack_push(STACK, v1);
 }
 
 void del(value_t *v) {
-  value_t *v2 = array_pop(STACK);
+  value_t *v2 = stack_pop(STACK);
   if (v2 == NULL) {
     eval_error("EMPTY STACK");
     return;
   }
-  value_t *v1 = array_pop(STACK);
+  value_t *v1 = stack_pop(STACK);
   if (v1 == NULL) {
-    array_append(STACK, v2);
+    stack_push(STACK, v2);
     eval_error("EMPTY STACK");
     return;
   }
 
   if (v2->type != VINT) {
-    array_append(STACK, v1);
-    array_append(STACK, v2);
+    stack_push(STACK, v1);
+    stack_push(STACK, v2);
     eval_error("INCORRECT TYPE ARGUMENT");
     return;
   }
@@ -753,36 +753,36 @@ void del(value_t *v) {
 
 void clear(value_t *v) {
   while (STACK->size != 0) {
-    value_t *v1 = array_pop(STACK);
+    value_t *v1 = stack_pop(STACK);
     value_free(v1);
   }
 }
 
 void stemif(value_t *v) {
-  value_t *v3 = array_pop(STACK);
+  value_t *v3 = stack_pop(STACK);
   if (v3 == NULL) {
     eval_error("EMPTY STACK");
     return;
   }
-  value_t *v2 = array_pop(STACK);
+  value_t *v2 = stack_pop(STACK);
   if (v2 == NULL) {
-    array_append(STACK, v3);
+    stack_push(STACK, v3);
     eval_error("EMPTY STACK");
     return;
   }
 
-  value_t *v1 = array_pop(STACK);
+  value_t *v1 = stack_pop(STACK);
   if (v1 == NULL) {
-    array_append(STACK, v2);
-    array_append(STACK, v3);
+    stack_push(STACK, v2);
+    stack_push(STACK, v3);
     eval_error("EMPTY STACK");
     return;
   }
 
   if (v1->type != VINT) {
-    array_append(STACK, v1);
-    array_append(STACK, v2);
-    array_append(STACK, v3);
+    stack_push(STACK, v1);
+    stack_push(STACK, v2);
+    stack_push(STACK, v3);
     eval_error("INCORRECT TYPE ARGUMENT");
     return;
   }
@@ -792,11 +792,11 @@ void stemif(value_t *v) {
     value_free(v1);
     if (v2->type == VQUOTE) {
 
-      array_append(EVAL_STACK, v2);
+      stack_push(EVAL_STACK, v2);
       for (int i = 0; i < v2->quote->size; i++) {
         eval(value_copy(v2->quote->items[i]));
       }
-      value_t *vf = array_pop(EVAL_STACK);
+      value_t *vf = stack_pop(EVAL_STACK);
       if (vf) {
         value_free(vf);
       }
@@ -807,11 +807,11 @@ void stemif(value_t *v) {
     value_free(v2);
     value_free(v1);
     if (v3->type == VQUOTE) {
-      array_append(EVAL_STACK, v3);
+      stack_push(EVAL_STACK, v3);
       for (int i = 0; i < v3->quote->size; i++) {
         eval(value_copy(v3->quote->items[i]));
       }
-      value_t *vf = array_pop(EVAL_STACK);
+      value_t *vf = stack_pop(EVAL_STACK);
       if (vf) {
         value_free(vf);
       }
@@ -822,14 +822,14 @@ void stemif(value_t *v) {
 }
 
 void gtequals(value_t *v) {
-  value_t *v2 = array_pop(STACK);
+  value_t *v2 = stack_pop(STACK);
   if (v2 == NULL) {
     eval_error("EMPTY STACK");
     return;
   }
-  value_t *v1 = array_pop(STACK);
+  value_t *v1 = stack_pop(STACK);
   if (v1 == NULL) {
-    array_append(STACK, v2);
+    stack_push(STACK, v2);
     eval_error("EMPTY STACK");
     return;
   }
@@ -842,25 +842,25 @@ void gtequals(value_t *v) {
              (v2->type == VINT || v2->type == VFLOAT)) {
     retval->int_float = v1->int_float >= v2->int_float;
   } else {
-    array_append(STACK, v1);
-    array_append(STACK, v2);
+    stack_push(STACK, v1);
+    stack_push(STACK, v2);
     eval_error("INCORRECT TYPE ARGUMENT");
     return;
   }
-  array_append(STACK, retval);
+  stack_push(STACK, retval);
   value_free(v1);
   value_free(v2);
 }
 
 void ltequals(value_t *v) {
-  value_t *v2 = array_pop(STACK);
+  value_t *v2 = stack_pop(STACK);
   if (v2 == NULL) {
     eval_error("EMPTY STACK");
     return;
   }
-  value_t *v1 = array_pop(STACK);
+  value_t *v1 = stack_pop(STACK);
   if (v1 == NULL) {
-    array_append(STACK, v2);
+    stack_push(STACK, v2);
     eval_error("EMPTY STACK");
     return;
   }
@@ -873,21 +873,21 @@ void ltequals(value_t *v) {
              (v2->type == VINT || v2->type == VFLOAT)) {
     retval->int_float = v1->int_float <= v2->int_float;
   } else {
-    array_append(STACK, v1);
-    array_append(STACK, v2);
+    stack_push(STACK, v1);
+    stack_push(STACK, v2);
     eval_error("INCORRECT TYPE ARGUMENT");
     return;
   }
-  array_append(STACK, retval);
+  stack_push(STACK, retval);
   value_free(v1);
   value_free(v2);
 }
 
 void clib(value_t *v) {
-  value_t *v1 = array_pop(STACK);
+  value_t *v1 = stack_pop(STACK);
   void *handle = dlopen(v1->str_word->value, RTLD_LAZY);
   if (!handle) {
-    array_append(STACK, v1);
+    stack_push(STACK, v1);
     eval_error("NOLIB");
     return;
   }
@@ -911,14 +911,14 @@ void clib(value_t *v) {
 }
 
 void gthan(value_t *v) {
-  value_t *v2 = array_pop(STACK);
+  value_t *v2 = stack_pop(STACK);
   if (v2 == NULL) {
     eval_error("EMPTY STACK");
     return;
   }
-  value_t *v1 = array_pop(STACK);
+  value_t *v1 = stack_pop(STACK);
   if (v1 == NULL) {
-    array_append(STACK, v2);
+    stack_push(STACK, v2);
     eval_error("EMPTY STACK");
     return;
   }
@@ -931,25 +931,25 @@ void gthan(value_t *v) {
              (v2->type == VINT || v2->type == VFLOAT)) {
     retval->int_float = v1->int_float > v2->int_float;
   } else {
-    array_append(STACK, v1);
-    array_append(STACK, v2);
+    stack_push(STACK, v1);
+    stack_push(STACK, v2);
     eval_error("INCORRECT TYPE ARGUMENT");
     return;
   }
-  array_append(STACK, retval);
+  stack_push(STACK, retval);
   value_free(v1);
   value_free(v2);
 }
 
 void lthan(value_t *v) {
-  value_t *v2 = array_pop(STACK);
+  value_t *v2 = stack_pop(STACK);
   if (v2 == NULL) {
     eval_error("EMPTY STACK");
     return;
   }
-  value_t *v1 = array_pop(STACK);
+  value_t *v1 = stack_pop(STACK);
   if (v1 == NULL) {
-    array_append(STACK, v2);
+    stack_push(STACK, v2);
     eval_error("EMPTY STACK");
     return;
   }
@@ -962,25 +962,25 @@ void lthan(value_t *v) {
              (v2->type == VINT || v2->type == VFLOAT)) {
     retval->int_float = v1->int_float < v2->int_float;
   } else {
-    array_append(STACK, v1);
-    array_append(STACK, v2);
+    stack_push(STACK, v1);
+    stack_push(STACK, v2);
     eval_error("INCORRECT TYPE ARGUMENT");
     return;
   }
-  array_append(STACK, retval);
+  stack_push(STACK, retval);
   value_free(v1);
   value_free(v2);
 }
 
 void equals(value_t *v) {
-  value_t *v2 = array_pop(STACK);
+  value_t *v2 = stack_pop(STACK);
   if (v2 == NULL) {
     eval_error("EMPTY STACK");
     return;
   }
-  value_t *v1 = array_pop(STACK);
+  value_t *v1 = stack_pop(STACK);
   if (v1 == NULL) {
-    array_append(STACK, v2);
+    stack_push(STACK, v2);
     eval_error("EMPTY STACK");
     return;
   }
@@ -993,25 +993,25 @@ void equals(value_t *v) {
              (v2->type == VINT || v2->type == VFLOAT)) {
     retval->int_float = v1->int_float == v2->int_float;
   } else {
-    array_append(STACK, v1);
-    array_append(STACK, v2);
+    stack_push(STACK, v1);
+    stack_push(STACK, v2);
     eval_error("INCORRECT TYPE ARGUMENT");
     return;
   }
-  array_append(STACK, retval);
+  stack_push(STACK, retval);
   value_free(v1);
   value_free(v2);
 }
 
 void nequals(value_t *v) {
-  value_t *v2 = array_pop(STACK);
+  value_t *v2 = stack_pop(STACK);
   if (v2 == NULL) {
     eval_error("EMPTY STACK");
     return;
   }
-  value_t *v1 = array_pop(STACK);
+  value_t *v1 = stack_pop(STACK);
   if (v1 == NULL) {
-    array_append(STACK, v2);
+    stack_push(STACK, v2);
     eval_error("EMPTY STACK");
     return;
   }
@@ -1024,25 +1024,25 @@ void nequals(value_t *v) {
              (v2->type == VINT || v2->type == VFLOAT)) {
     retval->int_float = v1->int_float != v2->int_float;
   } else {
-    array_append(STACK, v1);
-    array_append(STACK, v2);
+    stack_push(STACK, v1);
+    stack_push(STACK, v2);
     eval_error("INCORRECT TYPE ARGUMENT");
     return;
   }
-  array_append(STACK, retval);
+  stack_push(STACK, retval);
   value_free(v1);
   value_free(v2);
 }
 
 void compose(value_t *v) {
-  value_t *v2 = array_pop(STACK);
+  value_t *v2 = stack_pop(STACK);
   if (v2 == NULL) {
     eval_error("EMPTY STACK");
     return;
   }
-  value_t *v1 = array_pop(STACK);
+  value_t *v1 = stack_pop(STACK);
   if (v1 == NULL) {
-    array_append(STACK, v2);
+    stack_push(STACK, v2);
     eval_error("EMPTY STACK");
     return;
   }
@@ -1062,21 +1062,21 @@ void compose(value_t *v) {
     value_free(v2);
   } else if (v2->type == VQUOTE && v1->type == VQUOTE) {
     retval = v1;
-    array_extend(v1->quote, v2->quote);
+    stack_extend(v1->quote, v2->quote);
     free(v2->quote->items);
     free(v2->quote);
     free(v2);
   } else {
-    array_append(STACK, v1);
-    array_append(STACK, v2);
+    stack_push(STACK, v1);
+    stack_push(STACK, v2);
     eval_error("INCORRECT TYPE ARGUMENT");
     return;
   }
-  array_append(STACK, retval);
+  stack_push(STACK, retval);
 }
 
 void isnum(value_t *v) {
-  value_t *v1 = array_pop(STACK);
+  value_t *v1 = stack_pop(STACK);
   if (v1 == NULL) {
     eval_error("EMPTY STACK");
     return;
@@ -1095,12 +1095,12 @@ void isnum(value_t *v) {
   }
   retval->int_float = isnum;
 
-  array_append(STACK, v1);
-  array_append(STACK, retval);
+  stack_push(STACK, v1);
+  stack_push(STACK, retval);
 }
 
 void stoi(value_t *v) {
-  value_t *v1 = array_pop(STACK);
+  value_t *v1 = stack_pop(STACK);
   if (v1 == NULL) {
     eval_error("EMPTY STACK");
     return;
@@ -1108,56 +1108,56 @@ void stoi(value_t *v) {
 
   value_t *retval = init_value(VINT);
   retval->int_float = atoi(v1->str_word->value);
-  array_append(STACK, retval);
+  stack_push(STACK, retval);
   value_free(v1);
 }
 
 void ssize(value_t *v) {
   value_t *retval = init_value(VINT);
   retval->int_float = STACK->size;
-  array_append(STACK, retval);
+  stack_push(STACK, retval);
 }
 
 void qstack(value_t *v) {
   value_t *retval = init_value(VQUOTE);
-  retval->quote = array_copy(STACK);
-  array_append(STACK, retval);
+  retval->quote = stack_copy(STACK);
+  stack_push(STACK, retval);
 }
 
 void vat(value_t *v) {
   value_t *retval;
-  value_t *v2 = array_pop(STACK);
+  value_t *v2 = stack_pop(STACK);
   if (v2 == NULL) {
     eval_error("EMTPY STACK");
     return;
   }
-  value_t *v1 = array_pop(STACK);
+  value_t *v1 = stack_pop(STACK);
   if (v1 == NULL) {
-    array_append(STACK, v2);
+    stack_push(STACK, v2);
     eval_error("EMTPY STACK");
     return;
   }
 
   if (v1->type != VINT) {
-    array_append(STACK, v1);
-    array_append(STACK, v2);
+    stack_push(STACK, v1);
+    stack_push(STACK, v2);
     eval_error("INCORRECT TYPE ARGUMENT");
     return;
   }
   if (v2->type == VQUOTE) {
     if (v2->quote->size <= v1->int_float || v1->int_float < 0) {
-      array_append(STACK, v1);
-      array_append(STACK, v2);
+      stack_push(STACK, v1);
+      stack_push(STACK, v2);
       eval_error("INDEX ERROR");
       return;
     }
-    array_append(STACK, v2);
-    array_append(STACK, value_copy(v2->quote->items[(int)v1->int_float]));
+    stack_push(STACK, v2);
+    stack_push(STACK, value_copy(v2->quote->items[(int)v1->int_float]));
     value_free(v1);
   } else if (v2->type == VSTR || v2->type == VWORD) {
     if (v2->str_word->length <= v1->int_float || v1->int_float < 0) {
-      array_append(STACK, v1);
-      array_append(STACK, v2);
+      stack_push(STACK, v1);
+      stack_push(STACK, v2);
       eval_error("INDEX ERROR");
       return;
     }
@@ -1169,25 +1169,25 @@ void vat(value_t *v) {
       retval = init_value(VSTR);
     }
     retval->str_word = s;
-    array_append(STACK, v2);
-    array_append(STACK, retval);
+    stack_push(STACK, v2);
+    stack_push(STACK, retval);
     value_free(v1);
   } else {
-    array_append(STACK, v1);
-    array_append(STACK, v2);
+    stack_push(STACK, v1);
+    stack_push(STACK, v2);
     eval_error("INCORRECT TYPE ARGUMENT");
     return;
   }
 }
 
 void stemfwrite(value_t *v) {
-  value_t *v1 = array_pop(STACK);
+  value_t *v1 = stack_pop(STACK);
   if (v1 == NULL) {
     eval_error("EMPTY STACK");
     return;
   }
   if (v1->type != VSTR) {
-    array_append(STACK, v1);
+    stack_push(STACK, v1);
     eval_error("EMPTY STACK");
     return;
   }
@@ -1195,7 +1195,7 @@ void stemfwrite(value_t *v) {
   size_t len;
   FILE *fp = fopen(v1->str_word->value, "w+");
   if (!fp) {
-    array_append(STACK, v1);
+    stack_push(STACK, v1);
     eval_error("FOPEN ERROR");
     return;
   }
@@ -1205,13 +1205,13 @@ void stemfwrite(value_t *v) {
 }
 
 void stemsleep(value_t *v) {
-  value_t *v1 = array_pop(STACK);
+  value_t *v1 = stack_pop(STACK);
   if (v1 == NULL) {
     eval_error("EMPTY STACK");
     return;
   }
   if (v1->type != VINT && v1->type != VFLOAT) {
-    array_append(STACK, v1);
+    stack_push(STACK, v1);
     eval_error("INCORRECT TYPE ARGUMENT");
     return;
   }
@@ -1221,22 +1221,22 @@ void stemsleep(value_t *v) {
 }
 
 void stemcut(value_t *v) {
-  value_t *v1 = array_pop(STACK);
+  value_t *v1 = stack_pop(STACK);
   value_t *r1;
   value_t *r2;
   if (v1 == NULL) {
     eval_error("EMPTY STACK");
     return;
   }
-  value_t *v2 = array_pop(STACK);
+  value_t *v2 = stack_pop(STACK);
   if (v2 == NULL) {
-    array_append(STACK, v1);
+    stack_push(STACK, v1);
     eval_error("EMPTY STACK");
     return;
   }
   if (v1->type != VINT) {
-    array_append(STACK, v1);
-    array_append(STACK, v2);
+    stack_push(STACK, v1);
+    stack_push(STACK, v2);
     eval_error("INCORRECT TYPE ARGUMENT");
     return;
   }
@@ -1244,8 +1244,8 @@ void stemcut(value_t *v) {
   case VWORD:
   case VSTR:
     if (v1->int_float >= v2->str_word->length || v1->int_float < 0) {
-      array_append(STACK, v1);
-      array_append(STACK, v2);
+      stack_push(STACK, v1);
+      stack_push(STACK, v2);
       eval_error("INDEX ERROR");
       return;
     }
@@ -1268,20 +1268,20 @@ void stemcut(value_t *v) {
     break;
   case VQUOTE:
     if (v1->int_float >= v2->quote->size || v1->int_float < 0) {
-      array_append(STACK, v1);
-      array_append(STACK, v2);
+      stack_push(STACK, v1);
+      stack_push(STACK, v2);
       eval_error("INDEX ERROR");
       return;
     }
     r1 = init_value(VQUOTE);
-    r1->quote = init_array(10);
+    r1->quote = init_stack(10);
     r2 = init_value(VQUOTE);
-    r2->quote = init_array(10);
+    r2->quote = init_stack(10);
     for (int i = 0; i < v1->int_float + 1; i++) {
-      array_append(r1->quote, v2->quote->items[i]);
+      stack_push(r1->quote, v2->quote->items[i]);
     }
     for (int i = v1->int_float + 1; i < v2->quote->size; i++) {
-      array_append(r2->quote, v2->quote->items[i]);
+      stack_push(r2->quote, v2->quote->items[i]);
     }
     /* [ a b c ] 1 cut => [ a ] [ b c ] */
     free(v2->quote->items);
@@ -1289,24 +1289,24 @@ void stemcut(value_t *v) {
     free(v2);
     break;
   default:
-    array_append(STACK, v2);
-    array_append(STACK, v1);
+    stack_push(STACK, v2);
+    stack_push(STACK, v1);
     eval_error("INCORRECT TYPE ARGUMENT");
     return;
   }
-  array_append(STACK, r1);
-  array_append(STACK, r2);
+  stack_push(STACK, r1);
+  stack_push(STACK, r2);
   value_free(v1);
 }
 
 void undef(value_t *v) {
-  value_t *v1 = array_pop(STACK);
+  value_t *v1 = stack_pop(STACK);
   if (v1 == NULL) {
     eval_error("EMPTY STACK");
     return;
   }
   if (v1->type != VWORD) {
-    array_append(STACK, v1);
+    stack_push(STACK, v1);
     eval_error("INCORRECT TYPE ARGUMENT");
     return;
   }
@@ -1316,7 +1316,7 @@ void undef(value_t *v) {
 }
 
 void tostr(value_t *v) {
-  value_t *v1 = array_pop(STACK);
+  value_t *v1 = stack_pop(STACK);
   if (v1 == NULL) {
     eval_error("EMPTY STACK");
     return;
@@ -1324,20 +1324,20 @@ void tostr(value_t *v) {
   if (v1->type == VERR || v1->type == VWORD)
     v1->type = VSTR;
   else {
-    array_append(STACK, v1);
+    stack_push(STACK, v1);
     eval_error("INVALID TYPE ARGUMENT");
   }
-  array_append(STACK, v1);
+  stack_push(STACK, v1);
 }
 
 void include(value_t *v) {
-  value_t *v1 = array_pop(STACK);
+  value_t *v1 = stack_pop(STACK);
   if (v1 == NULL) {
     eval_error("EMPTY STACK");
     return;
   }
   if (v1->type != VSTR) {
-    array_append(STACK, v1);
+    stack_push(STACK, v1);
     eval_error("EMPTY STACK");
     return;
   }
@@ -1348,7 +1348,7 @@ void include(value_t *v) {
   FILE *fp = fopen(strval->value, "rb");
   string_free(strval);
   if (!fp) {
-    array_append(STACK, v1);
+    stack_push(STACK, v1);
     eval_error("FREAD ERROR");
     return;
   }
@@ -1356,34 +1356,34 @@ void include(value_t *v) {
   fclose(fp);
 
   value_t *retval = init_value(VQUOTE);
-  retval->quote = init_array(10);
+  retval->quote = init_stack(10);
   parser_t *p = parser_pp(val);
   value_t *cur;
   while (1) {
     cur = parser_get_next(p);
     if (cur == NULL)
       break;
-    array_append(retval->quote, cur);
+    stack_push(retval->quote, cur);
   }
-  array_append(STACK, retval);
+  stack_push(STACK, retval);
   value_free(v1);
   free(p->source);
   free(p);
 }
 
 void uncurry(value_t *v) {
-  value_t *v1 = array_pop(STACK);
+  value_t *v1 = stack_pop(STACK);
   if (v1 == NULL) {
     eval_error("EMPTY STACK");
     return;
   }
   if (v1->type != VQUOTE) {
-    array_append(STACK, v1);
+    stack_push(STACK, v1);
     eval_error("EMPTY STACK");
     return;
   }
   if (v1->quote->size <= 0) {
-    array_append(STACK, v1);
+    stack_push(STACK, v1);
     eval_error("INDEX ERROR");
     return;
   }
@@ -1392,8 +1392,8 @@ void uncurry(value_t *v) {
     v1->quote->items[i - 1] = v1->quote->items[i];
   }
   v1->quote->size--;
-  array_append(STACK, v1);
-  array_append(STACK, retval);
+  stack_push(STACK, v1);
+  stack_push(STACK, retval);
 }
 
 void add_objs() {}
