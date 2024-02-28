@@ -496,18 +496,39 @@ bool isfalias(value_t *v) {
   return false;
 }
 
-stack_t *expandword(stack_t *s) {
-  contain_t *cur = stack_peek(STACK);
-  for (int i = 0; i < s->size; i++) {
-    if (ht_exists(cur->flit, s->items[i])) {
-      return NULL;
-    }
-    if (ht_exists(cur->word_table, s->items[i])) {
-      value_t *v = ht_get(cur->word_table, s->items[i]);
-      stack_t *subword = v->container->stack;
+// need to check 's's flit and word table before cur
+// can make a faster expandword() that doesn't copy hashtables
+
+int expandonce(contain_t *s, contain_t *cur) {
+  if (ht_exists(cur->flit, s->items[i])) {
+    contain_push(s, s->items[i]);
+    free(s->items[i]);
+    return 0;
+  } else if {
+    value_t *v = ht_get(cur->word_table, s->items[i]);
+    if (v) {
+      contain_t *subword = v->container;
       /* expandword needs to check for faliases */
+      int stacklen = substack->size;
+      for (int i = 0; i < stacklen; i++) {
+        contain_compose(s, subword); // write stack_compose(stack_t *a, stack_t *b)
+        free(s->items[i]);
+      }
     }
+    return 0;
   }
+  return 1;
+}
+void expandword(contain_t *s) {
+  contain_t *cur = stack_peek(STACK);
+  int stacklen = s->stack->size;
+  for (int i = 0; i < s->stack->size; i++) {
+    if (expandonce(s, s))
+      if (expandonce(s, cur))
+        // quote word and push to s, free(s->items[i])
+  }
+  s->stack->items += stacklen;
+  s->stack->size -= stacklen;
 }
 
 void evalf() {
@@ -515,7 +536,7 @@ void evalf() {
   stack_t *stack = cur->stack;
   value_t *v = stack_pop(cur->stack);
   for (int i = 0; i < v->container->stack->size; i++) {
-  }
+  } // should this just be evalstack(v)?
 }
 
 void *func_copy(void *funcs) { return NULL; }
@@ -539,7 +560,7 @@ void evalstack(value_t *v) {
     value_t *newval = v->container->stack->items[i];
     switch (newval->type) {
     case VWORD:
-      /* put word in stack, call expandword and then eval whatever is expanded
+      /* put word in container, call expandword and then eval whatever is expanded
        */
       break;
     case VSTACK:
