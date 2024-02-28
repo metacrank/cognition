@@ -496,7 +496,7 @@ bool isfalias(value_t *v) {
   return false;
 }
 
-void expandword(contain_t *c, stack_t *new, contain_t *cur) { // *cur = stack_peek(STACK)
+void expandstack(contain_t *c, stack_t *new, contain_t *cur) { // *cur = stack_peek(STACK)
   stack_t *subword = c->stack;
   int stacklen = subword->size;
   for (int i = 0; i < stacklen; i++) {
@@ -517,12 +517,27 @@ void expandword(contain_t *c, stack_t *new, contain_t *cur) { // *cur = stack_pe
   }
 }
 
+stack_t *expandword(value_t *v) {
+  contain_t *cur = stack_peek(STACK);
+  stack_t *new = init_stack(0);
+  if (ht_exists(cur->flit, v)) {
+    new = /* some object */;
+  } else if (v = ht_get(cur->word_table, v)) {
+    expandstack(new, expandword(v, new, c));
+  } else if (isfalias(subword->items[i])) {
+    new = /* evalf object */;
+  } else {
+    // push quoted word
+  }
+  return new;
+}
+
 void evalf() {
   contain_t *cur = stack_peek(STACK);
   stack_t *stack = cur->stack;
   value_t *v = stack_pop(cur->stack);
   for (int i = 0; i < v->container->stack->size; i++) {
-  } // should this just be evalstack(v)?
+  }
 }
 
 void *func_copy(void *funcs) { return NULL; }
@@ -548,6 +563,8 @@ void evalstack(value_t *v) {
     case VWORD:
       /* put word in container, call expandword and then eval whatever is expanded
        */
+      stack_t *v = expandword(newval);
+      eval(v);
       break;
     case VSTACK:
       /* push to top of stack stack stack */
