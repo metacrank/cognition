@@ -572,6 +572,6 @@ void eval(value_t *v) {
   if (cindex >= 0) {
     int fixedindex = cur->stack->size - 1 - cindex;
     value_t *needseval = stack_popdeep(cur->stack, fixedindex);
-    evalstack(needseval); // previously evalstack(v)
+    evalstack(needseval);
   }
 }
