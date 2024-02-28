@@ -502,17 +502,17 @@ bool isfalias(value_t *v) {
 int expandonce(contain_t *s, contain_t *cur) {
   if (ht_exists(cur->flit, s->items[i])) {
     contain_push(s, s->items[i]);
-    free(s->items[i]);
+    value_free(s->items[i]);
     return 0;
   } else if {
     value_t *v = ht_get(cur->word_table, s->items[i]);
     if (v) {
       contain_t *subword = v->container;
       /* expandword needs to check for faliases */
-      int stacklen = substack->size;
+      int stacklen = subword->stack->size;
       for (int i = 0; i < stacklen; i++) {
         contain_compose(s, subword); // write stack_compose(stack_t *a, stack_t *b)
-        free(s->items[i]);
+        value_free(s->items[i]);
       }
     }
     return 0;
@@ -522,14 +522,43 @@ int expandonce(contain_t *s, contain_t *cur) {
 void expandword(contain_t *s) {
   contain_t *cur = stack_peek(STACK);
   int stacklen = s->stack->size;
-  for (int i = 0; i < s->stack->size; i++) {
+  for (int i = 0; i < stacklen; i++) {
     if (expandonce(s, s))
       if (expandonce(s, cur))
-        // quote word and push to s, free(s->items[i])
+        // quote word and push to s, value_free(s->items[i])
+        value_free(s->items[i])
   }
   s->stack->items += stacklen;
   s->stack->size -= stacklen;
 }
+
+
+void expandword(contain_t *c, contain_t *cur) { // *cur = stack_peek(STACK)
+  stack_t *subword = c->stack;
+  int stacklen = subword->size;
+  for (int i = 0; i < stacklen; i++) {
+    // if in c flit
+    if (c->stack->)
+    // push word
+    // else if in c word table
+    // compose expandword(ht_get(c->word_table, c->items[i]), c)
+    // else if in cur flit
+    // push word
+    // else if in cur word table
+    // compose expandword(ht_get(cur->word_table, c->items[i]), cur)
+    // else
+    // push quoted word
+
+    // free original item
+    value_free(subword->items[i])
+  }
+  subword->items += stacklen;
+  subword->size -= stacklen;
+}
+
+
+
+
 
 void evalf() {
   contain_t *cur = stack_peek(STACK);
