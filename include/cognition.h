@@ -34,7 +34,7 @@ struct VALUE_STRUCT {
     long double int_float;
     /*! @brief A quote is an stack of more values, which can contain more
      * quotes. */
-    contain_t *quote;
+    contain_t *container;
     /*! @brief this holds the string value of a string, word, or the name of a
      * custom type. */
     string_t *str_word;
@@ -113,18 +113,18 @@ struct CONTAINER_STRUCT {
   ht_t *word_table;
   /*! @brief foreign language interface table */
   ht_t *flit;
-  /*! @brief table of objects loaded in by foreign language interface table */
-  ht_t *obj_table;
-  /*! @brief list of crank cycles */
-  int (*cranks)[2];
-  /*! @brief crank size */
-  size_t crank_size;
+  /*! @brief crank array */
+  stack_t *cranks;
   /*! @brief The list of delimiter characters */
   string_t *delims;
+  /*! @brief false is delimiter blacklist */
+  bool dflag;
   /*! @brief aliases for evalf */
   stack_t *faliases;
   /*! @brief list of ignored characters */
   string_t *ignored;
+  /* @brief false is ignored blacklist */
+  bool iflag;
 };
 
 /*! Useless function that is only used in order to be passed into a hash table.
@@ -135,7 +135,7 @@ void func_free(void *f);
 stack_t *init_stack(size_t size);
 
 /*! pushes element to back of stack */
-void stack_push(stack_t *a, value_t *v);
+void stack_push(stack_t *a, void *v);
 
 /*! add element to stack at index */
 void stack_add(stack_t *a, value_t *v, int index);
@@ -150,7 +150,7 @@ void *stack_copy(void *a, void *(*copyfunc)(void *));
 void stack_extend(stack_t *a1, stack_t *a2);
 
 /*! Free stack and all value_t elements. */
-void stack_free(stack_t *a, void (*freefunc)(void *));
+void stack_free(void *a, void (*freefunc)(void *));
 
 /*! Allocates memory for new value_t. */
 value_t *init_value(int type);
@@ -177,7 +177,10 @@ void add_obj(ht_t *h, ht_t *h2, void (*printfunc)(void *),
              void (*createfunc)(void *), char *key);
 
 /*! Allocates memory for new container */
-contain_t *init_contain(ht_t *h, ht_t *flit, ht_t *ot, int (*crank)[2]);
+contain_t *init_contain(ht_t *h, ht_t *flit, stack_t *cranks);
+
+/* Copies container structure */
+contain_t *contain_copy(contain_t *c, void *(*copyfunc)(void *));
 
 /*! Allocates memory for new container */
 void contain_free(void *);
@@ -199,6 +202,9 @@ value_t *parser_get_next(parser_t *p);
 /*! Allocates memory for new node struct. */
 node_t *init_node(string_t *key, void *v);
 
+/*! Deep copy of sll node */
+node_t *node_copy(node_t *n, void *(*copyfunc)(void *));
+
 /*! Frees node */
 void node_free(node_t *n, void (*freefunc)(void *));
 
@@ -214,6 +220,9 @@ void *sll_get(sll_t *l, string_t *key);
 
 /*! deletes item from singly linked list */
 void sll_delete(sll_t *l, string_t *k, void (*freefunc)(void *));
+
+/*! deep copy of singly linked list */
+sll_t *sll_copy(sll_t *l, void *(*copyfunc)(void *));
 
 /*! Frees singly linked list */
 void sll_free(sll_t *l, void (*freefunc)(void *));
@@ -234,19 +243,16 @@ void ht_delete(ht_t *h, string_t *key, void (*freefunc)(void *));
 /*! returns true if key exists in hash table. false otherwise */
 bool ht_exists(ht_t *h, string_t *key);
 
+/*! deep copy of hash table */
+ht_t *ht_copy(ht_t *h, void *(*copyfunc)(void *));
+
 /*! Frees hash table */
 void ht_free(ht_t *h, void (*freefunc)(void *));
 
 /*! hashes key into integer for hash table */
 unsigned long hash(ht_t *h, char *key);
 
-/*! returns true if word found in FLIT table, and then executes that function */
-bool eval_builtins(value_t *v);
-
-/*! returns true if word found in WORD_TABLE, and then executes that function */
-bool eval_ht(value_t *v);
-
 /*! Evaluates a value returned by the parser. */
-void eval(parser_t *p, value_t *v);
+void eval(value_t *v);
 
 #endif // PARSER_H_

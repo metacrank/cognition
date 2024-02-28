@@ -1,4 +1,4 @@
-#include "better_string.h"
+#include <better_string.h>
 #include <cognition.h>
 #include <ctype.h>
 #include <macros.h>
@@ -11,6 +11,8 @@
 /* Global variables defined */
 stack_t *STACK;
 stack_t *EVAL_STACK;
+ht_t *OBJ_TABLE;
+parser_t *PARSER;
 
 void func_free(void *f) {}
 
@@ -26,7 +28,7 @@ stack_t *init_stack(size_t size) {
   return a;
 }
 
-void stack_push(stack_t *a, value_t *v) {
+void stack_push(stack_t *a, void *v) {
   if (a->size >= a->capacity - 2) {
     a->capacity = a->capacity * 2;
     a->items = realloc(a->items, a->capacity * sizeof(value_t *));
@@ -45,6 +47,16 @@ void stack_add(stack_t *a, value_t *v, int index) {
   }
   a->items[index] = v;
   a->size++;
+}
+
+void *stack_popdeep(stack_t *a, int index) {
+  if (index >= a->size)
+    return NULL;
+  void *retval = a->items[index];
+  for (int i = index; i < a->size; i++) {
+    a->items[i] = a->items[i + 1];
+  }
+  return retval;
 }
 
 void *stack_pop(stack_t *a) {
@@ -115,9 +127,9 @@ void *value_copy(void *v) {
     a->str_word = string_copy(v1->str_word);
     a->escaped = v1->escaped;
   } else if (v1->type == VSTACK) {
-    a->quote = stack_copy(v1->quote, value_copy);
+    a->container = contain_copy(v1->container, value_copy);
   } else if (v1->type == VCUSTOM) {
-    ht_t *ot = container->obj_table;
+    ht_t *ot = OBJ_TABLE;
     custom_t *c = ht_get(ot, a->str_word);
     a->custom = c->copyfunc(v1->custom);
     a->str_word = string_copy(v1->str_word);
@@ -134,10 +146,10 @@ void value_free(void *vtmp) {
     string_free(v->str_word);
   }
   if (v->type == VSTACK) {
-    contain_free(v->quote);
+    contain_free(v->container);
   }
   if (v->type == VCUSTOM) {
-    void (*freefunc)(void *) = ht_get(c->obj_table, v->str_word);
+    void (*freefunc)(void *) = ht_get(OBJ_TABLE, v->str_word);
     freefunc(v->custom);
   }
   free(v);
@@ -186,7 +198,6 @@ contain_t *init_container(ht_t *h, ht_t *flit, ht_t *ot, int (*cranks)[2],
 void contain_free(void *con) {
   contain_t *c = con;
   ht_free(c->word_table, value_free);
-  ht_free(c->obj_table, custom_free);
   ht_free(c->flit, func_free);
   stack_free(c->stack, value_free);
   stack_free(c->err_stack, value_free);
@@ -234,14 +245,7 @@ void parser_move(parser_t *p) {
   }
 }
 
-bool isdelim(parser_t *p) {
-  for (int i = 0; i < p->delims->length; i++) {
-    if (p->delims->value[i] == p->c) {
-      return true;
-    }
-  }
-  return false;
-}
+bool isdelim(parser_t *p) { contain_t *c = stack_pop(STACK); }
 
 value_t *parse_word(parser_t *p) {
   string_t *strval = init_string(NULL);
@@ -255,9 +259,21 @@ value_t *parse_word(parser_t *p) {
 }
 
 bool isignore(parser_t *p) {
-  for (int i = 0; i < p->ignored->length; i++) {
-    if (p->ignored->value[i] == p->c)
-      return true;
+  contain_t *c = stack_pop(STACK);
+  if (c->iflag) {
+    for (int i = 0; i < c->ignored->length; i++) {
+      if (c->ignored->value[i] == p->c) {
+        return true;
+      }
+      return false;
+    }
+  } else {
+    for (int i = 0; i < c->ignored->length; i++) {
+      if (c->ignored->value[i] != p->c) {
+        return false;
+      }
+    }
+    return true;
   }
   return false;
 }
@@ -288,6 +304,13 @@ node_t *init_node(string_t *key, void *value) {
   n->value = value;
   n->next = NULL;
   return n;
+}
+
+node_t *node_copy(node_t *n, void *(*copyfunc)(void *)) {
+  if (!n)
+    return NULL;
+  node_t *nn = init_node(string_copy(n->key), copyfunc(n->value));
+  return nn;
 }
 
 void node_free(node_t *n, void (*freefunc)(void *)) {
@@ -365,6 +388,18 @@ void sll_delete(sll_t *l, string_t *k, void (*freefunc)(void *)) {
   }
 }
 
+sll_t *sll_copy(sll_t *l, void *(*copyfunc)(void *)) {
+  sll_t *list = init_sll();
+  list->head = node_copy(l->head, copyfunc);
+  node_t *nn = list->head;
+  node_t *n = l->head;
+  while (n) {
+    nn = node_copy(n->next, copyfunc);
+    n = n->next;
+    nn = nn->next;
+  }
+}
+
 void sll_free(sll_t *l, void (*func)(void *)) {
   node_t *cur = l->head;
   node_t *tmp;
@@ -388,6 +423,16 @@ ht_t *init_ht(size_t size) {
     h->buckets[i] = init_sll();
   }
   return h;
+}
+
+ht_t *ht_copy(ht_t *h, void *(*copyfunc)(void *)) {
+  ht_t *ht = calloc(1, sizeof(ht_t));
+  ht->buckets = calloc(h->size, sizeof(sll_t *));
+  for (int i = 0; i < h->size; i++) {
+    ht->buckets[i] = sll_copy(h->buckets[i], copyfunc);
+  }
+  ht->size = h->size;
+  return ht;
 }
 
 void ht_add(ht_t *h, string_t *key, void *v, void (*freefunc)(void *)) {
@@ -429,85 +474,97 @@ unsigned long hash(ht_t *h, char *key) {
   return hash % h->size;
 }
 
-bool eval_ht(value_t *v) {
-  contain_t *cur = stack_peek(STACK);
-  value_t *func = ht_get(cur->word_table, v->str_word);
-  if (func == NULL)
-    return false;
-  value_free(v);
-  if (func->type == VSTACK) {
-    for (int i = 0; i < func->quote->size; i++) {
-      eval(value_copy(func->quote->items[i]));
-    }
-  } else {
-    eval(value_copy(func));
-  }
-  return true;
-}
-
-bool eval_builtins(value_t *v) {
-  contain_t *cur = stack_peek(STACK);
-  void (*func)(value_t *) = ht_get(cur->flit, v->str_word);
-  if (func == NULL)
-    return false;
-  stack_push(EVAL_STACK, v);
-  func(v);
-  stack_pop(EVAL_STACK);
-  value_free(v);
-  return true;
-}
-
 void inc_crank() {
   contain_t *cur = stack_peek(STACK);
-  int(*cranks)[2] = cur->cranks;
-  for (int i = 0; i < cur->crank_size; i++) {
-    cranks[i][0]++;
-    if (cranks[i][0] >= cranks[i][1]) {
-      cranks[i][0] = 0;
+  void **defcranks = cur->cranks->items;
+  int(*crank)[2];
+  for (int i = 0; i < cur->cranks->size; i++) {
+    crank = defcranks[i];
+    crank[0][0]++;
+    if (crank[0][0] >= crank[0][1]) {
+      crank[0][0] = 0;
     }
   }
 }
 
 bool isfalias(value_t *v) {
   contain_t *c = stack_peek(STACK);
-  for (int i = 0; i < c->falias_size; i++) {
-    if (strcmp(c->faliases[i]->value, v->str_word->value) == 0)
+  for (int i = 0; i < c->faliases->size; i++) {
+    if (strcmp(c->faliases->items[i], v->str_word->value) == 0)
       return true;
   }
   return false;
+}
+
+stack_t *expandword(stack_t *s) {
+  contain_t *cur = stack_peek(STACK);
+  for (int i = 0; i < s->size; i++) {
+    if (ht_exists(cur->flit, s->items[i])) {
+      return NULL;
+    }
+    if (ht_exists(cur->word_table, s->items[i])) {
+      value_t *v = ht_get(cur->word_table, s->items[i]);
+      stack_t *subword = v->container->stack;
+      /* expandword needs to check for faliases */
+    }
+  }
 }
 
 void evalf() {
   contain_t *cur = stack_peek(STACK);
   stack_t *stack = cur->stack;
   value_t *v = stack_pop(cur->stack);
-  for (int i = 0; i < v->quote->stack->size; i++) {
+  for (int i = 0; i < v->container->stack->size; i++) {
   }
 }
 
-void eval(parser_t *p, value_t *v) {
+void *func_copy(void *funcs) { return NULL; }
+
+void *cranks_copy(void *cranks) {}
+
+void contain_push(contain_t *c, value_t *v) {
+  contain_t *contain = init_contain(ht_copy(c->word_table, value_copy),
+                                    ht_copy(c->flit, func_copy),
+                                    stack_copy(c->cranks, cranks_copy));
+  value_t *container = init_value(VSTACK);
+  container->container = contain;
+  stack_push(contain->stack, v);
+  contain_t *otherc = stack_peek(STACK);
+  stack_push(otherc->stack, container);
+}
+
+void evalstack(value_t *v) {
+  for (int i = 0; i < v->container->stack->size; i++) {
+    value_t *newval = v->container->stack->items[i];
+    switch (newval->type) {
+    case VWORD:
+      /* put word in stack, call expandword and then eval whatever is expanded
+       */
+      break;
+    case VSTACK:
+      /* push to top of stack stack stack */
+      break;
+    default:
+      printf("whoops\n");
+    }
+  }
+}
+
+void eval(value_t *v) {
   contain_t *cur = stack_peek(STACK);
-  switch (v->type) {
-  case VINT:
-  case VFLOAT:
-  case VSTACK:
-  case VERR:
-  case VCUSTOM:
-    stack_push(cur->stack, v);
-    break;
-  case VWORD:
-    inc_crank();
-    if (isfalias(v)) {
-      value_free(v);
+  int cindex = -1;
+  int(*crank)[2];
+  for (int i = 0; i < cur->cranks->size; i++) {
+    crank = cur->cranks->items[i];
+    if (*crank[0] == 0) {
+      cindex = i;
+      break;
     }
-    if (0) {
-      stack_push(cur->stack, v);
-    } else {
-      if (!eval_builtins(v)) {
-        if (!eval_ht(v)) {
-          stack_push(cur->stack, v);
-        }
-      }
-    }
+  }
+  contain_push(cur, v);
+  if (cindex >= 0) {
+    int fixedindex = cur->stack->size - 1 - cindex;
+    value_t *needseval = stack_popdeep(cur->stack, fixedindex);
+    evalstack(v);
   }
 }

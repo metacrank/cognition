@@ -1,18 +1,15 @@
 #include <builtins.h>
+#include <cognition.h>
 #include <dlfcn.h>
-#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stem.h>
 #include <string.h>
 #include <unistd.h>
 
-extern ht_t *WORD_TABLE;
-extern array_t *STACK;
+extern stack_t *STACK;
 extern parser_t *PARSER;
-extern array_t *EVAL_STACK;
+extern stack_t *EVAL_STACK;
 extern ht_t *OBJ_TABLE;
-extern ht_t *FLIT;
 
 /*! prints usage then exits */
 void usage() {
@@ -30,20 +27,10 @@ void version() {
 /*! frees all global variables */
 void global_free() {
   free(PARSER->source);
-  ht_free(WORD_TABLE, value_free);
-  ht_free(FLIT, func_free);
   ht_free(OBJ_TABLE, custom_free);
-  array_free(STACK);
+  stack_free(STACK);
   free(PARSER);
-  array_free(EVAL_STACK);
-}
-
-/*! handles SIGINT signal; frees memory before exit */
-void sigint_handler(int signum) {
-  signal(SIGINT, sigint_handler);
-  global_free();
-  fflush(stdout);
-  exit(1);
+  stack_free(EVAL_STACK);
 }
 
 int main(int argc, char **argv) {
@@ -74,14 +61,11 @@ int main(int argc, char **argv) {
 
   /* Set up global variables */
   PARSER = parser_pp(buf);
-  STACK = init_array(10);
-  WORD_TABLE = init_ht(500);
-  EVAL_STACK = init_array(10);
-  FLIT = init_ht(500);
+  STACK = init_stack(10);
+  EVAL_STACK = init_stack(10);
   OBJ_TABLE = init_ht(500);
 
   add_funcs();
-  signal(SIGINT, sigint_handler);
 
   /* parse and eval loop */
   while (1) {
