@@ -496,69 +496,26 @@ bool isfalias(value_t *v) {
   return false;
 }
 
-// need to check 's's flit and word table before cur
-// can make a faster expandword() that doesn't copy hashtables
-
-int expandonce(contain_t *s, contain_t *cur) {
-  if (ht_exists(cur->flit, s->items[i])) {
-    contain_push(s, s->items[i]);
-    value_free(s->items[i]);
-    return 0;
-  } else if {
-    value_t *v = ht_get(cur->word_table, s->items[i]);
-    if (v) {
-      contain_t *subword = v->container;
-      /* expandword needs to check for faliases */
-      int stacklen = subword->stack->size;
-      for (int i = 0; i < stacklen; i++) {
-        contain_compose(s, subword); // write stack_compose(stack_t *a, stack_t *b)
-        value_free(s->items[i]);
-      }
-    }
-    return 0;
-  }
-  return 1;
-}
-void expandword(contain_t *s) {
-  contain_t *cur = stack_peek(STACK);
-  int stacklen = s->stack->size;
-  for (int i = 0; i < stacklen; i++) {
-    if (expandonce(s, s))
-      if (expandonce(s, cur))
-        // quote word and push to s, value_free(s->items[i])
-        value_free(s->items[i])
-  }
-  s->stack->items += stacklen;
-  s->stack->size -= stacklen;
-}
-
-
-void expandword(contain_t *c, contain_t *cur) { // *cur = stack_peek(STACK)
+void expandword(contain_t *c, stack_t *new, contain_t *cur) { // *cur = stack_peek(STACK)
   stack_t *subword = c->stack;
   int stacklen = subword->size;
   for (int i = 0; i < stacklen; i++) {
-    // if in c flit
-    if (c->stack->)
-    // push word
-    // else if in c word table
-    // compose expandword(ht_get(c->word_table, c->items[i]), c)
-    // else if in cur flit
-    // push word
-    // else if in cur word table
-    // compose expandword(ht_get(cur->word_table, c->items[i]), cur)
-    // else
-    // push quoted word
-
-    // free original item
-    value_free(subword->items[i])
+    value_t *v;
+    if (ht_exists(c->flit, subword->items[i])) {
+      contain_push(new, /* custom object */);
+    } else if (v = ht_get(c->word_table, subword->items[i])) {
+      contain_compose(new, expandword(v, new, c));
+    } else if (v = ht_get(cur->flit, subword->items[i])) {
+      contain_push(new, /* custom object */);
+    } else if (v = ht_get(cur->word_table, subword->items[i])) {
+      contain_compose(new, expandword(v, new, cur));
+    } else if (isfalias(subword->items[i])) {
+      contain_push(new, /* evalf object */);
+    } else {
+      // push quoted word
+    }
   }
-  subword->items += stacklen;
-  subword->size -= stacklen;
 }
-
-
-
-
 
 void evalf() {
   contain_t *cur = stack_peek(STACK);
