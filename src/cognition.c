@@ -522,8 +522,8 @@ stack_t *expandword(value_t *v) {
   stack_t *new = init_stack(0);
   if (ht_exists(cur->flit, v)) {
     new = /* some object */;
-  } else if (v = ht_get(cur->word_table, v)) {
-    expandstack(new, expandword(v, new, c));
+  } else if (contain_t *newv = ht_get(cur->word_table, v)) {
+    expandstack(new, expandword(newv, new, c));
   } else if (isfalias(subword->items[i])) {
     new = /* evalf object */;
   } else {
