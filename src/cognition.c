@@ -552,6 +552,13 @@ void evalstack(value_t *v) {
 
 void eval(value_t *v) {
   contain_t *cur = stack_peek(STACK);
+  if (isfalias(v)) {
+    if (cur->cranks->items->[1][0]) {
+      value_t* needseval = stack_pop(cur->stack);
+      evalstack(needseval);
+    }
+    return;
+  }
   int cindex = -1;
   int(*crank)[2];
   for (int i = 0; i < cur->cranks->size; i++) {
@@ -565,6 +572,6 @@ void eval(value_t *v) {
   if (cindex >= 0) {
     int fixedindex = cur->stack->size - 1 - cindex;
     value_t *needseval = stack_popdeep(cur->stack, fixedindex);
-    evalstack(v);
+    evalstack(needseval); // previously evalstack(v)
   }
 }
