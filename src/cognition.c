@@ -533,6 +533,7 @@ void contain_push(contain_t *c, value_t *v) {
   stack_push(otherc->stack, container);
 }
 
+// add falias support
 void evalstack(value_t *v) {
   for (int i = 0; i < v->container->stack->size; i++) {
     value_t *newval = v->container->stack->items[i];
@@ -554,8 +555,7 @@ void eval(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   if (isfalias(v)) {
     if (cur->cranks->items->[1][0]) {
-      value_t* needseval = stack_pop(cur->stack);
-      evalstack(needseval);
+      evalf();
     }
     return;
   }
