@@ -252,6 +252,18 @@ void ht_free(ht_t *h, void (*freefunc)(void *));
 /*! hashes key into integer for hash table */
 unsigned long hash(ht_t *h, char *key);
 
+/* pushes a value to a container */
+void contain_push(containt_t *c, value_t *v);
+
+/* recursively evaluates a stack, with cranking */
+void evalstack(contain_t *c, contain_t *parent);
+
+/* expands and recursively evaluates a word value, with cranking */
+void evalword(value_t *v, contain_t *parent, contain_t *parent, contain_t *gparent);
+
+/* performs one crank */
+void crank();
+
 /*! Evaluates a value returned by the parser. */
 void eval(value_t *v);
 

@@ -496,41 +496,42 @@ bool isfalias(value_t *v) {
   return false;
 }
 
-void expandstack(contain_t *c, stack_t *new, contain_t *cur) { // *cur = stack_peek(STACK)
-  stack_t *subword = c->stack;
-  int stacklen = subword->size;
-  for (int i = 0; i < stacklen; i++) {
-    value_t *v;
-    if (ht_exists(c->flit, subword->items[i])) {
-      contain_push(new, /* custom object */);
-    } else if (v = ht_get(c->word_table, subword->items[i])) {
-      contain_compose(new, expandword(v, new, c));
-    } else if (v = ht_get(cur->flit, subword->items[i])) {
-      contain_push(new, /* custom object */);
-    } else if (v = ht_get(cur->word_table, subword->items[i])) {
-      contain_compose(new, expandword(v, new, cur));
-    } else if (isfalias(subword->items[i])) {
-      contain_push(new, /* evalf object */);
-    } else {
-      // push quoted word
-    }
-  }
-}
+/* void expandstack(contain_t *c, stack_t *new, contain_t *cur) { // *cur = stack_peek(STACK) */
+/*   stack_t *subword = c->stack; */
+/*   int stacklen = subword->size; */
+/*   for (int i = 0; i < stacklen; i++) { */
+/*     value_t *v; */
+/*     if (ht_exists(c->flit, subword->items[i])) { */
+/*       contain_push(new, /\* custom object *\/); */
+/*     } else if ((v = ht_get(c->word_table, subword->items[i]))) { */
+/*       contain_compose(new, expandword(v, new, c)); */
+/*     } else if ((v = ht_get(cur->flit, subword->items[i]))) { */
+/*       contain_push(new, /\* custom object *\/); */
+/*     } else if ((v = ht_get(cur->word_table, subword->items[i]))) { */
+/*       contain_compose(new, expandword(v, new, cur)); */
+/*     } else if (isfalias(subword->items[i])) { */
+/*       contain_push(new, /\* evalf object *\/); */
+/*     } else { */
+/*       // push quoted word */
+/*     } */
+/*   } */
+/* } */
 
-stack_t *expandword(value_t *v) {
-  contain_t *cur = stack_peek(STACK);
-  stack_t *new = init_stack(0);
-  if (ht_exists(cur->flit, v)) {
-    new = /* some object */;
-  } else if (contain_t *newv = ht_get(cur->word_table, v)) {
-    expandstack(new, expandword(newv, new, c));
-  } else if (isfalias(subword->items[i])) {
-    new = /* evalf object */;
-  } else {
-    // push quoted word
-  }
-  return new;
-}
+/* stack_t *expandword(value_t *v) { */
+/*   contain_t *cur = stack_peek(STACK); */
+/*   stack_t *new = init_stack(0); */
+/*   contain_t *newv; */
+/*   if (ht_exists(cur->flit, v)) { */
+/*     new = /\* some object *\/; */
+/*   } else if ((newv = ht_get(cur->word_table, v))) { */
+/*     expandstack(new, expandword(newv, new, c)); */
+/*   } else if (isfalias(subword->items[i])) { */
+/*     new = /\* evalf object *\/; */
+/*   } else { */
+/*     // push quoted word */
+/*   } */
+/*   return new; */
+/* } */
 
 void evalf() {
   contain_t *cur = stack_peek(STACK);
