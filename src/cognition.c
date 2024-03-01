@@ -555,16 +555,12 @@ void contain_push(contain_t *c, value_t *v) {
   stack_push(otherc->stack, container);
 }
 
-// add falias support
-void evalstack(value_t *v) {
-  for (int i = 0; i < v->container->stack->size; i++) {
-    value_t *newval = v->container->stack->items[i];
+void evalstack(contain_t *c, contain_t *parent) {
+  for (int i = 0; i < c->stack->size; i++) {
+    value_t *newval = c->stack->items[i];
     switch (newval->type) {
     case VWORD:
-      /* put word in container, call expandword and then eval whatever is expanded
-       */
-      stack_t *v = expandword(newval);
-      eval(v);
+      evalword(newval, c, parent);
       break;
     case VSTACK:
       /* push to top of stack stack stack */
@@ -575,14 +571,29 @@ void evalstack(value_t *v) {
   }
 }
 
-void eval(value_t *v) {
-  contain_t *cur = stack_peek(STACK);
-  if (isfalias(v)) {
-    if (cur->cranks->items->[1][0]) {
-      evalf();
-    }
-    return;
+// replace isfalias(v) with checks for faliases in v's parent stack?
+void evalword(value_t *v, contain_t *parent, contain_t *gparent) {
+  contain_t *expand;
+  if (ht_exists(parent->flit, v)) {
+    // apply macro to STACK
+    crank();
+  } else if (expand = ht_get(parent->word_table, v)) {
+    evalstack(expand, parent);
+  } else if (temp = ht_get(gparent->flit, v)) {
+    // apply macro to STACK
+    crank();
+  } else if (expand = ht_get(gparent->word_table, v)) {
+    evalstack(expand, parent);
+  } else if (isfalias(v)) {
+    evalf();
+  } else {
+    // push quoted word inheriting parent's flit and word table
+    crank();
   }
+}
+
+void crank() {
+  contain_t *cur = stack_peek(STACK);
   int cindex = -1;
   int(*crank)[2];
   for (int i = 0; i < cur->cranks->size; i++) {
@@ -592,10 +603,43 @@ void eval(value_t *v) {
       break;
     }
   }
-  contain_push(cur, v);
   if (cindex >= 0) {
     int fixedindex = cur->stack->size - 1 - cindex;
     value_t *needseval = stack_popdeep(cur->stack, fixedindex);
-    evalstack(needseval);
+    evalstack(needseval, cur);
   }
+  inc_crank();
+}
+
+void eval(value_t *v) {
+  contain_t *cur = stack_peek(STACK);
+  if (isfalias(v)) {
+    if (cur->cranks->items[1][0]) {
+      evalf();
+    }
+    return;
+  }
+  contain_push(cur, v);
+  crank();
+  /* if (isfalias(v)) { */
+  /*   if (cur->cranks->items[1][0]) { *
+  /*     evalf(); */
+  /*   } */
+  /*   return; */
+  /* } */
+  /* int cindex = -1; */
+  /* int(*crank)[2]; */
+  /* for (int i = 0; i < cur->cranks->size; i++) { */
+  /*   crank = cur->cranks->items[i]; */
+  /*   if (*crank[0] == 0) { */
+  /*     cindex = i; */
+  /*     break; */
+  /*   } */
+  /* } */
+  /* if (cindex >= 0) { */
+  /*   int fixedindex = cur->stack->size - 1 - cindex; */
+  /*   value_t *needseval = stack_popdeep(cur->stack, fixedindex); */
+  /*   evalstack(needseval, cur); */
+  /* } */
+  /* inc_crank(); */
 }
