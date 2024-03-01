@@ -557,6 +557,7 @@ void contain_push(contain_t *c, value_t *v) {
 }
 
 void evalstack(contain_t *c, contain_t *parent) {
+  contain_t *cur = stack_peek(STACK);
   for (int i = 0; i < c->stack->size; i++) {
     value_t *newval = c->stack->items[i];
     switch (newval->type) {
@@ -564,7 +565,8 @@ void evalstack(contain_t *c, contain_t *parent) {
       evalword(newval, c, parent);
       break;
     case VSTACK:
-      /* push to top of stack stack stack */
+      contain_push(cur, newval);
+      crank();
       break;
     default:
       printf("whoops\n");
@@ -575,15 +577,15 @@ void evalstack(contain_t *c, contain_t *parent) {
 // replace isfalias(v) with checks for faliases in v's parent stack?
 void evalword(value_t *v, contain_t *parent, contain_t *gparent) {
   contain_t *expand;
-  if (ht_exists(parent->flit, v)) {
+  if (ht_exists(parent->flit, v->str_word)) {
     // apply macro to STACK
     crank();
-  } else if (expand = ht_get(parent->word_table, v)) {
+  } else if ((expand = ht_get(parent->word_table, v->str_word))) {
     evalstack(expand, parent);
-  } else if (temp = ht_get(gparent->flit, v)) {
+  } else if (ht_exists(gparent->flit, v->str_word)) {
     // apply macro to STACK
     crank();
-  } else if (expand = ht_get(gparent->word_table, v)) {
+  } else if ((expand = ht_get(gparent->word_table, v->str_word))) {
     evalstack(expand, parent);
   } else if (isfalias(v)) {
     evalf();
