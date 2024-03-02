@@ -583,24 +583,55 @@ void contain_push(contain_t *c, value_t *v) {
   stack_push(otherc->stack, container);
 }
 
+void push_quoted(contain_t *cur, value_t *v) {
+  q = init_value(VSTACK);
+  q->container = init_contain(init_ht(0), init_ht(0), init_stack(0));
+  contain_push(q->container, v);
+  contain_push(cur, q);
+}
+
 void evalstack(contain_t *c, contain_t *parent) {
   contain_t *cur = stack_peek(STACK);
+  value_t *q;
   for (int i = 0; i < c->stack->size; i++) {
     value_t *newval = c->stack->items[i];
     switch (newval->type) {
-    case VWORD:
-      evalword(newval, c, parent);
-      break;
-    case VSTACK:
-      contain_push(cur, newval);
-      crank();
-      break;
-    default:
-      value_t *q = init_value(VSTACK);
-      q->container = init_contain(init_ht(0), init_ht(0), init_stack(0));
-      contain_push(q->container, newval);
-      contain_push(cur, q);
-      crank();
+      case VWORD:
+        evalword(newval, c, parent);
+        break;
+      case VSTACK:
+        contain_push(cur, newval);
+        crank();
+        break;
+      /* case VCLIB: */
+      /*   ((void(*)())(newval->custom))(); */
+      /*   crank(); */
+      /*   break; */
+      default:
+        push_quoted(cur, newval);
+        crank();
+    }
+  }
+}
+
+void evalmacro(stack_t *macro) {
+  contain_t *cur = stack_peek(STACK);
+  value_t *v;
+  value_t *q;
+  for (int i = 0; i < macro->size; i++) {
+    v = macro->items[i];e
+    switch (v->type) {
+      case VCLIB:
+        ((void(*)())(v->custom))();
+        break;
+      case VSTACK:
+        contain_push(cur, v);
+        break;
+      case VWORD:
+        evalword(v, cur, cur);
+        break;
+      default:
+        push_quoted(cur, v);
     }
   }
 }
@@ -608,24 +639,21 @@ void evalstack(contain_t *c, contain_t *parent) {
 // replace isfalias(v) with checks for faliases in v's all parent stacks?
 void evalword(value_t *v, contain_t *parent, contain_t *gparent) {
   contain_t *expand;
-  if (ht_exists(parent->flit, v->str_word)) {
-    // apply macro to STACK
+  stack_t *macro;
+  if ((macro = ht_get(parent->flit, v->str_word))) {
+    evalmacro(macro);
     crank();
   } else if ((expand = ht_get(parent->word_table, v->str_word))) {
     evalstack(expand, parent);
-  } else if (ht_exists(gparent->flit, v->str_word)) {
-    // apply macro to STACK
+  } else if ((macro = ht_get(gparent->flit, v->str_word))) {
+    evalmacro(macro);
     crank();
   } else if ((expand = ht_get(gparent->word_table, v->str_word))) {
     evalstack(expand, parent);
   } else if (isfalias(v)) {
     evalf();
   } else {
-    // push quoted word inheriting nothing
-    value_t *q = init_value(VSTACK);
-    q->container = init_contain(init_ht(0), init_ht(0), init_stack(0));
-    contain_push(q->container, v);
-    contain_push(stack_peek(STACK), q);
+    push_quoted(stack_peek(STACK), v);
     crank();
   }
 }

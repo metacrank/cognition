@@ -19,7 +19,7 @@ struct STACK_STRUCT {
   size_t capacity;
 };
 
-/*! @brief holds a string, int, float, word, or quote, as well as custom
+/*! @brief holds a string, int, float, stack, or function pointer, as well as custom
  * datatypes. */
 /*! VCUSTOM allows for definitions of custom structs, where the name of such a
  *custom data structure is to be held in str_word, and the actual custom struct
@@ -27,7 +27,7 @@ struct STACK_STRUCT {
  *functions in order for the builtin functions to remain memory safe. */
 struct VALUE_STRUCT {
   /*! @brief Enum that defines different types within the language. */
-  enum { VWORD, VINT, VFLOAT, VSTACK, VERR, VCUSTOM } type;
+  enum { VWORD, VINT, VFLOAT, VSTACK, VERR, VCUSTOM, VCLIB } type;
   union {
     /*! @brief floats and ints in this language are to be stored in this
      * variable. */
@@ -39,7 +39,7 @@ struct VALUE_STRUCT {
      * custom type. */
     string_t *str_word;
   };
-  /*! @brief this variable holds the value of a custom type. */
+  /*! @brief this variable holds the value of a custom type, or clib function pointer. */
   void *custom;
   /*! @brief only to be used with values of type word */
   /*! This variable tells the evaluator if the word in question needs to be
