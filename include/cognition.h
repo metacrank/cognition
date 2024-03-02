@@ -161,6 +161,9 @@ void *value_copy(void *v);
 /*! Frees value struct */
 void value_free(void *v);
 
+/* Gets the custom object table referencing the current root stack */
+ht_t *ot_get();
+
 /*! Allocates memory for new custom_t */
 custom_t *init_custom(void (*)(void *), void (*)(void *), void *(*)(void *));
 

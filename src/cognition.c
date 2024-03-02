@@ -11,7 +11,8 @@
 /* Global variables defined */
 stack_t *STACK;
 stack_t *EVAL_STACK;
-ht_t *OBJ_TABLE;
+stack_t *OBJ_STACK; // stack of tuples of: pointer to 'root' stack, ht_t*
+//ht_t *OBJ_TABLE;
 parser_t *PARSER;
 
 void func_free(void *f) {}
@@ -129,7 +130,7 @@ void *value_copy(void *v) {
   } else if (v1->type == VSTACK) {
     a->container = contain_copy(v1->container, value_copy);
   } else if (v1->type == VCUSTOM) {
-    ht_t *ot = OBJ_TABLE;
+    ht_t *ot = ot_get();
     custom_t *c = ht_get(ot, a->str_word);
     a->custom = c->copyfunc(v1->custom);
     a->str_word = string_copy(v1->str_word);
@@ -149,10 +150,28 @@ void value_free(void *vtmp) {
     contain_free(v->container);
   }
   if (v->type == VCUSTOM) {
-    void (*freefunc)(void *) = ht_get(OBJ_TABLE, v->str_word);
+    void (*freefunc)(void *) = ht_get(ot_get(), v->str_word);
     freefunc(v->custom);
   }
   free(v);
+}
+
+ht_t *ot_get() {
+  if (STACK->size > 0) {
+    contain_t *root = STACK->items[0];
+    void *(entry)[2];
+    contain_t *ref;
+    ht_t *ot;
+    for (int i = 0; i < OBJ_STACK->size; i++) {
+      entry = OBJ_STACK->items[i];
+      ref = entry[0];
+      if (ref == root) {
+        ot = entry[1];
+        return ot;
+      }
+    }
+  }
+  return NULL;
 }
 
 custom_t *init_custom(void (*printfunc)(void *), void (*freefunc)(void *),
@@ -487,9 +506,17 @@ void inc_crank() {
   }
 }
 
+bool isfaliasin(contain_t *c, value_t *v) {
+  for (int i = 0; i < c->faliases->size; i++) {
+    if (strcmp(c->faliases->items[i], v->str_word->value) == 0)
+      return true;
+  }
+  return false;
+}
+
 bool isfalias(value_t *v) {
   contain_t *c = stack_peek(STACK);
-  for (int i = 0; i < c->faliases->size; i++) {
+  for (int i = 0; i < c->faliases->size; i++) { /* isfaliasin(c, v); */
     if (strcmp(c->faliases->items[i], v->str_word->value) == 0)
       return true;
   }
@@ -569,12 +596,16 @@ void evalstack(contain_t *c, contain_t *parent) {
       crank();
       break;
     default:
-      printf("whoops\n");
+      value_t *q = init_value(VSTACK);
+      q->container = init_contain(init_ht(0), init_ht(0), init_stack(0));
+      contain_push(q->container, newval);
+      contain_push(cur, q);
+      crank();
     }
   }
 }
 
-// replace isfalias(v) with checks for faliases in v's parent stack?
+// replace isfalias(v) with checks for faliases in v's all parent stacks?
 void evalword(value_t *v, contain_t *parent, contain_t *gparent) {
   contain_t *expand;
   if (ht_exists(parent->flit, v->str_word)) {
@@ -590,7 +621,11 @@ void evalword(value_t *v, contain_t *parent, contain_t *gparent) {
   } else if (isfalias(v)) {
     evalf();
   } else {
-    // push quoted word inheriting parent's flit and word table
+    // push quoted word inheriting nothing
+    value_t *q = init_value(VSTACK);
+    q->container = init_contain(init_ht(0), init_ht(0), init_stack(0));
+    contain_push(q->container, v);
+    contain_push(stack_peek(STACK), q);
     crank();
   }
 }

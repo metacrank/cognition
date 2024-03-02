@@ -9,7 +9,9 @@
 extern stack_t *STACK;
 extern parser_t *PARSER;
 extern stack_t *EVAL_STACK;
-extern ht_t *OBJ_TABLE;
+//extern ht_t *OBJ_TABLE;
+extern stack_t *OBJ_STACK;
+extern ht_t *DEFAULT_FLIT;
 
 /*! prints usage then exits */
 void usage() {
@@ -27,10 +29,12 @@ void version() {
 /*! frees all global variables */
 void global_free() {
   free(PARSER->source);
-  ht_free(OBJ_TABLE, custom_free);
+  //ht_free(OBJ_TABLE, custom_free);
+  stack_free(OBJ_STACK);
   stack_free(STACK);
   free(PARSER);
   stack_free(EVAL_STACK);
+  ht_free(DEFAULT_FLIT)
 }
 
 int main(int argc, char **argv) {
@@ -63,9 +67,17 @@ int main(int argc, char **argv) {
   PARSER = parser_pp(buf);
   STACK = init_stack(10);
   EVAL_STACK = init_stack(10);
-  OBJ_TABLE = init_ht(500);
+  OBJ_STACK = init_stack(10);
 
-  add_funcs();
+  // flit is has entries of stacks of tuples: enum { VAL, FUNC }, value_t
+  // or it's just value_t, and custom values get custom = funcptr
+
+  /* initialise environment */
+  contain_t *stack = init_contain(init_ht(500), init_ht(500), init_stack(10));
+  add_funcs(stack->flit);
+  stack_push(STACK, stack);
+  void *(ot)[] = {stack, init_ht(10)};
+  stack_push(OBJ_STACK, ot);
 
   /* parse and eval loop */
   while (1) {
