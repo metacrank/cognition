@@ -274,10 +274,13 @@ void contain_push(contain_t *c, value_t *v);
 void push_quoted(contain_t *cur, value_t *v);
 
 /* recursively evaluates a stack, with cranking */
-void evalstack(contain_t *c, contain_t *parent);
+void evalstack(contain_t *c, stack_t *family);
+
+/* recursively evaluates a flit macro without cranking */
+void evalmacro(stack_t *macro, stack_t *family);
 
 /* expands and recursively evaluates a word value, with cranking */
-void evalword(value_t *v, contain_t *parent, contain_t *gparent);
+void evalword(value_t *v, stack_t *family);
 
 /* performs one crank */
 void crank();

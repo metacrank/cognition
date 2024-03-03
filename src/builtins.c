@@ -1,13 +1,23 @@
 #include <builtins.h>
-#include <builtins/combinators.h>
-#include <builtins/cranker.h>
-#include <builtins/hashtable.h>
-#include <builtins/io.h>
-#include <builtins/math.h>
-#include <builtins/metastack.h>
-#include <builtins/misc.h>
-#include <builtins/parser.h>
-#include <builtins/stackops.h>
+/* #include <builtins/combinators.h> */
+/* #include <builtins/cranker.h> */
+/* #include <builtins/hashtable.h> */
+/* #include <builtins/io.h> */
+/* #include <builtins/math.h> */
+/* #include <builtins/metastack.h> */
+/* #include <builtins/misc.h> */
+/* #include <builtins/parser.h> */
+/* #include <builtins/stackops.h> */
+
+#include <combinators.h>
+#include <cranker.h>
+#include <hashtable.h>
+#include <io.h>
+#include <math.h>
+#include <metastack.h>
+#include <misc.h>
+#include <parser.h>
+#include <stackops.h>
 
 extern stack_t *STACK;
 

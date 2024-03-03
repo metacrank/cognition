@@ -167,14 +167,14 @@ void value_free(void *vtmp) {
 ht_t *ot_get() {
   if (STACK->size > 0) {
     contain_t *root = STACK->items[0];
-    void *(entry)[2];
     contain_t *ref;
     ht_t *ot;
+    void *(*entry)[2];
     for (int i = 0; i < OBJ_STACK->size; i++) {
       entry = OBJ_STACK->items[i];
-      ref = entry[0];
+      ref = *entry[0];
       if (ref == root) {
-        ot = entry[1];
+        ot = *entry[1];
         return ot;
       }
     }
@@ -544,7 +544,7 @@ void inc_crank() {
     crank[0][0]++;
     if (crank[0][0] >= crank[0][1]) {
       crank[0][0] = 0;
-    }func
+    }
   }
 }
 
@@ -604,10 +604,10 @@ bool isfalias(value_t *v) {
 
 void evalf() {
   contain_t *cur = stack_peek(STACK);
-  stack_t *stack = cur->stack;
   value_t *v = stack_pop(cur->stack);
-  for (int i = 0; i < v->container->stack->size; i++) {
-  }
+  stack_t *family = init_stack(10);
+  stack_push(family, cur);
+  evalstack(v->container, family);
 }
 
 void *func_copy(void *funcs) { return NULL; }
@@ -625,22 +625,22 @@ void contain_push(contain_t *c, value_t *v) {
   stack_push(otherc->stack, container);
 }
 
-// inits with zero crank; is this ideal?
 void push_quoted(contain_t *cur, value_t *v) {
-  q = init_value(VSTACK);
+  value_t *q = init_value(VSTACK);
   q->container = init_contain(init_ht(0), init_ht(0), init_stack(0));
   contain_push(q->container, v);
   contain_push(cur, q);
 }
 
-void evalstack(contain_t *c, contain_t *parent) {
+void evalstack(contain_t *c, stack_t *family) {
   contain_t *cur = stack_peek(STACK);
   value_t *q;
   for (int i = 0; i < c->stack->size; i++) {
     value_t *newval = c->stack->items[i];
     switch (newval->type) {
       case VWORD:
-        evalword(newval, c, parent);
+        stack_push(family, c);
+        evalword(newval, family);
         break;
       case VSTACK:
         contain_push(cur, newval);
@@ -657,12 +657,12 @@ void evalstack(contain_t *c, contain_t *parent) {
   }
 }
 
-void evalmacro(stack_t *macro) {
+void evalmacro(stack_t *macro, stack_t *family) {
   contain_t *cur = stack_peek(STACK);
   value_t *v;
   value_t *q;
   for (int i = 0; i < macro->size; i++) {
-    v = macro->items[i];e
+    v = macro->items[i];
     switch (v->type) {
       case VCLIB:
         ((void(*)())(v->custom))();
@@ -671,7 +671,7 @@ void evalmacro(stack_t *macro) {
         contain_push(cur, v);
         break;
       case VWORD:
-        evalword(v, cur, cur);
+        evalword(v, family);
         break;
       default:
         push_quoted(cur, v);
@@ -680,24 +680,22 @@ void evalmacro(stack_t *macro) {
 }
 
 // replace isfalias(v) with checks for faliases in v's all parent stacks?
-void evalword(value_t *v, contain_t *parent, contain_t *gparent) {
+void evalword(value_t *v, stack_t *family) {
   contain_t *expand;
   stack_t *macro;
-  if ((macro = ht_get(parent->flit, v->str_word))) {
-    evalmacro(macro);
-    crank();
-  } else if ((expand = ht_get(parent->word_table, v->str_word))) {
-    evalstack(expand, parent);
-  } else if ((macro = ht_get(gparent->flit, v->str_word))) {
-    evalmacro(macro);
-    crank();
-  } else if ((expand = ht_get(gparent->word_table, v->str_word))) {
-    evalstack(expand, parent);
-  } else if (isfalias(v)) {
-    evalf();
-  } else {
-    push_quoted(stack_peek(STACK), v);
-    crank();
+  for (int i = 0; i < family->size; i++) {
+    contain_t *parent = family->items[i];
+    if ((macro = ht_get(parent->flit, v->str_word))) {
+      evalmacro(macro, family);
+      crank();
+    } else if ((expand = ht_get(parent->word_table, v->str_word))) {
+      evalstack(expand, family);
+    } else if ((isfaliasin(parent, v))) {
+      evalf();
+    } else {
+      push_quoted(stack_peek(STACK), v);
+      crank();
+    }
   }
 }
 
@@ -715,7 +713,9 @@ void crank() {
   if (cindex >= 0) {
     int fixedindex = cur->stack->size - 1 - cindex;
     value_t *needseval = stack_popdeep(cur->stack, fixedindex);
-    evalstack(needseval->container, cur);
+    stack_t *family = init_stack(10);
+    stack_push(family, cur);
+    evalstack(needseval->container, family);
   }
   inc_crank();
 }
@@ -723,32 +723,12 @@ void crank() {
 void eval(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   if (isfalias(v)) {
-    if (cur->cranks->items[1][0]) {
+    int(*crank)[2] = cur->cranks->items[0];
+    if (crank[1]) {
       evalf();
     }
     return;
   }
   contain_push(cur, v);
   crank();
-  /* if (isfalias(v)) { */
-  /*   if (cur->cranks->items[1][0]) { *
-  /*     evalf(); */
-  /*   } */
-  /*   return; */
-  /* } */
-  /* int cindex = -1; */
-  /* int(*crank)[2]; */
-  /* for (int i = 0; i < cur->cranks->size; i++) { */
-  /*   crank = cur->cranks->items[i]; */
-  /*   if (*crank[0] == 0) { */
-  /*     cindex = i; */
-  /*     break; */
-  /*   } */
-  /* } */
-  /* if (cindex >= 0) { */
-  /*   int fixedindex = cur->stack->size - 1 - cindex; */
-  /*   value_t *needseval = stack_popdeep(cur->stack, fixedindex); */
-  /*   evalstack(needseval, cur); */
-  /* } */
-  /* inc_crank(); */
 }
