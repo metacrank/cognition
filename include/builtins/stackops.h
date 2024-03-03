@@ -125,4 +125,11 @@ void cog_vat(value_t *v);
 /*! @brief returns type of first stack element as an integer */
 void cog_type(value_t *v);
 
+
+
+
+
+/* adds stack operation fuctions to flit */
+void add_funcs_stackops(ht_t *flit);
+
 #endif // BUILTINS_STACKOPS_H_

@@ -143,6 +143,9 @@ void stack_add(stack_t *a, value_t *v, int index);
 /*! pops last element off of stack */
 void *stack_pop(stack_t *a);
 
+/* returns pointer to top of stack */
+void *stack_peek(stack_t *s);
+
 /*! Deep copy of stack and its contents. */
 void *stack_copy(void *a, void *(*copyfunc)(void *));
 
@@ -171,7 +174,10 @@ custom_t *init_custom(void (*)(void *), void (*)(void *), void *(*)(void *));
 void custom_free(void *);
 
 /*! Adds function to FLIT. */
-void add_func(ht_t *h, void (*func)(value_t *), char *key);
+void add_func(ht_t *h, void (*func)(/*value_t **/), char *key);
+
+/* Adds function stack to FLIT */
+void add_macro(ht_t *h, stack_t *macro, char *key);
 
 /*! Adds object functions to OBJ_TABLE and adds constructor for custom type to
  * FLIT. */
@@ -184,6 +190,9 @@ contain_t *init_contain(ht_t *h, ht_t *flit, stack_t *cranks);
 
 /* Copies container structure */
 contain_t *contain_copy(contain_t *c, void *(*copyfunc)(void *));
+
+/* Copies a container containing value_t */
+void *contain_value_copy(void *c);
 
 /*! Allocates memory for new container */
 void contain_free(void *);
@@ -255,14 +264,20 @@ void ht_free(ht_t *h, void (*freefunc)(void *));
 /*! hashes key into integer for hash table */
 unsigned long hash(ht_t *h, char *key);
 
+/* copies crank stack */
+void *cranks_copy(void *cranks);
+
 /* pushes a value to a container */
-void contain_push(containt_t *c, value_t *v);
+void contain_push(contain_t *c, value_t *v);
+
+// inits with zero crank; is this ideal?
+void push_quoted(contain_t *cur, value_t *v);
 
 /* recursively evaluates a stack, with cranking */
 void evalstack(contain_t *c, contain_t *parent);
 
 /* expands and recursively evaluates a word value, with cranking */
-void evalword(value_t *v, contain_t *parent, contain_t *parent, contain_t *gparent);
+void evalword(value_t *v, contain_t *parent, contain_t *gparent);
 
 /* performs one crank */
 void crank();

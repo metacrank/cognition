@@ -62,7 +62,7 @@ void print_value(value_t *v) {
   case VWORD:
     printf("W: %s\n", v->str_word->value);
     break;
-  case VQUOTE:
+    case VQUOTE:
     printf("Q: [\n");
     for (int i = 0; i < v->quote->size; i++) {
       print_value(v->quote->items[i]);

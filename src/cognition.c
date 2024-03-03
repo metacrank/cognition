@@ -92,6 +92,10 @@ void stack_free(void *a, void (*freefunc)(void *)) {
   free(s);
 }
 
+void value_stack_free(void *a) {
+  stack_free(a, value_free);
+}
+
 void *stack_copy(void *a, void *(*copyfunc)(void *)) {
   stack_t *b = calloc(1, sizeof(stack_t));
   if (!b)
@@ -106,6 +110,10 @@ void *stack_copy(void *a, void *(*copyfunc)(void *)) {
     b->items[i] = copyfunc(s->items[i]);
   }
   return b;
+}
+
+void *value_stack_copy(void *a) {
+  return stack_copy(a, value_copy);
 }
 
 value_t *init_value(int type) {
@@ -187,8 +195,16 @@ custom_t *init_custom(void (*printfunc)(void *), void (*freefunc)(void *),
 
 void custom_free(void *c) { free(c); }
 
-void add_func(ht_t *h, void (*func)(value_t *), char *key) {
-  ht_add(h, init_string(key), func, value_free);
+void add_func(ht_t *h, void (*func)(/*value_t **/), char *key) {
+  stack_t *macro = init_stack(1);
+  value_t *v = init_value(VCLIB);
+  v->custom = func;
+  stack_push(macro, v);
+  ht_add(h, init_string(key), macro, value_stack_free);
+}
+
+void add_macro(ht_t *h, stack_t *macro, char *key) {
+  ht_add(h, init_string(key), macro, value_stack_free);
 }
 
 void add_obj(ht_t *h, ht_t *h2, void (*printfunc)(void *),
@@ -200,8 +216,7 @@ void add_obj(ht_t *h, ht_t *h2, void (*printfunc)(void *),
   ht_add(h2, init_string(key), createfunc, value_free);
 }
 
-contain_t *init_container(ht_t *h, ht_t *flit, ht_t *ot, int (*cranks)[2],
-                          size_t crank_size) {
+contain_t *init_contain(ht_t *h, ht_t *flit, stack_t *cranks) {
   contain_t *c = calloc(1, sizeof(contain_t));
   c->stack = init_stack(10);
   c->err_stack = init_stack(10);
@@ -217,9 +232,36 @@ contain_t *init_container(ht_t *h, ht_t *flit, ht_t *ot, int (*cranks)[2],
 void contain_free(void *con) {
   contain_t *c = con;
   ht_free(c->word_table, value_free);
-  ht_free(c->flit, func_free);
+  ht_free(c->flit, value_stack_free);
   stack_free(c->stack, value_free);
   stack_free(c->err_stack, value_free);
+}
+
+void *contain_value_copy(void *c) {
+  return contain_copy(c, value_copy);
+}
+
+void *falias_copy(void *f) {
+  return string_copy(f);
+}
+
+contain_t *contain_copy(contain_t *c, void *(*copyfunc)(void *)) {
+  contain_t *contain = calloc(1, sizeof(contain_t));
+  if (c->word_table->size) {
+    contain->word_table = ht_copy(c->word_table, contain_value_copy);
+  } else {
+    contain->word_table = init_ht(10);
+  }
+  if (c->flit->size) {
+    contain->flit = ht_copy(c->flit, value_stack_copy);
+  } else {
+    contain->flit = init_ht(10);
+  }
+  contain->cranks = stack_copy(c->cranks, cranks_copy);
+  contain->err_stack = stack_copy(c->err_stack, value_copy);
+  contain->stack = stack_copy(c->stack, value_copy);
+  contain->faliases = stack_copy(c->faliases, falias_copy);
+  contain->delims = string_copy(c->delims);
 }
 
 parser_t *init_parser(char *source) {
@@ -502,7 +544,7 @@ void inc_crank() {
     crank[0][0]++;
     if (crank[0][0] >= crank[0][1]) {
       crank[0][0] = 0;
-    }
+    }func
   }
 }
 
@@ -583,6 +625,7 @@ void contain_push(contain_t *c, value_t *v) {
   stack_push(otherc->stack, container);
 }
 
+// inits with zero crank; is this ideal?
 void push_quoted(contain_t *cur, value_t *v) {
   q = init_value(VSTACK);
   q->container = init_contain(init_ht(0), init_ht(0), init_stack(0));
@@ -603,10 +646,10 @@ void evalstack(contain_t *c, contain_t *parent) {
         contain_push(cur, newval);
         crank();
         break;
-      /* case VCLIB: */
-      /*   ((void(*)())(newval->custom))(); */
-      /*   crank(); */
-      /*   break; */
+      case VCLIB:
+        ((void(*)())(newval->custom))();
+        crank();
+        break;
       default:
         push_quoted(cur, newval);
         crank();
@@ -672,7 +715,7 @@ void crank() {
   if (cindex >= 0) {
     int fixedindex = cur->stack->size - 1 - cindex;
     value_t *needseval = stack_popdeep(cur->stack, fixedindex);
-    evalstack(needseval, cur);
+    evalstack(needseval->container, cur);
   }
   inc_crank();
 }

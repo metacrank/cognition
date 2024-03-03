@@ -30,4 +30,7 @@ void cog_metacrankbase(value_t *v);
 /* returns the number of operations done since nth metacrank high tide */
 void cog_metamodcrank(value_t *v);
 
+/* adds cranker fuctions to flit */
+void add_funcs_cranker(ht_t *flit);
+
 #endif // BUILTINS_CRANKER_H_

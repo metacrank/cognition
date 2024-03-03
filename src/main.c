@@ -69,9 +69,6 @@ int main(int argc, char **argv) {
   EVAL_STACK = init_stack(10);
   OBJ_STACK = init_stack(10);
 
-  // flit is has entries of stacks of tuples: enum { VAL, FUNC }, value_t
-  // or it's just value_t, and custom values get custom = funcptr
-
   /* initialise environment */
   contain_t *stack = init_contain(init_ht(500), init_ht(500), init_stack(10));
   add_funcs(stack->flit);

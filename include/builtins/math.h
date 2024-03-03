@@ -59,4 +59,7 @@ void cog_equals(value_t *v);
 /*! @brief polymorphic not equals; arguments cannot be quotes */
 void cog_nequals(value_t *v);
 
+/* adds math fuctions to flit */
+void add_funcs_math(ht_t *flit);
+
 #endif // BUILTINS_MATH_H_

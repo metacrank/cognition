@@ -15,4 +15,7 @@ void cog_fwrite(value_t *v);
 /*! @brief reads stdin into string */
 void cog_read(value_t *v);
 
+/* adds io fuctions to flit */
+void add_funcs_io(ht_t *flit);
+
 #endif // BUILTINS_IO_H_

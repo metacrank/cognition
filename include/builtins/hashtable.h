@@ -24,4 +24,7 @@ void cog_alias(value_t *v);
 /* returns an unordered list of the words defined in the current environment */
 void cog_wordlist(value_t *v);
 
+/* adds hashtable fuctions to flit */
+void add_funcs_hashtable(ht_t *flit);
+
 #endif // BUILTINS_HASHTABLE_H_

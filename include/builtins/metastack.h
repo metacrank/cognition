@@ -33,4 +33,7 @@ void cog_chroot(value_t *v);
 /* exits from the root stack */
 void cog_exit(value_t *v);
 
+/* adds metastack fuctions to flit */
+void add_funcs_metastack(ht_t *flit);
+
 #endif // BUILTINS_METASTACK_H_
