@@ -28,13 +28,12 @@ void version() {
 
 /*! frees all global variables */
 void global_free() {
-  free(PARSER->source);
-  //ht_free(OBJ_TABLE, custom_free);
-  stack_free(OBJ_STACK);
-  stack_free(STACK);
-  free(PARSER);
-  stack_free(EVAL_STACK);
-  ht_free(DEFAULT_FLIT)
+  /* free(PARSER->source); */
+  /* stack_free(OBJ_STACK); */
+  /* stack_free(STACK); */
+  /* free(PARSER); */
+  /* stack_free(EVAL_STACK); */
+  /* ht_free(DEFAULT_FLIT); */
 }
 
 int main(int argc, char **argv) {

@@ -149,6 +149,9 @@ void *stack_peek(stack_t *s);
 /*! Deep copy of stack and its contents. */
 void *stack_copy(void *a, void *(*copyfunc)(void *));
 
+/* copy stacks with value_t's in them */
+void *value_stack_copy(void *a);
+
 /*! Concatenate two stacks and put the result in a1. */
 void stack_extend(stack_t *a1, stack_t *a2);
 
