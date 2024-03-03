@@ -226,6 +226,8 @@ contain_t *init_contain(ht_t *h, ht_t *flit, stack_t *cranks) {
   c->faliases = init_stack(10);
   c->delims = init_string(NULL);
   c->ignored = init_string(NULL);
+  c->dflag = false;
+  c->iflag = true;
   return c;
 }
 
@@ -306,21 +308,21 @@ void parser_move(parser_t *p) {
   }
 }
 
-bool isdelim(parser_t *p) { contain_t *c = stack_pop(STACK); }
+bool isdelim(parser_t *p) { contain_t *c = stack_peek(STACK); }
 
 value_t *parse_word(parser_t *p) {
   string_t *strval = init_string(NULL);
   value_t *retval = init_value(VWORD);
   retval->str_word = strval;
-  while (!isdelim(p)) {
+  do {
     string_append(strval, p->c);
     parser_move(p);
-  }
-  parser_move(p);
+  } while (!isdelim(p) && p->c);
+  return retval;
 }
 
 bool isignore(parser_t *p) {
-  contain_t *c = stack_pop(STACK);
+  contain_t *c = stack_peek(STACK);
   if (c->iflag) {
     for (int i = 0; i < c->ignored->length; i++) {
       if (c->ignored->value[i] == p->c) {

@@ -1,7 +1,7 @@
 CC := gcc 
 SRCDIR := src
 BUILDDIR := build
-TARGET := stem
+TARGET := crank
 SRCEXT := c
 SOURCES := $(shell find $(SRCDIR) -type f -name *.$(SRCEXT))
 OBJECTS := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.o))

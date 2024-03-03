@@ -70,6 +70,7 @@ int main(int argc, char **argv) {
 
   /* initialise environment */
   contain_t *stack = init_contain(init_ht(500), init_ht(500), init_stack(10));
+  stack_push(stack->faliases, init_string("f"));
   add_funcs(stack->flit);
   stack_push(STACK, stack);
   void *(ot)[] = {stack, init_ht(10)};
