@@ -251,6 +251,10 @@ void contain_free(void *con) {
   ht_free(c->flit, value_stack_free);
   stack_free(c->stack, value_free);
   stack_free(c->err_stack, value_free);
+  stack_free(c->cranks, free);
+  stack_free(c->faliases, (void(*)(void*))string_free);
+  string_free(c->delims);
+  string_free(c->ignored);
 }
 
 void *contain_value_copy(void *c) {
@@ -633,6 +637,8 @@ void evalf() {
   stack_t *family = init_stack(10);
   stack_push(family, cur);
   evalstack(v->container, family);
+  free(family->items);
+  free(family);
   value_t *vf = stack_pop(EVAL_STACK);
   if(vf) {
     value_free(vf);
@@ -669,6 +675,7 @@ void evalstack(contain_t *c, stack_t *family) {
       case VWORD:
         stack_push(family, c);
         evalword(newval, family);
+        stack_pop(family);
         break;
       case VSTACK:
         stack_push(cur->stack, newval);
@@ -748,9 +755,16 @@ void crank() {
   if (cindex >= 0) {
     int fixedindex = cur->stack->size - 1 - cindex;
     value_t *needseval = stack_popdeep(cur->stack, fixedindex);
+    stack_push(EVAL_STACK, needseval);
     stack_t *family = init_stack(10);
     stack_push(family, cur);
     evalstack(needseval->container, family);
+    free(family->items);
+    free(family);
+    value_t *vf = stack_pop(EVAL_STACK);
+    if(vf) {
+      value_free(vf);
+    }
   }
   inc_crank();
 }
