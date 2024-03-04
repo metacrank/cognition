@@ -9,9 +9,7 @@
 extern stack_t *STACK;
 extern parser_t *PARSER;
 extern stack_t *EVAL_STACK;
-//extern ht_t *OBJ_TABLE;
 extern stack_t *OBJ_STACK;
-extern ht_t *DEFAULT_FLIT;
 
 /*! prints usage then exits */
 void usage() {
@@ -28,12 +26,11 @@ void version() {
 
 /*! frees all global variables */
 void global_free() {
-  /* free(PARSER->source); */
-  /* stack_free(OBJ_STACK); */
-  /* stack_free(STACK); */
-  /* free(PARSER); */
-  /* stack_free(EVAL_STACK); */
-  /* ht_free(DEFAULT_FLIT); */
+  free(PARSER->source);
+  stack_free(OBJ_STACK, obj_free);
+  stack_free(STACK, contain_free);
+  free(PARSER);
+  stack_free(EVAL_STACK, value_free);
 }
 
 int main(int argc, char **argv) {
@@ -73,7 +70,7 @@ int main(int argc, char **argv) {
   stack_push(stack->faliases, init_string("f"));
   add_funcs(stack->flit);
   stack_push(STACK, stack);
-  void *(ot)[] = {stack, init_ht(10)};
+  void *(ot)[2] = {stack, init_ht(10)};
   stack_push(OBJ_STACK, ot);
 
   /* parse and eval loop */

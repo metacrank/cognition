@@ -173,6 +173,9 @@ void value_free(void *v);
 /* Gets the custom object table referencing the current root stack */
 ht_t *ot_get();
 
+/* frees an object table */
+void obj_free(void *v);
+
 /*! Allocates memory for new custom_t */
 custom_t *init_custom(void (*)(void *), void (*)(void *), void *(*)(void *));
 

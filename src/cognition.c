@@ -12,8 +12,8 @@
 /* Global variables defined */
 stack_t *STACK;
 stack_t *EVAL_STACK;
-stack_t *OBJ_STACK; // stack of tuples of: pointer to 'root' stack, ht_t*
-//ht_t *OBJ_TABLE;
+// stack of tuples of: pointer to 'root' stack, ht_t*
+stack_t *OBJ_STACK;
 parser_t *PARSER;
 
 void func_free(void *f) {}
@@ -188,6 +188,13 @@ ht_t *ot_get() {
     }
   }
   return NULL;
+}
+
+void obj_free(void *v) {
+  void *(*entry)[2] = v;
+  ht_t *ot = *entry[1];
+  ht_free(ot, free);
+  free(v);
 }
 
 custom_t *init_custom(void (*printfunc)(void *), void (*freefunc)(void *),
