@@ -146,11 +146,17 @@ void stack_add(stack_t *a, value_t *v, int index);
 /*! pops last element off of stack */
 void *stack_pop(stack_t *a);
 
+/* pops deep element in stack */
+void *stack_popdeep(stack_t *a, int index);
+
 /* returns pointer to top of stack */
 void *stack_peek(stack_t *s);
 
 /*! Deep copy of stack and its contents. */
 void *stack_copy(void *a, void *(*copyfunc)(void *));
+
+/* free stacks with value_t's in them */
+void value_stack_free(void *a);
 
 /* copy stacks with value_t's in them */
 void *value_stack_copy(void *a);
@@ -272,6 +278,12 @@ void ht_free(ht_t *h, void (*freefunc)(void *));
 
 /*! hashes key into integer for hash table */
 unsigned long hash(ht_t *h, char *key);
+
+/* checks if a value_t is an falias in a container */
+bool isfaliasin(contain_t *c, value_t *v);
+
+/* checks if a value_t is an falias */
+bool isfalias(value_t *v);
 
 /* expands a stack as much as possible (i.e. before def'ing it) */
 void expandstack(contain_t *c, contain_t *new, stack_t *family);

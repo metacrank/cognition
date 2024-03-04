@@ -59,7 +59,7 @@ void stack_add(stack_t *a, value_t *v, int index) {
 }
 
 void *stack_popdeep(stack_t *a, int index) {
-  if (index >= a->size)
+  if (index >= a->size || index < 0)
     return NULL;
   void *retval = a->items[index];
   for (int i = index; i < a->size; i++) {
