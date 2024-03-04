@@ -572,41 +572,47 @@ bool isfalias(value_t *v) {
   return isfaliasin(c, v);
 }
 
-/* void expandstack(contain_t *c, stack_t *new, contain_t *cur) { // *cur = stack_peek(STACK) */
-/*   stack_t *subword = c->stack; */
-/*   int stacklen = subword->size; */
-/*   for (int i = 0; i < stacklen; i++) { */
-/*     value_t *v; */
-/*     if (ht_exists(c->flit, subword->items[i])) { */
-/*       contain_push(new, /\* custom object *\/); */
-/*     } else if ((v = ht_get(c->word_table, subword->items[i]))) { */
-/*       contain_compose(new, expandword(v, new, c)); */
-/*     } else if ((v = ht_get(cur->flit, subword->items[i]))) { */
-/*       contain_push(new, /\* custom object *\/); */
-/*     } else if ((v = ht_get(cur->word_table, subword->items[i]))) { */
-/*       contain_compose(new, expandword(v, new, cur)); */
-/*     } else if (isfalias(subword->items[i])) { */
-/*       contain_push(new, /\* evalf object *\/); */
-/*     } else { */
-/*       // push quoted word */
+/* void expandstack(contain_t *c, contain_t *new, stack_t *family) { */
+/*   for (int i = 0; i < c->stack->size; i++) { */
+/*     value_t *newval = c->stack->items[i]; */
+/*     switch (newval->type) { */
+/*       case VWORD: */
+/*         stack_push(family, c); */
+/*         expandword(newval, new, family); */
+/*         break; */
+/*       default: */
+/*         stack_push(new->stack, newval); */
 /*     } */
 /*   } */
 /* } */
 
-/* stack_t *expandword(value_t *v) { */
-/*   contain_t *cur = stack_peek(STACK); */
-/*   stack_t *new = init_stack(0); */
-/*   contain_t *newv; */
-/*   if (ht_exists(cur->flit, v)) { */
-/*     new = /\* some object *\/; */
-/*   } else if ((newv = ht_get(cur->word_table, v))) { */
-/*     expandstack(new, expandword(newv, new, c)); */
-/*   } else if (isfalias(subword->items[i])) { */
-/*     new = /\* evalf object *\/; */
-/*   } else { */
-/*     // push quoted word */
+/* void expandword(value_t *v, contain_t *new, stack_t *family) { */
+/*   contain_t *expand; */
+/*   stack_t *macro; */
+/*   bool evald = false; */
+/*   for (int i = family->size - 1; i >= 0; i--) { */
+/*     contain_t *parent = family->items[i]; */
+/*     if ((macro = ht_get(parent->flit, v->str_word))) { */
+/*       stack_push(new->stack, v); // change */
+/*       evald = true; */
+/*       break; */
+/*     } else if ((expand = ht_get(parent->word_table, v->str_word))) { */
+/*       expandstack(expand, new, family); */
+/*       evald = true; */
+/*       break; */
+/*     } else if ((isfaliasin(parent, v))) { */
+/*       value_t *f = init_value(VCLIB); */
+/*       stack_t *s = init_stack(1); */
+/*       stack_push(s, (void(*))evalf); // something like this */
+/*       f->custom = s; */
+/*       stack_push(new->stack, f); */
+/*       evald = true; */
+/*       break; */
+/*     } */
 /*   } */
-/*   return new; */
+/*   if (!evald) { */
+/*     stack_push(new->stack, v); */
+/*   } */
 /* } */
 
 void evalf() {
@@ -690,7 +696,6 @@ void evalmacro(stack_t *macro, stack_t *family) {
   }
 }
 
-// replace isfalias(v) with checks for faliases in v's all parent stacks?
 void evalword(value_t *v, stack_t *family) {
   contain_t *expand;
   stack_t *macro;
