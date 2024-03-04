@@ -195,7 +195,7 @@ custom_t *init_custom(void (*printfunc)(void *), void (*freefunc)(void *),
 
 void custom_free(void *c) { free(c); }
 
-void add_func(ht_t *h, void (*func)(/*value_t **/), char *key) {
+void add_func(ht_t *h, void (*func)(value_t *), char *key) {
   stack_t *macro = init_stack(1);
   value_t *v = init_value(VCLIB);
   v->custom = func;
@@ -282,24 +282,24 @@ void parser_reset(parser_t *p, char *source) {
   p->c = source[0];
 }
 
-parser_t *parser_pp(char *s) {
-  parser_t *p = init_parser(s);
-  string_t *rstr = init_string(NULL);
-  while (p->c != '\0') {
-    if (p->c == '#') { /* Comment character is # in stem */
-      while (p->c != '\n' && p->c != '\0') {
-        parser_move(p);
-      }
-    } else {
-      string_append(rstr, p->c);
-      parser_move(p);
-    }
-  }
-  free(p->source);
-  parser_reset(p, rstr->value);
-  free(rstr);
-  return p;
-}
+/* parser_t *parser_pp(char *s) { */
+/*   parser_t *p = init_parser(s); */
+/*   string_t *rstr = init_string(NULL); */
+/*   while (p->c != '\0') { */
+/*     if (p->c == '#') { /\* Comment character is # in stem *\/ */
+/*       while (p->c != '\n' && p->c != '\0') { */
+/*         parser_move(p); */
+/*       } */
+/*     } else { */
+/*       string_append(rstr, p->c); */
+/*       parser_move(p); */
+/*     } */
+/*   } */
+/*   free(p->source); */
+/*   parser_reset(p, rstr->value); */
+/*   free(rstr); */
+/*   return p; */
+/* } */
 
 void parser_move(parser_t *p) {
   if (p->i < strlen(p->source) && p->c != '\0') {
@@ -606,6 +606,12 @@ bool isfalias(value_t *v) {
 
 void evalf() {
   contain_t *cur = stack_peek(STACK);
+  if (cur->stack->size == 0) {
+    value_t *err = init_value(VERR);
+    err->str_word = init_string("evalf: empty stack");
+    stack_push(cur->err_stack, err);
+    return;
+  }
   value_t *v = stack_pop(cur->stack);
   stack_t *family = init_stack(10);
   stack_push(family, cur);
@@ -629,7 +635,7 @@ void contain_push(contain_t *c, value_t *v) {
 
 void push_quoted(contain_t *cur, value_t *v) {
   value_t *q = init_value(VSTACK);
-  q->container = init_contain(init_ht(0), init_ht(0), init_stack(0));
+  q->container = init_contain(init_ht(0), init_ht(0), init_stack(1));
   contain_push(q->container, v);
   contain_push(cur, q);
 }
@@ -649,7 +655,7 @@ void evalstack(contain_t *c, stack_t *family) {
         crank();
         break;
       case VCLIB:
-        ((void(*)())(newval->custom))();
+        ((void(*)(value_t *v))(newval->custom))(newval);
         crank();
         break;
       default:
@@ -667,7 +673,7 @@ void evalmacro(stack_t *macro, stack_t *family) {
     v = macro->items[i];
     switch (v->type) {
       case VCLIB:
-        ((void(*)())(v->custom))();
+        ((void(*)(value_t *v))(v->custom))(v);
         break;
       case VSTACK:
         contain_push(cur, v);
@@ -685,19 +691,24 @@ void evalmacro(stack_t *macro, stack_t *family) {
 void evalword(value_t *v, stack_t *family) {
   contain_t *expand;
   stack_t *macro;
+  bool evald = false;
   for (int i = 0; i < family->size; i++) {
     contain_t *parent = family->items[i];
     if ((macro = ht_get(parent->flit, v->str_word))) {
       evalmacro(macro, family);
       crank();
+      evald = true;
     } else if ((expand = ht_get(parent->word_table, v->str_word))) {
       evalstack(expand, family);
+      evald = true;
     } else if ((isfaliasin(parent, v))) {
       evalf();
-    } else {
-      push_quoted(stack_peek(STACK), v);
-      crank();
+      evald = true;
     }
+  }
+  if (!evald) {
+    push_quoted(stack_peek(STACK), v);
+    crank();
   }
 }
 

@@ -63,7 +63,7 @@ int main(int argc, char **argv) {
   fclose(FP);
 
   /* Set up global variables */
-  PARSER = parser_pp(buf);
+  PARSER = init_parser(buf);
   STACK = init_stack(10);
   EVAL_STACK = init_stack(10);
   OBJ_STACK = init_stack(10);
@@ -75,6 +75,8 @@ int main(int argc, char **argv) {
   stack_push(STACK, stack);
   void *(ot)[] = {stack, init_ht(10)};
   stack_push(OBJ_STACK, ot);
+
+  printf("[%s] [%d] [%c]\n", PARSER->source, PARSER->i, PARSER->c);
 
   /* parse and eval loop */
   while (1) {
