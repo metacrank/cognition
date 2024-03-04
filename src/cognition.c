@@ -191,10 +191,9 @@ ht_t *ot_get() {
 }
 
 void obj_free(void *v) {
-  void *(*entry)[2] = v;
-  ht_t *ot = *entry[1];
+  void **entry = v;
+  ht_t *ot = entry[1];
   ht_free(ot, free);
-  free(v);
 }
 
 custom_t *init_custom(void (*printfunc)(void *), void (*freefunc)(void *),
