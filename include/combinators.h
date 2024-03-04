@@ -1,7 +1,7 @@
 #ifndef BUILTINS_COMBINATORS_H_
 #define BUILTINS_COMBINATORS_H_
 
-#include <builtins.h>
+#include <cognition.h>
 
 /* pops the first element on the stack and pushes a child stack containing that element */
 /* what configuration of definitions are passed down? */

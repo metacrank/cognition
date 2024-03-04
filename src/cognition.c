@@ -1,4 +1,5 @@
 #include <better_string.h>
+#include <builtins.h>
 #include <cognition.h>
 #include <ctype.h>
 #include <macros.h>
@@ -572,60 +573,64 @@ bool isfalias(value_t *v) {
   return isfaliasin(c, v);
 }
 
-/* void expandstack(contain_t *c, contain_t *new, stack_t *family) { */
-/*   for (int i = 0; i < c->stack->size; i++) { */
-/*     value_t *newval = c->stack->items[i]; */
-/*     switch (newval->type) { */
-/*       case VWORD: */
-/*         stack_push(family, c); */
-/*         expandword(newval, new, family); */
-/*         break; */
-/*       default: */
-/*         stack_push(new->stack, newval); */
-/*     } */
-/*   } */
-/* } */
+void expandstack(contain_t *c, contain_t *new, stack_t *family) {
+  for (int i = 0; i < c->stack->size; i++) {
+    value_t *newval = c->stack->items[i];
+    switch (newval->type) {
+      case VWORD:
+        stack_push(family, c);
+        expandword(newval, new, family);
+        break;
+      default:
+        stack_push(new->stack, newval);
+    }
+  }
+}
 
-/* void expandword(value_t *v, contain_t *new, stack_t *family) { */
-/*   contain_t *expand; */
-/*   stack_t *macro; */
-/*   bool evald = false; */
-/*   for (int i = family->size - 1; i >= 0; i--) { */
-/*     contain_t *parent = family->items[i]; */
-/*     if ((macro = ht_get(parent->flit, v->str_word))) { */
-/*       stack_push(new->stack, v); // change */
-/*       evald = true; */
-/*       break; */
-/*     } else if ((expand = ht_get(parent->word_table, v->str_word))) { */
-/*       expandstack(expand, new, family); */
-/*       evald = true; */
-/*       break; */
-/*     } else if ((isfaliasin(parent, v))) { */
-/*       value_t *f = init_value(VCLIB); */
-/*       stack_t *s = init_stack(1); */
-/*       stack_push(s, (void(*))evalf); // something like this */
-/*       f->custom = s; */
-/*       stack_push(new->stack, f); */
-/*       evald = true; */
-/*       break; */
-/*     } */
-/*   } */
-/*   if (!evald) { */
-/*     stack_push(new->stack, v); */
-/*   } */
-/* } */
+void expandword(value_t *v, contain_t *new, stack_t *family) {
+  contain_t *expand;
+  stack_t *macro;
+  bool evald = false;
+  for (int i = family->size - 1; i >= 0; i--) {
+    contain_t *parent = family->items[i];
+    if ((macro = ht_get(parent->flit, v->str_word))) {
+      stack_push(new->stack, v); // change
+      evald = true;
+      break;
+    } else if ((expand = ht_get(parent->word_table, v->str_word))) {
+      expandstack(expand, new, family);
+      evald = true;
+      break;
+    } else if ((isfaliasin(parent, v))) {
+      value_t *f = init_value(VCLIB);
+      void(*func)(value_t *v) = cog_eval;
+      f->custom = func;
+      stack_push(new->stack, f);
+      evald = true;
+      break;
+    }
+  }
+  if (!evald) {
+    stack_push(new->stack, v);
+  }
+}
 
 void evalf() {
   contain_t *cur = stack_peek(STACK);
   if (cur->stack->size == 0) {
     value_t *err = init_value(VERR);
-    eval_error("evalf: empty stack");
+    eval_error("EMPTY STACK");
     return;
   }
   value_t *v = stack_pop(cur->stack);
+  stack_push(EVAL_STACK, v);
   stack_t *family = init_stack(10);
   stack_push(family, cur);
   evalstack(v->container, family);
+  value_t *vf = stack_pop(EVAL_STACK);
+  if(vf) {
+    value_free(vf);
+  }
 }
 
 void *func_copy(void *funcs) { return NULL; }

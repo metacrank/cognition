@@ -16,20 +16,7 @@ void cog_quote(value_t *v) {
 }
 
 void cog_eval(value_t *v) {
-  contain_t *cur = stack_peek(STACK);
-  value_t *v1 = stack_pop(cur->stack);
-  if (!cur->stack->size) {
-    eval_error("EMPTY STACK");
-    return;
-  }
-  stack_push(EVAL_STACK, v1);
-  stack_t *family = init_stack(10);
-  stack_push(family, cur);
-  evalstack(v->container, family);
-  value_t *vf = stack_pop(EVAL_STACK);
-  if (vf) {
-    value_free(vf);
-  }
+  evalf();
 }
 
 void cog_child(value_t *v) {

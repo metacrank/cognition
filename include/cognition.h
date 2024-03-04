@@ -1,5 +1,5 @@
-#ifndef PARSER_H_
-#define PARSER_H_
+#ifndef COGNITION_H_
+#define COGNITION_H_
 #include <better_string.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -270,6 +270,15 @@ void ht_free(ht_t *h, void (*freefunc)(void *));
 /*! hashes key into integer for hash table */
 unsigned long hash(ht_t *h, char *key);
 
+/* expands a stack as much as possible (i.e. before def'ing it) */
+void expandstack(contain_t *c, contain_t *new, stack_t *family);
+
+/* similarly for a single word */
+void expandword(value_t *v, contain_t *new, stack_t *family);
+
+/* crankless evaluation on the stack */
+void evalf();
+
 /* copies crank stack */
 void *cranks_copy(void *cranks);
 
@@ -294,4 +303,4 @@ void crank();
 /*! Evaluates a value returned by the parser. */
 void eval(value_t *v);
 
-#endif // PARSER_H_
+#endif // COGNITION_H_
