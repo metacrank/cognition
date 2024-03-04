@@ -131,6 +131,9 @@ struct CONTAINER_STRUCT {
  */
 void func_free(void *f);
 
+/* push error to error stack */
+void eval_error(char *s);
+
 /*! Allocates memory for new stack */
 stack_t *init_stack(size_t size);
 

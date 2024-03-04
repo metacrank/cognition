@@ -1,13 +1,4 @@
 #include <builtins.h>
-#include <combinators.h>
-#include <cranker.h>
-#include <hashtable.h>
-#include <io.h>
-#include <math.h>
-#include <metastack.h>
-#include <misc.h>
-#include <parser.h>
-#include <stackops.h>
 #include <cognition.h>
 #include <dlfcn.h>
 #include <stdio.h>
@@ -85,18 +76,14 @@ int main(int argc, char **argv) {
   void *(ot)[] = {stack, init_ht(10)};
   stack_push(OBJ_STACK, ot);
 
-  printf("[%s] [%d] [%c]\n", PARSER->source, PARSER->i, PARSER->c);
-  value_t *dummy = init_value(VWORD);
-
   /* parse and eval loop */
   while (1) {
     v = parser_get_next(PARSER);
     if (v == NULL)
       break;
-    //eval(v);
-    push_quoted(stack_peek(STACK), v);
-    cog_questionmark(dummy);
-    printf("\n\n");
+    eval(v);
+    /* cog_questionmark(dummy); */
+    /* printf("\n\n"); */
   }
 
   /* Free all global variables */

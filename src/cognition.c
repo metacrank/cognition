@@ -17,6 +17,13 @@ parser_t *PARSER;
 
 void func_free(void *f) {}
 
+void eval_error(char *s) {
+  value_t *v = init_value(VERR);
+  v->str_word = init_string(s);
+  contain_t *cur = stack_peek(STACK);
+  stack_push(cur->err_stack, v);
+}
+
 stack_t *init_stack(size_t size) {
   stack_t *a = calloc(1, sizeof(stack_t));
   if (!a)
@@ -551,8 +558,10 @@ void inc_crank() {
 }
 
 bool isfaliasin(contain_t *c, value_t *v) {
+  string_t *falias;
   for (int i = 0; i < c->faliases->size; i++) {
-    if (strcmp(c->faliases->items[i], v->str_word->value) == 0)
+    falias = c->faliases->items[i];
+    if (strcmp(falias->value, v->str_word->value) == 0)
       return true;
   }
   return false;
@@ -560,11 +569,7 @@ bool isfaliasin(contain_t *c, value_t *v) {
 
 bool isfalias(value_t *v) {
   contain_t *c = stack_peek(STACK);
-  for (int i = 0; i < c->faliases->size; i++) { /* isfaliasin(c, v); */
-    if (strcmp(c->faliases->items[i], v->str_word->value) == 0)
-      return true;
-  }
-  return false;
+  return isfaliasin(c, v);
 }
 
 /* void expandstack(contain_t *c, stack_t *new, contain_t *cur) { // *cur = stack_peek(STACK) */
@@ -608,8 +613,7 @@ void evalf() {
   contain_t *cur = stack_peek(STACK);
   if (cur->stack->size == 0) {
     value_t *err = init_value(VERR);
-    err->str_word = init_string("evalf: empty stack");
-    stack_push(cur->err_stack, err);
+    eval_error("evalf: empty stack");
     return;
   }
   value_t *v = stack_pop(cur->stack);
@@ -635,14 +639,13 @@ void contain_push(contain_t *c, value_t *v) {
 
 void push_quoted(contain_t *cur, value_t *v) {
   value_t *q = init_value(VSTACK);
-  q->container = init_contain(init_ht(0), init_ht(0), init_stack(1));
+  q->container = init_contain(init_ht(1), init_ht(1), init_stack(1));
   stack_push(q->container->stack, v);
   stack_push(cur->stack, q);
 }
 
 void evalstack(contain_t *c, stack_t *family) {
   contain_t *cur = stack_peek(STACK);
-  value_t *q;
   for (int i = 0; i < c->stack->size; i++) {
     value_t *newval = c->stack->items[i];
     switch (newval->type) {
@@ -692,18 +695,21 @@ void evalword(value_t *v, stack_t *family) {
   contain_t *expand;
   stack_t *macro;
   bool evald = false;
-  for (int i = 0; i < family->size; i++) {
+  for (int i = family->size - 1; i >= 0; i--) {
     contain_t *parent = family->items[i];
     if ((macro = ht_get(parent->flit, v->str_word))) {
       evalmacro(macro, family);
       crank();
       evald = true;
+      break;
     } else if ((expand = ht_get(parent->word_table, v->str_word))) {
       evalstack(expand, family);
       evald = true;
+      break;
     } else if ((isfaliasin(parent, v))) {
       evalf();
       evald = true;
+      break;
     }
   }
   if (!evald) {
@@ -724,8 +730,6 @@ void crank() {
     }
   }
   if (cindex >= 0) {
-    printf("ERROR");
-    exit(1);
     int fixedindex = cur->stack->size - 1 - cindex;
     value_t *needseval = stack_popdeep(cur->stack, fixedindex);
     stack_t *family = init_stack(10);
@@ -738,11 +742,15 @@ void crank() {
 void eval(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   if (isfalias(v)) {
-    int(*crank)[2] = cur->cranks->items[0];
-    if (*crank[0] && *crank[1]) {
+    if (cur->cranks->size == 0) {
       evalf();
+      return;
     }
-    return;
+    int(*crank)[2] = cur->cranks->items[0];
+    if (*crank[0] || !(*crank[1])) {
+      evalf();
+      return;
+    }
   }
   push_quoted(cur, v);
   crank();

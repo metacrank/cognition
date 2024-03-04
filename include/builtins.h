@@ -1,9 +1,15 @@
 #ifndef BUILTINS_H_
 #define BUILTINS_H_
 #include <cognition.h>
-
-/* push error to error stack */
-void eval_error(char *s);
+#include <combinators.h>
+#include <cranker.h>
+#include <hashtable.h>
+#include <io.h>
+#include <math.h>
+#include <metastack.h>
+#include <misc.h>
+#include <parser.h>
+#include <stackops.h>
 
 /*! @brief dds functions to flit table */
 void add_funcs(ht_t* flit);
