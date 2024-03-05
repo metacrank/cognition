@@ -4,7 +4,7 @@
 extern stack_t *STACK;
 /* n m metacrank sets metacrank n to period m */
 void cog_metacrank(value_t *v) {
-  contain_t *cur = stack_pop(STACK);
+  contain_t *cur = peek_pop(STACK);
   stack_t *stack = cur->stack;
   value_t *tmp = stack_pop(stack);
   if (!tmp) {
@@ -57,7 +57,7 @@ void cog_metacrank(value_t *v) {
 
 /*sets 0th crank value to specified period*/
 void cog_crank(value_t *v) {
-  contain_t *cur = stack_pop(STACK);
+  contain_t *cur = stack_peek(STACK);
   stack_t *stack = cur->stack;
   value_t *tmp = stack_pop(stack);
   if (!tmp) {

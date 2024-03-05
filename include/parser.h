@@ -15,6 +15,18 @@ void cog_aliasf(value_t *v);
 /* if elt is in the f alias list, remove it */
 void cog_unaliasf(value_t *v);
 
+void cog_d(value_t *v);
+
+void cog_i(value_t *v);
+
+void cog_dflag(value_t *v);
+
+void cog_iflag(value_t *v);
+
+void cog_geti(value_t *v);
+
+void cog_getd(value_t *v);
+
 /* adds parser fuctions to flit */
 void add_funcs_parser(ht_t *flit);
 
