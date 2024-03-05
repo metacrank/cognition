@@ -214,13 +214,19 @@ parser_t *init_parser(char *source);
 void parser_move(parser_t *p);
 
 /*! Removes comments from string s. */
-parser_t *parser_pp(char *s);
+/* parser_t *parser_pp(char *s); */
 
 /*! Resets state of parser */
 void parser_reset(parser_t *p, char *source);
 
 /*! Gets the next value_t from the string, returns NULL if EOF. */
 value_t *parser_get_next(parser_t *p);
+
+/* returns true if p is an ignored character */
+bool isignore(parser_t *p);
+
+/* returns true if p is a delimiter character */
+bool isdelim(parser_t *p);
 
 /*! Allocates memory for new node struct. */
 node_t *init_node(string_t *key, void *v);
@@ -303,7 +309,7 @@ void push_quoted(contain_t *cur, value_t *v);
 void evalstack(contain_t *c, stack_t *family);
 
 /* recursively evaluates a flit macro without cranking */
-void evalmacro(stack_t *macro, stack_t *family);
+void evalmacro(stack_t *macro, value_t *word, stack_t *family);
 
 /* expands and recursively evaluates a word value, with cranking */
 void evalword(value_t *v, stack_t *family);

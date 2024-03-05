@@ -326,16 +326,49 @@ void parser_move(parser_t *p) {
   }
 }
 
-bool isdelim(parser_t *p) { contain_t *c = stack_peek(STACK); }
+bool isdelim(parser_t *p) {
+  contain_t *c = stack_peek(STACK);
+  if (c->dflag) {
+    for (int i = 0; i < c->delims->length; i++) {
+      if (c->delims->value[i] == p->c) {
+        return true;
+      }
+      return false;
+    }
+  } else {
+    for (int i = 0; i < c->delims->length; i++) {
+      if (c->delims->value[i] == p->c) {
+        return false;
+      }
+    }
+    return true;
+  }
+  return false;
+}
 
+/* value_t *parse_word(parser_t *p) { */
+/*   string_t *strval = init_string(NULL); */
+/*   value_t *retval = init_value(VWORD); */
+/*   retval->str_word = strval; */
+/*   do { */
+/*     string_append(strval, p->c); */
+/*     parser_move(p); */
+/*   } while (!isdelim(p) && p->c); */
+/*   return retval; */
+/* } */
 value_t *parse_word(parser_t *p) {
   string_t *strval = init_string(NULL);
   value_t *retval = init_value(VWORD);
   retval->str_word = strval;
-  do {
+  while (!isdelim(p) && p->c) {
     string_append(strval, p->c);
     parser_move(p);
-  } while (!isdelim(p) && p->c);
+  }
+  if (!p->c || isignore(p)) {
+    return retval;
+  }
+  string_append(strval, p->c);
+  parser_move(p);
   return retval;
 }
 
@@ -350,7 +383,7 @@ bool isignore(parser_t *p) {
     }
   } else {
     for (int i = 0; i < c->ignored->length; i++) {
-      if (c->ignored->value[i] != p->c) {
+      if (c->ignored->value[i] == p->c) {
         return false;
       }
     }
@@ -691,7 +724,7 @@ void evalstack(contain_t *c, stack_t *family) {
   }
 }
 
-void evalmacro(stack_t *macro, stack_t *family) {
+void evalmacro(stack_t *macro, value_t *word, stack_t *family) {
   contain_t *cur = stack_peek(STACK);
   value_t *v;
   value_t *q;
@@ -699,7 +732,7 @@ void evalmacro(stack_t *macro, stack_t *family) {
     v = macro->items[i];
     switch (v->type) {
       case VCLIB:
-        ((void(*)(value_t *v))(v->custom))(v);
+        ((void(*)(value_t *v))(v->custom))(word);
         break;
       case VSTACK:
         stack_push(cur->stack, v);
@@ -720,7 +753,7 @@ void evalword(value_t *v, stack_t *family) {
   for (int i = family->size - 1; i >= 0; i--) {
     contain_t *parent = family->items[i];
     if ((macro = ht_get(parent->flit, v->str_word))) {
-      evalmacro(macro, family);
+      evalmacro(macro, v, family);
       crank();
       evald = true;
       break;

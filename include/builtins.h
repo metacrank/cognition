@@ -5,7 +5,7 @@
 #include <cranker.h>
 #include <hashtable.h>
 #include <io.h>
-#include <math.h>
+#include <bmath.h>
 #include <metastack.h>
 #include <misc.h>
 #include <parser.h>

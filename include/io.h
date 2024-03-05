@@ -3,6 +3,9 @@
 
 #include <cognition.h>
 
+/* prints a value_t */
+void print_value(value_t *v, const char *end);
+
 /*! @brief prints the entire stack */
 void cog_questionmark(value_t *v);
 
