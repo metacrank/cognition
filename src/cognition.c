@@ -255,6 +255,7 @@ void contain_free(void *con) {
   stack_free(c->faliases, (void(*)(void*))string_free);
   string_free(c->delims);
   string_free(c->ignored);
+  free(c);
 }
 
 void *contain_value_copy(void *c) {
@@ -729,7 +730,7 @@ void evalword(value_t *v, stack_t *family) {
       evalstack(expand, family);
       evald = true;
       break;
-    } else if ((isfaliasin(parent, v))) {
+    } else if (isfaliasin(parent, v)) {
       evalf();
       evald = true;
       break;
@@ -759,8 +760,7 @@ void crank() {
     stack_t *family = init_stack(10);
     stack_push(family, cur);
     evalstack(needseval->container, family);
-    free(family->items);
-    free(family);
+    stack_free(family, free);
     value_t *vf = stack_pop(EVAL_STACK);
     if(vf) {
       value_free(vf);
