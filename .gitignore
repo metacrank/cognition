@@ -8,4 +8,5 @@ tmp/
 /html/**
 /latex/**
 stem
+crank
 compile_commands.json
