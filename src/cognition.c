@@ -157,7 +157,7 @@ void value_free(void *vtmp) {
   contain_t *c = stack_peek(STACK);
   if (v == NULL)
     return;
-  if (v->type == VWORD || v->type == VERR) {
+  if (v->type == VWORD || v->type == VERR || v->type == VCLIB || v->type == VCUSTOM) {
     string_free(v->str_word);
   }
   if (v->type == VSTACK) {
@@ -210,6 +210,7 @@ void custom_free(void *c) { free(c); }
 void add_func(ht_t *h, void (*func)(value_t *), char *key) {
   stack_t *macro = init_stack(1);
   value_t *v = init_value(VCLIB);
+  v->str_word = init_string(key);
   v->custom = func;
   stack_push(macro, v);
   ht_add(h, init_string(key), macro, value_stack_free);
@@ -626,12 +627,11 @@ void expandword(value_t *v, contain_t *new, stack_t *family) {
 
 void evalf() {
   contain_t *cur = stack_peek(STACK);
-  if (cur->stack->size == 0) {
-    value_t *err = init_value(VERR);
+  value_t *v = stack_pop(cur->stack);
+  if (v == NULL) {
     eval_error("EMPTY STACK");
     return;
   }
-  value_t *v = stack_pop(cur->stack);
   stack_push(EVAL_STACK, v);
   stack_t *family = init_stack(10);
   stack_push(family, cur);
