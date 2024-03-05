@@ -771,6 +771,7 @@ void crank() {
 void eval(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   if (isfalias(v)) {
+    value_free(v);
     if (cur->cranks->size == 0) {
       evalf();
       return;
