@@ -27,13 +27,9 @@ struct STACK_STRUCT {
  *functions in order for the builtin functions to remain memory safe. */
 struct VALUE_STRUCT {
   /*! @brief Enum that defines different types within the language. */
-  enum { VWORD, VINT, VFLOAT, VSTACK, VERR, VCUSTOM, VCLIB } type;
+  enum { VWORD, VSTACK, VERR, VCUSTOM, VCLIB } type;
   union {
-    /*! @brief floats and ints in this language are to be stored in this
-     * variable. */
-    long double int_float;
-    /*! @brief A quote is an stack of more values, which can contain more
-     * quotes. */
+    /*! @brief A container is a complete cognition environment, and can contain more containers. */
     contain_t *container;
     /*! @brief this holds the string value of a string, word, or the name of a
      * custom type. */

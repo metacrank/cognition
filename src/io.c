@@ -7,12 +7,6 @@ extern stack_t *STACK;
 void print_value(value_t *v) {
   custom_t *c;
   switch (v->type) {
-    case VINT:
-      printf("%.0Lf\n", v->int_float);
-      break;
-    case VFLOAT:
-      printf("%Lf\n", v->int_float);
-      break;
     case VWORD:
       printf("W: %s\n", v->str_word->value);
       break;

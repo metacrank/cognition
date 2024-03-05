@@ -134,13 +134,11 @@ value_t *init_value(int type) {
 }
 
 void *value_copy(void *v) {
-  value_t *a = init_value(VINT);
+  value_t *a = init_value(VWORD);
   value_t *v1 = v;
   contain_t *container = stack_peek(STACK);
   a->type = v1->type;
-  if (v1->type == VINT || v1->type == VFLOAT) {
-    a->int_float = v1->int_float;
-  } else if (v1->type == VWORD || v1->type == VERR) {
+  if (v1->type == VWORD || v1->type == VERR) {
     a->str_word = string_copy(v1->str_word);
     a->escaped = v1->escaped;
   } else if (v1->type == VSTACK) {
@@ -760,7 +758,8 @@ void crank() {
     stack_t *family = init_stack(10);
     stack_push(family, cur);
     evalstack(needseval->container, family);
-    stack_free(family, free);
+    free(family->items);
+    free(family);
     value_t *vf = stack_pop(EVAL_STACK);
     if(vf) {
       value_free(vf);
