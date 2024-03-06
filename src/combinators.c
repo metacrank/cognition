@@ -44,7 +44,7 @@ void cog_child(value_t *v) {
   v1->container->ignored = string_copy(cur->ignored);
   v1->container->dflag = cur->dflag;
   v1->container->iflag = cur->iflag;
-  contain_push(cur, v1);
+  stack_push(cur->stack, v1);
 }
 
 void cog_stack(value_t *v) {
@@ -62,7 +62,7 @@ void cog_stack(value_t *v) {
   v1->container->ignored = string_copy(cur->ignored);
   v1->container->dflag = cur->dflag;
   v1->container->iflag = cur->iflag;
-  contain_push(cur, v1);
+  stack_push(cur->stack, v1);
 }
 
 void cog_wstack(value_t *v) {
@@ -106,7 +106,7 @@ void cog_wstack(value_t *v) {
       // return;
     }
   }
-  contain_push(cur, retval);
+  stack_push(cur->stack, retval);
 }
 
 void cog_bstack(value_t *v) {
@@ -150,7 +150,7 @@ void cog_sub(value_t *v) {
   v1->container = init_contain(init_ht(500), init_ht(500), init_stack(10));
   stack_push(v1->container->faliases, init_string("f"));
   add_funcs(v1->container->flit);
-  contain_push(cur, v1);
+  stack_push(cur->stack, v1);
 }
 
 void add_funcs_combinators(ht_t* flit) {

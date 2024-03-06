@@ -82,12 +82,12 @@ int main(int argc, char **argv) {
     //printf("\nword: [%s]\n", v->str_word->value);
     eval(v);
   }
-  printf("\n\nStack at end:\n");
-  value_t *dummy = init_value(VWORD);
-  dummy->str_word = init_string("v");
-  cog_questionmark(dummy);
-  value_free(dummy);
+  printf("\n");
+  printf("Stack at end:\n");
   contain_t *cur = stack_peek(STACK);
+  for (int i = 0; i < cur->stack->size; i++) {
+    print_value(cur->stack->items[i], "\n");
+  }
   printf("\n");
   printf("delims: '");
   for (int i = 0; i < cur->delims->length; i++) {
