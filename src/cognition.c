@@ -333,17 +333,15 @@ bool isdelim(parser_t *p) {
       if (c->delims->value[i] == p->c) {
         return true;
       }
+    }
+    return false;
+  }
+  for (int i = 0; i < c->delims->length; i++) {
+    if (c->delims->value[i] == p->c) {
       return false;
     }
-  } else {
-    for (int i = 0; i < c->delims->length; i++) {
-      if (c->delims->value[i] == p->c) {
-        return false;
-      }
-    }
-    return true;
   }
-  return false;
+  return true;
 }
 
 /* value_t *parse_word(parser_t *p) { */
@@ -357,7 +355,6 @@ bool isdelim(parser_t *p) {
 /*   return retval; */
 /* } */
 value_t *parse_word(parser_t *p, bool skipped) {
-  printf("(%c)\n", p->c);
   string_t *strval = init_string(NULL);
   value_t *retval = init_value(VWORD);
   retval->str_word = strval;
@@ -379,32 +376,27 @@ bool isignore(parser_t *p) {
       if (c->ignored->value[i] == p->c) {
         return true;
       }
+    }
+    return false;
+  }
+  for (int i = 0; i < c->ignored->length; i++) {
+    if (c->ignored->value[i] == p->c) {
       return false;
     }
-  } else {
-    for (int i = 0; i < c->ignored->length; i++) {
-      if (c->ignored->value[i] == p->c) {
-        return false;
-      }
-    }
-    return true;
   }
-  return false;
+  return true;
 }
 
 bool parser_skip_ignore(parser_t *p) {
   bool skipped = false;
   while (isignore(p) && p->c != '\0') {
-    printf("[%c]", p->c);
     parser_move(p);
     skipped = true;
   }
-  printf("%d", skipped);
   return skipped;
 }
 
 value_t *parser_get_next(parser_t *p) {
-  printf("{%c}", p->c);
   bool skipped = parser_skip_ignore(p);
   switch (p->c) {
   case '\0':
