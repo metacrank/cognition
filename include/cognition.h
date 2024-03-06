@@ -219,6 +219,12 @@ void parser_move(parser_t *p);
 /*! Resets state of parser */
 void parser_reset(parser_t *p, char *source);
 
+/* gets the next word */
+value_t *parse_word(parser_t *p, bool skipped);
+
+/* returns true if ignored characters were skipped, false if none were */
+bool parser_skip_ignore(parser_t *p);
+
 /*! Gets the next value_t from the string, returns NULL if EOF. */
 value_t *parser_get_next(parser_t *p);
 

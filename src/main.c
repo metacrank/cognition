@@ -78,10 +78,17 @@ int main(int argc, char **argv) {
     v = parser_get_next(PARSER);
     if (v == NULL)
       break;
+    //cog_questionmark(v);
+    //printf("\nword: [%s]\n", v->str_word->value);
     eval(v);
-    /* cog_questionmark(dummy); */
-    /* printf("\n\n"); */
   }
+  printf("\n\nStack at end:\n");
+  value_t *dummy = init_value(VWORD);
+  dummy->str_word = init_string("v");
+  cog_questionmark(dummy);
+  value_free(dummy);
+  contain_t *cur = stack_peek(STACK);
+  printf("\ndelims: %d[%s] ignored: %d[%s]\n", cur->dflag, cur->delims->value, cur->iflag, cur->ignored->value);
 
   /* Free all global variables */
   global_free();

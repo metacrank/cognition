@@ -78,8 +78,8 @@ void cog_getd(value_t *v) {
 void add_funcs_parser(ht_t* flit) {
   add_func(flit, cog_d, "d");
   add_func(flit, cog_i, "i");
-  add_func(flit, cog_dflag, "dflag");
-  add_func(flit, cog_iflag, "iflag");
+  add_func(flit, cog_dflag, "dtgl");
+  add_func(flit, cog_iflag, "itgl");
   add_func(flit, cog_geti, "geti");
   add_func(flit, cog_getd, "getd");
 }

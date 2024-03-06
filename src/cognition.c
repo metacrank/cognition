@@ -356,19 +356,19 @@ bool isdelim(parser_t *p) {
 /*   } while (!isdelim(p) && p->c); */
 /*   return retval; */
 /* } */
-value_t *parse_word(parser_t *p) {
+value_t *parse_word(parser_t *p, bool skipped) {
+  printf("(%c)\n", p->c);
   string_t *strval = init_string(NULL);
   value_t *retval = init_value(VWORD);
   retval->str_word = strval;
+  if (!skipped && p->c) {
+    string_append(strval, p->c);
+    parser_move(p);
+  }
   while (!isdelim(p) && p->c) {
     string_append(strval, p->c);
     parser_move(p);
   }
-  if (!p->c || isignore(p)) {
-    return retval;
-  }
-  string_append(strval, p->c);
-  parser_move(p);
   return retval;
 }
 
@@ -392,21 +392,27 @@ bool isignore(parser_t *p) {
   return false;
 }
 
-void parser_skip_ignore(parser_t *p) {
+bool parser_skip_ignore(parser_t *p) {
+  bool skipped = false;
   while (isignore(p) && p->c != '\0') {
+    printf("[%c]", p->c);
     parser_move(p);
+    skipped = true;
   }
+  printf("%d", skipped);
+  return skipped;
 }
 
 value_t *parser_get_next(parser_t *p) {
-  parser_skip_ignore(p);
+  printf("{%c}", p->c);
+  bool skipped = parser_skip_ignore(p);
   switch (p->c) {
   case '\0':
     return NULL;
   case EOF:
     return NULL;
   default:
-    return parse_word(p);
+    return parse_word(p, skipped);
   }
 }
 
@@ -769,6 +775,7 @@ void evalword(value_t *v, stack_t *family) {
   }
   if (!evald) {
     push_quoted(stack_peek(STACK), v);
+    //cog_questionmark(v);
     crank();
   }
 }
@@ -799,6 +806,7 @@ void crank() {
     }
   }
   inc_crank();
+  //cog_questionmark(v);
 }
 
 void eval(value_t *v) {

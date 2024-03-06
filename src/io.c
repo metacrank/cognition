@@ -8,7 +8,15 @@ void print_value(value_t *v, const char *end) {
   custom_t *c;
   switch (v->type) {
     case VWORD:
-      printf("'%s'", v->str_word->value);
+      printf("'");
+      for (int i = 0; i < v->str_word->length; i++) {
+        if (v->str_word->value[i] == '\n') {
+          printf("\\n");
+        }
+        else printf("%c", v->str_word->value[i]);
+      }
+      printf("'");
+      //printf("'%s'", v->str_word->value);
       break;
     case VSTACK:
       printf("[ ");
