@@ -621,6 +621,7 @@ void expandstack(contain_t *c, contain_t *new, stack_t *family) {
       case VWORD:
         stack_push(family, c);
         expandword(newval, new, family);
+        stack_pop(family);
         break;
       default:
         stack_push(new->stack, newval);
@@ -635,7 +636,9 @@ void expandword(value_t *v, contain_t *new, stack_t *family) {
   for (int i = family->size - 1; i >= 0; i--) {
     contain_t *parent = family->items[i];
     if ((macro = ht_get(parent->flit, v->str_word))) {
-      stack_push(new->stack, v); // change
+      for (int i = 0; i < macro->size; i++) {
+        stack_push(new->stack, value_copy(macro->items[i]));
+      }
       evald = true;
       break;
     } else if ((expand = ht_get(parent->word_table, v->str_word))) {
