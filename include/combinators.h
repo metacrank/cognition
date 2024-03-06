@@ -73,95 +73,85 @@ void cog_split(value_t *v);
 **keep3
 **keep4
 **keepn
-**
+*/
 
 
 
-current stack: x1...xn y1...yn q1 q2...qm
+/*current stack: x1...xn y1...yn q1 q2...qm
 let a be the number of values in each set of x,y etc., b be the number of such sets, and c be the number of quotes to apply on each set of values.
-let p be the numerical value of (bi/tri).
+let p be the numerical value of (bi/tri).*/
 
+/*
 then
 'm(bi/tri/quad)n'  operates on a stack with a=n, b=m, c=q,
 'm(bi/tri/quad)*n' operates on a stack with a=n, b=q, c=m,
 
+'mcleaven' operates on a stack with a=n, b=m, c=(# of quotes in child stack)
+'mspreadn' operates on a stack with a=n, b=(# of quotes in child stack), c=m
+
 'l m call'    operates on a stack with a=1, b=l, c=m,
-'l m n calln' operates on a stack with a=n, b=l, c=m
+'l m n calln' operates on a stack with a=n, b=l, c=m,
 
 'm(bi/tri/quad)&' operates on a stack with a=n, b=m, c=q, and multiplies the set of quotes by m,
-'m(bi/tri/quad)@' operates on a stack with a=n, b=q, c=m, and multiplies the set of quotes by q.
+'m(bi/tri/quad)@' operates on a stack with a=n, b=q, c=m, and multiplies the set of quotes by q,
+
+'l m apply'    operates on a stack with a=1, b=l, c=m, and multiplies the set of quotes by l,
+'l m n applyn' operates on a stack with a=n, b=l, c=m, and multiplies the set of quotes by l.
+*/
 
 
-
-
-
+/*
+complete list of builtins:
 
 bi
 bi2
 bi3
+bi4
 bin
-2bi
-2bi2
-2bi3
-2bin
-3bi
-3bi2
-3bi3
-3bin
-mbi
-mbi2
-mbi3
-mbin
 tri
 tri2
 tri3
+tri4
 trin
-2tri
-2tri2
-2tri3
-2trin
-3tri
-3tri2
-3tri3
-3trin
-mtri
-mtri2
-mtri3
-mtrin
+quad
+quad2
+quad3
+quad4
+quadn
 &
 cleave
 cleave2
 cleave3
+cleave4
 cleaven
-2cleave
-2cleave2
-2cleave3
-2cleaven
-3cleave
-3cleave2
-3cleave3
-3cleaven
-mcleave
-mcleave1
-mcleave2
-mcleave3
-mcleaven
 --
 bi*
 bi*2
 bi*3
+bi*4
 bi*n
 tri*
 tri*2
 tri*3
+tri*4
 tri*n
+quad*
+quad*2
+quad*3
+quad*4
+quad*n
 &
 spread
 spread2
 spread3
+spread4
 spreadn
 
 call
+call2
+call3
+call4
+calln
 
 --
 --
@@ -169,60 +159,37 @@ call
 bi&
 bi&2
 bi&3
+bi&4
 bi&n
-2bi&
-2bi&2
-2bi&3
-2bi&n
-3bi&
-3bi&2
-3bi&3
-3bi&n
-mbi&
-mbi&2
-mbi&3
-mbi&n
 tri&
 tri&2
 tri&3
+tri&4
 tri&n
-2tri&
-2tri&2
-2tri&3
-2tri&n
-3tri&
-3tri&2
-3tri&3
-3tri&n
-mtri&
-mtri&2
-mtri&3
-mtri&n
+quad&
+quad&2
+quad&3
+quad&4
+quad&n
 --
 bi@
 bi@2
 bi@3
+bi@4
 bi@n
 tri@
 tri@2
 tri@3
+tri@4
 tri@n
 
 apply
+apply2
+apply3
+apply4
+applyn
 
-
-
-
-
-
-
-
-
-
-
-
-**
- */
+*/
 
 
 
