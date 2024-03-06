@@ -62,6 +62,7 @@ void *stack_popdeep(stack_t *a, int index) {
   if (index >= a->size || index < 0)
     return NULL;
   void *retval = a->items[index];
+  a->size--;
   for (int i = index; i < a->size; i++) {
     a->items[i] = a->items[i + 1];
   }
@@ -588,10 +589,9 @@ unsigned long hash(ht_t *h, char *key) {
 
 void inc_crank() {
   contain_t *cur = stack_peek(STACK);
-  void **defcranks = cur->cranks->items;
   int(*crank)[2];
   for (int i = 0; i < cur->cranks->size; i++) {
-    crank = defcranks[i];
+    crank = cur->cranks->items[i];
     crank[0][0]++;
     if (crank[0][0] >= crank[0][1]) {
       crank[0][0] = 0;
@@ -697,28 +697,44 @@ void push_quoted(contain_t *cur, value_t *v) {
   stack_push(cur->stack, q);
 }
 
+void eval_value(contain_t *c, stack_t *family, contain_t *cur, value_t *val) {
+  switch (val->type) {
+    case VWORD:
+      stack_push(family, c);
+      evalword(val, family);
+      stack_pop(family);
+      break;
+    case VSTACK:
+      stack_push(cur->stack, val);
+      break;
+    case VCLIB:
+      ((void(*)(value_t *v))(val->custom))(val);
+      break;
+    default:
+      push_quoted(cur, value_copy(val));
+  }
+}
+
 void evalstack(contain_t *c, stack_t *family) {
   contain_t *cur = stack_peek(STACK);
-  for (int i = 0; i < c->stack->size; i++) {
-    value_t *newval = c->stack->items[i];
-    switch (newval->type) {
-      case VWORD:
-        stack_push(family, c);
-        evalword(newval, family);
-        stack_pop(family);
-        break;
-      case VSTACK:
-        stack_push(cur->stack, newval);
-        crank();
-        break;
-      case VCLIB:
-        ((void(*)(value_t *v))(newval->custom))(newval);
-        crank();
-        break;
-      default:
-        push_quoted(cur, newval);
-        crank();
+  if (c->stack->size) {
+    eval_value(c, family, cur, c->stack->items[0]);
+    inc_crank();
+    if (cur->cranks->size) {
+      int(*cr)[2] = cur->cranks->items[0];
     }
+  }
+  int(*cr)[2];
+  for (int i = 1; i < c->stack->size; i++) {
+    value_t *newval = c->stack->items[i];
+    cr = c->cranks->items[0];
+    if (*cr[0] == 0 && *cr[1]) {
+      eval_value(c, family, cur, newval);
+      inc_crank();
+      break;
+    }
+    push_quoted(cur, value_copy(newval));
+    crank();
   }
 }
 
@@ -739,7 +755,7 @@ void evalmacro(stack_t *macro, value_t *word, stack_t *family) {
         evalword(v, family);
         break;
       default:
-        push_quoted(cur, v);
+        push_quoted(cur, value_copy(v));
     }
   }
 }
@@ -752,7 +768,6 @@ void evalword(value_t *v, stack_t *family) {
     contain_t *parent = family->items[i];
     if ((macro = ht_get(parent->flit, v->str_word))) {
       evalmacro(macro, v, family);
-      crank();
       evald = true;
       break;
     } else if ((expand = ht_get(parent->word_table, v->str_word))) {
@@ -760,15 +775,12 @@ void evalword(value_t *v, stack_t *family) {
       evald = true;
       break;
     } else if (isfaliasin(parent, v)) {
-      evalf();
       evald = true;
       break;
     }
   }
   if (!evald) {
-    push_quoted(stack_peek(STACK), v);
-    //cog_questionmark(v);
-    crank();
+    push_quoted(stack_peek(STACK), value_copy(v));
   }
 }
 
@@ -778,7 +790,7 @@ void crank() {
   int(*crank)[2];
   for (int i = 0; i < cur->cranks->size; i++) {
     crank = cur->cranks->items[i];
-    if (*crank[0] == 0 && *crank[1]) {
+    if (crank[0][0] == 0 && crank[0][1]) {
       cindex = i;
       break;
     }
@@ -786,6 +798,10 @@ void crank() {
   if (cindex >= 0) {
     int fixedindex = cur->stack->size - 1 - cindex;
     value_t *needseval = stack_popdeep(cur->stack, fixedindex);
+    if (!needseval) {
+      eval_error("CRANK TOO DEEP");
+      return;
+    }
     stack_push(EVAL_STACK, needseval);
     stack_t *family = init_stack(10);
     stack_push(family, cur);
@@ -796,9 +812,9 @@ void crank() {
     if(vf) {
       value_free(vf);
     }
+  } else {
+    inc_crank();
   }
-  inc_crank();
-  //cog_questionmark(v);
 }
 
 void eval(value_t *v) {
@@ -810,7 +826,7 @@ void eval(value_t *v) {
       return;
     }
     int(*crank)[2] = cur->cranks->items[0];
-    if (*crank[0] || !(*crank[1])) {
+    if (crank[0][0] == 1 || crank[0][1] == 0) {
       evalf();
       return;
     }

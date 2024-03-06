@@ -16,7 +16,6 @@ void print_value(value_t *v, const char *end) {
         else printf("%c", v->str_word->value[i]);
       }
       printf("'");
-      //printf("'%s'", v->str_word->value);
       break;
     case VSTACK:
       printf("[ ");

@@ -74,8 +74,8 @@ void cog_metacrank(value_t *v) {
     }
   }
   int(*cr)[2] = cranks->items[v1val];
-  *cr[0] = (v2val > 1);
-  *cr[1] = v2val;
+  cr[0][0] = 0;
+  cr[0][1] = v2val;
   value_free(v1);
   value_free(v2);
 }
@@ -115,8 +115,8 @@ void cog_crank(value_t *v) {
     stack_push(cranks, arr);
   }
   int(*c)[2] = cranks->items[0];
-  *c[0] = (v1val > 1);
-  *c[1] = v1val;
+  c[0][0] = 0;
+  c[0][1] = v1val;
   value_free(v1);
 }
 
@@ -184,7 +184,7 @@ void cog_crankbase(value_t *v) {
   value_t *v1 = init_value(VWORD);
   contain_t *cur = stack_peek(STACK);
   int(*cr)[2] = cur->cranks->items[0];
-  int base = *cr[1];
+  int base = cr[0][1];
   char *str = malloc(sizeof(char) * (int)(log10(base) + 2));
   sprintf(str, "%d", base);
   v1->str_word = init_string(str);

@@ -88,7 +88,30 @@ int main(int argc, char **argv) {
   cog_questionmark(dummy);
   value_free(dummy);
   contain_t *cur = stack_peek(STACK);
-  printf("\ndelims: %d[%s] ignored: %d[%s]\n", cur->dflag, cur->delims->value, cur->iflag, cur->ignored->value);
+  printf("\n");
+  printf("delims: '");
+  for (int i = 0; i < cur->delims->length; i++) {
+    if (cur->delims->value[i] == '\n')
+      printf("\\n");
+    else
+      printf("%c", cur->delims->value[i]);
+  }
+  if (cur->dflag) printf("' (whitelist)\n");
+  else printf("] (blacklist)\n");
+  printf("ignored: '");
+  for (int i = 0; i < cur->ignored->length; i++) {
+    if (cur->ignored->value[i] == '\n')
+      printf("\\n");
+    else
+      printf("%c", cur->ignored->value[i]);
+  }
+  if (cur->iflag) printf("' (whitelist)\n");
+  else printf("] (blacklist)\n");
+
+  if (cur->cranks->size) {
+    int(*cr)[2] = cur->cranks->items[0];
+    printf("crank %d\n", cr[0][1]);
+  } else printf("crank 0\n");
 
   /* Free all global variables */
   global_free();
