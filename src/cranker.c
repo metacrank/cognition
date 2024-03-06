@@ -49,6 +49,8 @@ void cog_metacrank(value_t *v) {
   /*   value_free(v2); */
   /*   return; */
   /* } */
+  value_free(tmp);
+  value_free(tmp2);
 
   if (v1->type != VWORD || v2->type != VWORD) {
     /* TODO: error */
