@@ -10,4 +10,5 @@ void add_funcs(ht_t *flit) {
   add_funcs_misc(flit);
   add_funcs_parser(flit);
   add_funcs_stackops(flit);
+  add_funcs_strings(flit);
 }

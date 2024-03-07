@@ -10,6 +10,7 @@
 #include <misc.h>
 #include <parser.h>
 #include <stackops.h>
+#include <strings.h>
 
 /*! @brief dds functions to flit table */
 void add_funcs(ht_t* flit);
