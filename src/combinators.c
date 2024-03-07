@@ -22,6 +22,53 @@ void cog_eval(value_t *v) {
   evalf();
 }
 
+void cog_dip(value_t *v) {
+  contain_t *cur = stack_peek(STACK);
+  stack_t *stack = cur->stack;
+  value_t *v1 = stack_pop(stack);
+  if (!v1) {
+    eval_error("EMPTY STACK");
+    return;
+  }
+  evalf();
+  stack_push(stack, v1);
+}
+
+void cog_if(value_t *v) {
+  contain_t *cur = stack_peek(STACK);
+  stack_t *stack = cur->stack;
+  value_t *v3 = stack_pop(stack);
+  if (!v3) {
+    eval_error("EMPTY STACK");
+    return;
+  }
+  value_t *v2 = stack_pop(stack);
+  if (!v2) {
+    value_free(v3);
+    eval_error("EMPTY STACK");
+    return;
+  }
+  value_t *v1 = stack_pop(stack);
+  if (!v1) {
+    value_free(v2);
+    value_free(v3);
+    eval_error("EMPTY STACK");
+    return;
+  }
+  /* TODO: Checks if int */
+  int v1_fixed = atoi(v1->str_word->value);
+  value_free(v1);
+  if (v1_fixed) {
+    stack_push(stack, v2);
+    value_free(v3);
+    evalf();
+  } else {
+    stack_push(stack, v3);
+    value_free(v2);
+    evalf();
+  }
+}
+
 void cog_child(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   value_t *v1 = init_value(VSTACK);
@@ -161,4 +208,6 @@ void add_funcs_combinators(ht_t* flit) {
   add_func(flit, cog_wstack, "wstack");
   add_func(flit, cog_bstack, "bstack");
   add_func(flit, cog_sub, "sub");
+  add_func(flit, cog_if, "if");
+  add_func(flit, cog_dip, "dip");
 }
