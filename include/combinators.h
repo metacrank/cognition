@@ -48,11 +48,26 @@ void cog_curry3(value_t *v);
 void cog_curry4(value_t *v);
 void cog_curryn(value_t *v);
 
+/* @brief [quote] [value] push  */
+void cog_push(value_t *v);
+void cog_push2(value_t *v);
+void cog_push3(value_t *v);
+void cog_push4(value_t *v);
+void cog_pushn(value_t *v);
+
 /* curries elements further down */
-void with(value_t *v);
-void withd(value_t *v);
-void withdd(value_t *v);
-void withn(value_t *v);
+void cog_with(value_t *v);
+void cog_with2(value_t *v);
+void cog_with3(value_t *v);
+void cog_with4(value_t *v);
+void cog_withn(value_t *v);
+
+/* uncurries elements from stack */
+void cog_uncurry(value_t *v);
+void cog_uncurry2(value_t *v);
+void cog_uncurry3(value_t *v);
+void cog_uncurry4(value_t *v);
+void cog_uncurryn(value_t *v);
 
 /* @brief Inserts a value into a string or quote. */
 /* call with `[quote/string] value index insert` */
@@ -65,11 +80,12 @@ void cog_dip4(value_t *v);
 void cog_dipn(value_t *v);
 
 /*! @brief keeps value on the stack after evaluating the value */
-void keep(value_t *v);
-void keep2(value_t *v);
-void keep3(value_t *v);
-void keep4(value_t *v);
-void keepn(value_t *v);
+void cog_keep(value_t *v);
+void cog_keep2(value_t *v);
+void cog_keep3(value_t *v);
+void cog_keep4(value_t *v);
+void cog_keepn(value_t *v);
+
 
 /*! @brief [cond] [if true] [if false] if; evaluates 2nd term if cond is true;
  * otherwise evaluates the other one. */
@@ -89,6 +105,32 @@ void cog_do(value_t *v);
 
 /* splits child in two */
 void cog_split(value_t *v);
+void cog_split0(value_t *v);
+void cog_split1(value_t *v);
+void cog_split2(value_t *v);
+void cog_split3(value_t *v);
+
+void cog_splitst(value_t *v);
+void cog_splitst0(value_t *v);
+void cog_splitst1(value_t *v);
+void cog_splitst2(value_t *v);
+void cog_splitst3(value_t *v);
+
+
+/* gets nth values */
+void cog_first(value_t *v);
+void cog_second(value_t *v);
+void cog_third(value_t *v);
+void cog_fourth(value_t *v);
+void cog_last(value_t *v);
+void cog_secondlast(value_t *v);
+void cog_thirdlast(value_t *v);
+void cog_fourthlast(value_t *v);
+void cog_nth(value_t *v);
+
+
+/* uncompose all values in quote */
+void cog_uncompose(value_t *v);
 
 
 /*current stack: x1...xn y1...yn q1 q2...qm
@@ -203,7 +245,22 @@ void cog_apply3(value_t *v);
 void cog_apply4(value_t *v);
 void cog_applyn(value_t *v);
 
+/* [ q1 q2 ... q3 ] n &&n applies each quote in a child stack on the top n items of the stack and returns the output of the last quote if all return true */
 
+void cog_and0(value_t *v);
+void cog_and1(value_t *v);
+void cog_and2(value_t *v);
+void cog_and3(value_t *v);
+void cog_and4(value_t *v);
+void cog_andn(value_t *v);
+
+/* similar but for at least one truth value */
+void cog_or0(value_t *v);
+void cog_or1(value_t *v);
+void cog_or2(value_t *v);
+void cog_or3(value_t *v);
+void cog_or4(value_t *v);
+void cog_orn(value_t *v);
 
 
 /* adds combinator builtins to flit */
