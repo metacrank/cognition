@@ -60,4 +60,6 @@ void cog_insert(value_t *v);
 void cog_isnum(value_t *v);
 
 
+void add_funcs_strings(ht_t *flit);
+
 #endif // STRINGS_H_

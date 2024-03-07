@@ -13,6 +13,6 @@
 #include <strings.h>
 
 /*! @brief dds functions to flit table */
-void add_funcs(ht_t* flit);
+void add_funcs(ht_t *flit);
 
 #endif // BUILTINS_H_
