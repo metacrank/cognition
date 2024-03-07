@@ -11,11 +11,13 @@ void cog_undef(value_t *v);
 
 /* if the word is associated with the current stack, returns the definition of the word */
 /* should this be changed to allow the ungluing of any word for the default environment?
- * we could have another word to get the stack attribute of a word's definition
+ * probably not
+ * because we can always have a word defined with [ a ] [ [ quote ] eval ] def,
+ * where evaluating it in crank 3: 'a dsc 1 crank eval'  will return [ quote ]
  */
 void cog_unglue(value_t *v);
 
-/* returns 0 if and only if the word is not defined */
+/* returns false if and only if the word is not defined */
 void cog_isdef(value_t *v);
 
 /* turns a child stack definition into a 'builtin' */

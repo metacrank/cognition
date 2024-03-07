@@ -97,36 +97,11 @@ void cog_rotdn(value_t *v);
 void cog_negrotdn(value_t *v);
 
 
-
-
-
-
-
-
-/*! @brief [VWORD/VSTR/VQUOTE] len; returns length of value */
-void cog_len(value_t *v);
-
-/*! @brief deletes value at index from child */
-void cog_del(value_t *v);
-
-/*! @brief checks if string is a number. */
-void cog_isnum(value_t *v);
-
-/*! @brief string to integer */
-void cog_stoi(value_t *v);
-
 /*! @brief returns current stack size */
 void cog_ssize(value_t *v);
 
-/*! @brief [number] [VQUOTE/VSTR/VWORD] vat; gets the value at a certain index.
- */
-void cog_vat(value_t *v);
-
-/*! @brief returns type of first stack element as an integer */
+/*! @brief returns type of top stack element as an integer */
 void cog_type(value_t *v);
-
-
-
 
 
 /* adds stack operation fuctions to flit */

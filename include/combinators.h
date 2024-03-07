@@ -35,11 +35,12 @@ void cog_compose4(value_t *v);
 void cog_composen(value_t *v);
 
 void cog_prepose(value_t *v);
+void cog_prepose2(value_t *v);
+void cog_prepose3(value_t *v);
+void cog_prepose4(value_t *v);
+void cog_preposen(value_t *v);
 
 void cog_strstack(value_t *v);
-
-/*! @brief reads a file into a string, returns on the stack */
-void cog_fread(value_t *v);
 
 /* @brief [value] [quote] curry  */
 void cog_curry(value_t *v);
@@ -69,9 +70,9 @@ void cog_uncurry3(value_t *v);
 void cog_uncurry4(value_t *v);
 void cog_uncurryn(value_t *v);
 
-/* @brief Inserts a value into a string or quote. */
-/* call with `[quote/string] value index insert` */
-void cog_insert(value_t *v);
+/* @brief Inserts a value into a quote. */
+/* call with `[quote] value index put` */
+void cog_put(value_t *v);
 
 void cog_dip(value_t *v);
 void cog_dip2(value_t *v);
@@ -123,14 +124,21 @@ void cog_second(value_t *v);
 void cog_third(value_t *v);
 void cog_fourth(value_t *v);
 void cog_last(value_t *v);
-void cog_secondlast(value_t *v);
-void cog_thirdlast(value_t *v);
-void cog_fourthlast(value_t *v);
-void cog_nth(value_t *v);
+void cog_second_last(value_t *v);
+void cog_third_last(value_t *v);
+void cog_fourth_last(value_t *v);
 
+void cog_vat(value_t *v);
+
+/*! @brief deletes value at index from child */
+void cog_del(value_t *v);
 
 /* uncompose all values in quote */
 void cog_uncompose(value_t *v);
+
+/* size of a stack */
+void cog_size(value_t *v);
+
 
 
 /*current stack: x1...xn y1...yn q1 q2...qm

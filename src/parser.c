@@ -51,12 +51,12 @@ void cog_i(value_t *v) {
   value_free(word);
 }
 
-void cog_dflag(value_t *v) {
+void cog_dtgl(value_t *v) {
   contain_t *c = stack_peek(STACK);
   c->dflag = !c->dflag;
 }
 
-void cog_iflag(value_t *v) {
+void cog_itgl(value_t *v) {
   contain_t *c = stack_peek(STACK);
   c->iflag = !c->iflag;
 }
@@ -78,8 +78,8 @@ void cog_getd(value_t *v) {
 void add_funcs_parser(ht_t* flit) {
   add_func(flit, cog_d, "d");
   add_func(flit, cog_i, "i");
-  add_func(flit, cog_dflag, "dtgl");
-  add_func(flit, cog_iflag, "itgl");
+  add_func(flit, cog_dtgl, "dtgl");
+  add_func(flit, cog_itgl, "itgl");
   add_func(flit, cog_geti, "geti");
   add_func(flit, cog_getd, "getd");
 }
