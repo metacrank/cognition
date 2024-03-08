@@ -711,7 +711,7 @@ void eval_value(contain_t *c, stack_t *family, contain_t *cur, value_t *val) {
       stack_pop(family);
       break;
     case VSTACK:
-      stack_push(cur->stack, val);
+      stack_push(cur->stack, value_copy(val));
       break;
     case VCLIB:
       ((void(*)(value_t *v))(val->custom))(val);
@@ -755,7 +755,7 @@ void evalmacro(stack_t *macro, value_t *word, stack_t *family) {
         ((void(*)(value_t *v))(v->custom))(word);
         break;
       case VSTACK:
-        stack_push(cur->stack, v);
+        stack_push(cur->stack, value_copy(v));
         break;
       case VWORD:
         evalword(v, family);
