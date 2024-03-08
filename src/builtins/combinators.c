@@ -1,5 +1,4 @@
-// #include <builtins/combinators.h>
-#include <combinators.h>
+#include <builtins/combinators.h>
 #include <string.h>
 
 extern stack_t *STACK;

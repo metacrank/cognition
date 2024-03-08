@@ -1,16 +1,16 @@
 #ifndef BUILTINS_H_
 #define BUILTINS_H_
 #include <cognition.h>
-#include <combinators.h>
-#include <cranker.h>
-#include <hashtable.h>
-#include <io.h>
-#include <bmath.h>
-#include <metastack.h>
-#include <misc.h>
-#include <parser.h>
-#include <stackops.h>
-#include <strings.h>
+#include <builtins/combinators.h>
+#include <builtins/cranker.h>
+#include <builtins/hashtable.h>
+#include <builtins/io.h>
+#include <builtins/bmath.h>
+#include <builtins/metastack.h>
+#include <builtins/misc.h>
+#include <builtins/parser.h>
+#include <builtins/stackops.h>
+#include <builtins/strings.h>
 
 /*! @brief dds functions to flit table */
 void add_funcs(ht_t *flit);

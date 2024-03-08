@@ -1,9 +1,11 @@
 CC := gcc 
 SRCDIR := src
+BUILTINS_SRCDIR := src/builtins
 BUILDDIR := build
+BUILTINS_BUILDDIR := $(BUILDDIR)/builtins
 TARGET := crank
 SRCEXT := c
-SOURCES := $(shell find $(SRCDIR) -type f -name *.$(SRCEXT))
+SOURCES := $(shell find $(SRCDIR) $(BUILTINS_SRCDIR) -type f -name *.$(SRCEXT))
 OBJECTS := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.o))
 CFLAGS := -fpic
 LIB := -L lib -lm
@@ -15,7 +17,7 @@ $(TARGET): $(OBJECTS)
 
 $(BUILDDIR)/%.o: $(SRCDIR)/%.$(SRCEXT)
 	@echo " Building..."
-	@mkdir -p $(BUILDDIR)
+	@mkdir -p $(BUILDDIR) $(BUILTINS_BUILDDIR)
 	@echo " $(CC) $(CFLAGS) $(INC) -c -o $@ $<"; $(CC) $(CFLAGS) $(INC) -c -o $@ $< -save-temps -O3
 
 clean:
