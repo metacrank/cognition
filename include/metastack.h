@@ -12,6 +12,9 @@ void cog_ccd(value_t *v);
 /* pops one element from the stack stack */
 void cog_uncd(value_t *v);
 
+/* takes top of stack with you during uncd */
+void cog_pop(value_t *v);
+
 /* instant qstack and reset to baremetal cognition settings, definitions, and builtins */
 void cog_meta(value_t *v);
 
@@ -27,10 +30,19 @@ void cog_pcd(value_t *v);
 /* returns a pointer to the current stack */
 void cog_gstack(value_t *v);
 
+/* returns a pointer to the stack at the top of the stack */
+void cog_gchild(value_t *v);
+
+/* returns a pointer to the root stack */
+void cog_groot(value_t *v);
+
+/* returns to root stack */
+void cog_root(value_t *v);
+
 /* replaces the entire contents of the stack stack with the stack at the top of the stack */
 void cog_chroot(value_t *v);
 
-/* exits from the root stack */
+/* exits from the root stack, no matter what stack you're in */
 void cog_exit(value_t *v);
 
 /* adds metastack fuctions to flit */

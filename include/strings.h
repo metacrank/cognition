@@ -59,6 +59,8 @@ void cog_insert(value_t *v);
 /*! @brief checks if string is a number. */
 void cog_isnum(value_t *v);
 
+/* parses string into stack, using the current method of tokenization */
+void cog_strstack(value_t *v);
 
 void add_funcs_strings(ht_t *flit);
 

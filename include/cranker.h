@@ -15,9 +15,6 @@ void cog_crankall(value_t *v);
 /* instant 0 crankall */
 void cog_reset(value_t *v);
 
-/* evaluate child instantly if it is not high tide */
-void cog_f(value_t *v);
-
 /* returns the number of operations in a crank cycle */
 void cog_crankbase(value_t *v);
 

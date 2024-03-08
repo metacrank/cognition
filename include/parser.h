@@ -45,6 +45,9 @@ void cog_undelim(value_t *v);
 /* same for ignored characters */
 void cog_unignore(value_t *v);
 
+/* parse and eval string */
+void evalstr(value_t *v);
+
 /* adds parser fuctions to flit */
 void add_funcs_parser(ht_t *flit);
 
