@@ -247,8 +247,10 @@ contain_t *init_contain(ht_t *h, ht_t *flit, stack_t *cranks) {
 
 void contain_free(void *con) {
   contain_t *c = con;
-  ht_free(c->word_table, value_free);
-  ht_free(c->flit, value_stack_free);
+  if (c->word_table)
+    ht_free(c->word_table, value_free);
+  if (c->flit)
+    ht_free(c->flit, value_stack_free);
   stack_free(c->stack, value_free);
   stack_free(c->err_stack, value_free);
   stack_free(c->cranks, free);
@@ -555,7 +557,7 @@ void ht_add(ht_t *h, string_t *key, void *v, void (*freefunc)(void *)) {
 }
 
 void *ht_get(ht_t *h, string_t *key) {
-  if (key == NULL)
+  if (key == NULL || h == NULL)
     return NULL;
   return sll_get(h->buckets[hash(h, key->value)], key);
 }
@@ -695,7 +697,7 @@ void contain_push(contain_t *c, value_t *v) {
 
 void push_quoted(contain_t *cur, value_t *v) {
   value_t *q = init_value(VSTACK);
-  q->container = init_contain(init_ht(1), init_ht(1), init_stack(1));
+  q->container = init_contain(NULL, NULL, init_stack(1));
   stack_push(q->container->stack, v);
   stack_push(cur->stack, q);
 }

@@ -13,14 +13,14 @@ extern stack_t *OBJ_STACK;
 
 /*! prints usage then exits */
 void usage() {
-  printf("Usage: stem [-hv] [file]\n");
+  printf("Usage: crank [-hv] [file]\n");
   exit(1);
 }
 
 /*! prints version and exits */
 void version() {
-  printf("Author: Preston Pan, MIT License 2024\n");
-  printf("stem, version 1.4 alpha\n");
+  printf("Author: Preston Pan, Matthew Hinton, MIT License 2024\n");
+  printf("cognition, version 1.0 alpha\n");
   exit(0);
 }
 
