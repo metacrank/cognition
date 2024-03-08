@@ -1,4 +1,5 @@
 #include <builtins.h>
+#include <builtins/io.h>
 #include <cognition.h>
 #include <dlfcn.h>
 #include <stdio.h>

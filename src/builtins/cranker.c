@@ -1,18 +1,13 @@
 #include <cognition.h>
 #include <builtins/cranker.h>
+#include <builtinslib.h>
 #include <ctype.h>
 #include <math.h>
 #include <stdio.h>
 
 extern stack_t *STACK;
+extern stack_t *EVAL_STACK;
 
-bool strisint(string_t *s) {
-  for (int i = 0; i < s->length; i++) {
-    if (!isdigit(s->value[i]))
-      return false;
-  }
-  return true;
-}
 /* n m metacrank sets metacrank n to period m */
 void cog_metacrank(value_t *v) {
   contain_t *cur = stack_peek(STACK);

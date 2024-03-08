@@ -28,29 +28,31 @@ void cog_bstack(value_t *v);
 /* creates a child stack with the default cognition environment */
 void cog_sub(value_t *v);
 
+/* keeps first stack's attributes */
 void cog_compose(value_t *v);
 /* void cog_compose2(value_t *v); */
 /* void cog_compose3(value_t *v); */
 /* void cog_compose4(value_t *v); */
 /* void cog_composen(value_t *v); */
 
-/* void cog_prepose(value_t *v); */
+/* keeps attributes of the stack being preposed to */
+void cog_prepose(value_t *v);
 /* void cog_prepose2(value_t *v); */
 /* void cog_prepose3(value_t *v); */
 /* void cog_prepose4(value_t *v); */
 /* void cog_preposen(value_t *v); */
 
-void cog_strstack(value_t *v);
-
 /* @brief [value] [quote] curry  */
-void cog_curry(value_t *v);
+/* curry can be written as 'swap quote prepose' */
+/* void cog_curry(value_t *v); */
 /* void cog_curry2(value_t *v); */
 /* void cog_curry3(value_t *v); */
 /* void cog_curry4(value_t *v); */
 /* void cog_curryn(value_t *v); */
 
-/* @brief [quote] [value] push  */
-void cog_push(value_t *v);
+/* @brief [quote] [value] push */
+/* push can be written as 'quote compose' */
+/* void cog_push(value_t *v); */
 /* void cog_push2(value_t *v); */
 /* void cog_push3(value_t *v); */
 /* void cog_push4(value_t *v); */
@@ -58,20 +60,22 @@ void cog_push(value_t *v);
 
 /* curries elements further down */
 /* void cog_with(value_t *v); */
-/* void cog_with2(value_t *v); */
-/* void cog_with3(value_t *v); */
-/* void cog_with4(value_t *v); */
-/* void cog_withn(value_t *v); */
+/* void cog_2with(value_t *v); */
+/* void cog_3with(value_t *v); */
+/* void cog_4with(value_t *v); */
+/* void cog_mwith(value_t *v); */
+/* void cog_mwithn(value_t *v) */
 
 /* uncurries elements from stack */
-void cog_uncurry(value_t *v);
+/* uncurryn can be written as 'split swap dip' */
+/* void cog_uncurry(value_t *v); */
 /* void cog_uncurry2(value_t *v); */
 /* void cog_uncurry3(value_t *v); */
 /* void cog_uncurry4(value_t *v); */
 /* void cog_uncurryn(value_t *v); */
 
 /* @brief Inserts a value into a quote. */
-/* call with `[quote] value index put` */
+/* call with `[quote] value index put*/
 void cog_put(value_t *v);
 
 void cog_dip(value_t *v);
@@ -81,6 +85,7 @@ void cog_dip(value_t *v);
 /* void cog_dipn(value_t *v); */
 
 /*! @brief keeps value on the stack after evaluating the value */
+/* keep can be written as 'dupd dip' */
 /* void cog_keep(value_t *v); */
 /* void cog_keep2(value_t *v); */
 /* void cog_keep3(value_t *v); */
@@ -94,7 +99,7 @@ void cog_if(value_t *v);
 
 /* void cog_when(value_t *v); */
 
-/* executes child, then pops element off stack and if true executes the same child again, in a loop */
+/* executes child, then looks at element at top of stack and if true executes the same child again, in a loop */
 void cog_loop(value_t *v);
 /* loop === [ eval ] keep [ loop ] curry when */
 

@@ -1,6 +1,13 @@
-
+ldfgldftgldfdtgl
 df 
  
-ldfgldftgldfdtgl  dfiffd f i f 1 crank f
+dfiffd f i f 1 crank f
 
-l 0 2 metacrank . 0 1 metacrank ? 2 1 2 metacrank crank m .
+
+
+l 2 crank . 0 1 metacrank ?
+
+2 1 2 metacrank crank m reset . f
+
+1 crank f
+
