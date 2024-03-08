@@ -34,6 +34,7 @@ void cog_dsc(value_t *v);
 
 /*! @brief swaps the top two values of the stack */
 void cog_swap(value_t *v);
+void cog_swapmn(value_t *v);
 /* void cog_swapd(value_t *v); */
 /* void cog_swapdd(value_t *v); */
 
