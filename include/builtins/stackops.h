@@ -100,8 +100,8 @@ void cog_dup(value_t *v);
 /*! @brief returns current stack size */
 void cog_ssize(value_t *v);
 
-/*! @brief returns type of top stack element as an integer */
-void cog_type(value_t *v);
+/* /\*! @brief returns type of top stack element as an integer *\/ */
+/* void cog_type(value_t *v); */
 
 
 /* adds stack operation fuctions to flit */
