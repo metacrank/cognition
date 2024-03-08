@@ -5,7 +5,7 @@
 #include <builtins/cranker.h>
 #include <builtins/hashtable.h>
 #include <builtins/io.h>
-#include <builtins/bmath.h>
+#include <builtins/math.h>
 #include <builtins/metastack.h>
 #include <builtins/misc.h>
 #include <builtins/parser.h>
