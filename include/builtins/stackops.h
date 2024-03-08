@@ -34,9 +34,9 @@ void cog_dsc(value_t *v);
 
 /*! @brief swaps the top two values of the stack */
 void cog_swap(value_t *v);
-void cog_swapmn(value_t *v);
 /* void cog_swapd(value_t *v); */
 /* void cog_swapdd(value_t *v); */
+/* void cog_swapmn(value_t *v); */
 
 /* reverses order of more than two elements */
 /* void cog_spin(value_t *v); */
@@ -97,6 +97,11 @@ void cog_dup(value_t *v);
 /* void cog_rotdn(value_t *v); */
 /* void cog_negrotdn(value_t *v); */
 
+/* void cog_weave(value_t *v); */
+/* void cog_2weave(value_t *v); */
+/* void cog_3weave(value_t *v); */
+/* void cog_4weave(value_t *v); */
+/* void cog_nweave(value_t *v); */
 
 /*! @brief returns current stack size */
 void cog_ssize(value_t *v);
