@@ -247,10 +247,8 @@ contain_t *init_contain(ht_t *h, ht_t *flit, stack_t *cranks) {
 
 void contain_free(void *con) {
   contain_t *c = con;
-  if (c->word_table)
-    ht_free(c->word_table, value_free);
-  if (c->flit)
-    ht_free(c->flit, value_stack_free);
+  ht_free(c->word_table, value_free);
+  ht_free(c->flit, value_stack_free);
   stack_free(c->stack, value_free);
   stack_free(c->err_stack, value_free);
   stack_free(c->cranks, free);
@@ -541,6 +539,7 @@ ht_t *init_ht(size_t size) {
 }
 
 ht_t *ht_copy(ht_t *h, void *(*copyfunc)(void *)) {
+  if (h == NULL) return NULL;
   ht_t *ht = calloc(1, sizeof(ht_t));
   ht->buckets = calloc(h->size, sizeof(sll_t *));
   for (int i = 0; i < h->size; i++) {
@@ -565,12 +564,14 @@ void *ht_get(ht_t *h, string_t *key) {
 bool ht_exists(ht_t *h, string_t *key) { return ht_get(h, key) != NULL; }
 
 void ht_delete(ht_t *h, string_t *key, void (*freefunc)(void *)) {
+  if (h == NULL) return;
   if (key == NULL)
     return;
   sll_delete(h->buckets[hash(h, key->value)], key, freefunc);
 }
 
 void ht_free(ht_t *h, void (*func)(void *)) {
+  if (h == NULL) return;
   for (int i = 0; i < h->size; i++) {
     sll_free(h->buckets[i], func);
   }
