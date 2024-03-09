@@ -333,24 +333,6 @@ void parser_move(parser_t *p) {
   }
 }
 
-bool isdelim(parser_t *p) {
-  contain_t *c = stack_peek(STACK);
-  if (c->dflag) {
-    for (int i = 0; i < c->delims->length; i++) {
-      if (c->delims->value[i] == p->c) {
-        return true;
-      }
-    }
-    return false;
-  }
-  for (int i = 0; i < c->delims->length; i++) {
-    if (c->delims->value[i] == p->c) {
-      return false;
-    }
-  }
-  return true;
-}
-
 /* value_t *parse_word(parser_t *p) { */
 /*   string_t *strval = init_string(NULL); */
 /*   value_t *retval = init_value(VWORD); */
@@ -388,6 +370,24 @@ bool isignore(parser_t *p) {
   }
   for (int i = 0; i < c->ignored->length; i++) {
     if (c->ignored->value[i] == p->c) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool isdelim(parser_t *p) {
+  contain_t *c = stack_peek(STACK);
+  if (c->dflag) {
+    for (int i = 0; i < c->delims->length; i++) {
+      if (c->delims->value[i] == p->c) {
+        return true;
+      }
+    }
+    return false;
+  }
+  for (int i = 0; i < c->delims->length; i++) {
+    if (c->delims->value[i] == p->c) {
       return false;
     }
   }
@@ -704,7 +704,7 @@ void contain_push(contain_t *c, value_t *v) {
 
 void push_quoted(contain_t *cur, value_t *v) {
   value_t *q = init_value(VSTACK);
-  q->container = init_contain(NULL, NULL, init_stack(1));
+  q->container = init_contain(NULL, NULL, init_stack(10));
   stack_push(q->container->stack, v);
   stack_push(cur->stack, q);
 }

@@ -1,6 +1,7 @@
 #include <builtins/combinators.h>
 #include <builtinslib.h>
 #include <string.h>
+#include <stdio.h>
 
 extern stack_t *STACK;
 extern stack_t *EVAL_STACK;
@@ -487,6 +488,78 @@ void cog_substack(value_t *v) {
   qstack->size = n2 - n1 + 1;
 }
 
+void cog_del(value_t *v) {
+  contain_t *cur = stack_peek(STACK);
+  stack_t *stack = cur->stack;
+  if (stack->size < 2) {
+    eval_error("EMPTY STACK");
+    return;
+  }
+  value_t *index = stack_pop(stack);
+  if (index->container->stack->size != 1) {
+    stack_push(stack, index);
+    eval_error("TYPE ERROR");
+    return;
+  }
+  value_t *idxval = index->container->stack->items[0];
+  if (idxval->type != VWORD) {
+    stack_push(stack, index);
+    eval_error("TYPE ERROR");
+    return;
+  }
+  if (!strisint(idxval->str_word)) {
+    stack_push(stack, index);
+    eval_error("TYPE ERROR");
+    return;
+  }
+  int n = atoi(idxval->str_word->value);
+  value_t *quot = stack_peek(stack);
+  if (n < 0 || n >= quot->container->stack->size) {
+    stack_push(stack, index);
+    eval_error("OUT OF RANGE");
+    return;
+  }
+  value_free(index);
+  value_free(stack_popdeep(quot->container->stack, n));
+}
+
+void cog_uncompose(value_t *v) {
+  contain_t *cur = stack_peek(STACK);
+  stack_t *stack = cur->stack;
+  value_t *quot = stack_pop(STACK);
+  if (quot == NULL) {
+    eval_error("EMPTY STACK");
+    return;
+  }
+  for (int i = 0; i < quot->container->stack->size; i++) {
+    value_t *element = init_value(VSTACK);
+    element->container = calloc(1, sizeof(contain_t));
+    element->container->stack = init_stack(10);
+    element->container->err_stack = stack_copy(quot->container->err_stack, value_copy);
+    contain_copy_attributes(quot->container, element->container);
+    stack_push(element->container->stack, quot->container->stack->items[i]);
+    stack_push(stack, element);
+  }
+  quot->container->stack->size = 0;
+  value_free(quot);
+}
+
+void cog_size(value_t *v) {
+  contain_t *cur = stack_peek(STACK);
+  stack_t *stack = cur->stack;
+  value_t *v1 = stack_peek(stack);
+  if (v1 == NULL) {
+    eval_error("EMPTY STACK");
+    return;
+  }
+  int size = v1->container->stack->size;
+  char buffer[11];
+  snprintf(buffer, 11, "%d", size);
+  value_t *sizeval = init_value(VWORD);
+  sizeval->str_word = init_string(buffer);
+  push_quoted(cur, sizeval);
+}
+
 void add_funcs_combinators(ht_t *flit) {
   add_func(flit, cog_quote, "quote");
   add_func(flit, cog_eval, "eval");
@@ -501,8 +574,11 @@ void add_funcs_combinators(ht_t *flit) {
   add_func(flit, cog_dip, "dip");
   add_func(flit, cog_if, "if");
   add_func(flit, cog_loop, "loop");
-  add_func(flit, cog_times, "loop");
+  add_func(flit, cog_times, "times");
   add_func(flit, cog_split, "split");
   add_func(flit, cog_vat, "vat");
   add_func(flit, cog_substack, "substack");
+  add_func(flit, cog_del, "del");
+  add_func(flit, cog_uncompose, "uncompose");
+  add_func(flit, cog_size, "size");
 }
