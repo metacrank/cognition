@@ -7,6 +7,7 @@
 typedef struct VALUE_STRUCT value_t;
 typedef struct STACK_STRUCT stack_t;
 typedef struct CONTAINER_STRUCT contain_t;
+typedef struct ERROR_STRUCT error_t;
 
 /*! @brief non-generic stack data structure used for stacks and quotes */
 /*! stack_t holds items of type value_t *; see VALUE_STRUCT for more details*/
@@ -17,6 +18,12 @@ struct STACK_STRUCT {
   size_t size;
   /*! @brief the buffer size */
   size_t capacity;
+};
+
+/* holds a str_word with the name of the word that produced the error, and an error string */
+struct ERROR_STRUCT {
+  string_t *error;
+  string_t *str_word;
 };
 
 /*! @brief holds a string, int, float, stack, or function pointer, as well as custom
@@ -34,8 +41,11 @@ struct VALUE_STRUCT {
     /*! @brief this holds the string value of a string, word, or the name of a
      * custom type. */
     string_t *str_word;
+    /* holds the name and word reference for a VERR */
+    error_t *error;
   };
-  /*! @brief this variable holds the value of a custom type, or clib function pointer. */
+  /*! @brief this variable holds the value of a custom type, clib function pointer, or pointer to
+   * a copy of the str_word that resulted in the VERR */
   void *custom;
   /*! @brief only to be used with values of type word */
   /*! This variable tells the evaluator if the word in question needs to be
@@ -128,7 +138,7 @@ struct CONTAINER_STRUCT {
 void func_free(void *f);
 
 /* push error to error stack */
-void eval_error(char *s);
+void eval_error(char *s, value_t *w);
 
 /*! Allocates memory for new stack */
 stack_t *init_stack(size_t size);

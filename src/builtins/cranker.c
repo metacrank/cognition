@@ -26,13 +26,13 @@ void cog_metacrank(value_t *v) {
 
   value_t *tmp2 = stack_pop(stack);
   if (!tmp) {
-    eval_error("EMPTY STACK");
+    eval_error("EMPTY STACK", v);
     value_free(tmp);
     return;
   }
   contain_t *ctmp2 = tmp2->container;
   if (ctmp2->stack->size != 1) {
-    eval_error("TYPE ERROR");
+    eval_error("TYPE ERROR", v);
     value_free(tmp);
     value_free(tmp2);
     return;
@@ -48,13 +48,13 @@ void cog_metacrank(value_t *v) {
   value_free(tmp2);
 
   if (v1->type != VWORD || v2->type != VWORD) {
-    eval_error("TYPE ERROR");
+    eval_error("TYPE ERROR", v);
     value_free(v1);
     value_free(v2);
     return;
   }
   if (!(strisint(v1->str_word) && strisint(v1->str_word))) {
-    eval_error("TYPE ERROR");
+    eval_error("TYPE ERROR", v);
     value_free(v1);
     value_free(v2);
     return;
@@ -83,24 +83,24 @@ void cog_crank(value_t *v) {
   stack_t *stack = cur->stack;
   value_t *tmp = stack_pop(stack);
   if (!tmp) {
-    eval_error("EMPTY STACK");
+    eval_error("EMPTY STACK", v);
     return;
   }
   contain_t *ctmp = tmp->container;
   if (ctmp->stack->size != 1) {
-    eval_error("TYPE ERROR");
+    eval_error("TYPE ERROR", v);
     value_free(tmp);
     return;
   }
   value_t *v1 = stack_pop(ctmp->stack);
   value_free(tmp);
   if (v1->type != VWORD) {
-    eval_error("TYPE ERROR");
+    eval_error("TYPE ERROR", v);
     value_free(v1);
     return;
   }
   if (!strisint(v1->str_word)) {
-    eval_error("TYPE ERROR");
+    eval_error("TYPE ERROR", v);
     value_free(v1);
     return;
   }
@@ -124,24 +124,24 @@ void cog_crankall(value_t *v) {
   stack_t *stack = cur->stack;
   value_t *tmp = stack_pop(stack);
   if (!tmp) {
-    eval_error("EMPTY STACK");
+    eval_error("EMPTY STACK", v);
     return;
   }
   contain_t *ctmp = tmp->container;
   if (ctmp->stack->size != 1) {
-    eval_error("TYPE ERROR");
+    eval_error("TYPE ERROR", v);
     value_free(tmp);
     return;
   }
   value_t *v1 = stack_pop(ctmp->stack);
   value_free(tmp);
   if (v1->type != VWORD) {
-    eval_error("TYPE ERROR");
+    eval_error("TYPE ERROR", v);
     value_free(v1);
     return;
   }
   if (!strisint(v1->str_word)) {
-    eval_error("TYPE ERROR");
+    eval_error("TYPE ERROR", v);
     value_free(v1);
     return;
   }

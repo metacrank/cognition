@@ -18,9 +18,12 @@ parser_t *PARSER;
 
 void func_free(void *f) {}
 
-void eval_error(char *s) {
+void eval_error(char *s, value_t *w) {
   value_t *v = init_value(VERR);
-  v->str_word = init_string(s);
+  v->error = calloc(1, sizeof(error_t));
+  if (w) v->error->str_word = string_copy(w->str_word);
+  else v->error->str_word = NULL;
+  v->error->error = init_string(s);
   contain_t *cur = stack_peek(STACK);
   stack_push(cur->err_stack, v);
 }
@@ -672,7 +675,7 @@ void evalf() {
   contain_t *cur = stack_peek(STACK);
   value_t *v = stack_pop(cur->stack);
   if (v == NULL) {
-    eval_error("EMPTY STACK");
+    eval_error("EMPTY STACK", NULL);
     return;
   }
   stack_push(EVAL_STACK, v);
@@ -720,7 +723,7 @@ void eval_value(contain_t *c, stack_t *family, contain_t *cur, value_t *val) {
       stack_push(cur->stack, value_copy(val));
       break;
     case VCLIB:
-      ((void(*)(value_t *v))(val->custom))(val);
+      ((void(*)(value_t *v))(val->custom))(NULL);
       break;
     default:
       push_quoted(cur, value_copy(val));
@@ -811,7 +814,7 @@ void crank() {
     int fixedindex = cur->stack->size - 1 - cindex;
     value_t *needseval = stack_popdeep(cur->stack, fixedindex);
     if (!needseval) {
-      eval_error("CRANK TOO DEEP");
+      eval_error("CRANK TOO DEEP", NULL);
       return;
     }
     stack_push(EVAL_STACK, needseval);

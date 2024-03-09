@@ -1,5 +1,5 @@
 #include <builtins.h>
-#include <builtins/io.h>
+#include <builtinslib.h>
 #include <cognition.h>
 #include <dlfcn.h>
 #include <stdio.h>
@@ -90,6 +90,12 @@ int main(int argc, char **argv) {
     print_value(cur->stack->items[i], "\n");
   }
   printf("\n");
+  printf("Error stack:\n");
+  stack_t *error_stack = cur->err_stack;
+  for (int i = 0; i < error_stack->size; i++) {
+    print_value(error_stack->items[i], "\n");
+  }
+  printf("\n");
   printf("delims: '");
   for (int i = 0; i < cur->delims->length; i++) {
     if (cur->delims->value[i] == '\n')
@@ -98,7 +104,7 @@ int main(int argc, char **argv) {
       printf("%c", cur->delims->value[i]);
   }
   if (cur->dflag) printf("' (whitelist)\n");
-  else printf("] (blacklist)\n");
+  else printf("' (blacklist)\n");
   printf("ignored: '");
   for (int i = 0; i < cur->ignored->length; i++) {
     if (cur->ignored->value[i] == '\n')
@@ -107,7 +113,7 @@ int main(int argc, char **argv) {
       printf("%c", cur->ignored->value[i]);
   }
   if (cur->iflag) printf("' (whitelist)\n");
-  else printf("] (blacklist)\n");
+  else printf("' (blacklist)\n");
 
   if (cur->cranks->size) {
     int(*cr)[2] = cur->cranks->items[0];

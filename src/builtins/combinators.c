@@ -13,7 +13,7 @@ void cog_quote(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   value_t *v1 = stack_pop(cur->stack);
   if (v1 == NULL) {
-    eval_error("EMPTY STACK");
+    eval_error("EMPTY STACK", v);
     return;
   }
   push_quoted(cur, v1);
@@ -54,7 +54,7 @@ void cog_wstack(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   value_t *list = stack_pop(STACK);
   if (list == NULL) {
-    eval_error("EMPTY STACK");
+    eval_error("EMPTY STACK", v);
     return;
   }
   value_t *retval = init_value(VSTACK);
@@ -84,7 +84,7 @@ void cog_wstack(value_t *v) {
       string_t *err = init_string(": no word ");
       string_concat(full_err, err);
       string_concat(full_err, v1->str_word);
-      eval_error(full_err->value);
+      eval_error(full_err->value, v);
       string_free(err);
       string_free(full_err);
       // return;
@@ -98,7 +98,7 @@ void cog_bstack(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   value_t *list = stack_pop(STACK);
   if (list == NULL) {
-    eval_error("EMPTY STACK");
+    eval_error("EMPTY STACK", v);
     return;
   }
   cog_child(v);
@@ -121,7 +121,7 @@ void cog_bstack(value_t *v) {
       string_t *err = init_string(": no word ");
       string_concat(full_err, err);
       string_concat(full_err, v1->str_word);
-      eval_error(full_err->value);
+      eval_error(full_err->value, v);
       string_free(err);
       string_free(full_err);
       // return;
@@ -141,7 +141,7 @@ void cog_sub(value_t *v) {
 void cog_compose(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   if (cur->stack->size < 2) {
-    eval_error("EMPTY STACK");
+    eval_error("EMPTY STACK", v);
     return;
   }
   value_t *v2 = stack_pop(cur->stack);
@@ -160,7 +160,7 @@ void cog_compose(value_t *v) {
 void cog_prepose(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   if (cur->stack->size < 2) {
-    eval_error("EMPTY STACK");
+    eval_error("EMPTY STACK", v);
     return;
   }
   value_t *v2 = stack_pop(cur->stack);
@@ -182,19 +182,19 @@ void cog_prepose(value_t *v) {
 void cog_put(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   if (cur->stack->size < 3) {
-    eval_error("EMPTY STACK");
+    eval_error("EMPTY STACK", v);
     return;
   }
   value_t *index = stack_pop(cur->stack);
   if (index->container->stack->size != 1) {
     stack_push(cur->stack, index);
-    eval_error("TYPE ERROR");
+    eval_error("TYPE ERROR", v);
     return;
   }
   value_t *idxval = index->container->stack->items[0];
   if (idxval->type != VWORD) {
     stack_push(cur->stack, index);
-    eval_error("TYPE ERROR");
+    eval_error("TYPE ERROR", v);
     return;
   }
   value_t *v1 = stack_pop(cur->stack);
@@ -203,7 +203,7 @@ void cog_put(value_t *v) {
   if (idx < 0 || idx > stack->container->stack->size) {
     stack_push(cur->stack, v1);
     stack_push(cur->stack, index);
-    eval_error("OUT OF RANGE");
+    eval_error("OUT OF RANGE", v);
     return;
   }
   value_free(index);
@@ -230,7 +230,7 @@ void cog_dip(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   stack_t *stack = cur->stack;
   if (cur->stack->size < 2) {
-    eval_error("EMPTY STACK");
+    eval_error("EMPTY STACK", v);
     return;
   }
   value_t *quot = stack_pop(stack);
@@ -245,27 +245,27 @@ void cog_if(value_t *v) {
   stack_t *stack = cur->stack;
   value_t *v3 = stack_pop(stack);
   if (!v3) {
-    eval_error("EMPTY STACK");
+    eval_error("EMPTY STACK", v);
     return;
   }
   value_t *v2 = stack_pop(stack);
   if (!v2) {
     stack_push(cur->stack, v3);
-    eval_error("EMPTY STACK");
+    eval_error("EMPTY STACK", v);
     return;
   }
   value_t *v1 = stack_pop(stack);
   if (!v1) {
     stack_push(cur->stack, v2);
     stack_push(cur->stack, v3);
-    eval_error("EMPTY STACK");
+    eval_error("EMPTY STACK", v);
     return;
   }
   if (v1->type != VWORD) {
     stack_push(stack, v1);
     stack_push(stack, v2);
     stack_push(stack, v3);
-    eval_error("TYPE ERROR");
+    eval_error("TYPE ERROR", v);
     return;
   }
   bool v1_fixed = word_truth(v1);
@@ -286,7 +286,7 @@ void cog_if(value_t *v) {
 void cog_loop(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   if (cur->stack->size == 0) {
-    eval_error("EMPTY STACK");
+    eval_error("EMPTY STACK", v);
     return;
   }
   value_t *body = stack_pop(cur->stack);
@@ -298,16 +298,16 @@ void cog_loop(value_t *v) {
     evalstack(body->container, family);
     value_t *cont_val = stack_peek(STACK);
     if (cont_val == NULL) {
-      eval_error("EMPTY STACK");
+      eval_error("EMPTY STACK", v);
       break;
     }
     if (cont_val->container->stack->size != 1) {
-      eval_error("TYPE ERROR");
+      eval_error("TYPE ERROR", v);
       break;
     }
     value_t *cont_val_value = cont_val->container->stack->items[0];
     if (cont_val_value->type != VWORD) {
-      eval_error("TYPE ERROR");
+      eval_error("TYPE ERROR", v);
       break;
     }
     cont = word_truth(cont_val_value);
@@ -321,24 +321,24 @@ void cog_loop(value_t *v) {
 void cog_times(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   if (cur->stack->size < 2) {
-    eval_error("EMPTY STACK");
+    eval_error("EMPTY STACK", v);
     return;
   }
   value_t *q1 = stack_pop(cur->stack);
   if (q1->container->stack->size != 1) {
     stack_push(cur->stack, q1);
-    eval_error("TYPE ERROR");
+    eval_error("TYPE ERROR", v);
     return;
   }
   value_t *w1 = q1->container->stack->items[0];
   if (w1->type != VWORD) {
     stack_push(cur->stack, q1);
-    eval_error("TYPE ERROR");
+    eval_error("TYPE ERROR", v);
     return;
   }
   if (!strisint(w1->str_word)) {
     stack_push(cur->stack, q1);
-    eval_error("TYPE ERROR");
+    eval_error("TYPE ERROR", v);
     return;
   }
   int n = atoi(w1->str_word->value);
@@ -358,31 +358,31 @@ void cog_times(value_t *v) {
 void cog_split(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   if (cur->stack->size < 2) {
-    eval_error("EMPTY STACK");
+    eval_error("EMPTY STACK", v);
     return;
   }
   value_t *num = stack_pop(cur->stack);
   if (num->container->stack->size != 1) {
     stack_push(cur->stack, num);
-    eval_error("TYPE ERROR");
+    eval_error("TYPE ERROR", v);
     return;
   }
   value_t *numval = num->container->stack->items[0];
   if (numval->type != VWORD) {
     stack_push(cur->stack, num);
-    eval_error("TYPE ERROR");
+    eval_error("TYPE ERROR", v);
     return;
   }
   if (!strisint(numval->str_word)) {
     stack_push(cur->stack, num);
-    eval_error("TYPE ERROR");
+    eval_error("TYPE ERROR", v);
     return;
   }
   int n = atoi(numval->str_word->value);
   value_t *q = stack_peek(STACK);
   if (n < 0 || n > q->container->stack->size) {
     stack_push(cur->stack, num);
-    eval_error("OUT OF RANGE");
+    eval_error("OUT OF RANGE", v);
     return;
   }
   value_t *q2 = init_value(VSTACK);
@@ -403,31 +403,31 @@ void cog_vat(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   stack_t *stack = cur->stack;
   if (stack->size < 2) {
-    eval_error("EMPTY STACK");
+    eval_error("EMPTY STACK", v);
     return;
   }
   value_t *index = stack_pop(stack);
   if (index->container->stack->size != 1) {
     stack_push(stack, index);
-    eval_error("TYPE ERROR");
+    eval_error("TYPE ERROR", v);
     return;
   }
   value_t *idxval = index->container->stack->items[0];
   if (idxval->type != VWORD) {
     stack_push(stack, index);
-    eval_error("TYPE ERROR");
+    eval_error("TYPE ERROR", v);
     return;
   }
   if (!strisint(idxval->str_word)) {
     stack_push(stack, index);
-    eval_error("TYPE ERROR");
+    eval_error("TYPE ERROR", v);
     return;
   }
   int n = atoi(idxval->str_word->value);
   value_t *quot = stack_peek(stack);
   if (n < 0 || n >= quot->container->stack->size) {
     stack_push(stack, index);
-    eval_error("OUT OF RANGE");
+    eval_error("OUT OF RANGE", v);
     return;
   }
   value_free(index);
@@ -439,7 +439,7 @@ void cog_substack(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   stack_t *stack = cur->stack;
   if (stack->size < 3) {
-    eval_error("EMPTY STACK");
+    eval_error("EMPTY STACK", v);
     return;
   }
   value_t *index2 = stack_pop(stack);
@@ -447,7 +447,7 @@ void cog_substack(value_t *v) {
   if (index1->container->stack->size != 1 || index2->container->stack->size != 1) {
     stack_push(stack, index1);
     stack_push(stack, index2);
-    eval_error("TYPE ERROR");
+    eval_error("TYPE ERROR", v);
     return;
   }
   value_t *idxval1 = index1->container->stack->items[0];
@@ -455,13 +455,13 @@ void cog_substack(value_t *v) {
   if (idxval1->type != VWORD || idxval2->type != VWORD) {
     stack_push(stack, index1);
     stack_push(stack, index2);
-    eval_error("TYPE ERROR");
+    eval_error("TYPE ERROR", v);
     return;
   }
   if (!strisint(idxval1->str_word) || !strisint(idxval2->str_word)) {
     stack_push(stack, index1);
     stack_push(stack, index2);
-    eval_error("TYPE ERROR");
+    eval_error("TYPE ERROR", v);
     return;
   }
   int n1 = atoi(idxval1->str_word->value);
@@ -470,7 +470,7 @@ void cog_substack(value_t *v) {
   if (n1 < 0 || n2 < 0 || n1 >= quot->container->stack->size || n2 >= quot->container->stack->size || n2 < n1) {
     stack_push(stack, index1);
     stack_push(stack, index2);
-    eval_error("OUT OF RANGE");
+    eval_error("OUT OF RANGE", v);
     return;
   }
   value_free(index1);
@@ -492,31 +492,31 @@ void cog_del(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   stack_t *stack = cur->stack;
   if (stack->size < 2) {
-    eval_error("EMPTY STACK");
+    eval_error("EMPTY STACK", v);
     return;
   }
   value_t *index = stack_pop(stack);
   if (index->container->stack->size != 1) {
     stack_push(stack, index);
-    eval_error("TYPE ERROR");
+    eval_error("TYPE ERROR", v);
     return;
   }
   value_t *idxval = index->container->stack->items[0];
   if (idxval->type != VWORD) {
     stack_push(stack, index);
-    eval_error("TYPE ERROR");
+    eval_error("TYPE ERROR", v);
     return;
   }
   if (!strisint(idxval->str_word)) {
     stack_push(stack, index);
-    eval_error("TYPE ERROR");
+    eval_error("TYPE ERROR", v);
     return;
   }
   int n = atoi(idxval->str_word->value);
   value_t *quot = stack_peek(stack);
   if (n < 0 || n >= quot->container->stack->size) {
     stack_push(stack, index);
-    eval_error("OUT OF RANGE");
+    eval_error("OUT OF RANGE", v);
     return;
   }
   value_free(index);
@@ -528,7 +528,7 @@ void cog_uncompose(value_t *v) {
   stack_t *stack = cur->stack;
   value_t *quot = stack_pop(STACK);
   if (quot == NULL) {
-    eval_error("EMPTY STACK");
+    eval_error("EMPTY STACK", v);
     return;
   }
   for (int i = 0; i < quot->container->stack->size; i++) {
@@ -549,7 +549,7 @@ void cog_size(value_t *v) {
   stack_t *stack = cur->stack;
   value_t *v1 = stack_peek(stack);
   if (v1 == NULL) {
-    eval_error("EMPTY STACK");
+    eval_error("EMPTY STACK", v);
     return;
   }
   int size = v1->container->stack->size;

@@ -7,7 +7,7 @@ void cog_d(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   value_t *stack = stack_pop(cur->stack);
   if (stack == NULL) {
-    eval_error("EMPTY STACK");
+    eval_error("EMPTY STACK", v);
     return;
   }
   if (stack->container->stack->size != 1) {
@@ -31,7 +31,7 @@ void cog_i(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   value_t *stack = stack_pop(cur->stack);
   if (stack == NULL) {
-    eval_error("EMPTY STACK");
+    eval_error("EMPTY STACK", v);
     return;
   }
   if (stack->container->stack->size != 1) {
