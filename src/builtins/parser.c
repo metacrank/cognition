@@ -46,7 +46,7 @@ void cog_i(value_t *v) {
   }
   string_free(cur->ignored);
   cur->ignored = string_copy(word->str_word);
-  value_free(word);
+  value_free(stack);
 }
 
 void cog_dtgl(value_t *v) {
