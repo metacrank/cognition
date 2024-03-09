@@ -47,10 +47,6 @@ struct VALUE_STRUCT {
   /*! @brief this variable holds the value of a custom type, clib function pointer, or pointer to
    * a copy of the str_word that resulted in the VERR */
   void *custom;
-  /*! @brief only to be used with values of type word */
-  /*! This variable tells the evaluator if the word in question needs to be
-   * evaluated as a funtion or pushed onto the stack. */
-  bool escaped;
 };
 
 /*! @brief Parser implementation directly parses without lexer */
@@ -181,6 +177,9 @@ void *value_copy(void *v);
 
 /*! Frees value struct */
 void value_free(void *v);
+
+/* Frees an error type */
+void error_free(void *v);
 
 /* Gets the custom object table referencing the current root stack */
 ht_t *ot_get();
@@ -314,6 +313,10 @@ void expandword(value_t *v, contain_t *new, stack_t *family);
 
 /* crankless evaluation on the stack */
 void evalf();
+
+/* increments and decrements crank stack */
+void inc_crank();
+void dec_crank();
 
 /* copies crank stack */
 void *cranks_copy(void *cranks);

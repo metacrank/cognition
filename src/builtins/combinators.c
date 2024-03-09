@@ -21,6 +21,7 @@ void cog_quote(value_t *v) {
 
 void cog_eval(value_t *v) {
   evalf();
+  dec_crank();
 }
 
 void cog_child(value_t *v) {
@@ -150,9 +151,7 @@ void cog_compose(value_t *v) {
     return;
   }
   value_t *v1 = stack_peek(cur->stack);
-  for (int i = 0; i < v2->container->stack->size; i++) {
-    stack_push(v1->container->stack, v2->container->stack->items[i]);
-  }
+  stack_extend(v1->container->stack, v2->container->stack);
   v2->container->stack->size = 0;
   value_free(v2);
 }
@@ -170,9 +169,7 @@ void cog_prepose(value_t *v) {
   }
   value_t *v1 = stack_peek(cur->stack);
   stack_t *stack = v2->container->stack;
-  for (int i = 0; i < v1->container->stack->size; i++) {
-    stack_push(stack, v1->container->stack->items[i]);
-  }
+  stack_extend(stack, v1->container->stack);
   v1->container->stack->size = 0;
   v2->container->stack = v1->container->stack;
   v1->container->stack = stack;

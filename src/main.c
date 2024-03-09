@@ -1,6 +1,7 @@
 #include <builtins.h>
 #include <builtinslib.h>
 #include <cognition.h>
+#include <macros.h>
 #include <dlfcn.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -62,16 +63,19 @@ int main(int argc, char **argv) {
 
   /* Set up global variables */
   PARSER = init_parser(buf);
-  STACK = init_stack(10);
-  EVAL_STACK = init_stack(10);
-  OBJ_STACK = init_stack(10);
+  STACK = init_stack(DEFAULT_STACK_SIZE);
+  EVAL_STACK = init_stack(DEFAULT_STACK_SIZE);
+  OBJ_STACK = init_stack(DEFAULT_STACK_SIZE);
 
   /* initialise environment */
-  contain_t *stack = init_contain(init_ht(500), init_ht(500), init_stack(10));
+  contain_t *stack = init_contain(init_ht(DEFAULT_HT_SIZE),
+                                  init_ht(DEFAULT_HT_SIZE),
+                                  init_stack(DEFAULT_STACK_SIZE));
+  stack->faliases = init_stack(DEFAULT_STACK_SIZE);
   stack_push(stack->faliases, init_string("f"));
   add_funcs(stack->flit);
   stack_push(STACK, stack);
-  void *(ot)[2] = {stack, init_ht(10)};
+  void *(ot)[2] = {stack, init_ht(DEFAULT_HT_SIZE)};
   stack_push(OBJ_STACK, ot);
 
   /* parse and eval loop */
@@ -92,34 +96,41 @@ int main(int argc, char **argv) {
   printf("\n");
   printf("Error stack:\n");
   stack_t *error_stack = cur->err_stack;
-  for (int i = 0; i < error_stack->size; i++) {
-    print_value(error_stack->items[i], "\n");
+  if (error_stack) {
+    for (int i = 0; i < error_stack->size; i++) {
+      print_value(error_stack->items[i], "\n");
+    }
   }
   printf("\n");
   printf("delims: '");
-  for (int i = 0; i < cur->delims->length; i++) {
-    if (cur->delims->value[i] == '\n')
-      printf("\\n");
-    else
-      printf("%c", cur->delims->value[i]);
+  if (cur->delims) {
+    for (int i = 0; i < cur->delims->length; i++) {
+      if (cur->delims->value[i] == '\n')
+        printf("\\n");
+      else
+        printf("%c", cur->delims->value[i]);
+    }
   }
   if (cur->dflag) printf("' (whitelist)\n");
   else printf("' (blacklist)\n");
   printf("ignored: '");
-  for (int i = 0; i < cur->ignored->length; i++) {
-    if (cur->ignored->value[i] == '\n')
-      printf("\\n");
-    else
-      printf("%c", cur->ignored->value[i]);
+  if (cur->ignored) {
+    for (int i = 0; i < cur->ignored->length; i++) {
+      if (cur->ignored->value[i] == '\n')
+        printf("\\n");
+      else
+        printf("%c", cur->ignored->value[i]);
+    }
   }
   if (cur->iflag) printf("' (whitelist)\n");
   else printf("' (blacklist)\n");
 
-  if (cur->cranks->size) {
-    int(*cr)[2] = cur->cranks->items[0];
-    printf("crank %d\n", cr[0][1]);
+  if (cur->cranks) {
+    if (cur->cranks->size) {
+      int(*cr)[2] = cur->cranks->items[0];
+      printf("crank %d\n", cr[0][1]);
+    } else printf("crank 0\n");
   } else printf("crank 0\n");
-
   /* Free all global variables */
   global_free();
   return 0;

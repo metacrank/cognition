@@ -74,6 +74,10 @@
 #define CRESET "\e[0m"
 #define COLOR_RESET "\e[0m"
 
+/* Set defaults */
+#define DEFAULT_HT_SIZE 500
+#define DEFAULT_STACK_SIZE 10
+
 /*! Die in case of catastrophic memory problem */
 void die(char *message);
 

@@ -25,6 +25,8 @@ void eval_error(char *s, value_t *w) {
   else v->error->str_word = NULL;
   v->error->error = init_string(s);
   contain_t *cur = stack_peek(STACK);
+  if (cur->err_stack == NULL)
+    cur->err_stack = init_stack(DEFAULT_STACK_SIZE);
   stack_push(cur->err_stack, v);
 }
 
@@ -96,6 +98,7 @@ void stack_extend(stack_t *a, stack_t *b) {
 }
 
 void stack_free(void *a, void (*freefunc)(void *)) {
+  if (a == NULL) return;
   stack_t *s = a;
   for (int i = 0; i < s->size; i++) {
     freefunc(s->items[i]);
@@ -136,18 +139,17 @@ value_t *init_value(int type) {
   if (!v)
     die("calloc on value");
   v->type = type;
-  v->escaped = false;
   return v;
 }
 
 void *value_copy(void *v) {
+  if (v == NULL) return NULL;
   value_t *a = init_value(VWORD);
   value_t *v1 = v;
   contain_t *container = stack_peek(STACK);
   a->type = v1->type;
   if (v1->type == VWORD || v1->type == VERR) {
     a->str_word = string_copy(v1->str_word);
-    a->escaped = v1->escaped;
   } else if (v1->type == VSTACK) {
     a->container = contain_copy(v1->container, value_copy);
   } else if (v1->type == VCUSTOM) {
@@ -160,21 +162,33 @@ void *value_copy(void *v) {
 }
 
 void value_free(void *vtmp) {
+  if (vtmp == NULL) return;
   value_t *v = (value_t *)vtmp;
   contain_t *c = stack_peek(STACK);
   if (v == NULL)
     return;
-  if (v->type == VWORD || v->type == VERR || v->type == VCLIB || v->type == VCUSTOM) {
+  if (v->type == VWORD || v->type == VCLIB || v->type == VCUSTOM) {
     string_free(v->str_word);
   }
   if (v->type == VSTACK) {
     contain_free(v->container);
+  }
+  if (v->type == VERR) {
+    error_free(v->error);
   }
   if (v->type == VCUSTOM) {
     void (*freefunc)(void *) = ht_get(ot_get(), v->str_word);
     freefunc(v->custom);
   }
   free(v);
+}
+
+void error_free(void *err) {
+  if (err == NULL) return;
+  error_t *e = err;
+  string_free(e->error);
+  string_free(e->str_word);
+  free(e);
 }
 
 ht_t *ot_get() {
@@ -238,20 +252,21 @@ void add_obj(ht_t *h, ht_t *h2, void (*printfunc)(void *),
 
 contain_t *init_contain(ht_t *h, ht_t *flit, stack_t *cranks) {
   contain_t *c = calloc(1, sizeof(contain_t));
-  c->stack = init_stack(10);
-  c->err_stack = init_stack(10);
+  c->stack = init_stack(DEFAULT_STACK_SIZE);
+  c->err_stack = NULL;
   c->flit = flit;
   c->word_table = h;
   c->cranks = cranks;
-  c->faliases = init_stack(10);
-  c->delims = init_string(NULL);
-  c->ignored = init_string(NULL);
+  c->faliases = NULL;
+  c->delims = NULL;
+  c->ignored = NULL;
   c->dflag = false;
   c->iflag = true;
   return c;
 }
 
 void contain_free(void *con) {
+  if (con == NULL) return;
   contain_t *c = con;
   ht_free(c->word_table, value_free);
   ht_free(c->flit, value_stack_free);
@@ -364,6 +379,7 @@ value_t *parse_word(parser_t *p, bool skipped) {
 bool isignore(parser_t *p) {
   contain_t *c = stack_peek(STACK);
   if (c->iflag) {
+    if (c->ignored == NULL) return false;
     for (int i = 0; i < c->ignored->length; i++) {
       if (c->ignored->value[i] == p->c) {
         return true;
@@ -371,6 +387,7 @@ bool isignore(parser_t *p) {
     }
     return false;
   }
+  if (c->ignored == NULL) return true;
   for (int i = 0; i < c->ignored->length; i++) {
     if (c->ignored->value[i] == p->c) {
       return false;
@@ -382,6 +399,7 @@ bool isignore(parser_t *p) {
 bool isdelim(parser_t *p) {
   contain_t *c = stack_peek(STACK);
   if (c->dflag) {
+    if (c->delims == NULL) return false;
     for (int i = 0; i < c->delims->length; i++) {
       if (c->delims->value[i] == p->c) {
         return true;
@@ -389,6 +407,7 @@ bool isdelim(parser_t *p) {
     }
     return false;
   }
+  if (c->delims == NULL) return true;
   for (int i = 0; i < c->delims->length; i++) {
     if (c->delims->value[i] == p->c) {
       return false;
@@ -601,6 +620,7 @@ unsigned long hash(ht_t *h, char *key) {
 
 void inc_crank() {
   contain_t *cur = stack_peek(STACK);
+  if (cur->cranks == NULL) return;
   int(*crank)[2];
   for (int i = 0; i < cur->cranks->size; i++) {
     crank = cur->cranks->items[i];
@@ -611,7 +631,21 @@ void inc_crank() {
   }
 }
 
+void dec_crank() {
+  contain_t *cur = stack_peek(STACK);
+  if (cur->cranks == NULL) return;
+  int(*crank)[2];
+  for (int i = 0; i < cur->cranks->size; i++) {
+    crank = cur->cranks->items[i];
+    crank[0][0]--;
+    if (crank[0][0] < 0) {
+      crank[0][0] = crank[0][1];
+    }
+  }
+}
+
 bool isfaliasin(contain_t *c, value_t *v) {
+  if (c->faliases == NULL) return false;
   string_t *falias;
   for (int i = 0; i < c->faliases->size; i++) {
     falias = c->faliases->items[i];
@@ -694,20 +728,9 @@ void *func_copy(void *funcs) { return NULL; }
 
 void *cranks_copy(void *cranks) {}
 
-void contain_push(contain_t *c, value_t *v) {
-  contain_t *contain = init_contain(ht_copy(c->word_table, value_copy),
-                                    ht_copy(c->flit, func_copy),
-                                    stack_copy(c->cranks, cranks_copy));
-  value_t *container = init_value(VSTACK);
-  container->container = contain;
-  stack_push(contain->stack, v);
-  contain_t *otherc = stack_peek(STACK);
-  stack_push(otherc->stack, container);
-}
-
 void push_quoted(contain_t *cur, value_t *v) {
   value_t *q = init_value(VSTACK);
-  q->container = init_contain(NULL, NULL, init_stack(10));
+  q->container = init_contain(NULL, NULL, NULL);
   stack_push(q->container->stack, v);
   stack_push(cur->stack, q);
 }
@@ -735,22 +758,23 @@ void evalstack(contain_t *c, stack_t *family) {
   if (c->stack->size) {
     eval_value(c, family, cur, c->stack->items[0]);
     inc_crank();
-    if (cur->cranks->size) {
-      int(*cr)[2] = cur->cranks->items[0];
+    int(*cr)[2];
+    for (int i = 1; i < c->stack->size; i++) {
+      value_t *newval = c->stack->items[i];
+      if (c->cranks) {
+        cr = cur->cranks->items[0];
+        if (cr[0][0] == 0 && cr[0][1]) {
+          eval_value(c, family, cur, newval);
+          inc_crank();
+          break;
+        }
+      }
+      push_quoted(cur, value_copy(newval));
+      crank();
     }
+    return;
   }
-  int(*cr)[2];
-  for (int i = 1; i < c->stack->size; i++) {
-    value_t *newval = c->stack->items[i];
-    cr = c->cranks->items[0];
-    if (*cr[0] == 0 && *cr[1]) {
-      eval_value(c, family, cur, newval);
-      inc_crank();
-      break;
-    }
-    push_quoted(cur, value_copy(newval));
-    crank();
-  }
+  inc_crank();
 }
 
 void evalmacro(stack_t *macro, value_t *word, stack_t *family) {
@@ -801,6 +825,7 @@ void evalword(value_t *v, stack_t *family) {
 
 void crank() {
   contain_t *cur = stack_peek(STACK);
+  if (cur->cranks == NULL) return;
   int cindex = -1;
   int(*crank)[2];
   for (int i = 0; i < cur->cranks->size; i++) {
@@ -815,6 +840,7 @@ void crank() {
     value_t *needseval = stack_popdeep(cur->stack, fixedindex);
     if (!needseval) {
       eval_error("CRANK TOO DEEP", NULL);
+      inc_crank();
       return;
     }
     stack_push(EVAL_STACK, needseval);
@@ -836,12 +862,16 @@ void eval(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   if (isfalias(v)) {
     value_free(v);
+    if (!cur->cranks) {
+      evalf();
+      return;
+    }
     if (cur->cranks->size == 0) {
       evalf();
       return;
     }
     int(*crank)[2] = cur->cranks->items[0];
-    if (crank[0][0] == 1 || crank[0][1] == 0) {
+    if (crank[0][0] != 1 || crank[0][1] == 0) {
       evalf();
       return;
     }

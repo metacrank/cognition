@@ -11,20 +11,19 @@ void cog_d(value_t *v) {
     return;
   }
   if (stack->container->stack->size != 1) {
-    value_free(stack);
-    /* TODO: error out */
+    stack_push(cur->stack, stack);
+    eval_error("TYPE ERROR", v);
     return;
   }
-  value_t *word = stack_pop(stack->container->stack);
-  value_free(stack);
+  value_t *word = stack->container->stack->items[0];
   if (word->type != VWORD) {
-    value_free(word);
-    /* TODO: error out */
+    stack_push(cur->stack, stack);
+    eval_error("TYPE ERROR", v);
     return;
   }
   string_free(cur->delims);
   cur->delims = string_copy(word->str_word);
-  value_free(word);
+  value_free(stack);
 }
 
 void cog_i(value_t *v) {
@@ -35,15 +34,14 @@ void cog_i(value_t *v) {
     return;
   }
   if (stack->container->stack->size != 1) {
-    value_free(stack);
-    /* TODO: error out */
+    stack_push(cur->stack, stack);
+    eval_error("TYPE ERROR", v);
     return;
   }
-  value_t *word = stack_pop(stack->container->stack);
-  value_free(stack);
+  value_t *word = stack->container->stack->items[0];
   if (word->type != VWORD) {
-    value_free(word);
-    /* TODO: error out */
+    stack_push(cur->stack, stack);
+    eval_error("TYPE ERROR", v);
     return;
   }
   string_free(cur->ignored);
@@ -65,6 +63,8 @@ void cog_geti(value_t *v) {
   value_t *list = init_value(VWORD);
   contain_t *cur = stack_peek(STACK);
   list->str_word = string_copy(cur->ignored);
+  if (list->str_word == NULL)
+    list->str_word = init_string("");
   push_quoted(cur, list);
 }
 
@@ -72,6 +72,8 @@ void cog_getd(value_t *v) {
   value_t *list = init_value(VWORD);
   contain_t *cur = stack_peek(STACK);
   list->str_word = string_copy(cur->delims);
+  if (list->str_word == NULL)
+    list->str_word = init_string("");
   push_quoted(cur, list);
 }
 

@@ -58,6 +58,7 @@ void cog_metacrank(value_t *v) {
     stack_push(stack, tmp);
     return;
   }
+  if (cur->cranks == NULL) cur->cranks = init_stack(10);
   stack_t *cranks = cur->cranks;
   int v1val = atoi(v1->str_word->value);
   int v2val = atoi(v2->str_word->value);
@@ -103,6 +104,7 @@ void cog_crank(value_t *v) {
     return;
   }
   int v1val = atoi(v1->str_word->value);
+  if (cur->cranks == NULL) cur->cranks = init_stack(10);
   stack_t *cranks = cur->cranks;
   if (cranks->size == 0) {
     int(*arr)[2] = malloc(sizeof(int[2]));
@@ -173,7 +175,7 @@ void cog_crankall(value_t *v) {
 void cog_reset(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   stack_free(cur->cranks, free);
-  cur->cranks = init_stack(10);
+  cur->cranks = NULL;
 }
 
 void cog_crankbase(value_t *v) {

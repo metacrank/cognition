@@ -64,6 +64,7 @@ void string_append(string_t *s, char c) {
 }
 
 void string_free(string_t *s) {
+  if (s == NULL) return;
   free(s->value);
   free(s);
 }
