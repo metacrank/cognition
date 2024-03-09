@@ -206,7 +206,10 @@ contain_t *contain_copy(contain_t *c, void *(*copyfunc)(void *));
 void *contain_value_copy(void *c);
 
 /*! Allocates memory for new container */
-void contain_free(void *);
+void contain_free(void *con);
+
+/* copies faliases */
+void *falias_copy(void *f);
 
 /*! Allocates memory for new parser */
 parser_t *init_parser(char *source);

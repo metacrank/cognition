@@ -23,6 +23,9 @@ void cog_isdef(value_t *v);
 /* turns a child stack definition into a 'builtin' */
 void cog_alias(value_t *v);
 
+/* turns entire definition into a compiled function */
+void cog_compile(value_t *v);
+
 /* returns an unordered list of the words defined in the current environment */
 void cog_wordlist(value_t *v);
 
@@ -40,6 +43,7 @@ void cog_unglue_from(value_t *v);
 /* ... */
 void cog_isdefin(value_t *v);
 void cog_aliasin(value_t *v);
+void cog_compilein(value_t *v);
 
 /* returns wordlist from stack pointer */
 void cog_wordlist_of(value_t *v);

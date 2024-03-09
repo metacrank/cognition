@@ -106,6 +106,9 @@ void value_stack_free(void *a) {
 }
 
 void *stack_copy(void *a, void *(*copyfunc)(void *)) {
+  if (a == NULL) {
+    return NULL;
+  }
   stack_t *b = calloc(1, sizeof(stack_t));
   if (!b)
     die("calloc on stack");
@@ -267,6 +270,9 @@ void *falias_copy(void *f) {
 }
 
 contain_t *contain_copy(contain_t *c, void *(*copyfunc)(void *)) {
+  if (c == NULL) {
+    return NULL;
+  }
   contain_t *contain = calloc(1, sizeof(contain_t));
   if (c->word_table->size) {
     contain->word_table = ht_copy(c->word_table, contain_value_copy);

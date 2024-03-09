@@ -28,7 +28,10 @@ string_t *init_string(char *s) {
   return str;
 }
 
-string_t *string_copy(string_t *s) { return init_string(s->value); }
+string_t *string_copy(string_t *s) {
+  if (s == NULL) return NULL;
+  return init_string(s->value);
+}
 
 /* stackoverflow code */
 void *realloc_zero(void *pBuffer, size_t oldSize, size_t newSize) {
