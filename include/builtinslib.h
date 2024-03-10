@@ -9,6 +9,8 @@ bool word_truth(value_t *v);
 
 void contain_copy_attributes(contain_t *c, contain_t *newc);
 
+void print_str_formatted(string_t *string);
+
 void print_value(value_t *v, const char *end);
 
 #endif // BUILTINSLIB_H_

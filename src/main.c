@@ -103,25 +103,11 @@ int main(int argc, char **argv) {
   }
   printf("\n");
   printf("delims: '");
-  if (cur->delims) {
-    for (int i = 0; i < cur->delims->length; i++) {
-      if (cur->delims->value[i] == '\n')
-        printf("\\n");
-      else
-        printf("%c", cur->delims->value[i]);
-    }
-  }
+  print_str_formatted(cur->delims);
   if (cur->dflag) printf("' (whitelist)\n");
   else printf("' (blacklist)\n");
   printf("ignored: '");
-  if (cur->ignored) {
-    for (int i = 0; i < cur->ignored->length; i++) {
-      if (cur->ignored->value[i] == '\n')
-        printf("\\n");
-      else
-        printf("%c", cur->ignored->value[i]);
-    }
-  }
+  print_str_formatted(cur->ignored);
   if (cur->iflag) printf("' (whitelist)\n");
   else printf("' (blacklist)\n");
 
@@ -131,6 +117,7 @@ int main(int argc, char **argv) {
       printf("crank %d\n", cr[0][1]);
     } else printf("crank 0\n");
   } else printf("crank 0\n");
+
   /* Free all global variables */
   global_free();
   return 0;

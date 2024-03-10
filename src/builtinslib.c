@@ -30,17 +30,25 @@ void contain_copy_attributes(contain_t *c, contain_t *newc) {
   newc->iflag = c->iflag;
 }
 
+void print_str_formatted(string_t *string) {
+  if (!string) return;
+  for (int i = 0; i < string->length; i++) {
+    if (string->value[i] == '\n') {
+      printf("\\n");
+    } else if (string->value[i] == '\t') {
+      printf("\\t");
+    } else {
+      printf("%c", string->value[i]);
+    }
+  }
+}
+
 void print_value(value_t *v, const char *end) {
   custom_t *c;
   switch (v->type) {
     case VWORD:
       printf("'");
-      for (int i = 0; i < v->str_word->length; i++) {
-        if (v->str_word->value[i] == '\n') {
-          printf("\\n");
-        }
-        else printf("%c", v->str_word->value[i]);
-      }
+      print_str_formatted(v->str_word);
       printf("'");
       break;
     case VSTACK:
