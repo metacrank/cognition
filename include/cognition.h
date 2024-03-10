@@ -127,6 +127,10 @@ struct CONTAINER_STRUCT {
   string_t *ignored;
   /* @brief false is ignored blacklist */
   bool iflag;
+  /* list of singlet characters */
+  string_t *singlets;
+  /* false is singlet blacklist */
+  bool sflag;
 };
 
 /*! Useless function that is only used in order to be passed into a hash table.
@@ -239,6 +243,9 @@ bool parser_skip_ignore(parser_t *p);
 
 /*! Gets the next value_t from the string, returns NULL if EOF. */
 value_t *parser_get_next(parser_t *p);
+
+/* returns true if p is a singlet character */
+bool issinglet(parser_t *p);
 
 /* returns true if p is an ignored character */
 bool isignore(parser_t *p);

@@ -260,8 +260,10 @@ contain_t *init_contain(ht_t *h, ht_t *flit, stack_t *cranks) {
   c->faliases = NULL;
   c->delims = NULL;
   c->ignored = NULL;
+  c->singlets = NULL;
   c->dflag = false;
   c->iflag = true;
+  c->sflag = true;
   return c;
 }
 
@@ -276,6 +278,7 @@ void contain_free(void *con) {
   stack_free(c->faliases, (void(*)(void*))string_free);
   string_free(c->delims);
   string_free(c->ignored);
+  string_free(c->singlets);
   free(c);
 }
 
@@ -295,18 +298,24 @@ contain_t *contain_copy(contain_t *c, void *(*copyfunc)(void *)) {
   if (c->word_table->size) {
     contain->word_table = ht_copy(c->word_table, contain_value_copy);
   } else {
-    contain->word_table = init_ht(10);
+    contain->word_table = init_ht(DEFAULT_HT_SIZE);
   }
   if (c->flit->size) {
     contain->flit = ht_copy(c->flit, value_stack_copy);
   } else {
-    contain->flit = init_ht(10);
+    contain->flit = init_ht(DEFAULT_HT_SIZE);
   }
   contain->cranks = stack_copy(c->cranks, cranks_copy);
   contain->err_stack = stack_copy(c->err_stack, value_copy);
-  contain->stack = stack_copy(c->stack, value_copy);
+  contain->stack = stack_copy(c->stack, copyfunc);
   contain->faliases = stack_copy(c->faliases, falias_copy);
   contain->delims = string_copy(c->delims);
+  contain->singlets = string_copy(c->singlets);
+  contain->ignored = string_copy(c->ignored);
+  contain->dflag = c->dflag;
+  contain->iflag = c->iflag;
+  contain->sflag = c->sflag;
+  return contain;
 }
 
 parser_t *init_parser(char *source) {
@@ -365,6 +374,11 @@ value_t *parse_word(parser_t *p, bool skipped) {
   string_t *strval = init_string(NULL);
   value_t *retval = init_value(VWORD);
   retval->str_word = strval;
+  if (issinglet(p)) {
+    string_append(strval, p->c);
+    parser_move(p);
+    return retval;
+  }
   if (!skipped && p->c) {
     string_append(strval, p->c);
     parser_move(p);
@@ -372,8 +386,31 @@ value_t *parse_word(parser_t *p, bool skipped) {
   while (!isdelim(p) && p->c) {
     string_append(strval, p->c);
     parser_move(p);
+    if (issinglet(p)) {
+      return retval;
+    }
   }
   return retval;
+}
+
+bool issinglet(parser_t *p) {
+  contain_t *c = stack_peek(STACK);
+  if (c->sflag) {
+    if (c->singlets == NULL) return false;
+    for (int i = 0; i < c->singlets->length; i++) {
+      if (c->singlets->value[i] == p->c) {
+        return true;
+      }
+    }
+    return false;
+  }
+  if (c->singlets == NULL) return true;
+  for (int i = 0; i < c->singlets->length; i++) {
+    if (c->singlets->value[i] == p->c) {
+      return false;
+    }
+  }
+  return true;
 }
 
 bool isignore(parser_t *p) {
