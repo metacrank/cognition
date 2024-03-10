@@ -17,13 +17,17 @@ void cog_undef(value_t *v);
  */
 void cog_unglue(value_t *v);
 
-/* returns false if and only if the word is not defined */
+/* returns false if and only if the word is not defined anywhere */
 void cog_isdef(value_t *v);
 
-/* turns a child stack definition into a 'builtin' */
+/* turns a child stack definition into a macro and binds it to word */
 void cog_alias(value_t *v);
 
-/* turns entire definition into a compiled function */
+/* like alias except values are stored in the word table */
+void cog_bind(value_t *v);
+
+/* compiles child stack based on current environment and binds it to a word as a macro */
+/* note: will not have the same behaviour as 'alias' */
 void cog_compile(value_t *v);
 
 /* returns an unordered list of the words defined in the current environment */
@@ -43,6 +47,7 @@ void cog_unglue_from(value_t *v);
 /* ... */
 void cog_isdefin(value_t *v);
 void cog_aliasin(value_t *v);
+void cog_bindin(value_t *v);
 void cog_compilein(value_t *v);
 
 /* returns wordlist from stack pointer */
