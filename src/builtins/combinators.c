@@ -14,7 +14,7 @@ void cog_quote(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   value_t *v1 = stack_pop(cur->stack);
   if (v1 == NULL) {
-    eval_error("EMPTY STACK", v);
+    eval_error("TOO FEW ARGUMENTS", v);
     return;
   }
   push_quoted(cur, v1);
@@ -56,7 +56,7 @@ void cog_wstack(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   value_t *list = stack_pop(STACK);
   if (list == NULL) {
-    eval_error("EMPTY STACK", v);
+    eval_error("TOO FEW ARGUMENTS", v);
     return;
   }
   value_t *retval = init_value(VSTACK);
@@ -100,7 +100,7 @@ void cog_bstack(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   value_t *list = stack_pop(STACK);
   if (list == NULL) {
-    eval_error("EMPTY STACK", v);
+    eval_error("TOO FEW ARGUMENTS", v);
     return;
   }
   cog_child(v);
@@ -145,7 +145,7 @@ void cog_sub(value_t *v) {
 void cog_compose(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   if (cur->stack->size < 2) {
-    eval_error("EMPTY STACK", v);
+    eval_error("TOO FEW ARGUMENTS", v);
     return;
   }
   value_t *v2 = stack_pop(cur->stack);
@@ -162,7 +162,7 @@ void cog_compose(value_t *v) {
 void cog_prepose(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   if (cur->stack->size < 2) {
-    eval_error("EMPTY STACK", v);
+    eval_error("TOO FEW ARGUMENTS", v);
     return;
   }
   value_t *v2 = stack_pop(cur->stack);
@@ -182,7 +182,7 @@ void cog_prepose(value_t *v) {
 void cog_put(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   if (cur->stack->size < 3) {
-    eval_error("EMPTY STACK", v);
+    eval_error("TOO FEW ARGUMENTS", v);
     return;
   }
   value_t *index = stack_pop(cur->stack);
@@ -220,7 +220,7 @@ void cog_put(value_t *v) {
 /*   stack_t *stack = cur->stack; */
 /*   value_t *v1 = stack_pop(stack); */
 /*   if (!v1) { */
-/*     eval_error("EMPTY STACK"); */
+/*     eval_error("TOO FEW ARGUMENTS"); */
 /*     return; */
 /*   } */
 /*   evalf(); */
@@ -230,7 +230,7 @@ void cog_dip(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   stack_t *stack = cur->stack;
   if (cur->stack->size < 2) {
-    eval_error("EMPTY STACK", v);
+    eval_error("TOO FEW ARGUMENTS", v);
     return;
   }
   value_t *quot = stack_pop(stack);
@@ -245,20 +245,20 @@ void cog_if(value_t *v) {
   stack_t *stack = cur->stack;
   value_t *v3 = stack_pop(stack);
   if (!v3) {
-    eval_error("EMPTY STACK", v);
+    eval_error("TOO FEW ARGUMENTS", v);
     return;
   }
   value_t *v2 = stack_pop(stack);
   if (!v2) {
     stack_push(cur->stack, v3);
-    eval_error("EMPTY STACK", v);
+    eval_error("TOO FEW ARGUMENTS", v);
     return;
   }
   value_t *v1 = stack_pop(stack);
   if (!v1) {
     stack_push(cur->stack, v2);
     stack_push(cur->stack, v3);
-    eval_error("EMPTY STACK", v);
+    eval_error("TOO FEW ARGUMENTS", v);
     return;
   }
   if (v1->type != VWORD) {
@@ -286,7 +286,7 @@ void cog_if(value_t *v) {
 void cog_loop(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   if (cur->stack->size == 0) {
-    eval_error("EMPTY STACK", v);
+    eval_error("TOO FEW ARGUMENTS", v);
     return;
   }
   value_t *body = stack_pop(cur->stack);
@@ -298,7 +298,7 @@ void cog_loop(value_t *v) {
     evalstack(body->container, family);
     value_t *cont_val = stack_peek(STACK);
     if (cont_val == NULL) {
-      eval_error("EMPTY STACK", v);
+      eval_error("TOO FEW ARGUMENTS", v);
       break;
     }
     if (cont_val->container->stack->size != 1) {
@@ -321,7 +321,7 @@ void cog_loop(value_t *v) {
 void cog_times(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   if (cur->stack->size < 2) {
-    eval_error("EMPTY STACK", v);
+    eval_error("TOO FEW ARGUMENTS", v);
     return;
   }
   value_t *q1 = stack_pop(cur->stack);
@@ -358,7 +358,7 @@ void cog_times(value_t *v) {
 void cog_split(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   if (cur->stack->size < 2) {
-    eval_error("EMPTY STACK", v);
+    eval_error("TOO FEW ARGUMENTS", v);
     return;
   }
   value_t *num = stack_pop(cur->stack);
@@ -403,7 +403,7 @@ void cog_vat(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   stack_t *stack = cur->stack;
   if (stack->size < 2) {
-    eval_error("EMPTY STACK", v);
+    eval_error("TOO FEW ARGUMENTS", v);
     return;
   }
   value_t *index = stack_pop(stack);
@@ -439,7 +439,7 @@ void cog_substack(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   stack_t *stack = cur->stack;
   if (stack->size < 3) {
-    eval_error("EMPTY STACK", v);
+    eval_error("TOO FEW ARGUMENTS", v);
     return;
   }
   value_t *index2 = stack_pop(stack);
@@ -492,7 +492,7 @@ void cog_del(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   stack_t *stack = cur->stack;
   if (stack->size < 2) {
-    eval_error("EMPTY STACK", v);
+    eval_error("TOO FEW ARGUMENTS", v);
     return;
   }
   value_t *index = stack_pop(stack);
@@ -528,7 +528,7 @@ void cog_uncompose(value_t *v) {
   stack_t *stack = cur->stack;
   value_t *quot = stack_pop(STACK);
   if (quot == NULL) {
-    eval_error("EMPTY STACK", v);
+    eval_error("TOO FEW ARGUMENTS", v);
     return;
   }
   for (int i = 0; i < quot->container->stack->size; i++) {
@@ -549,7 +549,7 @@ void cog_size(value_t *v) {
   stack_t *stack = cur->stack;
   value_t *v1 = stack_peek(stack);
   if (v1 == NULL) {
-    eval_error("EMPTY STACK", v);
+    eval_error("TOO FEW ARGUMENTS", v);
     return;
   }
   int size = v1->container->stack->size;

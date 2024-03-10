@@ -16,7 +16,7 @@ void cog_dsc(value_t *v) {
   stack_t *stack = cur->stack;
   value_t *v1 = stack_pop(stack);
   if (!v1) {
-    eval_error("EMPTY STACK", v);
+    eval_error("TOO FEW ARGUMENTS", v);
     return;
   }
   value_free(v1);
@@ -26,7 +26,7 @@ void cog_swap(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   stack_t *stack = cur->stack;
   if (stack->size < 2) {
-    eval_error("EMPTY STACK", v);
+    eval_error("TOO FEW ARGUMENTS", v);
     return;
   }
   int size = stack->size;

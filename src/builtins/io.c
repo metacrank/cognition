@@ -18,7 +18,7 @@ void cog_period(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   value_t *elt = stack_pop(cur->stack);
   if (elt == NULL) {
-    eval_error("EMPTY STACK", v);
+    eval_error("TOO FEW ARGUMENTS", v);
     return;
   }
   print_value(elt, "\n");
@@ -28,8 +28,8 @@ void cog_period(value_t *v) {
 void cog_print(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   value_t *v1 = stack_pop(cur->stack);
-  if (v1 == NULL) {
-    eval_error("EMPTY STACK", v);
+  if (v1 == NULL)
+    eval_error("TOO FEW ARGUMENTS", v);
     return;
   }
   if (v1->container->stack->size == 0) {
