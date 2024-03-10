@@ -1,5 +1,6 @@
 #include <builtins/combinators.h>
 #include <builtinslib.h>
+#include <macros.h>
 #include <string.h>
 #include <stdio.h>
 
@@ -30,7 +31,7 @@ void cog_child(value_t *v) {
   v1->container = calloc(1, sizeof(contain_t));
   contain_copy_attributes(cur, v1->container);
   v1->container->err_stack = stack_copy(cur->err_stack, value_copy);
-  v1->container->stack = init_stack(10);
+  v1->container->stack = init_stack(DEFAULT_STACK_SIZE);
   stack_push(cur->stack, v1);
 }
 
@@ -38,12 +39,12 @@ void cog_stack(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   value_t *v1 = init_value(VSTACK);
   v1->container = calloc(1, sizeof(contain_t));
-  v->container->word_table = init_ht(500);
-  v1->container->flit = init_ht(500);
-  v1->container->cranks = init_stack(10);
-  v1->container->err_stack = init_stack(10);
-  v1->container->stack = init_stack(10);
-  v1->container->faliases = init_stack(10);
+  v->container->word_table = init_ht(DEFAULT_HT_SIZE);
+  v1->container->flit = init_ht(DEFAULT_HT_SIZE);
+  v1->container->cranks = init_stack(DEFAULT_STACK_SIZE);
+  v1->container->err_stack = init_stack(DEFAULT_STACK_SIZE);
+  v1->container->stack = init_stack(DEFAULT_STACK_SIZE);
+  v1->container->faliases = init_stack(DEFAULT_STACK_SIZE);
   v1->container->delims = string_copy(cur->delims);
   v1->container->ignored = string_copy(cur->ignored);
   v1->container->dflag = cur->dflag;
@@ -60,12 +61,12 @@ void cog_wstack(value_t *v) {
   }
   value_t *retval = init_value(VSTACK);
   retval->container = calloc(1, sizeof(contain_t));
-  retval->container->word_table = init_ht(100);
-  retval->container->flit = init_ht(100);
-  retval->container->cranks = init_stack(10);
-  retval->container->err_stack = init_stack(10);
-  retval->container->stack = init_stack(10);
-  retval->container->faliases = init_stack(10);
+  retval->container->word_table = init_ht(DEFAULT_HT_SIZE);
+  retval->container->flit = init_ht(DEFAULT_HT_SIZE);
+  retval->container->cranks = init_stack(DEFAULT_STACK_SIZE);
+  retval->container->err_stack = init_stack(DEFAULT_STACK_SIZE);
+  retval->container->stack = init_stack(DEFAULT_STACK_SIZE);
+  retval->container->faliases = init_stack(DEFAULT_STACK_SIZE);
   retval->container->delims = string_copy(cur->delims);
   retval->container->ignored = string_copy(cur->ignored);
   retval->container->dflag = cur->dflag;
@@ -133,7 +134,9 @@ void cog_bstack(value_t *v) {
 void cog_sub(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   value_t *v1 = init_value(VSTACK);
-  v1->container = init_contain(init_ht(500), init_ht(500), init_stack(10));
+  v1->container = init_contain(init_ht(DEFAULT_HT_SIZE),
+                               init_ht(DEFAULT_HT_SIZE),
+                               init_stack(DEFAULT_STACK_SIZE));
   stack_push(v1->container->faliases, init_string("f"));
   add_funcs(v1->container->flit);
   stack_push(cur->stack, v1);
@@ -289,7 +292,7 @@ void cog_loop(value_t *v) {
   value_t *body = stack_pop(cur->stack);
   stack_push(EVAL_STACK, body);
   bool cont = true;
-  stack_t *family = init_stack(10);
+  stack_t *family = init_stack(DEFAULT_STACK_SIZE);
   stack_push(family, cur);
   do {
     evalstack(body->container, family);
@@ -341,7 +344,7 @@ void cog_times(value_t *v) {
   int n = atoi(w1->str_word->value);
   value_t *body = stack_pop(STACK);
   stack_push(EVAL_STACK, body);
-  stack_t *family = init_stack(10);
+  stack_t *family = init_stack(DEFAULT_STACK_SIZE);
   stack_push(family, cur);
   for (int i = 0; i < n; i++) {
     evalstack(body->container, family);
@@ -385,7 +388,7 @@ void cog_split(value_t *v) {
   value_t *q2 = init_value(VSTACK);
 
   q2->container = calloc(1, sizeof(contain_t));
-  q2->container->stack = init_stack(10);
+  q2->container->stack = init_stack(DEFAULT_STACK_SIZE);
   q2->container->err_stack = stack_copy(q->container->err_stack, value_copy);
   contain_copy_attributes(q->container, q2->container);
 
@@ -531,7 +534,7 @@ void cog_uncompose(value_t *v) {
   for (int i = 0; i < quot->container->stack->size; i++) {
     value_t *element = init_value(VSTACK);
     element->container = calloc(1, sizeof(contain_t));
-    element->container->stack = init_stack(10);
+    element->container->stack = init_stack(DEFAULT_STACK_SIZE);
     element->container->err_stack = stack_copy(quot->container->err_stack, value_copy);
     contain_copy_attributes(quot->container, element->container);
     stack_push(element->container->stack, quot->container->stack->items[i]);
