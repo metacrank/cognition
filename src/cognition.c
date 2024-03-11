@@ -295,16 +295,8 @@ contain_t *contain_copy(contain_t *c, void *(*copyfunc)(void *)) {
     return NULL;
   }
   contain_t *contain = calloc(1, sizeof(contain_t));
-  if (c->word_table->size) {
-    contain->word_table = ht_copy(c->word_table, contain_value_copy);
-  } else {
-    contain->word_table = init_ht(DEFAULT_HT_SIZE);
-  }
-  if (c->flit->size) {
-    contain->flit = ht_copy(c->flit, value_stack_copy);
-  } else {
-    contain->flit = init_ht(DEFAULT_HT_SIZE);
-  }
+  contain->word_table = ht_copy(c->word_table, contain_value_copy);
+  contain->flit = ht_copy(c->flit, value_stack_copy);
   contain->cranks = stack_copy(c->cranks, cranks_copy);
   contain->err_stack = stack_copy(c->err_stack, value_copy);
   contain->stack = stack_copy(c->stack, copyfunc);
@@ -781,12 +773,15 @@ void eval_value(contain_t *c, stack_t *family, contain_t *cur, value_t *val) {
       break;
     case VSTACK:
       stack_push(cur->stack, value_copy(val));
+      inc_crank();
       break;
     case VCLIB:
       ((void(*)(value_t *v))(val->custom))(NULL);
+      inc_crank();
       break;
     default:
       push_quoted(cur, value_copy(val));
+      inc_crank();
   }
 }
 
@@ -794,7 +789,6 @@ void evalstack(contain_t *c, stack_t *family) {
   contain_t *cur = stack_peek(STACK);
   if (c->stack->size) {
     eval_value(c, family, cur, c->stack->items[0]);
-    inc_crank();
     int(*cr)[2];
     for (int i = 1; i < c->stack->size; i++) {
       value_t *newval = c->stack->items[i];
@@ -802,7 +796,6 @@ void evalstack(contain_t *c, stack_t *family) {
         cr = cur->cranks->items[0];
         if (cr[0][0] == 0 && cr[0][1]) {
           eval_value(c, family, cur, newval);
-          inc_crank();
           break;
         }
       }
@@ -844,6 +837,7 @@ void evalword(value_t *v, stack_t *family) {
     contain_t *parent = family->items[i];
     if ((macro = ht_get(parent->flit, v->str_word))) {
       evalmacro(macro, v, family);
+      inc_crank();
       evald = true;
       break;
     } else if ((expand = ht_get(parent->word_table, v->str_word))) {

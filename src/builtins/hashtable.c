@@ -24,7 +24,8 @@ void cog_def(value_t *v) {
     stack_push(stack, quot);
     return;
   }
-  ht_add(cur->word_table, word->str_word, quot, contain_free);
+  ht_add(cur->word_table, word->str_word, quot->container, contain_free);
+  free(quot);
   free(word);
 }
 
@@ -53,4 +54,6 @@ void cog_undef(value_t *v) {
 }
 
 void add_funcs_hashtable(ht_t *flit) {
+  add_func(flit, cog_def, "def");
+  add_func(flit, cog_undef, "undef");
 }
