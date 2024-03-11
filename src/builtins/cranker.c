@@ -18,20 +18,21 @@ void cog_metacrank(value_t *v) {
     eval_error("TOO FEW ARGUMENTS", v);
     return;
   }
-  contain_t *ctmp = tmp->container;
-  if (ctmp->stack->size != 1) {
-    eval_error("TYPE ERROR", v);
-    stack_push(stack, tmp);
-    return;
-  }
-  value_t *v2 = ctmp->stack->items[0];
-
   value_t *tmp2 = stack_pop(stack);
   if (!tmp2) {
     eval_error("TOO FEW ARGUMENTS", v);
     stack_push(stack, tmp);
     return;
   }
+  contain_t *ctmp = tmp->container;
+  if (ctmp->stack->size != 1) {
+    eval_error("TYPE ERROR", v);
+    stack_push(stack, tmp2);
+    stack_push(stack, tmp);
+    return;
+  }
+  value_t *v2 = ctmp->stack->items[0];
+
   contain_t *ctmp2 = tmp2->container;
   if (ctmp2->stack->size != 1) {
     eval_error("TYPE ERROR", v);
@@ -188,21 +189,12 @@ void cog_metacrankc(value_t *v) {
     eval_error("TOO FEW ARGUMENTS", v);
     return;
   }
-  contain_t *ctmp = tmp->container;
-  if (ctmp->stack->size != 1) {
-    eval_error("TYPE ERROR", v);
-    stack_push(stack, tmp);
-    return;
-  }
-  value_t *v2 = ctmp->stack->items[0];
-
   value_t *tmp2 = stack_pop(stack);
   if (!tmp2) {
     eval_error("TOO FEW ARGUMENTS", v);
     stack_push(stack, tmp);
     return;
   }
-
   value_t *vstack = stack_peek(cur->stack);
   if (vstack == NULL) {
     eval_error("TOO FEW ARGUMENTS", v);
@@ -210,6 +202,15 @@ void cog_metacrankc(value_t *v) {
     stack_push(stack, tmp);
     return;
   }
+
+  contain_t *ctmp = tmp->container;
+  if (ctmp->stack->size != 1) {
+    eval_error("TYPE ERROR", v);
+    stack_push(stack, tmp2);
+    stack_push(stack, tmp);
+    return;
+  }
+  value_t *v2 = ctmp->stack->items[0];
 
   contain_t *ctmp2 = tmp2->container;
   if (ctmp2->stack->size != 1) {
@@ -265,6 +266,13 @@ void cog_crankc(value_t *v) {
     eval_error("TOO FEW ARGUMENTS", v);
     return;
   }
+  value_t *vstack = stack_peek(stack);
+  if (vstack == NULL) {
+    eval_error("TOO FEW ARGUMENTS", v);
+    stack_push(stack, tmp);
+    return;
+  }
+
   contain_t *ctmp = tmp->container;
   if (ctmp->stack->size != 1) {
     eval_error("TYPE ERROR", v);
@@ -282,12 +290,7 @@ void cog_crankc(value_t *v) {
     stack_push(stack, tmp);
     return;
   }
-  value_t *vstack = stack_peek(stack);
-  if (vstack == NULL) {
-    eval_error("TOO FEW ARGUMENTS", v);
-    stack_push(stack, tmp);
-    return;
-  }
+
   int v1val = atoi(v1->str_word->value);
   if (vstack->container->cranks == NULL) vstack->container->cranks = init_stack(DEFAULT_STACK_SIZE);
   stack_t *cranks = vstack->container->cranks;
@@ -311,6 +314,13 @@ void cog_crankallc(value_t *v) {
     eval_error("TOO FEW ARGUMENTS", v);
     return;
   }
+  value_t *vstack = stack_peek(stack);
+  if (vstack == NULL) {
+    eval_error("TOO FEW ARGUMENTS", v);
+    stack_push(stack, tmp);
+    return;
+  }
+
   contain_t *ctmp = tmp->container;
   if (ctmp->stack->size != 1) {
     eval_error("TYPE ERROR", v);
@@ -328,12 +338,7 @@ void cog_crankallc(value_t *v) {
     stack_push(stack, tmp);
     return;
   }
-  value_t *vstack = stack_peek(stack);
-  if (vstack == NULL) {
-    eval_error("TOO FEW ARGUMENTS", v);
-    stack_push(stack, tmp);
-    return;
-  }
+
   int v1val = atoi(v1->str_word->value);
   if (vstack->container->cranks == NULL)
     cur->cranks = init_stack(DEFAULT_STACK_SIZE);

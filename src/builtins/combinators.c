@@ -82,14 +82,11 @@ void cog_wstack(value_t *v) {
     } else if (isfalias(v1)) {
       stack_push(retval->container->faliases, string_copy(v1->str_word));
     } else {
-      string_t *full_err = string_copy(v->str_word);
-      string_t *err = init_string(": no word ");
-      string_concat(full_err, err);
-      string_concat(full_err, v1->str_word);
-      eval_error(full_err->value, v);
+      string_t *err = init_string("INVALID ARGUMENT: ");
+      string_concat(err, v1->str_word);
+      eval_error(err->value, v);
       string_free(err);
-      string_free(full_err);
-      // return;
+      return;
     }
   }
   stack_push(cur->stack, retval);
@@ -119,14 +116,11 @@ void cog_bstack(value_t *v) {
         }
       }
     } else {
-      string_t *full_err = string_copy(v->str_word);
-      string_t *err = init_string(": no word ");
-      string_concat(full_err, err);
-      string_concat(full_err, v1->str_word);
-      eval_error(full_err->value, v);
+      string_t *err = init_string("INVALID ARGUMENT: ");
+      string_concat(err, v1->str_word);
+      eval_error(err->value, v);
       string_free(err);
-      string_free(full_err);
-      // return;
+      return;
     }
   }
 }
@@ -197,6 +191,11 @@ void cog_put(value_t *v) {
     eval_error("TYPE ERROR", v);
     return;
   }
+  if (!strisint(idxval->str_word)) {
+    stack_push(cur->stack, index);
+    eval_error("TYPE ERROR", v);
+    return;
+  }
   value_t *v1 = stack_pop(cur->stack);
   value_t *stack = stack_peek(cur->stack);
   int idx = atoi(idxval->str_word->value);
@@ -214,18 +213,6 @@ void cog_put(value_t *v) {
   stack->container->stack->items[idx] = v1;
 }
 
-//??????
-/* void cog_dip(value_t *v) { */
-/*   contain_t *cur = stack_peek(STACK); */
-/*   stack_t *stack = cur->stack; */
-/*   value_t *v1 = stack_pop(stack); */
-/*   if (!v1) { */
-/*     eval_error("TOO FEW ARGUMENTS"); */
-/*     return; */
-/*   } */
-/*   evalf(); */
-/*   stack_push(stack, v1); */
-/* } */
 void cog_dip(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   stack_t *stack = cur->stack;

@@ -524,7 +524,7 @@ void sll_add(sll_t *l, string_t *s, void *v, void (*freefunc)(void *)) {
     cur = cur->next;
   }
   if (strcmp(s->value, cur->key->value) == 0) {
-    value_free(cur->value);
+    freefunc(cur->value);
     string_free(s);
     cur->value = v;
     return;
