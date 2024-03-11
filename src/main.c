@@ -59,8 +59,12 @@ void print_end() {
 
   if (cur->cranks) {
     if (cur->cranks->size) {
-      int(*cr)[2] = cur->cranks->items[0];
-      printf("crank %d\n", cr[0][1]);
+      printf("cranks:");
+      for (int i = 0; i < cur->cranks->size; i++) {
+        int(*cr)[2] = cur->cranks->items[i];
+        printf(" (%d,%d)", cr[0][0], cr[0][1]);
+      }
+      printf("\n");
     } else printf("crank 0\n");
   } else printf("crank 0\n");
 }

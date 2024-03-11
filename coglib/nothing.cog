@@ -21,8 +21,55 @@ matthew quote print compose
 
 getd dup _ concat _ swap d i 
 _quote_swap_quote_compose_swap_dup_d_i eval
-2 crank space swap print nop 1 crank swap quote swap compose def
-2 crank newline swap print nop 1 crank swap quote swap compose def
+2 crank \s swap 1 crank quote def
+2 crank endl swap 1 crank quote def
 
-help space me newline
+2 crank space nop
+\s nop print compose
+1 crank def
+
+2 crank newline nop
+endl nop print compose
+1 crank def
+
+2 crank ! nop
+!!! quote print compose 1 crank def
+
+2 crank ! nop 1 crank dup s getd concat d
+
+newline
+help space me!newline
+
+2 crank - dup 1 crank print
+getd print dup print geti print dup print gets print print newline newline
+
+getd dup _ concat _ swap d i_
+_dsc_swap_dup_d_i
+2 crank false swap 1 crank 
+quote def
+
+2 crank - dup 1 crank print
+getd print dup print geti print dup print gets print print newline newline
+
+2 crank # nop 1 crank
+dup gets concat s dup getd concat d
+8 crank
+geti getd gets d i s
+1 crank
+endl swap compose compose
+false swap compose compose
+false swap compose compose compose compose
+2 crank
+1 quote crank compose 1 quote 0 quote metacrank compose
+1 crank compose compose
+2 crank dsc compose s compose d compose i compose
+1 crank
+quote compose
+2 crank
+1 quote 5 quote metacrank compose nop compose nop compose 2 quote crank compose
+1 crank compose compose
+compose
+def
+
+# this is a comment
 

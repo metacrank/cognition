@@ -377,10 +377,11 @@ value_t *parse_word(parser_t *p, bool skipped) {
   }
   while (!isdelim(p) && p->c) {
     string_append(strval, p->c);
-    parser_move(p);
     if (issinglet(p)) {
+      parser_move(p);
       return retval;
     }
+    parser_move(p);
   }
   return retval;
 }
