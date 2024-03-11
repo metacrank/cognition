@@ -40,16 +40,10 @@ endl nop print compose
 newline
 help space me!newline
 
-2 crank - dup 1 crank print
-getd print dup print geti print dup print gets print print newline newline
-
-getd dup _ concat _ swap d i_
-_dsc_swap_dup_d_i
+getd geti getd _ concat _ swap d i_
+_dsc_quote_swap_quote_compose_dip_d_i
 2 crank false swap 1 crank 
 quote def
-
-2 crank - dup 1 crank print
-getd print dup print geti print dup print gets print print newline newline
 
 2 crank # nop 1 crank
 dup gets concat s dup getd concat d
@@ -73,3 +67,10 @@ def
 
 # this is a comment
 
+# code for printing delim/ignore/singlet characters:
+2 crank - dup 1 crank print
+getd print dup print geti print dup print gets print print newline newline
+#2 crank - dup 1 crank print
+#getd print dup print geti print dup print gets print print newline newline
+
+# Wow, comments are the best invention ever made
