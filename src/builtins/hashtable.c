@@ -25,8 +25,10 @@ void cog_def(value_t *v) {
     return;
   }
   ht_add(cur->word_table, word->str_word, quot->container, contain_free);
-  free(quot);
-  free(word);
+  word->str_word = NULL;
+  quot->container = NULL;
+  value_free(wordc);
+  value_free(quot);
 }
 
 void cog_undef(value_t *v) {

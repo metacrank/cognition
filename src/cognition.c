@@ -164,7 +164,6 @@ void *value_copy(void *v) {
 void value_free(void *vtmp) {
   if (vtmp == NULL) return;
   value_t *v = (value_t *)vtmp;
-  contain_t *c = stack_peek(STACK);
   if (v == NULL)
     return;
   if (v->type == VWORD || v->type == VCLIB || v->type == VCUSTOM) {
@@ -270,7 +269,7 @@ contain_t *init_contain(ht_t *h, ht_t *flit, stack_t *cranks) {
 void contain_free(void *con) {
   if (con == NULL) return;
   contain_t *c = con;
-  ht_free(c->word_table, value_free);
+  ht_free(c->word_table, contain_free);
   ht_free(c->flit, value_stack_free);
   stack_free(c->stack, value_free);
   stack_free(c->err_stack, value_free);
