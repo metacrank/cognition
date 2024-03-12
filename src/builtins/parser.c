@@ -114,6 +114,96 @@ void cog_gets(value_t *v) {
   push_quoted(cur, list);
 }
 
+void cog_delim(value_t *v) {
+  contain_t *cur = stack_peek(STACK);
+  value_t *strc = stack_pop(cur->stack);
+  if (!strc) {
+    eval_error("TOO FEW ARGUMENTS", v);
+    return;
+  }
+  if (strc->container->stack->size != 1) {
+    eval_error("TYPE ERROR", v);
+    stack_push(cur->stack, strc);
+    return;
+  }
+  value_t *strv = strc->container->stack->items[0];
+  if (strv->type != VWORD) {
+    eval_error("TYPE ERROR", v);
+    stack_push(cur->stack, strc);
+    return;
+  }
+  if (!strv->str_word->length) {
+    value_free(strc);
+    return;
+  }
+  if (!cur->delims) {
+    cur->delims = init_string("");
+  }
+  for (int i = 0; i < strv->str_word->length; i++) {
+    if (!isdelim(strv->str_word->value[i])) {
+      if (cur->dflag) {
+        string_append(cur->delims, strv->str_word->value[i]);
+      } else {
+        for (int j = 0; j < cur->delims->length; j++) {
+          if (strv->str_word->value[i] == cur->delims->value[j]) {
+            for (int k = j; k < cur->delims->length; k++) {
+              cur->delims->value[k] = cur->delims->value[k + 1];
+            }
+            cur->delims->length--;
+            break;
+          }
+        }
+      }
+    }
+  }
+  value_free(strc);
+}
+
+void cog_undelim(value_t *v) {
+  contain_t *cur = stack_peek(STACK);
+  value_t *strc = stack_pop(cur->stack);
+  if (!strc) {
+    eval_error("TOO FEW ARGUMENTS", v);
+    return;
+  }
+  if (strc->container->stack->size != 1) {
+    eval_error("TYPE ERROR", v);
+    stack_push(cur->stack, strc);
+    return;
+  }
+  value_t *strv = strc->container->stack->items[0];
+  if (strv->type != VWORD) {
+    eval_error("TYPE ERROR", v);
+    stack_push(cur->stack, strc);
+    return;
+  }
+  if (!strv->str_word->length) {
+    value_free(strc);
+    return;
+  }
+  if (!cur->delims) {
+    cur->delims = init_string("");
+  }
+  for (int i = 0; i < strv->str_word->length; i++) {
+    if (isdelim(strv->str_word->value[i])) {
+      if (cur->dflag) {
+        for (int j = 0; j < cur->delims->length; j++) {
+          if (strv->str_word->value[i] == cur->delims->value[j]) {
+            for (int k = j; k < cur->delims->length; k++) {
+              cur->delims->value[k] = cur->delims->value[k + 1];
+            }
+            cur->delims->length--;
+            break;
+          }
+        }
+      } else {
+        string_append(cur->delims, strv->str_word->value[i]);
+      }
+    }
+  }
+  value_free(strc);
+}
+
 void add_funcs_parser(ht_t* flit) {
   add_func(flit, cog_d, "d");
   add_func(flit, cog_i, "i");
@@ -124,4 +214,6 @@ void add_funcs_parser(ht_t* flit) {
   add_func(flit, cog_geti, "geti");
   add_func(flit, cog_getd, "getd");
   add_func(flit, cog_gets, "gets");
+  add_func(flit, cog_delim, "delim");
+  add_func(flit, cog_undelim, "undelim");
 }

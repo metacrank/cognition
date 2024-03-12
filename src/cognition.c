@@ -326,25 +326,6 @@ void parser_reset(parser_t *p, char *source) {
   p->c = source[0];
 }
 
-/* parser_t *parser_pp(char *s) { */
-/*   parser_t *p = init_parser(s); */
-/*   string_t *rstr = init_string(NULL); */
-/*   while (p->c != '\0') { */
-/*     if (p->c == '#') { /\* Comment character is # in stem *\/ */
-/*       while (p->c != '\n' && p->c != '\0') { */
-/*         parser_move(p); */
-/*       } */
-/*     } else { */
-/*       string_append(rstr, p->c); */
-/*       parser_move(p); */
-/*     } */
-/*   } */
-/*   free(p->source); */
-/*   parser_reset(p, rstr->value); */
-/*   free(rstr); */
-/*   return p; */
-/* } */
-
 void parser_move(parser_t *p) {
   if (p->i < strlen(p->source) && p->c != '\0') {
     p->i++;
@@ -352,21 +333,11 @@ void parser_move(parser_t *p) {
   }
 }
 
-/* value_t *parse_word(parser_t *p) { */
-/*   string_t *strval = init_string(NULL); */
-/*   value_t *retval = init_value(VWORD); */
-/*   retval->str_word = strval; */
-/*   do { */
-/*     string_append(strval, p->c); */
-/*     parser_move(p); */
-/*   } while (!isdelim(p) && p->c); */
-/*   return retval; */
-/* } */
 value_t *parse_word(parser_t *p, bool skipped) {
   string_t *strval = init_string(NULL);
   value_t *retval = init_value(VWORD);
   retval->str_word = strval;
-  if (issinglet(p)) {
+  if (issinglet(p->c)) {
     string_append(strval, p->c);
     parser_move(p);
     return retval;
@@ -375,9 +346,9 @@ value_t *parse_word(parser_t *p, bool skipped) {
     string_append(strval, p->c);
     parser_move(p);
   }
-  while (!isdelim(p) && p->c) {
+  while (!isdelim(p->c) && p->c) {
     string_append(strval, p->c);
-    if (issinglet(p)) {
+    if (issinglet(p->c)) {
       parser_move(p);
       return retval;
     }
@@ -386,60 +357,60 @@ value_t *parse_word(parser_t *p, bool skipped) {
   return retval;
 }
 
-bool issinglet(parser_t *p) {
-  contain_t *c = stack_peek(STACK);
-  if (c->sflag) {
-    if (c->singlets == NULL) return false;
-    for (int i = 0; i < c->singlets->length; i++) {
-      if (c->singlets->value[i] == p->c) {
+bool issinglet(char c) {
+  contain_t *cur = stack_peek(STACK);
+  if (cur->sflag) {
+    if (cur->singlets == NULL) return false;
+    for (int i = 0; i < cur->singlets->length; i++) {
+      if (cur->singlets->value[i] == c) {
         return true;
       }
     }
     return false;
   }
-  if (c->singlets == NULL) return true;
-  for (int i = 0; i < c->singlets->length; i++) {
-    if (c->singlets->value[i] == p->c) {
+  if (cur->singlets == NULL) return true;
+  for (int i = 0; i < cur->singlets->length; i++) {
+    if (cur->singlets->value[i] == c) {
       return false;
     }
   }
   return true;
 }
 
-bool isignore(parser_t *p) {
-  contain_t *c = stack_peek(STACK);
-  if (c->iflag) {
-    if (c->ignored == NULL) return false;
-    for (int i = 0; i < c->ignored->length; i++) {
-      if (c->ignored->value[i] == p->c) {
+bool isignore(char c) {
+  contain_t *cur = stack_peek(STACK);
+  if (cur->iflag) {
+    if (cur->ignored == NULL) return false;
+    for (int i = 0; i < cur->ignored->length; i++) {
+      if (cur->ignored->value[i] == c) {
         return true;
       }
     }
     return false;
   }
-  if (c->ignored == NULL) return true;
-  for (int i = 0; i < c->ignored->length; i++) {
-    if (c->ignored->value[i] == p->c) {
+  if (cur->ignored == NULL) return true;
+  for (int i = 0; i < cur->ignored->length; i++) {
+    if (cur->ignored->value[i] == c) {
       return false;
     }
   }
   return true;
 }
 
-bool isdelim(parser_t *p) {
-  contain_t *c = stack_peek(STACK);
-  if (c->dflag) {
-    if (c->delims == NULL) return false;
-    for (int i = 0; i < c->delims->length; i++) {
-      if (c->delims->value[i] == p->c) {
+bool isdelim(char c) {
+  contain_t *cur = stack_peek(STACK);
+  if (cur->dflag) {
+    if (cur->delims == NULL) return false;
+    for (int i = 0; i < cur->delims->length; i++) {
+      if (cur->delims->value[i] == c) {
         return true;
       }
     }
     return false;
   }
-  if (c->delims == NULL) return true;
-  for (int i = 0; i < c->delims->length; i++) {
-    if (c->delims->value[i] == p->c) {
+  if (cur->delims == NULL) return true;
+  for (int i = 0; i < cur->delims->length; i++) {
+    if (cur->delims->value[i] == c) {
       return false;
     }
   }
@@ -448,7 +419,7 @@ bool isdelim(parser_t *p) {
 
 bool parser_skip_ignore(parser_t *p) {
   bool skipped = false;
-  while (isignore(p) && p->c != '\0') {
+  while (isignore(p->c) && p->c != '\0') {
     parser_move(p);
     skipped = true;
   }

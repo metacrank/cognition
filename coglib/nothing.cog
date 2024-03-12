@@ -74,3 +74,10 @@ getd print dup print geti print dup print gets print print newline newline
 #getd print dup print geti print dup print gets print print newline newline
 
 # Wow, comments are the best invention ever made
+
+
+#okay i'm going to write some actual code
+4 crank ! # 1 crank s undelim
+5 crank Hello, World! print 1 crank
+#comments still work
+dip space print newline

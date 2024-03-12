@@ -245,13 +245,13 @@ bool parser_skip_ignore(parser_t *p);
 value_t *parser_get_next(parser_t *p);
 
 /* returns true if p is a singlet character */
-bool issinglet(parser_t *p);
+bool issinglet(char c);
 
 /* returns true if p is an ignored character */
-bool isignore(parser_t *p);
+bool isignore(char c);
 
 /* returns true if p is a delimiter character */
-bool isdelim(parser_t *p);
+bool isdelim(char c);
 
 /*! Allocates memory for new node struct. */
 node_t *init_node(string_t *key, void *v);
