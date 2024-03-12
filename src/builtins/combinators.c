@@ -248,14 +248,15 @@ void cog_if(value_t *v) {
     eval_error("TOO FEW ARGUMENTS", v);
     return;
   }
-  if (v1->type != VWORD) {
+  value_t *w1 = v1->container->stack->items[0];
+  if (w1->type != VWORD) {
     stack_push(stack, v1);
     stack_push(stack, v2);
     stack_push(stack, v3);
     eval_error("TYPE ERROR", v);
     return;
   }
-  bool v1_fixed = word_truth(v1);
+  bool v1_fixed = word_truth(w1);
   value_free(v1);
   if (v1_fixed) {
     stack_push(stack, v2);

@@ -1,0 +1,104 @@
+\documentclass[12 pt]{article}%
+\usepackage{amssymb, amsmath, amsthm, fullpage}%
+\usepackage{enumitem}
+\usepackage{multicol}
+\usepackage{longtable}
+\usepackage{verbatim}
+\usepackage{anyfontsize}
+\usepackage{diagbox}
+
+\title{Fundamental Builtin Word Classes in Cognition}
+\author{Matthew Hinton, Preston Pan, \copyright$1\bar43\bar5$}
+\date{$1\bar43\bar5.\bar95$ (February 2024)}
+
+\pagestyle{empty}
+\lineskip +3pt
+
+\begin{document}
+
+\maketitle
+
+\centering
+\begin{tiny}
+  \begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+    \hline
+    swap & dup & dsc & compose & eval & quote & stack creation & cd & hierarchy & metacrank & query crank & errors & escape \\
+    \hline\hline
+    swap & dup & dsc & compose & eval & quote & child & cd & parent & crank & modcrank & & evalf \\
+    dip & over & nip & curry & dip & curry & wstack & uncd & evalc & metacrank & crankbase & & \\
+         & & & & & & & & & & & & \\
+         & & & & & & & & & & & & \\
+    \hline
+  \end{tabular}\\
+  \bigskip\bigskip\bigskip
+  \begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+    \hline
+    \diagbox{word}{class} & swap & dup & dsc & compose & eval & quote & $\text{stack} \atop \text{creation} $ & cd & hierarchy & metacrank & query crank & errors & escape \\
+    \hline
+    swap & 1 & - & - & - & - & - & - & - & - & - & - & - & - \\
+    dup & - & 1 & - & - & - & - & - & - & - & - & - & - & - \\
+    dsc & - & - & 1 & - & - & - & - & - & - & - & - & - & - \\
+    compose & - & - & - & 1 & - & - & - & - & - & - & - & - & - \\
+    eval & - & - & - & - & 1 & - & - & - & - & - & - & - & - \\
+    quote & - & - & - & - & - & 1 & - & - & - & - & - & - & - \\
+    child & - & - & - & - & - & - & 1 & - & - & - & - & - & - \\
+    cd & - & - & - & - & - & - & - & 1 & - & - & - & - & - \\
+    parent & - & - & - & - & - & - & - & - & 1 & - & - & - & - \\
+    crank & - & - & - & - & - & - & - & - & - & 1 & - & - & - \\
+    modcrank & - & - & - & - & - & - & - & - & - & - & 1 & - & - \\
+    f & - & - & - & - & 1 & - & - & - & - & - & - & - & 1 \\
+    dip & - & - & - & - & - & - & - & - & - & - & - & - & - \\
+    over & - & - & - & - & - & - & - & - & - & - & - & - & - \\
+    nip & - & - & - & - & - & - & - & - & - & - & - & - & - \\
+    curry & - & - & - & - & - & - & - & - & - & - & - & - & - \\
+    dip & - & - & - & - & - & - & - & - & - & - & - & - & - \\
+    curry & - & - & - & - & - & - & - & - & - & - & - & - & - \\
+    wstack & - & - & - & - & - & - & - & - & - & - & - & - & - \\
+    uncd & - & - & - & - & - & - & - & - & - & - & - & - & - \\
+    evalc & - & - & - & - & - & - & - & - & - & - & - & - & - \\
+    metacrank & - & - & - & - & - & - & - & - & - & - & - & - & - \\
+    crankbase & - & - & - & - & - & - & - & - & - & - & - & - & - \\
+    uncurry & - & - & - & - & - & - & - & - & - & - & - & - & - \\
+    decompose & - & - & - & - & - & - & - & - & - & - & - & - & - \\
+    \hline
+  \end{tabular}\\
+
+\end{tiny}
+\bigskip
+
+\newpage\raggedright
+\textbf{Words by operation area:}\\
+\medskip
+\begin{tabular}{|c|c|c|c|c|c|c|c|}
+  \hline
+  Stack stack & Hashtable & Parser & Cranker & Delimiters & Ignore & Stack & FLI \\
+  \hline
+  eval & def & aliasf & metacrank & getd & geti & compose & clib \\
+  cd & undef & unaliasf & f & d & i & eval & \\
+  uncd & unglue & listf & crank & fd & fi & quote & \\
+  ccd & (isdef) & & & (dtoggle?) & (itoggle?) & dsc & \\
+  qstack & alias & $<$getf$>$ & & & & swap & \\
+  parent & wordlist & $<$setf$>$ & & & & dup & \\
+  meta & & & & & & substr & \\
+  sub & & & & & & & \\
+  chroot & & & & & & & \\
+  pcd & & & & & & & \\
+  exit & & & & & & & \\
+  (evalc) & & & & & & & \\
+  (quote) & & & & & & & \\
+  (child) & & & & & & & \\
+  (wstack) & & & & & & & \\
+  \hline
+\end{tabular}
+\bigskip\bigskip
+
+\textbf{Stack attributes:} \\
+\medskip
+delim string \\
+metacrank list \\
+f aliases \\
+FLI defs hashtable \\
+normal defs hashtable \\
+(STACK pointer)
+
+\end{document}

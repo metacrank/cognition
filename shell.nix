@@ -11,6 +11,8 @@ pkgs.mkShellNoCC {
     valgrind
     tig
     doxygen
+    nano
+    gdb
   ];
 }
 

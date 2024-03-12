@@ -49,14 +49,19 @@
 }
 
 % Affiliations are output in the \date{} command
-\date{\footnotesize\textsuperscript{\textbf{1}}School of Chemistry, The University of Michigan\\ \textsuperscript{\textbf{2}}Physics Department, The University of Wisconsin\\ \textsuperscript{\textbf{3}}Biological Sciences Department, The University of Minnesota}
+\date{\footnotesize\textsuperscript{\textbf{1}}University of Victoria}
 
 % Full-width abstract
 \renewcommand{\maketitlehookd}{%
 	\begin{abstract}
           \noindent
-          Modern programming languages require a parser to construct an intermediate data structure known as an AST
-          (abstract syntax tree)
+          Cognition is a system wherein components of the language are public to the language itself. It is written
+          in pure postfix notation, and removes the prefix characteristics of other similar languages.
+          This enables the Cognition interpreter to be able to manipulate its state based on code read on the fly
+          in a token stream, giving it the property of tokenizing and parsing future characters differently than it does
+          current characters. The result is an unopinionated language that can replicate a wide variety of different
+          syntaxes, allowing Cognition to modify syntax entirely during runtime. This paper investigates the implications
+          of this system, which has potential applications in parsing and self-modifying systems.
         \end{abstract}
 }
 
@@ -71,29 +76,45 @@
 %----------------------------------------------------------------------------------------
 
 \section{Introduction}
+Current programming languages operate with parsing requirements. This means that the parser must read ahead
+of the current token to decide what to do with the current token being passed into the parser. This usually causes
+the langauge to have a static syntax, due to the parser being too rigid for the AST to be made public. Metaprogramming
+languages solve this problem by making parts of the AST public, and in particular, concatenative programming languages such
+as forth, factor, and stem solve a part of this problem by introducing postfix notation for symbols usually known as \emph{words},
+which reduce the need for parsing by allowing tokens to be evaluated one-at-a-time. Many of these languages then utilize
+metaprogramming in order to alter the execution order of the tokens, usually using quotes.
+However, they don't remove the requirement of \emph{reading ahead}. Instead, they outsource this process to quotes,
+which are required for turing completeness in the form of recursion. Worse, many of these languages have strings, which
+require the parser or tokenizer to read ahead in order to package the string as a single token. Therefore, many of these
+languages are not perfect candidates for a perfectly postfix language.
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent porttitor arcu luctus, imperdiet urna iaculis, mattis eros. Pellentesque iaculis odio vel nisl ullamcorper, nec faucibus ipsum molestie. Sed dictum nisl non aliquet porttitor. Etiam vulputate arcu dignissim, finibus sem et, viverra nisl. Aenean luctus congue massa, ut laoreet metus ornare in. Nunc fermentum nisi imperdiet lectus tincidunt vestibulum at ac elit. Nulla mattis nisl eu malesuada suscipit.
+Cognition solves this problem using three mechanisms: first, tokens are one character long by default and information
+about how Cognition will tokenize based on certain delimiter rules are made public to the language; second, Cognition
+uses a unique metacrank system which allows it to modify the execution order of the code, allowing Cognition to
+\emph{simulate} reading ahead, and allow for metaprogramming; third, it uses what we call an \emph{falias} system which we
+believe to be computationally equivalent to metacrank, but makes for easier bootstrapping to an environment that is more
+desirable to program in.
 
-Aliquam arcu turpis, ultrices sed luctus ac, vehicula id metus. Morbi eu feugiat velit, et tempus augue. Proin ac mattis tortor. Donec tincidunt, ante rhoncus luctus semper, arcu lorem lobortis justo, nec convallis ante quam quis lectus. Aenean tincidunt sodales massa, et hendrerit tellus mattis ac. Sed non pretium nibh. Donec cursus maximus luctus. Vivamus lobortis eros et massa porta porttitor. Donec laoreet nisl vel risus lacinia elementum non nec lacus. Nullam luctus, nulla volutpat ultricies ultrices, quam massa placerat augue, ut fringilla urna lectus nec nibh. Vestibulum efficitur condimentum orci a semper. Pellentesque ut metus pretium lacus maximus semper.
-
-Fusce varius orci ac magna dapibus porttitor. In tempor leo a neque bibendum sollicitudin. Nulla pretium fermentum nisi, eget sodales magna facilisis eu. Praesent aliquet nulla ut bibendum lacinia. Donec vel mauris vulputate, commodo ligula ut, egestas orci. Suspendisse commodo odio sed hendrerit lobortis. Donec finibus eros erat, vel ornare enim mattis et. Donec finibus dolor quis dolor tempus consequat. Mauris fringilla dui id libero egestas, ut mattis neque ornare. Ut condimentum urna pharetra ipsum consequat, eu interdum elit cursus. Vivamus scelerisque tortor et nunc ultricies, id tincidunt libero pharetra. Aliquam eu imperdiet leo. Morbi a massa volutpat velit condimentum convallis et facilisis dolor.
-
-\begin{equation}
-	\cos^3 \theta =\frac{1}{4}\cos\theta+\frac{3}{4}\cos 3\theta
-	\label{eq:example}
-\end{equation}
-
-Automatically referencing an equation number using its label: Equation \ref{eq:example}.
-
-In hac habitasse platea dictumst. Curabitur mattis elit sit amet justo luctus vestibulum. In hac habitasse platea dictumst. Pellentesque lobortis justo enim, a condimentum massa tempor eu. Ut quis nulla a quam pretium eleifend nec eu nisl. Nam cursus porttitor eros, sed luctus ligula convallis quis. Nam convallis, ligula in auctor euismod, ligula mauris fringilla tellus, et egestas mauris odio eget diam. Praesent sodales in ipsum eu dictum. Aenean vel enim ipsum. Fusce ut felis at eros sagittis bibendum mollis lobortis libero.
-
-Maecenas consectetur metus at tellus finibus condimentum. Proin arcu lectus, ultrices non tincidunt et, tincidunt ut quam. Integer luctus posuere est, non maximus ante dignissim quis. Nunc a cursus erat. Curabitur suscipit nibh in tincidunt sagittis. Nam malesuada vestibulum quam id gravida. Proin ut dapibus velit. Vestibulum eget quam quis ipsum semper convallis. Duis consectetur nibh ac diam dignissim, id condimentum enim dictum. Nam aliquet ligula eu magna pellentesque, nec sagittis leo lobortis. Aenean tincidunt dignissim egestas.
 
 %------------------------------------------------
 
-\section{Methodologies}
+\section{Language Design}
+As of the release of this paper, the language design is incomplete yet still covers many general cases. Tradeoffs
+in the implementation have been made such that the esscence of the design is there but the implementation is simplified.
+In this section, we describe the 
+\subsection{Parser Design}
+The parser is designed to make public the specifics of how characters are parsed into tokens by delimiter rules,
+and by a few other constructs called \emph{ignores} and \emph{singlets}. Ignores allow the parser to ignore a list
+of characters at the start of the read-eval-print loop, and delimiters and singlets allow the parser to determine
+the end of the next token.
 
-\subsection{Sample Sites \& Processing}
+The parser has three flags for these features, where the flags represent the decision to whitelist or blacklist
+the characters to be ignored, or to be singlets or delimiters that stop the parser from collecting the token.
+When the parser hits a delimiter, the parser stops and the token gets packaged, whereas when the parser hits
+a singlet, the parser skips the singlet character. This enables a wide range of source file text manipulation.
+If characters were not ignored, at least one character must be parsed into a word, and if not, a word containing
+no characters can be created with singlets.
+\subsection{Builtins}
 
 This line shows how to use a footnote to further explain or cite text\footnote{Example footnote text.}.
 
