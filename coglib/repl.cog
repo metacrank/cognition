@@ -1,0 +1,42 @@
+ldfgldftgldfdtgl
+df 
+ 
+dfiff1 crank f
+
+f-word
+fwp]ME 0
+nth quote def
+
+getd geti getd _ concat _ swap d i_
+_dsc_quote_swap_quote_compose_dip_d_i
+2 crank false swap 1 crank quote def
+
+repl
+
+2 crank crankbase-child nop
+0 compose = compose
+
+1 crank false quote compose 2 crank
+
+modcrank-child nop 0 compose = compose
+1 crank t quote compose
+false quote compose 2 crank
+if compose
+
+quote eval compose eval
+
+if compose swap compose
+
+1 crank
+
+getd _ getd _ concat d i_cognition> _concat
+_swap_concat_swap_dup_i d quote
+2 crank print compose read compose quote compose compose compose
+
+uncd f-word compose eval quote eval compose eval
+quote eval compose compose
+
+evalstr quote dip compose
+
+ uncd compose f-word eval compose eval
+1 crank

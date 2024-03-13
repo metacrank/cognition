@@ -56,17 +56,16 @@ void print_end() {
   if (cur->sflag) printf("' (whitelist)\n");
   else printf("' (blacklist)\n");
 
-
   if (cur->cranks) {
     if (cur->cranks->size) {
       printf("cranks:");
       for (int i = 0; i < cur->cranks->size; i++) {
         int(*cr)[2] = cur->cranks->items[i];
-        printf(" (%d,%d)", cr[0][0], cr[0][1]);
+        printf(" %d:(%d,%d)", i, cr[0][0], cr[0][1]);
       }
       printf("\n");
     } else printf("crank 0\n");
-  } else printf("crank 0\n");
+  } else printf("null crank\n");
 }
 
 /*! frees all global variables */

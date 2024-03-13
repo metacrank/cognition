@@ -34,23 +34,34 @@ void cog_print(value_t *v) {
   }
   if (v1->container->stack->size == 0) {
     stack_push(cur->stack, v1);
-    eval_error("TYPE ERROR", v);
+    eval_error("BAD ARGUMENT TYPE", v);
     return;
   }
   value_t *word = v1->container->stack->items[0];
   if (word->type != VWORD) {
     stack_push(cur->stack, v1);
-    eval_error("TYPE ERROR", v);
+    eval_error("BAD ARGUMENT TYPE", v);
     return;
   }
   printf("%s", word->str_word->value);
   value_free(v1);
 }
 
-void cog_read(value_t *v) {}
+void cog_read(value_t *v) {
+  contain_t *cur = stack_peek(STACK);
+  value_t *strc = init_value(VSTACK);
+  strc->container = init_contain(NULL, NULL, NULL);
+  value_t *strval = init_value(VWORD);
+  char *s = get_line(stdin);
+  strval->str_word = init_string(s);
+  stack_push(strc->container->stack, strval);
+  stack_push(cur->stack, strc);
+  free(s);
+}
 
 void add_funcs_io(ht_t* flit) {
   add_func(flit, cog_questionmark, "?");
   add_func(flit, cog_period, ".");
   add_func(flit, cog_print, "print");
+  add_func(flit, cog_read, "read");
 }

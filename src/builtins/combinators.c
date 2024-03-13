@@ -423,6 +423,48 @@ void cog_vat(value_t *v) {
   stack_push(stack, v1);
 }
 
+/* void cog_nth(value_t *v) { */
+/*   contain_t *cur = stack_peek(STACK); */
+/*   stack_t *stack = cur->stack; */
+/*   if (stack->size < 2) { */
+/*     eval_error("TOO FEW ARGUMENTS", v); */
+/*     return; */
+/*   } */
+/*   value_t *v1 = stack_pop(stack); */
+/*   if (v1->container->stack->size != 1) { */
+/*     eval_error("BAD ARGUMENT TYPE", v); */
+/*     stack_push(stack, v1); */
+/*     return; */
+/*   } */
+/*   value_t *w1 = v1->container->stack->items[0]; */
+/*   if (w1->type != VWORD) { */
+/*     eval_error("BAD ARGUMENT TYPE", v); */
+/*     stack_push(stack, v1); */
+/*     return; */
+/*   } */
+/*   if (!strisint(w1->str_word)) { */
+/*     eval_error("BAD ARGUMENT TYPE", v); */
+/*     stack_push(stack, v1); */
+/*     return; */
+/*   } */
+/*   int n = atoi(w1->str_word->value); */
+/*   value_t *quot = stack_peek(STACK); */
+/*   if (quot->container->stack->size <= n || n < 0) { */
+/*     eval_error("INDEX OUT OF RANGE", v); */
+/*     stack_push(stack, v1); */
+/*     return; */
+/*   } */
+/*   value_free(v1); */
+/*   for (int i = 0; i < n; i++) { */
+/*     value_free(quot->container->stack->items[i]); */
+/*   } */
+/*   for (int i = n + 1; i < quot->container->stack->size; i++) { */
+/*     value_free(quot->container->stack->items[i]); */
+/*   } */
+/*   quot->container->stack->items[0] = quot->container->stack->items[n]; */
+/*   quot->container->stack->size = 0; */
+/* } */
+
 void cog_substack(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   stack_t *stack = cur->stack;

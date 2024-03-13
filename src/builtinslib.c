@@ -2,6 +2,15 @@
 #include <macros.h>
 #include <ctype.h>
 #include <stdio.h>
+#include <string.h>
+
+/* macros taken from stackoverflow */
+#define MAX 1000
+#define JUSTDO(a)                                                              \
+  if (!(a)) {                                                                  \
+    perror(#a);                                                                \
+    exit(1);                                                                   \
+  }
 
 bool strisint(string_t *s) {
   for (int i = 0; i < s->length; i++) {
@@ -69,4 +78,23 @@ void print_value(value_t *v, const char *end) {
       printf("CLIB_FUNC");
   }
   printf("%s", end);
+}
+
+/* taken from stackoverflow */
+char *get_line(FILE *f) {
+  int len = MAX;
+  char buf[MAX], *e = NULL, *ret;
+  JUSTDO(ret = calloc(MAX, 1));
+  while (fgets(buf, MAX, f)) {
+    if (len - strlen(ret) < MAX)
+      JUSTDO(ret = realloc(ret, len *= 2));
+    strcat(ret, buf);
+    if ((e = strrchr(ret, '\n')))
+      break;
+  }
+  /* stackoverflow code patch: clearerr */
+  clearerr(f);
+  if (e)
+    *e = '\0';
+  return ret;
 }
