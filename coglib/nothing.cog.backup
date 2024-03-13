@@ -81,3 +81,36 @@ getd print dup print geti print dup print gets print print newline newline
 5 crank Hello, World! print 1 crank
 #comments still work
 dip space print newline
+
+
+
+2 crank a nop
+Hello, nop print compose space compose World compose print compose ! compose 1 crank def
+a
+
+# implementing quotes [
+# [ === [ 1 0 metacrank eval 1 crank dup ']' = [ dsc nip ] [ dup '[' =  [ eval quote compose ] [ compose over ] if ] if ] [ ]
+# [ 1 0 metacrank eval 1 crank dup ']' = [ dsc nip ] [ dup '[' =  [ eval quote compose ] [ compose over ] if 2 crank 1 3 metacrank eval _ dsc ] if 2 crank 1 3 metacrank eval _ dsc ]
+# 2 crank 1 3 metacrank eval _ dsc
+# safe: crank nop compose quote stack dsc
+# unsafe: eval
+
+2 crank nip nop
+swap nop dsc compose 1 crank def
+
+2 crank swapd nop
+swap quote dip compose 1 crank def
+
+6 crank over
+swap dup swapd 1 crank compose compose def
+
+2 crank [ nop
+1 nop 0 compose metacrank compose eval compose 1 compose crank compose dup compose ] compose = compose dsc nop nip compose quote eval compose
+eval dup nop [ compose = compose eval nop quote compose compose compose quote eval compose eval compose nop over compose quote eval compose eval
+if compose 2 compose crank compose 1 compose 3 compose metacrank compose eval compose _ compose dsc compose quote eval compose eval if compose
+1 crank quote dup stack quote swap compose compose
+10 crank
+2 crank 1 3 metacrank eval _ dsc 1 crank compose compose compose compose compose compose compose compose
+def
+
+[ hello world ]

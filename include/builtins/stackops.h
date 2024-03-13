@@ -82,6 +82,12 @@ void cog_dup(value_t *v);
 /* void cog_reachdd(value_t *v); */
 /* void cog_pickddn(value_t *v); */
 
+/* shallow copy values, especially stacks with lots of data
+ * also makes interpreted loop functions faster */
+void cog_copy(value_t *v);
+/* OR cog_cp OR cog_ref */
+/* actually quite like cog_ref */
+
 /* rotates consecutive elements */
 /* void cog_rot(value_t *v); // x y z --> y z x */
 /* void cog_negrot(value_t *v); // call as '-rot' */
