@@ -784,8 +784,24 @@ void evalstack(contain_t *c, stack_t *family) {
           break;
         }
       }
-      push_quoted(cur, value_copy(newval));
-      crank();
+      if (newval->type != VWORD) {
+        push_quoted(cur, value_copy(newval));
+        crank();
+        continue;
+      }
+      bool evald = false;
+      for (int i = 0; i < family->size; i++) {
+        contain_t *parent = family->items[i];
+        if (isfaliasin(parent, newval)) {
+          evalf();
+          evald = true;
+          break;
+        }
+      }
+      if (evald) continue;
+      if (isfaliasin(c, newval)) {
+        evalf();
+      }
     }
     return;
   }
@@ -827,9 +843,6 @@ void evalword(value_t *v, stack_t *family) {
       break;
     } else if ((expand = ht_get(parent->word_table, v->str_word))) {
       evalstack(expand, family);
-      evald = true;
-      break;
-    } else if (isfaliasin(parent, v)) {
       evald = true;
       break;
     }
