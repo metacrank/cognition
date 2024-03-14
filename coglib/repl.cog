@@ -12,28 +12,19 @@ _dsc_quote_swap_quote_compose_dip_d_i
 2 crank false swap 1 crank quote def
 
 repl
-
 getd _ getd _ concat d i_cognition> _concat
 _swap_concat_swap_dup_i d quote
 2 crank print compose read compose
 quote compose compose compose
+cd compose evalstr compose uncd compose
+1 crank alias
 
-crankbase-child nop
-0 compose = compose
+stack repl
 
-1 crank false quote compose 2 crank
-
-modcrank-child nop 0 compose = compose
-1 crank t quote compose
-false quote compose 2 crank
-if compose
-
-quote eval compose eval
-
-if compose
-
-
-evalstr quote dip compose
-
- uncd compose f-word eval compose eval
+2 crank dup quote dip compose swap compose quote eval dip compose
+swap compose quote eval dip compose swap compose
 1 crank
+
+eval
+
+

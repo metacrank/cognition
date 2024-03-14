@@ -1,5 +1,6 @@
 #include <better_string.h>
 #include <builtins.h>
+#include <builtinslib.h>
 #include <cognition.h>
 #include <ctype.h>
 #include <macros.h>
@@ -275,7 +276,7 @@ void contain_free(void *con) {
     return;
   contain_t *c = con;
   ht_free(c->word_table, contain_free);
-  ht_free(c->flit, value_stack_free);
+  ht_free(c->flit, contain_free);
   stack_free(c->stack, value_free);
   stack_free(c->err_stack, value_free);
   stack_free(c->cranks, free);
@@ -779,11 +780,11 @@ void evalstack(contain_t *c, stack_t *family) {
     int(*cr)[2];
     for (int i = 1; i < c->stack->size; i++) {
       value_t *newval = c->stack->items[i];
-      if (c->cranks) {
+      if (cur->cranks) {
         cr = cur->cranks->items[0];
         if (cr[0][0] == 0 && cr[0][1]) {
           eval_value(c, family, cur, newval);
-          break;
+          continue;
         }
       }
       if (newval->type != VWORD) {
