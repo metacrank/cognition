@@ -231,11 +231,13 @@ void custom_free(void *c) { free(c); }
 
 void add_func(ht_t *h, void (*func)(value_t *), char *key) {
   stack_t *macro = init_stack(1);
+  contain_t *c = calloc(1, sizeof(contain_t));
+  c->stack = macro;
   value_t *v = init_value(VCLIB);
   v->str_word = init_string(key);
   v->custom = func;
   stack_push(macro, v);
-  ht_add(h, init_string(key), macro, value_stack_free);
+  ht_add(h, init_string(key), c, value_stack_free);
 }
 
 void add_macro(ht_t *h, stack_t *macro, char *key) {
@@ -753,7 +755,7 @@ void eval_value(contain_t *c, stack_t *family, contain_t *cur, value_t *val) {
   switch (val->type) {
   case VWORD:
     stack_push(family, c);
-    evalword(val, family);
+    evalword(val, family, false);
     stack_pop(family);
     break;
   case VSTACK:
@@ -808,8 +810,9 @@ void evalstack(contain_t *c, stack_t *family) {
   inc_crank();
 }
 
-void evalmacro(stack_t *macro, value_t *word, stack_t *family) {
+void evalmacro(contain_t *c, value_t *word, stack_t *family) {
   contain_t *cur = stack_peek(STACK);
+  stack_t *macro = c->stack;
   value_t *v;
   value_t *q;
   for (int i = 0; i < macro->size; i++) {
@@ -822,7 +825,10 @@ void evalmacro(stack_t *macro, value_t *word, stack_t *family) {
       stack_push(cur->stack, value_copy(v));
       break;
     case VWORD:
-      evalword(v, family);
+      if (isfaliasin(c, v))
+        evalf();
+      else
+        evalword(v, family, true);
       break;
     default:
       push_quoted(cur, value_copy(v));
@@ -830,19 +836,23 @@ void evalmacro(stack_t *macro, value_t *word, stack_t *family) {
   }
 }
 
-void evalword(value_t *v, stack_t *family) {
+void evalword(value_t *v, stack_t *family, bool m) {
   contain_t *expand;
   stack_t *macro;
   bool evald = false;
   for (int i = family->size - 1; i >= 0; i--) {
     contain_t *parent = family->items[i];
-    if ((macro = ht_get(parent->flit, v->str_word))) {
-      evalmacro(macro, v, family);
+    if ((expand = ht_get(parent->flit, v->str_word))) {
+      evalmacro(expand, v, family);
       inc_crank();
       evald = true;
       break;
     } else if ((expand = ht_get(parent->word_table, v->str_word))) {
       evalstack(expand, family);
+      evald = true;
+      break;
+    } else if (m && isfaliasin(parent, v)) {
+      evalf();
       evald = true;
       break;
     }
