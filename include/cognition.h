@@ -316,7 +316,7 @@ bool isfalias(value_t *v);
 void expandstack(contain_t *c, contain_t *new, stack_t *family);
 
 /* similarly for a single word */
-void expandword(value_t *v, contain_t *new, stack_t *family);
+bool expandword(value_t *v, contain_t *new, stack_t *family);
 
 /* crankless evaluation on the stack */
 void evalf();

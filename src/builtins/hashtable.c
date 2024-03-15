@@ -182,8 +182,9 @@ void cog_bind(value_t *v) {
   expandstack(quot->container, macro, family);
   free(family->items);
   free(family);
-  ht_add(cur->flit, string_copy(wordval->str_word), macro, contain_free);
+  ht_add(cur->word_table, string_copy(wordval->str_word), macro, contain_free);
   value_free(wordc);
+  value_free(quot);
 }
 
 void add_funcs_hashtable(ht_t *flit) {

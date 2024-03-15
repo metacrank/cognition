@@ -154,7 +154,7 @@ void *value_copy(void *v) {
   } else if (v1->type == VSTACK) {
     a->container = contain_copy(v1->container, value_copy);
   } else if (v1->type == VCLIB) {
-    a->str_word = v1->str_word;
+    a->str_word = string_copy(v1->str_word);
     a->custom = v1->custom;
   } else if (v1->type == VCUSTOM) {
     ht_t *ot = ot_get();
@@ -690,17 +690,18 @@ void expandstack(contain_t *c, contain_t *new, stack_t *family) {
     switch (newval->type) {
       case VWORD:
         stack_push(family, c);
-        expandword(newval, new, family);
+        if (!expandword(newval, new, family))
+          c->stack->items[i] = NULL;
         stack_pop(family);
-        value_free(newval);
         break;
       default:
         stack_push(new->stack, newval);
+        c->stack->items[i] = NULL;
     }
   }
 }
 
-void expandword(value_t *v, contain_t *new, stack_t *family) {
+bool expandword(value_t *v, contain_t *new, stack_t *family) {
   contain_t *expand;
   bool evald = false;
   for (int i = family->size - 1; i >= 0; i--) {
@@ -727,6 +728,7 @@ void expandword(value_t *v, contain_t *new, stack_t *family) {
   if (!evald) {
     stack_push(new->stack, v);
   }
+  return evald;
 }
 
 void evalf() {

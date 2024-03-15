@@ -9,6 +9,8 @@ _swap_concat_swap_dup_i d quote
 2 crank print compose read compose
 quote compose compose compose
 cd compose evalstr compose uncd compose
-1 crank alias
+1 crank
 
 stack
+
+repl
