@@ -84,9 +84,8 @@ dip space print newline
 
 
 
-2 crank a nop
-Hello, nop print compose space compose World compose print compose ! compose 1 crank def
-a
+2 crank a nop Hello, nop print compose space compose World compose print compose ! compose 1 crank def
+a a a a
 
 # implementing quotes [
 # [ === [ 1 0 metacrank eval 1 crank dup ']' = [ dsc nip ] [ dup '[' =  [ eval quote compose ] [ compose over ] if ] if ] [ ]
