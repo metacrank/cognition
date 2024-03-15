@@ -46,9 +46,9 @@ void cog_unconcat(value_t *v);
 
 void cog_nth(value_t *v);
 //or
-void cog_cat(value_t *v); // useful for [ fread strstack . ] word?
+//void cog_cat(value_t *v); // cat may be useful for [ fread . ] word?
 //or
-void cog_cvat(value_t *v);
+//void cog_cvat(value_t *v);
 
 /* length of a string */
 void cog_len(value_t *v);

@@ -100,7 +100,7 @@ void cog_if(value_t *v);
 /* void cog_when(value_t *v); */
 
 /* executes child, then looks at element at top of stack and if true executes the same child again, in a loop */
-void cog_loop(value_t *v);
+/* void cog_loop(value_t *v); */
 /* loop === [ eval ] keep [ loop ] curry when */
 
 /* [cond] [body] while; executes [body] while [cond] returns true, pops [cond] return value */
@@ -108,7 +108,7 @@ void cog_loop(value_t *v);
 
 /* void cog_until(value_t *v); */
 
-void cog_times(value_t *v);
+/* void cog_times(value_t *v); */
 
 /* splits child in two */
 void cog_split(value_t *v);

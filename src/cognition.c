@@ -1,5 +1,6 @@
 #include <better_string.h>
 #include <builtins.h>
+#include <builtinslib.h>
 #include <cognition.h>
 #include <ctype.h>
 #include <macros.h>
@@ -152,6 +153,9 @@ void *value_copy(void *v) {
     a->str_word = string_copy(v1->str_word);
   } else if (v1->type == VSTACK) {
     a->container = contain_copy(v1->container, value_copy);
+  } else if (v1->type == VCLIB) {
+    a->str_word = string_copy(v1->str_word);
+    a->custom = v1->custom;
   } else if (v1->type == VCUSTOM) {
     ht_t *ot = ot_get();
     custom_t *c = ht_get(ot, a->str_word);
@@ -661,10 +665,13 @@ bool isfaliasin(contain_t *c, value_t *v) {
   if (c->faliases == NULL)
     return false;
   string_t *falias;
-  for (int i = 0; i < c->faliases->size; i++) {
-    falias = c->faliases->items[i];
-    if (strcmp(falias->value, v->str_word->value) == 0)
-      return true;
+  if (c->faliases) {
+    for (int i = 0; i < c->faliases->size; i++) {
+      falias = c->faliases->items[i];
+      if (strcmp(falias->value, v->str_word->value) == 0)
+        return true;
+    }
+    return false;
   }
   return false;
 }
@@ -674,22 +681,25 @@ bool isfalias(value_t *v) {
   return isfaliasin(c, v);
 }
 
-void expandstack(contain_t *c, contain_t *new, stack_t *family) {
+void expandstack(contain_t *c, stack_t *new, stack_t *family) {
   for (int i = 0; i < c->stack->size; i++) {
     value_t *newval = c->stack->items[i];
+    c->stack->items[i] = NULL;
     switch (newval->type) {
-    case VWORD:
-      stack_push(family, c);
-      expandword(newval, new, family);
-      stack_pop(family);
-      break;
-    default:
-      stack_push(new->stack, newval);
+      case VWORD:
+        stack_push(family, c);
+        if (!expandword(newval, new, family))
+          c->stack->items[i] = NULL;
+        stack_pop(family);
+        break;
+      default:
+        stack_push(new, newval);
+        c->stack->items[i] = NULL;
     }
   }
 }
 
-void expandword(value_t *v, contain_t *new, stack_t *family) {
+bool expandword(value_t *v, stack_t *new, stack_t *family) {
   contain_t *expand;
   stack_t *macro;
   bool evald = false;
@@ -697,7 +707,7 @@ void expandword(value_t *v, contain_t *new, stack_t *family) {
     contain_t *parent = family->items[i];
     if ((macro = ht_get(parent->flit, v->str_word))) {
       for (int i = 0; i < macro->size; i++) {
-        stack_push(new->stack, value_copy(macro->items[i]));
+        stack_push(new, value_copy(macro->items[i]));
       }
       evald = true;
       break;
@@ -707,16 +717,18 @@ void expandword(value_t *v, contain_t *new, stack_t *family) {
       break;
     } else if ((isfaliasin(parent, v))) {
       value_t *f = init_value(VCLIB);
-      void (*func)(value_t * v) = cog_eval;
+      f->str_word = string_copy(v->str_word);
+      void (*func)(value_t *) = cog_eval;
       f->custom = func;
-      stack_push(new->stack, f);
+      stack_push(new, f);
       evald = true;
       break;
     }
   }
   if (!evald) {
-    stack_push(new->stack, v);
+    stack_push(new, v);
   }
+  return evald;
 }
 
 void evalf() {
@@ -753,7 +765,7 @@ void eval_value(contain_t *c, stack_t *family, contain_t *cur, value_t *val) {
   switch (val->type) {
   case VWORD:
     stack_push(family, c);
-    evalword(val, family);
+    evalword(val, family, false);
     stack_pop(family);
     break;
   case VSTACK:
@@ -777,15 +789,31 @@ void evalstack(contain_t *c, stack_t *family) {
     int(*cr)[2];
     for (int i = 1; i < c->stack->size; i++) {
       value_t *newval = c->stack->items[i];
-      if (c->cranks) {
+      if (cur->cranks) {
         cr = cur->cranks->items[0];
         if (cr[0][0] == 0 && cr[0][1]) {
           eval_value(c, family, cur, newval);
+          continue;
+        }
+      }
+      if (newval->type != VWORD) {
+        push_quoted(cur, value_copy(newval));
+        crank();
+        continue;
+      }
+      bool evald = false;
+      for (int i = 0; i < family->size; i++) {
+        contain_t *parent = family->items[i];
+        if (isfaliasin(parent, newval)) {
+          evalf();
+          evald = true;
           break;
         }
       }
-      push_quoted(cur, value_copy(newval));
-      crank();
+      if (evald) continue;
+      if (isfaliasin(c, newval)) {
+        evalf();
+      }
     }
     return;
   }
@@ -795,18 +823,17 @@ void evalstack(contain_t *c, stack_t *family) {
 void evalmacro(stack_t *macro, value_t *word, stack_t *family) {
   contain_t *cur = stack_peek(STACK);
   value_t *v;
-  value_t *q;
   for (int i = 0; i < macro->size; i++) {
     v = macro->items[i];
     switch (v->type) {
     case VCLIB:
-      ((void (*)(value_t * v))(v->custom))(word);
+      ((void (*)(value_t *))(v->custom))(word);
       break;
     case VSTACK:
       stack_push(cur->stack, value_copy(v));
       break;
     case VWORD:
-      evalword(v, family);
+      evalword(v, family, true);
       break;
     default:
       push_quoted(cur, value_copy(v));
@@ -814,7 +841,7 @@ void evalmacro(stack_t *macro, value_t *word, stack_t *family) {
   }
 }
 
-void evalword(value_t *v, stack_t *family) {
+void evalword(value_t *v, stack_t *family, bool m) {
   contain_t *expand;
   stack_t *macro;
   bool evald = false;
@@ -829,7 +856,8 @@ void evalword(value_t *v, stack_t *family) {
       evalstack(expand, family);
       evald = true;
       break;
-    } else if (isfaliasin(parent, v)) {
+    } else if (m && isfaliasin(parent, v)) {
+      evalf();
       evald = true;
       break;
     }
@@ -889,6 +917,7 @@ void eval(value_t *v) {
     }
     int(*crank)[2] = cur->cranks->items[0];
     if (crank[0][0] != 1 || crank[0][1] == 0) {
+      printf("evaling\n");
       evalf();
       return;
     }
