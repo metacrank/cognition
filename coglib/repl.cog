@@ -3,14 +3,6 @@ df
  
 dfiff1 crank f
 
-f-word
-fwp]ME 0
-nth quote def
-
-getd geti getd _ concat _ swap d i_
-_dsc_quote_swap_quote_compose_dip_d_i
-2 crank false swap 1 crank quote def
-
 repl
 getd _ getd _ concat d i_cognition> _concat
 _swap_concat_swap_dup_i d quote
@@ -19,12 +11,4 @@ quote compose compose compose
 cd compose evalstr compose uncd compose
 1 crank alias
 
-stack repl
-
-2 crank dup quote dip compose swap compose quote eval dip compose
-swap compose quote eval dip compose swap compose
-1 crank
-
-eval
-
-
+stack

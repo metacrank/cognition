@@ -39,9 +39,6 @@ void cog_stack(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   value_t *v1 = init_value(VSTACK);
   v1->container = calloc(1, sizeof(contain_t));
-  v->container->word_table = init_ht(DEFAULT_HT_SIZE);
-  v1->container->flit = init_ht(DEFAULT_HT_SIZE);
-  v1->container->cranks = init_stack(DEFAULT_STACK_SIZE);
   v1->container->err_stack = init_stack(DEFAULT_STACK_SIZE);
   v1->container->stack = init_stack(DEFAULT_STACK_SIZE);
   v1->container->faliases = init_stack(DEFAULT_STACK_SIZE);
@@ -61,9 +58,6 @@ void cog_wstack(value_t *v) {
   }
   value_t *retval = init_value(VSTACK);
   retval->container = calloc(1, sizeof(contain_t));
-  retval->container->word_table = init_ht(DEFAULT_HT_SIZE);
-  retval->container->flit = init_ht(DEFAULT_HT_SIZE);
-  retval->container->cranks = init_stack(DEFAULT_STACK_SIZE);
   retval->container->err_stack = init_stack(DEFAULT_STACK_SIZE);
   retval->container->stack = init_stack(DEFAULT_STACK_SIZE);
   retval->container->faliases = init_stack(DEFAULT_STACK_SIZE);
@@ -82,10 +76,7 @@ void cog_wstack(value_t *v) {
     } else if (isfalias(v1)) {
       stack_push(retval->container->faliases, string_copy(v1->str_word));
     } else {
-      string_t *err = init_string("INVALID ARGUMENT: ");
-      string_concat(err, v1->str_word);
-      eval_error(err->value, v);
-      string_free(err);
+      eval_error("UNDEFINED WORD", v);
       return;
     }
   }
@@ -116,10 +107,7 @@ void cog_bstack(value_t *v) {
         }
       }
     } else {
-      string_t *err = init_string("INVALID ARGUMENT: ");
-      string_concat(err, v1->str_word);
-      eval_error(err->value, v);
-      string_free(err);
+      eval_error("UNDEFINED WORD", v);
       return;
     }
   }
@@ -128,9 +116,7 @@ void cog_bstack(value_t *v) {
 void cog_sub(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   value_t *v1 = init_value(VSTACK);
-  v1->container = init_contain(init_ht(DEFAULT_HT_SIZE),
-                               init_ht(DEFAULT_HT_SIZE),
-                               init_stack(DEFAULT_STACK_SIZE));
+  v1->container = init_contain(NULL, NULL, NULL);
   stack_push(v1->container->faliases, init_string("f"));
   add_funcs(v1->container->flit);
   stack_push(cur->stack, v1);
