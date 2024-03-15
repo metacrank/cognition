@@ -138,7 +138,7 @@ void cog_alias(value_t *v) {
     stack_push(stack, quot);
     return;
   }
-  contain_t *macro = init_contain(NULL, NULL, NULL);
+  stack_t *macro = init_stack(DEFAULT_STACK_SIZE);
   stack_t *family = init_stack(DEFAULT_STACK_SIZE);
   stack_push(family, cur);
   expandstack(quot->container, macro, family);
@@ -176,7 +176,7 @@ void cog_bind(value_t *v) {
     stack_push(stack, quot);
     return;
   }
-  contain_t *macro = init_contain(NULL, NULL, NULL);
+  stack_t *macro = init_stack(DEFAULT_STACK_SIZE);
   stack_t *family = init_stack(DEFAULT_STACK_SIZE);
   stack_push(family, cur);
   expandstack(quot->container, macro, family);

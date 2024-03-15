@@ -313,10 +313,10 @@ bool isfaliasin(contain_t *c, value_t *v);
 bool isfalias(value_t *v);
 
 /* expands a stack as much as possible (i.e. before def'ing it) */
-void expandstack(contain_t *c, contain_t *new, stack_t *family);
+void expandstack(contain_t *c, stack_t *new, stack_t *family);
 
 /* similarly for a single word */
-bool expandword(value_t *v, contain_t *new, stack_t *family);
+bool expandword(value_t *v, stack_t *new, stack_t *family);
 
 /* crankless evaluation on the stack */
 void evalf();
@@ -338,7 +338,7 @@ void push_quoted(contain_t *cur, value_t *v);
 void evalstack(contain_t *c, stack_t *family);
 
 /* recursively evaluates a flit macro without cranking */
-void evalmacro(contain_t *c, value_t *word, stack_t *family);
+void evalmacro(stack_t *c, value_t *word, stack_t *family);
 
 /* expands and recursively evaluates a word value, with cranking */
 void evalword(value_t *v, stack_t *family, bool m);
