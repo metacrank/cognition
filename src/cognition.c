@@ -682,20 +682,29 @@ bool isfalias(value_t *v) {
 }
 
 void expandstack(contain_t *c, stack_t *new, stack_t *family) {
+  stack_t *new2;
   for (int i = 0; i < c->stack->size; i++) {
     value_t *newval = c->stack->items[i];
     c->stack->items[i] = NULL;
-    switch (newval->type) {
-      case VWORD:
-        stack_push(family, c);
-        if (!expandword(newval, new, family))
-          c->stack->items[i] = NULL;
-        stack_pop(family);
-        break;
-      default:
-        stack_push(new, newval);
-        c->stack->items[i] = NULL;
+    bool evald = false;
+    if (newval->type == VSTACK) {
+      new2 = init_stack(DEFAULT_STACK_SIZE);
+      stack_push(family, c);
+      expandstack(newval->container, new2, family);
+      stack_pop(family);
+      value_stack_free(newval->container->stack);
+      newval->container->stack = new2;
+    } else if (newval->type == VWORD) {
+      stack_push(family, c);
+      evald = expandword(newval, new, family);
+      stack_pop(family);
     }
+    if (evald) {
+      value_free(newval);
+    } else {
+      stack_push(new, newval);
+    }
+    c->stack->items[i] = NULL;
   }
 }
 
@@ -712,7 +721,9 @@ bool expandword(value_t *v, stack_t *new, stack_t *family) {
       evald = true;
       break;
     } else if ((expand = ht_get(parent->word_table, v->str_word))) {
-      expandstack(expand, new, family);
+      contain_t *expand2 = contain_value_copy(expand);
+      expandstack(expand2, new, family);
+      contain_free(expand2);
       evald = true;
       break;
     } else if ((isfaliasin(parent, v))) {
@@ -724,9 +735,6 @@ bool expandword(value_t *v, stack_t *new, stack_t *family) {
       evald = true;
       break;
     }
-  }
-  if (!evald) {
-    stack_push(new, v);
   }
   return evald;
 }
