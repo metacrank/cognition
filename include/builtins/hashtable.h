@@ -28,10 +28,15 @@ void cog_bind(value_t *v);
 
 /* compiles child stack based on current environment and binds it to a word as a macro */
 /* note: will not have the same behaviour as 'alias' */
+
+/* currently does 'arbitrary name' swap dupd bind unglue */
 void cog_compile(value_t *v);
 
 /* returns an unordered list of the words defined in the current environment */
+/* should this return two separate lists, one for each the word_table and the flit? */
 void cog_wordlist(value_t *v);
+/* deflist */
+/* aliaslist */
 
 /* def in stack given a stack pointer, storing given pointer with word */
 /* [ ptr ] [ word ] [ body ] defin */

@@ -182,9 +182,57 @@ void cog_bind(value_t *v) {
   expandstack(quot->container, macro, family);
   free(family->items);
   free(family);
-  ht_add(cur->word_table, string_copy(wordval->str_word), macro, contain_free);
+  value_stack_free(quot->container->stack);
+  quot->container->stack = macro;
+  ht_add(cur->word_table, string_copy(wordval->str_word), quot->container, contain_free);
+  quot->container = NULL;
   value_free(wordc);
   value_free(quot);
+}
+
+void cog_compile(value_t *v) {
+  contain_t *cur = stack_peek(STACK);
+  stack_t *stack = cur->stack;
+  value_t *quot = stack_peek(stack);
+  if (!quot) {
+    eval_error("TOO FEW ARGUMENTS", v);
+    return;
+  }
+  stack_t *macro = init_stack(DEFAULT_STACK_SIZE);
+  stack_t *family = init_stack(DEFAULT_STACK_SIZE);
+  stack_push(family, cur);
+  expandstack(quot->container, macro, family);
+  free(family->items);
+  free(family);
+  value_stack_free(quot->container->stack);
+  quot->container->stack = macro;
+}
+
+void cog_wordlist(value_t *v) {
+  contain_t *cur = stack_peek(STACK);
+  ht_t *h = cur->word_table;
+  contain_t *listc = init_contain(NULL, NULL, NULL);
+  stack_t *list = listc->stack;
+  for (int i = 0; i < h->size; i++) {
+    sll_t *l = h->buckets[i];
+    for (node_t *n = l->head; n != NULL; n = n->next) {
+      value_t *word = init_value(VWORD);
+      word->str_word = string_copy(n->key);
+      stack_push(list, word);
+    }
+  }
+  h = cur->flit;
+  for (int i = 0; i < h->size; i++) {
+    sll_t *l = h->buckets[i];
+    for (node_t *n = l->head; n != NULL; n = n->next) {
+      value_t *word = init_value(VWORD);
+      word->str_word = string_copy(n->key);
+      stack_push(list, word);
+    }
+  }
+  value_t *listval = init_value(VSTACK);
+  listval->container = listc;
+  stack_push(cur->stack, listval);
 }
 
 void add_funcs_hashtable(ht_t *flit) {
@@ -193,4 +241,7 @@ void add_funcs_hashtable(ht_t *flit) {
   add_func(flit, cog_unglue, "unglue");
   add_func(flit, cog_isdef, "isdef");
   add_func(flit, cog_alias, "alias");
+  add_func(flit, cog_bind, "bind");
+  add_func(flit, cog_compile, "compile");
+  add_func(flit, cog_wordlist, "wordlist");
 }
