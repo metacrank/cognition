@@ -83,7 +83,6 @@ getd print dup print geti print dup print gets print print newline newline
 dip space print newline
 
 
-
 2 crank a nop
 Hello, nop print compose space compose World compose print compose ! compose newline compose 1 crank def
 a
