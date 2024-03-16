@@ -633,8 +633,7 @@ unsigned long hash(ht_t *h, char *key) {
   return hash % h->size;
 }
 
-void inc_crank() {
-  contain_t *cur = stack_peek(STACK);
+void inc_crank(contain_t *cur) {
   if (cur->cranks == NULL)
     return;
   int(*crank)[2];
@@ -647,8 +646,7 @@ void inc_crank() {
   }
 }
 
-void dec_crank() {
-  contain_t *cur = stack_peek(STACK);
+void dec_crank(contain_t *cur) {
   if (cur->cranks == NULL)
     return;
   int(*crank)[2];
@@ -771,31 +769,33 @@ void push_quoted(contain_t *cur, value_t *v) {
 
 void eval_value(contain_t *c, stack_t *family, contain_t *cur, value_t *val) {
   switch (val->type) {
-  case VWORD:
-    stack_push(family, c);
-    evalword(val, family, false);
-    stack_pop(family);
-    break;
-  case VSTACK:
-    stack_push(cur->stack, value_copy(val));
-    inc_crank();
-    break;
-  case VCLIB:
-    ((void (*)(value_t * v))(val->custom))(NULL);
-    inc_crank();
-    break;
-  default:
-    push_quoted(cur, value_copy(val));
-    inc_crank();
+    case VWORD:
+      stack_push(family, c);
+      evalword(val, family, false);
+      stack_pop(family);
+      break;
+    case VSTACK:
+      stack_push(cur->stack, value_copy(val));
+      inc_crank(cur);
+      break;
+    case VCLIB:
+      ((void (*)(value_t * v))(val->custom))(NULL);
+      inc_crank(cur);
+      break;
+    default:
+      push_quoted(cur, value_copy(val));
+      inc_crank(cur);
   }
 }
 
 void evalstack(contain_t *c, stack_t *family) {
-  contain_t *cur = stack_peek(STACK);
+  contain_t *old = stack_peek(STACK);
   if (c->stack->size) {
-    eval_value(c, family, cur, c->stack->items[0]);
+    eval_value(c, family, old, c->stack->items[0]);
     int(*cr)[2];
     for (int i = 1; i < c->stack->size; i++) {
+      contain_t *cur = stack_peek(STACK);
+      family->items[0] = cur;
       value_t *newval = c->stack->items[i];
       if (cur->cranks) {
         cr = cur->cranks->items[0];
@@ -825,31 +825,32 @@ void evalstack(contain_t *c, stack_t *family) {
     }
     return;
   }
-  inc_crank();
+  inc_crank(old);
 }
 
 void evalmacro(stack_t *macro, value_t *word, stack_t *family) {
-  contain_t *cur = stack_peek(STACK);
   value_t *v;
   for (int i = 0; i < macro->size; i++) {
+    contain_t *cur = stack_peek(STACK);
     v = macro->items[i];
     switch (v->type) {
-    case VCLIB:
-      ((void (*)(value_t *))(v->custom))(word);
-      break;
-    case VSTACK:
-      stack_push(cur->stack, value_copy(v));
-      break;
-    case VWORD:
-      evalword(v, family, true);
-      break;
-    default:
-      push_quoted(cur, value_copy(v));
+      case VCLIB:
+        ((void (*)(value_t *))(v->custom))(word);
+        break;
+      case VSTACK:
+        stack_push(cur->stack, value_copy(v));
+        break;
+      case VWORD:
+        evalword(v, family, true);
+        break;
+      default:
+        push_quoted(cur, value_copy(v));
     }
   }
 }
 
 void evalword(value_t *v, stack_t *family, bool m) {
+  contain_t *old = stack_peek(STACK);
   contain_t *expand;
   stack_t *macro;
   bool evald = false;
@@ -857,7 +858,7 @@ void evalword(value_t *v, stack_t *family, bool m) {
     contain_t *parent = family->items[i];
     if ((macro = ht_get(parent->flit, v->str_word))) {
       evalmacro(macro, v, family);
-      inc_crank();
+      inc_crank(old);
       evald = true;
       break;
     } else if ((expand = ht_get(parent->word_table, v->str_word))) {
@@ -871,7 +872,7 @@ void evalword(value_t *v, stack_t *family, bool m) {
     }
   }
   if (!evald) {
-    push_quoted(stack_peek(STACK), value_copy(v));
+    push_quoted(old, value_copy(v));
   }
 }
 
@@ -893,7 +894,7 @@ void crank() {
     value_t *needseval = stack_popdeep(cur->stack, fixedindex);
     if (!needseval) {
       eval_error("CRANK TOO DEEP", NULL);
-      inc_crank();
+      inc_crank(cur);
       return;
     }
     stack_push(EVAL_STACK, needseval);
@@ -907,7 +908,7 @@ void crank() {
       value_free(vf);
     }
   } else {
-    inc_crank();
+    inc_crank(cur);
   }
 }
 

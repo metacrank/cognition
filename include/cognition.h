@@ -322,8 +322,8 @@ bool expandword(value_t *v, stack_t *new, stack_t *family);
 void evalf();
 
 /* increments and decrements crank stack */
-void inc_crank();
-void dec_crank();
+void inc_crank(contain_t *cur);
+void dec_crank(contain_t *cur);
 
 /* copies crank stack */
 void *cranks_copy(void *cranks);

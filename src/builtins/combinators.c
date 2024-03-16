@@ -21,8 +21,9 @@ void cog_quote(value_t *v) {
 }
 
 void cog_eval(value_t *v) {
+  contain_t *old = stack_peek(STACK);
   evalf();
-  dec_crank();
+  dec_crank(old);
 }
 
 void cog_child(value_t *v) {
