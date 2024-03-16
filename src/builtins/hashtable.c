@@ -14,14 +14,14 @@ void cog_def(value_t *v) {
   value_t *quot = stack_pop(stack);
   value_t *wordc = stack_pop(stack);
   if (wordc->container->stack->size != 1) {
-    eval_error("TYPE ERROR", v);
+    eval_error("BAD ARGUMENT TYPE", v);
     stack_push(stack, wordc);
     stack_push(stack, quot);
     return;
   }
   value_t *word = wordc->container->stack->items[0];
   if (word->type != VWORD) {
-    eval_error("TYPE ERROR", v);
+    eval_error("BAD ARGUMENT TYPE", v);
     stack_push(stack, wordc);
     stack_push(stack, quot);
     return;
@@ -42,19 +42,25 @@ void cog_undef(value_t *v) {
     return;
   }
   if (wordc->container->stack->size != 1) {
-    eval_error("TYPE ERROR", v);
+    eval_error("BAD ARGUMENT TYPE", v);
     stack_push(stack, wordc);
     return;
   }
   value_t *word = wordc->container->stack->items[0];
   if (word->type != VWORD) {
-    eval_error("TYPE ERROR", v);
+    eval_error("BAD ARGUMENT TYPE", v);
+    stack_push(stack, wordc);
+    return;
+  }
+  bool exists = ht_exists(cur->word_table, word->str_word) || ht_exists(cur->flit, word->str_word);
+  if (!exists) {
+    eval_error("UNDEFINED WORD", v);
     stack_push(stack, wordc);
     return;
   }
   ht_delete(cur->word_table, word->str_word, contain_free);
   ht_delete(cur->flit, word->str_word, value_stack_free);
-  free(word);
+  value_free(wordc);
 }
 
 void cog_unglue(value_t *v) {
@@ -235,6 +241,53 @@ void cog_wordlist(value_t *v) {
   stack_push(cur->stack, listval);
 }
 
+void cog_bequeath(value_t *v) {
+  contain_t *cur = stack_peek(STACK);
+  stack_t *stack = cur->stack;
+  value_t *wordc = stack_pop(stack);
+  if (!wordc) {
+    stack_push(stack, wordc);
+    eval_error("TOO FEW ARGUMENTS", v);
+    return;
+  }
+  int stacksize = wordc->container->stack->size;
+  contain_t *defs[stacksize];
+  stack_t *aliases[stacksize];
+  for (int i = 0; i < stacksize; i++) {
+    value_t *wordval = wordc->container->stack->items[i];
+    if (wordval->type != VWORD) {
+      stack_push(stack, wordc);
+      eval_error("BAD ARGUMENT TYPE", v);
+      return;
+    }
+    defs[i] = ht_get(cur->word_table, wordval->str_word);
+    if (defs[i] == NULL) {
+      aliases[i] = ht_get(cur->flit, wordval->str_word);
+      if (aliases[i] == NULL) {
+        stack_push(stack, wordc);
+        eval_error("UNDEFINED WORD", v);
+        return;
+      }
+    }
+  }
+  value_t *child = stack_peek(stack);
+  for (int i = 0; i < stacksize; i++) {
+    value_t *wordval = wordc->container->stack->items[i];
+    if (defs[i]) {
+      ht_add(child->container->word_table,
+             string_copy(wordval->str_word),
+             contain_value_copy(defs[i]),
+             contain_free);
+    } else {
+      ht_add(child->container->flit,
+             string_copy(wordval->str_word),
+             value_stack_copy(aliases[i]),
+             contain_free);
+    }
+  }
+  value_free(wordc);
+}
+
 void add_funcs_hashtable(ht_t *flit) {
   add_func(flit, cog_def, "def");
   add_func(flit, cog_undef, "undef");
@@ -244,4 +297,5 @@ void add_funcs_hashtable(ht_t *flit) {
   add_func(flit, cog_bind, "bind");
   add_func(flit, cog_compile, "compile");
   add_func(flit, cog_wordlist, "wordlist");
+  add_func(flit, cog_bequeath, "bequeath");
 }

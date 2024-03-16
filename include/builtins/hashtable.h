@@ -17,6 +17,10 @@ void cog_undef(value_t *v);
  */
 void cog_unglue(value_t *v);
 
+/* however, we could have a word that returns a pointer to the stack of definition */
+/* or the other option is just only to allow ungluing of words in the word table,
+ * which is what is currently implemented */
+
 /* returns false if and only if the word is not defined anywhere */
 void cog_isdef(value_t *v);
 
@@ -38,6 +42,11 @@ void cog_wordlist(value_t *v);
 /* deflist */
 /* aliaslist */
 
+/* copies a definition/alias/falias in the current stack to a child stack */
+void cog_bequeath(value_t *v);
+
+/* these remote functions might not be necessary */
+
 /* def in stack given a stack pointer, storing given pointer with word */
 /* [ ptr ] [ word ] [ body ] defin */
 void cog_defin(value_t *v);
@@ -57,9 +66,6 @@ void cog_compilein(value_t *v);
 
 /* returns wordlist from stack pointer */
 void cog_wordlist_of(value_t *v);
-
-/* copies a definition/alias/falias in the current stack to a child stack */
-void cog_bequeath(value_t *v);
 
 /* copies a definition/alias/falias to the given stack pointer */
 void cog_bequeath_to(value_t *v);

@@ -3,6 +3,7 @@
 #include <cognition.h>
 #include <builtins/combinators.h>
 #include <builtins/cranker.h>
+#include <builtins/errors.h>
 #include <builtins/hashtable.h>
 #include <builtins/io.h>
 #include <builtins/math.h>
