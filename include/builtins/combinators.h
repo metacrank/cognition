@@ -79,6 +79,7 @@ void cog_prepose(value_t *v);
 /* call with `[quote] value index put*/
 void cog_put(value_t *v);
 
+/* needs to use eval stack in case exit or similar metastack operations are called by dip! */
 void cog_dip(value_t *v);
 /* void cog_dip2(value_t *v); */
 /* void cog_dip3(value_t *v); */

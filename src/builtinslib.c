@@ -35,8 +35,10 @@ void contain_copy_attributes(contain_t *c, contain_t *newc) {
   newc->faliases = stack_copy(c->faliases, falias_copy);
   newc->delims = string_copy(c->delims);
   newc->ignored = string_copy(c->ignored);
+  newc->singlets = string_copy(c->singlets);
   newc->dflag = c->dflag;
   newc->iflag = c->iflag;
+  newc->sflag = c->sflag;
 }
 
 void print_str_formatted(string_t *string) {

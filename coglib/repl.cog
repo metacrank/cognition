@@ -13,5 +13,5 @@ cd compose evalstr compose uncd compose
 
 stack
 
-repl
+gstack
 

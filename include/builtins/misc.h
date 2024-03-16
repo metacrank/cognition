@@ -3,7 +3,7 @@
 
 #include <cognition.h>
 
-/* reset everything in stack */
+/* reset to baremetal cognition settings, definitions, and builtins */
 void cog_reset(value_t *v);
 
 /* adds misc fuctions to flit */

@@ -15,8 +15,8 @@ void cog_uncd(value_t *v);
 /* takes top of stack with you during uncd */
 void cog_pop(value_t *v);
 
-/* instant qstack and reset to baremetal cognition settings, definitions, and builtins */
-void cog_meta(value_t *v);
+/* instant qstack reset */
+/* void cog_meta(value_t *v); */
 
 /* creates a new stack above the current one, inheriting everything, and uncd's into it */
 void cog_qstack(value_t *v);
