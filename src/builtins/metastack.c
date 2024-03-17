@@ -5,6 +5,7 @@
 #include <limits.h>
 
 extern stack_t *STACK;
+extern string_t *EXIT_CODE;
 
 void cog_cd(value_t *v) {
   contain_t *cur = stack_peek(STACK);
@@ -101,7 +102,28 @@ void cog_root(value_t *v) {
 }
 
 void cog_exit(value_t *v) {
+  contain_t *cur = stack_peek(STACK);
+  value_t *codec = stack_pop(cur->stack);
+  if (!codec) {
+    eval_error("TOO FEW ARGUMENTS", v);
+    return;
+  }
+  if (codec->container->stack->size != 1) {
+    eval_error("BAD ARGUMENT TYPE", v);
+    stack_push(cur->stack, codec);
+    return;
+  }
+  value_t *code = codec->container->stack->items[0];
+  if (code->type != VWORD) {
+    eval_error("BAD ARGUMENT TYPE", v);
+    stack_push(cur->stack, codec);
+    return;
+  }
+  EXIT_CODE = code->str_word;
+  code->str_word = NULL;
+  value_free(codec);
   stack_free(STACK, contain_free);
+  STACK = NULL;
 }
 
 void add_funcs_metastack(ht_t *flit) {

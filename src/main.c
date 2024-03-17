@@ -12,6 +12,7 @@ extern stack_t *STACK;
 extern parser_t *PARSER;
 extern stack_t *EVAL_STACK;
 extern stack_t *OBJ_STACK;
+extern string_t *EXIT_CODE;
 
 /*! prints usage then exits */
 void usage(int e) {
@@ -29,6 +30,10 @@ void version() {
 /*! prints state of program when execution stops */
 void print_end() {
   printf("\n");
+  if (STACK == NULL) {
+      printf("Exit code: '%s' (called exit)\n", EXIT_CODE->value);
+    return;
+  }
   printf("Stack at end:\n");
   contain_t *cur = stack_peek(STACK);
   for (int i = 0; i < cur->stack->size; i++) {
@@ -66,15 +71,20 @@ void print_end() {
       printf("\n");
     } else printf("crank 0\n");
   } else printf("null crank\n");
+  if (EXIT_CODE)
+    printf("\nExit code: '%s'\n", EXIT_CODE->value);
+  else printf("\nExit code: ''\n");
 }
 
 /*! frees all global variables */
 void global_free() {
   free(PARSER->source);
   stack_free(OBJ_STACK, obj_free);
-  contain_free(STACK->items[0]);
-  free(STACK->items);
-  free(STACK);
+  if (STACK) {
+    contain_free(STACK->items[0]);
+    free(STACK->items);
+    free(STACK);
+  }
   free(PARSER);
   stack_free(EVAL_STACK, value_free);
 }
@@ -150,6 +160,7 @@ int main(int argc, char **argv) {
   STACK = init_stack(DEFAULT_STACK_SIZE);
   EVAL_STACK = init_stack(DEFAULT_STACK_SIZE);
   OBJ_STACK = init_stack(DEFAULT_STACK_SIZE);
+  EXIT_CODE = NULL;
 
   /* initialise environment */
   contain_t *stack = init_contain(init_ht(DEFAULT_HT_SIZE),
@@ -168,6 +179,8 @@ int main(int argc, char **argv) {
     if (v == NULL)
       break;
     eval(v);
+    if (STACK == NULL)
+      break;
   }
   if (!args.q) {
     print_end();

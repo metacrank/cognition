@@ -23,6 +23,7 @@ void cog_quote(value_t *v) {
 void cog_eval(value_t *v) {
   contain_t *old = stack_peek(STACK);
   evalf();
+  if (!old) return;
   dec_crank(old);
 }
 
@@ -215,7 +216,9 @@ void cog_dip(value_t *v) {
   value_t *v1 = stack_pop(stack);
   stack_push(stack, quot);
   evalf();
+  if (!cur) return;
   stack_push(stack, v1);
+  dec_crank(cur);
 }
 
 void cog_if(value_t *v) {
@@ -258,6 +261,8 @@ void cog_if(value_t *v) {
     value_free(v2);
     evalf();
   }
+  if (!cur) return;
+  dec_crank(cur);
 }
 
 /* // currenty equivalent to evalf'ing the loop body every repetition */

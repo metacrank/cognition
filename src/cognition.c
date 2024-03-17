@@ -16,6 +16,7 @@ stack_t *EVAL_STACK;
 // stack of tuples of: pointer to 'root' stack, ht_t*
 stack_t *OBJ_STACK;
 parser_t *PARSER;
+string_t *EXIT_CODE;
 
 void func_free(void *f) {}
 
@@ -791,6 +792,7 @@ void eval_value(contain_t *c, stack_t *family, contain_t *cur, value_t *val) {
     case VWORD:
       stack_push(family, c);
       evalword(val, family, false);
+      if (STACK == NULL) return;
       stack_pop(family);
       break;
     case VSTACK:
@@ -799,6 +801,7 @@ void eval_value(contain_t *c, stack_t *family, contain_t *cur, value_t *val) {
       break;
     case VCLIB:
       ((void (*)(value_t * v))(val->custom))(NULL);
+      if (STACK == NULL) return;
       inc_crank(cur);
       break;
     default:
@@ -809,8 +812,10 @@ void eval_value(contain_t *c, stack_t *family, contain_t *cur, value_t *val) {
 
 void evalstack(contain_t *c, stack_t *family) {
   contain_t *old = stack_peek(STACK);
+  if (!old) return;
   if (c->stack->size) {
     eval_value(c, family, old, c->stack->items[0]);
+    if (STACK == NULL) return;
     int(*cr)[2];
     for (int i = 1; i < c->stack->size; i++) {
       contain_t *cur = stack_peek(STACK);
@@ -820,12 +825,14 @@ void evalstack(contain_t *c, stack_t *family) {
         cr = cur->cranks->items[0];
         if (cr[0][0] == 0 && cr[0][1]) {
           eval_value(c, family, cur, newval);
+          if (STACK == NULL) return;
           continue;
         }
       }
       if (newval->type != VWORD) {
         push_quoted(cur, value_copy(newval));
         crank();
+        if (STACK == NULL) return;
         continue;
       }
       bool evald = false;
@@ -833,6 +840,7 @@ void evalstack(contain_t *c, stack_t *family) {
         contain_t *parent = family->items[i];
         if (isfaliasin(parent, newval)) {
           evalf();
+          if (STACK == NULL) return;
           evald = true;
           break;
         }
@@ -855,12 +863,14 @@ void evalmacro(stack_t *macro, value_t *word, stack_t *family) {
     switch (v->type) {
       case VCLIB:
         ((void (*)(value_t *))(v->custom))(word);
+        if (STACK == NULL) return;
         break;
       case VSTACK:
         stack_push(cur->stack, value_copy(v));
         break;
       case VWORD:
         evalword(v, family, true);
+        if (STACK == NULL) return;
         break;
       default:
         push_quoted(cur, value_copy(v));
@@ -879,6 +889,7 @@ void evalword(value_t *v, stack_t *family, bool m) {
     if ((macro = ht_get(parent->flit, v->str_word))) {
       stack_t *mcpy = value_stack_copy(macro);
       evalmacro(mcpy, v, family);
+      if (STACK == NULL) return;
       value_stack_free(mcpy);
       inc_crank(old);
       evald = true;
@@ -886,6 +897,7 @@ void evalword(value_t *v, stack_t *family, bool m) {
     } else if ((expand = ht_get(parent->word_table, v->str_word))) {
       contain_t *ecpy = contain_value_copy(expand);
       evalstack(ecpy, family);
+      if (STACK == NULL) return;
       contain_free(ecpy);
       evald = true;
       break;
@@ -903,6 +915,7 @@ void evalword(value_t *v, stack_t *family, bool m) {
 
 void crank() {
   contain_t *cur = stack_peek(STACK);
+  if (!cur) return;
   if (cur->cranks == NULL)
     return;
   int cindex = -1;
@@ -926,6 +939,7 @@ void crank() {
     stack_t *family = init_stack(10);
     stack_push(family, cur);
     evalstack(needseval->container, family);
+    if (STACK == NULL) return;
     free(family->items);
     free(family);
     value_t *vf = stack_pop(EVAL_STACK);
@@ -939,6 +953,7 @@ void crank() {
 
 void eval(value_t *v) {
   contain_t *cur = stack_peek(STACK);
+  if (!cur) return;
   if (isfalias(v)) {
     value_free(v);
     if (!cur->cranks) {

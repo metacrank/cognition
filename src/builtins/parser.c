@@ -511,8 +511,11 @@ void cog_evalstr(value_t *v) {
       if (w == NULL)
         break;
       eval(w);
+      if (STACK == NULL)
+        break;
     }
     free(parser);
+    if (STACK == NULL) break;
   }
   value_free(strc);
 }
