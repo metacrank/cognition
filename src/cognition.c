@@ -603,7 +603,19 @@ void *ht_get(ht_t *h, string_t *key) {
   return sll_get(h->buckets[hash(h, key->value)], key);
 }
 
-bool ht_exists(ht_t *h, string_t *key) { return ht_get(h, key) != NULL; }
+//bool ht_exists(ht_t *h, string_t *key) { return ht_get(h, key) != NULL; }
+
+bool ht_exists(ht_t *h, string_t *key) {
+  if (key == NULL || h == NULL) return false;
+  sll_t *l = h->buckets[hash(h, key->value)];
+  if (l->head == NULL) return false;
+  node_t *cur = l->head;
+  while (cur != NULL) {
+    if (strcmp(key->value, cur->key->value) == 0) return true;
+    cur = cur->next;
+  }
+  return false;
+}
 
 void ht_delete(ht_t *h, string_t *key, void (*freefunc)(void *)) {
   if (h == NULL)
@@ -856,6 +868,7 @@ void evalmacro(stack_t *macro, value_t *word, stack_t *family) {
   }
 }
 
+/* temporary fix for undef problem */
 void evalword(value_t *v, stack_t *family, bool m) {
   contain_t *old = stack_peek(STACK);
   contain_t *expand;
@@ -864,12 +877,16 @@ void evalword(value_t *v, stack_t *family, bool m) {
   for (int i = family->size - 1; i >= 0; i--) {
     contain_t *parent = family->items[i];
     if ((macro = ht_get(parent->flit, v->str_word))) {
-      evalmacro(macro, v, family);
+      stack_t *mcpy = value_stack_copy(macro);
+      evalmacro(mcpy, v, family);
+      value_stack_free(mcpy);
       inc_crank(old);
       evald = true;
       break;
     } else if ((expand = ht_get(parent->word_table, v->str_word))) {
-      evalstack(expand, family);
+      contain_t *ecpy = contain_value_copy(expand);
+      evalstack(ecpy, family);
+      contain_free(ecpy);
       evald = true;
       break;
     } else if (m && isfaliasin(parent, v)) {
@@ -880,6 +897,7 @@ void evalword(value_t *v, stack_t *family, bool m) {
   }
   if (!evald) {
     push_quoted(old, value_copy(v));
+    inc_crank(old);
   }
 }
 

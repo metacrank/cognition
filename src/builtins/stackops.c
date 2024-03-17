@@ -8,7 +8,10 @@ void cog_nop(value_t *v) {}
 void cog_clear(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   stack_t *stack = cur->stack;
-  value_stack_free(stack);
+  value_t *item;
+  while((item = stack_pop(stack))) {
+    value_free(item);
+  }
 }
 
 void cog_dsc(value_t *v) {
