@@ -43,18 +43,6 @@ void cog_metamodcrank(value_t *v);
 /* void cog_metacrankbase_child(value_t *v); */
 /* void cog_metamodcrank_child(value_t *v); */
 
-/* arbitrary stack operations by pointer */
-/* are these really necessary? */
-void cog_metacrankp(value_t *v);
-void cog_crankp(value_t *v);
-void cog_crankallp(value_t *v);
-void cog_haltp(value_t *v);
-
-void cog_crankbase_of(value_t *v);
-void cog_modcrank_of(value_t *v);
-void cog_metacrankbase_of(value_t *v);
-void cog_metamodcrank_of(value_t *v);
-
 /* adds cranker fuctions to flit */
 void add_funcs_cranker(ht_t *flit);
 

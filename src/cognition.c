@@ -546,10 +546,11 @@ sll_t *sll_copy(sll_t *l, void *(*copyfunc)(void *)) {
   node_t *nn = list->head;
   node_t *n = l->head;
   while (n) {
-    nn = node_copy(n->next, copyfunc);
+    nn->next = node_copy(n->next, copyfunc);
     n = n->next;
     nn = nn->next;
   }
+  return list;
 }
 
 void sll_free(sll_t *l, void (*func)(void *)) {
@@ -758,7 +759,13 @@ void evalf() {
 
 void *func_copy(void *funcs) { return NULL; }
 
-void *cranks_copy(void *cranks) {}
+void *cranks_copy(void *cranks) {
+  int(*cr)[2] = cranks;
+  int(*arr)[2] = malloc(sizeof(int[2]));
+  arr[0][0] = cr[0][0];
+  arr[0][1] = cr[0][1];
+  return arr;
+}
 
 void push_quoted(contain_t *cur, value_t *v) {
   value_t *q = init_value(VSTACK);
@@ -926,7 +933,6 @@ void eval(value_t *v) {
     }
     int(*crank)[2] = cur->cranks->items[0];
     if (crank[0][0] != 1 || crank[0][1] == 0) {
-      printf("evaling\n");
       evalf();
       return;
     }

@@ -26,7 +26,7 @@ void cog_metacrank(value_t *v) {
   }
   contain_t *ctmp = tmp->container;
   if (ctmp->stack->size != 1) {
-    eval_error("TYPE ERROR", v);
+    eval_error("BAD ARGUMENT TYPE", v);
     stack_push(stack, tmp2);
     stack_push(stack, tmp);
     return;
@@ -35,7 +35,7 @@ void cog_metacrank(value_t *v) {
 
   contain_t *ctmp2 = tmp2->container;
   if (ctmp2->stack->size != 1) {
-    eval_error("TYPE ERROR", v);
+    eval_error("BAD ARGUMENT TYPE", v);
     stack_push(stack, tmp2);
     stack_push(stack, tmp);
     return;
@@ -43,19 +43,19 @@ void cog_metacrank(value_t *v) {
   value_t *v1 = ctmp2->stack->items[0];
 
   if (v1 == NULL || v2 == NULL) {
-    eval_error("TYPE ERROR", v);
+    eval_error("BAD ARGUMENT TYPE", v);
     stack_push(stack, tmp2);
     stack_push(stack, tmp);
     return;
   }
   if (v1->type != VWORD || v2->type != VWORD) {
-    eval_error("TYPE ERROR", v);
+    eval_error("BAD ARGUMENT TYPE", v);
     stack_push(stack, tmp2);
     stack_push(stack, tmp);
     return;
   }
   if (!(strisint(v1->str_word) && strisint(v1->str_word))) {
-    eval_error("TYPE ERROR", v);
+    eval_error("BAD ARGUMENT TYPE", v);
     stack_push(stack, tmp2);
     stack_push(stack, tmp);
     return;
@@ -90,18 +90,18 @@ void cog_crank(value_t *v) {
   }
   contain_t *ctmp = tmp->container;
   if (ctmp->stack->size != 1) {
-    eval_error("TYPE ERROR", v);
+    eval_error("BAD ARGUMENT TYPE", v);
     stack_push(stack, tmp);
     return;
   }
   value_t *v1 = ctmp->stack->items[0];
   if (v1->type != VWORD) {
-    eval_error("TYPE ERROR", v);
+    eval_error("BAD ARGUMENT TYPE", v);
     stack_push(stack, tmp);
     return;
   }
   if (!strisint(v1->str_word)) {
-    eval_error("TYPE ERROR", v);
+    eval_error("BAD ARGUMENT TYPE", v);
     stack_push(stack, tmp);
     return;
   }
@@ -131,18 +131,18 @@ void cog_crankall(value_t *v) {
   }
   contain_t *ctmp = tmp->container;
   if (ctmp->stack->size != 1) {
-    eval_error("TYPE ERROR", v);
+    eval_error("BAD ARGUMENT TYPE", v);
     stack_push(stack, tmp);
     return;
   }
   value_t *v1 = ctmp->stack->items[0];
   if (v1->type != VWORD) {
-    eval_error("TYPE ERROR", v);
+    eval_error("BAD ARGUMENT TYPE", v);
     stack_push(stack, tmp);
     return;
   }
   if (!strisint(v1->str_word)) {
-    eval_error("TYPE ERROR", v);
+    eval_error("BAD ARGUMENT TYPE", v);
     stack_push(stack, tmp);
     return;
   }
@@ -205,7 +205,7 @@ void cog_halt(value_t *v) {
 
 /*   contain_t *ctmp = tmp->container; */
 /*   if (ctmp->stack->size != 1) { */
-/*     eval_error("TYPE ERROR", v); */
+/*     eval_error("BAD ARGUMENT TYPE", v); */
 /*     stack_push(stack, tmp2); */
 /*     stack_push(stack, tmp); */
 /*     return; */
@@ -214,7 +214,7 @@ void cog_halt(value_t *v) {
 
 /*   contain_t *ctmp2 = tmp2->container; */
 /*   if (ctmp2->stack->size != 1) { */
-/*     eval_error("TYPE ERROR", v); */
+/*     eval_error("BAD ARGUMENT TYPE", v); */
 /*     stack_push(stack, tmp2); */
 /*     stack_push(stack, tmp); */
 /*     return; */
@@ -222,19 +222,19 @@ void cog_halt(value_t *v) {
 /*   value_t *v1 = ctmp2->stack->items[0]; */
 
 /*   if (v1 == NULL || v2 == NULL) { */
-/*     eval_error("TYPE ERROR", v); */
+/*     eval_error("BAD ARGUMENT TYPE", v); */
 /*     stack_push(stack, tmp2); */
 /*     stack_push(stack, tmp); */
 /*     return; */
 /*   } */
 /*   if (v1->type != VWORD || v2->type != VWORD) { */
-/*     eval_error("TYPE ERROR", v); */
+/*     eval_error("BAD ARGUMENT TYPE", v); */
 /*     stack_push(stack, tmp2); */
 /*     stack_push(stack, tmp); */
 /*     return; */
 /*   } */
 /*   if (!(strisint(v1->str_word) && strisint(v1->str_word))) { */
-/*     eval_error("TYPE ERROR", v); */
+/*     eval_error("BAD ARGUMENT TYPE", v); */
 /*     stack_push(stack, tmp2); */
 /*     stack_push(stack, tmp); */
 /*     return; */
@@ -275,18 +275,18 @@ void cog_halt(value_t *v) {
 
 /*   contain_t *ctmp = tmp->container; */
 /*   if (ctmp->stack->size != 1) { */
-/*     eval_error("TYPE ERROR", v); */
+/*     eval_error("BAD ARGUMENT TYPE", v); */
 /*     stack_push(stack, tmp); */
 /*     return; */
 /*   } */
 /*   value_t *v1 = ctmp->stack->items[0]; */
 /*   if (v1->type != VWORD) { */
-/*     eval_error("TYPE ERROR", v); */
+/*     eval_error("BAD ARGUMENT TYPE", v); */
 /*     stack_push(stack, tmp); */
 /*     return; */
 /*   } */
 /*   if (!strisint(v1->str_word)) { */
-/*     eval_error("TYPE ERROR", v); */
+/*     eval_error("BAD ARGUMENT TYPE", v); */
 /*     stack_push(stack, tmp); */
 /*     return; */
 /*   } */
@@ -323,18 +323,18 @@ void cog_halt(value_t *v) {
 
 /*   contain_t *ctmp = tmp->container; */
 /*   if (ctmp->stack->size != 1) { */
-/*     eval_error("TYPE ERROR", v); */
+/*     eval_error("BAD ARGUMENT TYPE", v); */
 /*     stack_push(stack, tmp); */
 /*     return; */
 /*   } */
 /*   value_t *v1 = ctmp->stack->items[0]; */
 /*   if (v1->type != VWORD) { */
-/*     eval_error("TYPE ERROR", v); */
+/*     eval_error("BAD ARGUMENT TYPE", v); */
 /*     stack_push(stack, tmp); */
 /*     return; */
 /*   } */
 /*   if (!strisint(v1->str_word)) { */
-/*     eval_error("TYPE ERROR", v); */
+/*     eval_error("BAD ARGUMENT TYPE", v); */
 /*     stack_push(stack, tmp); */
 /*     return; */
 /*   } */

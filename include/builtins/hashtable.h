@@ -9,17 +9,8 @@ void cog_def(value_t *v);
 /* works on builtins/aliases */
 void cog_undef(value_t *v);
 
-/* if the word is associated with the current stack, returns the definition of the word */
-/* should this be changed to allow the ungluing of any word for the default environment?
- * probably not
- * because we can always have a word defined with [ a ] [ [ quote ] eval ] def,
- * where evaluating it in crank 2: 'a dsc 1 crank'  will return [ quote ]
- */
+/* if the word is defined in the word table, returns the definition of the word */
 void cog_unglue(value_t *v);
-
-/* however, we could have a word that returns a pointer to the stack of definition */
-/* or the other option is just only to allow ungluing of words in the word table,
- * which is what is currently implemented */
 
 /* returns false if and only if the word is not defined anywhere */
 void cog_isdef(value_t *v);
@@ -32,7 +23,6 @@ void cog_bind(value_t *v);
 
 /* compiles child stack based on current environment and binds it to a word as a macro */
 /* note: will not have the same behaviour as 'alias' */
-
 /* currently does 'arbitrary name' swap dupd bind unglue */
 void cog_compile(value_t *v);
 
@@ -44,31 +34,6 @@ void cog_wordlist(value_t *v);
 
 /* copies a definition/alias/falias in the current stack to a child stack */
 void cog_bequeath(value_t *v);
-
-/* these remote functions might not be necessary */
-
-/* def in stack given a stack pointer, storing given pointer with word */
-/* [ ptr ] [ word ] [ body ] defin */
-void cog_defin(value_t *v);
-
-/* undef in given stack */
-/* [ ptr ] [ word ] */
-void cog_undefin(value_t *v);
-
-/* unglue word as defined in stack, if stack given is where word was defined */
-void cog_unglue_from(value_t *v);
-
-/* ... */
-void cog_isdefin(value_t *v);
-void cog_aliasin(value_t *v);
-void cog_bindin(value_t *v);
-void cog_compilein(value_t *v);
-
-/* returns wordlist from stack pointer */
-void cog_wordlist_of(value_t *v);
-
-/* copies a definition/alias/falias to the given stack pointer */
-void cog_bequeath_to(value_t *v);
 
 /* adds hashtable fuctions to flit */
 void add_funcs_hashtable(ht_t *flit);

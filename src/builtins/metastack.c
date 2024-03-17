@@ -14,6 +14,16 @@ void cog_cd(value_t *v) {
     return;
   }
   stack_push(STACK, child->container);
+  cur = child->container;
+  for (int i = 0; i < cur->stack->size; i++) {
+    value_t *val = cur->stack->items[i];
+    if (val->type != VSTACK) {
+      value_t *newval = init_value(VSTACK);
+      newval->container = init_contain(NULL, NULL, NULL);
+      stack_push(newval->container->stack, val);
+      cur->stack->items[i] = newval;
+    }
+  }
 }
 
 void cog_ccd(value_t *v) {
@@ -27,6 +37,16 @@ void cog_ccd(value_t *v) {
   stack_push(STACK, child->container);
   child->container = NULL;
   contain_free(cur);
+  cur = child->container;
+  for (int i = 0; i < cur->stack->size; i++) {
+    value_t *val = cur->stack->items[i];
+    if (val->type != VSTACK) {
+      value_t *newval = init_value(VSTACK);
+      newval->container = init_contain(NULL, NULL, NULL);
+      stack_push(newval->container->stack, val);
+      cur->stack->items[i] = newval;
+    }
+  }
 }
 
 void cog_uncd(value_t *v) {
@@ -74,18 +94,14 @@ void cog_qstack(value_t *v) {
   stack_push(STACK, new);
 }
 
-void cog_pcd(value_t *v) {
-
+void cog_root(value_t *v) {
+  while (STACK->size > 1) {
+    stack_pop(STACK);
+  }
 }
 
-void cog_gstack(value_t *v) {
-  contain_t *cur = stack_peek(STACK);
-  value_t *ptrval = init_value(VWORD);
-  int ptrsize = sizeof(contain_t *) * CHAR_BIT / 4 + 2;
-  char buf[ptrsize + 1];
-  snprintf(buf, ptrsize + 1, "%p", cur);
-  ptrval->str_word = init_string(buf);
-  push_quoted(cur, ptrval);
+void cog_exit(value_t *v) {
+  stack_free(STACK, contain_free);
 }
 
 void add_funcs_metastack(ht_t *flit) {
@@ -94,5 +110,6 @@ void add_funcs_metastack(ht_t *flit) {
   add_func(flit, cog_uncd, "uncd");
   add_func(flit, cog_pop, "pop");
   add_func(flit, cog_qstack, "qstack");
-  add_func(flit, cog_gstack, "gstack");
+  add_func(flit, cog_root, "root");
+  add_func(flit, cog_exit, "exit");
 }

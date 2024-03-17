@@ -4,14 +4,14 @@ df
 dfiff1 crank f
 
 repl
-getd _ getd _ concat d i_cognition> _concat
-_swap_concat_swap_dup_i d quote
+getd _ getd _ concat d i_cognition> _concat_swap_dup_i d quote
 2 crank print compose read compose
 quote compose compose compose
-cd compose evalstr compose uncd compose
-1 crank compile
+cd compose evalstr compose
+1 crank getd _ getd _ concat d i_
+_concat_swap_dup_i d quote compose
+2 crank print compose ? compose uncd compose repl compose
+1 crank alias
 
-stack
-
-gstack
+child repl
 

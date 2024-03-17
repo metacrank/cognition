@@ -44,9 +44,11 @@ void cog_stack(value_t *v) {
   v1->container->stack = init_stack(DEFAULT_STACK_SIZE);
   v1->container->faliases = init_stack(DEFAULT_STACK_SIZE);
   v1->container->delims = string_copy(cur->delims);
+  v1->container->singlets = string_copy(cur->singlets);
   v1->container->ignored = string_copy(cur->ignored);
   v1->container->dflag = cur->dflag;
   v1->container->iflag = cur->iflag;
+  v1->container->sflag = cur->sflag;
   stack_push(cur->stack, v1);
 }
 
@@ -63,9 +65,11 @@ void cog_wstack(value_t *v) {
   retval->container->stack = init_stack(DEFAULT_STACK_SIZE);
   retval->container->faliases = init_stack(DEFAULT_STACK_SIZE);
   retval->container->delims = string_copy(cur->delims);
+  retval->container->singlets = string_copy(cur->singlets);
   retval->container->ignored = string_copy(cur->ignored);
   retval->container->dflag = cur->dflag;
   retval->container->iflag = cur->iflag;
+  retval->container->sflag = cur->sflag;
   contain_t *expand;
   stack_t *macro;
   for (int i = 0; i < list->container->stack->size; i++) {
@@ -169,18 +173,18 @@ void cog_put(value_t *v) {
   value_t *index = stack_pop(cur->stack);
   if (index->container->stack->size != 1) {
     stack_push(cur->stack, index);
-    eval_error("TYPE ERROR", v);
+    eval_error("BAD ARGUMENT TYPE", v);
     return;
   }
   value_t *idxval = index->container->stack->items[0];
   if (idxval->type != VWORD) {
     stack_push(cur->stack, index);
-    eval_error("TYPE ERROR", v);
+    eval_error("BAD ARGUMENT TYPE", v);
     return;
   }
   if (!strisint(idxval->str_word)) {
     stack_push(cur->stack, index);
-    eval_error("TYPE ERROR", v);
+    eval_error("BAD ARGUMENT TYPE", v);
     return;
   }
   value_t *v1 = stack_pop(cur->stack);
@@ -240,7 +244,7 @@ void cog_if(value_t *v) {
     stack_push(stack, v1);
     stack_push(stack, v2);
     stack_push(stack, v3);
-    eval_error("TYPE ERROR", v);
+    eval_error("BAD ARGUMENT TYPE", v);
     return;
   }
   bool v1_fixed = word_truth(w1);
@@ -277,12 +281,12 @@ void cog_if(value_t *v) {
 /*       break; */
 /*     } */
 /*     if (cont_val->container->stack->size != 1) { */
-/*       eval_error("TYPE ERROR", v); */
+/*       eval_error("BAD ARGUMENT TYPE", v); */
 /*       break; */
 /*     } */
 /*     value_t *cont_val_value = cont_val->container->stack->items[0]; */
 /*     if (cont_val_value->type != VWORD) { */
-/*       eval_error("TYPE ERROR", v); */
+/*       eval_error("BAD ARGUMENT TYPE", v); */
 /*       break; */
 /*     } */
 /*     cont = word_truth(cont_val_value); */
@@ -302,18 +306,18 @@ void cog_if(value_t *v) {
 /*   value_t *q1 = stack_pop(cur->stack); */
 /*   if (q1->container->stack->size != 1) { */
 /*     stack_push(cur->stack, q1); */
-/*     eval_error("TYPE ERROR", v); */
+/*     eval_error("BAD ARGUMENT TYPE", v); */
 /*     return; */
 /*   } */
 /*   value_t *w1 = q1->container->stack->items[0]; */
 /*   if (w1->type != VWORD) { */
 /*     stack_push(cur->stack, q1); */
-/*     eval_error("TYPE ERROR", v); */
+/*     eval_error("BAD ARGUMENT TYPE", v); */
 /*     return; */
 /*   } */
 /*   if (!strisint(w1->str_word)) { */
 /*     stack_push(cur->stack, q1); */
-/*     eval_error("TYPE ERROR", v); */
+/*     eval_error("BAD ARGUMENT TYPE", v); */
 /*     return; */
 /*   } */
 /*   int n = atoi(w1->str_word->value); */
@@ -339,18 +343,18 @@ void cog_split(value_t *v) {
   value_t *num = stack_pop(cur->stack);
   if (num->container->stack->size != 1) {
     stack_push(cur->stack, num);
-    eval_error("TYPE ERROR", v);
+    eval_error("BAD ARGUMENT TYPE", v);
     return;
   }
   value_t *numval = num->container->stack->items[0];
   if (numval->type != VWORD) {
     stack_push(cur->stack, num);
-    eval_error("TYPE ERROR", v);
+    eval_error("BAD ARGUMENT TYPE", v);
     return;
   }
   if (!strisint(numval->str_word)) {
     stack_push(cur->stack, num);
-    eval_error("TYPE ERROR", v);
+    eval_error("BAD ARGUMENT TYPE", v);
     return;
   }
   int n = atoi(numval->str_word->value);
@@ -384,18 +388,18 @@ void cog_vat(value_t *v) {
   value_t *index = stack_pop(stack);
   if (index->container->stack->size != 1) {
     stack_push(stack, index);
-    eval_error("TYPE ERROR", v);
+    eval_error("BAD ARGUMENT TYPE", v);
     return;
   }
   value_t *idxval = index->container->stack->items[0];
   if (idxval->type != VWORD) {
     stack_push(stack, index);
-    eval_error("TYPE ERROR", v);
+    eval_error("BAD ARGUMENT TYPE", v);
     return;
   }
   if (!strisint(idxval->str_word)) {
     stack_push(stack, index);
-    eval_error("TYPE ERROR", v);
+    eval_error("BAD ARGUMENT TYPE", v);
     return;
   }
   int n = atoi(idxval->str_word->value);
@@ -464,7 +468,7 @@ void cog_substack(value_t *v) {
   if (index1->container->stack->size != 1 || index2->container->stack->size != 1) {
     stack_push(stack, index1);
     stack_push(stack, index2);
-    eval_error("TYPE ERROR", v);
+    eval_error("BAD ARGUMENT TYPE", v);
     return;
   }
   value_t *idxval1 = index1->container->stack->items[0];
@@ -472,13 +476,13 @@ void cog_substack(value_t *v) {
   if (idxval1->type != VWORD || idxval2->type != VWORD) {
     stack_push(stack, index1);
     stack_push(stack, index2);
-    eval_error("TYPE ERROR", v);
+    eval_error("BAD ARGUMENT TYPE", v);
     return;
   }
   if (!strisint(idxval1->str_word) || !strisint(idxval2->str_word)) {
     stack_push(stack, index1);
     stack_push(stack, index2);
-    eval_error("TYPE ERROR", v);
+    eval_error("BAD ARGUMENT TYPE", v);
     return;
   }
   int n1 = atoi(idxval1->str_word->value);
@@ -515,18 +519,18 @@ void cog_del(value_t *v) {
   value_t *index = stack_pop(stack);
   if (index->container->stack->size != 1) {
     stack_push(stack, index);
-    eval_error("TYPE ERROR", v);
+    eval_error("BAD ARGUMENT TYPE", v);
     return;
   }
   value_t *idxval = index->container->stack->items[0];
   if (idxval->type != VWORD) {
     stack_push(stack, index);
-    eval_error("TYPE ERROR", v);
+    eval_error("BAD ARGUMENT TYPE", v);
     return;
   }
   if (!strisint(idxval->str_word)) {
     stack_push(stack, index);
-    eval_error("TYPE ERROR", v);
+    eval_error("BAD ARGUMENT TYPE", v);
     return;
   }
   int n = atoi(idxval->str_word->value);

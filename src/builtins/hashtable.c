@@ -1,6 +1,7 @@
 #include <builtins/hashtable.h>
 #include <builtinslib.h>
 #include <macros.h>
+#include <string.h>
 
 extern stack_t *STACK;
 
@@ -264,6 +265,9 @@ void cog_bequeath(value_t *v) {
     if (defs[i] == NULL) {
       aliases[i] = ht_get(cur->flit, wordval->str_word);
       if (aliases[i] == NULL) {
+        if (isfalias(wordval)) {
+          continue;
+        }
         stack_push(stack, wordc);
         eval_error("UNDEFINED WORD", v);
         return;
@@ -278,11 +282,16 @@ void cog_bequeath(value_t *v) {
              string_copy(wordval->str_word),
              contain_value_copy(defs[i]),
              contain_free);
-    } else {
+    } else if (aliases[i]) {
       ht_add(child->container->flit,
              string_copy(wordval->str_word),
              value_stack_copy(aliases[i]),
              contain_free);
+    } else {
+      if (child->container->faliases == NULL)
+        child->container->faliases = init_stack(DEFAULT_STACK_SIZE);
+      stack_push(child->container->faliases, wordval->str_word);
+      wordval->str_word = NULL;
     }
   }
   value_free(wordc);

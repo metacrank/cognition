@@ -72,7 +72,9 @@ void print_end() {
 void global_free() {
   free(PARSER->source);
   stack_free(OBJ_STACK, obj_free);
-  stack_free(STACK, contain_free);
+  contain_free(STACK->items[0]);
+  free(STACK->items);
+  free(STACK);
   free(PARSER);
   stack_free(EVAL_STACK, value_free);
 }
