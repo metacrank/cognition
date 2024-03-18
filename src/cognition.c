@@ -880,6 +880,9 @@ void evalmacro(stack_t *macro, value_t *word, stack_t *family) {
       case VSTACK:
         stack_push(cur->stack, value_copy(v));
         break;
+      case VMACRO:
+        stack_push(cur->stack, value_copy(v));
+        break;
       case VWORD:
         evalword(v, family, true);
         if (STACK == NULL) return;
