@@ -31,7 +31,8 @@ void version() {
 void print_end() {
   printf("\n");
   if (STACK == NULL) {
-      printf("Exit code: '%s' (called exit)\n", EXIT_CODE->value);
+      printf("Exit code: '%s'\n", EXIT_CODE->value);
+      //printf("Exit code: '%s' (called exit)\n", EXIT_CODE->value);
     return;
   }
   printf("Stack at end:\n");

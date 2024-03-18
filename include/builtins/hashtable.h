@@ -3,7 +3,8 @@
 
 #include <cognition.h>
 
-/* adds an entry for word with child at the top of the stack, recording the current stack's pointer */
+/* adds an entry for word with child at the top of the stack */
+/* if child is a stack, store in word table, if child is a macro, store in flit */
 void cog_def(value_t *v);
 
 /* works on builtins/aliases */
@@ -16,10 +17,10 @@ void cog_unglue(value_t *v);
 void cog_isdef(value_t *v);
 
 /* turns a child stack definition into a macro and binds it to word */
-void cog_alias(value_t *v);
+/* void cog_alias(value_t *v); */
 
 /* like alias except values are stored in the word table */
-void cog_bind(value_t *v);
+/* void cog_bind(value_t *v); */
 
 /* compiles child stack based on current environment and binds it to a word as a macro */
 /* note: will not have the same behaviour as 'alias' */

@@ -34,10 +34,12 @@ struct ERROR_STRUCT {
  *functions in order for the builtin functions to remain memory safe. */
 struct VALUE_STRUCT {
   /*! @brief Enum that defines different types within the language. */
-  enum { VWORD, VSTACK, VERR, VCUSTOM, VCLIB } type;
+  enum { VWORD, VSTACK, VMACRO, VERR, VCUSTOM, VCLIB } type;
   union {
     /*! @brief A container is a complete cognition environment, and can contain more containers. */
     contain_t *container;
+    /* a stack to hold a macro (a stack of values that gets executed without any cranking) */
+    stack_t *macro;
     /*! @brief this holds the string value of a string, word, or the name of a
      * custom type. */
     string_t *str_word;
@@ -313,7 +315,7 @@ bool isfaliasin(contain_t *c, value_t *v);
 bool isfalias(value_t *v);
 
 /* expands a stack as much as possible (i.e. before def'ing it) */
-void expandstack(contain_t *c, stack_t *new, stack_t *family);
+void expandstack(stack_t *s, stack_t *new, stack_t *family);
 
 /* similarly for a single word */
 bool expandword(value_t *v, stack_t *new, stack_t *family);

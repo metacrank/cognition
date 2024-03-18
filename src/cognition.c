@@ -154,6 +154,8 @@ void *value_copy(void *v) {
     a->str_word = string_copy(v1->str_word);
   } else if (v1->type == VSTACK) {
     a->container = contain_copy(v1->container, value_copy);
+  } else if (v1->type == VMACRO) {
+    a->macro = value_stack_copy(v1->macro);
   } else if (v1->type == VCLIB) {
     a->str_word = string_copy(v1->str_word);
     a->custom = v1->custom;
@@ -177,6 +179,9 @@ void value_free(void *vtmp) {
   }
   if (v->type == VSTACK) {
     contain_free(v->container);
+  }
+  if (v->type == VMACRO) {
+    value_stack_free(v->macro);
   }
   if (v->type == VERR) {
     error_free(v->error);
@@ -693,30 +698,21 @@ bool isfalias(value_t *v) {
   return isfaliasin(c, v);
 }
 
-void expandstack(contain_t *c, stack_t *new, stack_t *family) {
+void expandstack(stack_t *s, stack_t *new, stack_t *family) {
   stack_t *new2;
-  for (int i = 0; i < c->stack->size; i++) {
-    value_t *newval = c->stack->items[i];
-    c->stack->items[i] = NULL;
+  for (int i = 0; i < s->size; i++) {
+    value_t *newval = s->items[i];
+    s->items[i] = NULL;
     bool evald = false;
-    if (newval->type == VSTACK) {
-      new2 = init_stack(DEFAULT_STACK_SIZE);
-      stack_push(family, c);
-      expandstack(newval->container, new2, family);
-      stack_pop(family);
-      value_stack_free(newval->container->stack);
-      newval->container->stack = new2;
-    } else if (newval->type == VWORD) {
-      stack_push(family, c);
+    if (newval->type == VWORD) {
       evald = expandword(newval, new, family);
-      stack_pop(family);
     }
     if (evald) {
       value_free(newval);
     } else {
       stack_push(new, newval);
     }
-    c->stack->items[i] = NULL;
+    s->items[i] = NULL;
   }
 }
 
@@ -734,7 +730,9 @@ bool expandword(value_t *v, stack_t *new, stack_t *family) {
       break;
     } else if ((expand = ht_get(parent->word_table, v->str_word))) {
       contain_t *expand2 = contain_value_copy(expand);
-      expandstack(expand2, new, family);
+      stack_push(family, expand2);
+      expandstack(expand2->stack, new, family);
+      stack_pop(family);
       contain_free(expand2);
       evald = true;
       break;
@@ -761,7 +759,11 @@ void evalf() {
   stack_push(EVAL_STACK, v);
   stack_t *family = init_stack(10);
   stack_push(family, cur);
-  evalstack(v->container, family, NULL);
+  if (v->type == VSTACK)
+    evalstack(v->container, family, NULL);
+  else if (v->type == VMACRO)
+    evalmacro(v->macro, NULL, family);
+  else die("BAD VALUE TYPE ON STACK");
   free(family->items);
   free(family);
   value_t *vf = stack_pop(EVAL_STACK);
@@ -796,6 +798,10 @@ void eval_value(contain_t *c, stack_t *family, contain_t *cur, value_t *val, val
       stack_pop(family);
       break;
     case VSTACK:
+      stack_push(cur->stack, value_copy(val));
+      inc_crank(cur);
+      break;
+    case VMACRO:
       stack_push(cur->stack, value_copy(val));
       inc_crank(cur);
       break;
@@ -884,7 +890,6 @@ void evalmacro(stack_t *macro, value_t *word, stack_t *family) {
   }
 }
 
-/* temporary fix for undef problem */
 void evalword(value_t *v, stack_t *family, bool m) {
   contain_t *old = stack_peek(STACK);
   contain_t *expand;
@@ -940,14 +945,18 @@ void crank() {
     stack_push(EVAL_STACK, needseval);
     stack_t *family = init_stack(10);
     stack_push(family, cur);
-    evalstack(needseval->container, family, NULL);
-    if (STACK == NULL) return;
-    free(family->items);
-    free(family);
+    if (needseval->type == VSTACK)
+      evalstack(needseval->container, family, NULL);
+    else if (needseval->type == VMACRO)
+      evalmacro(needseval->macro, NULL, family);
+    else die("BAD VALUE ON STACK");
     value_t *vf = stack_pop(EVAL_STACK);
     if (vf) {
       value_free(vf);
     }
+    if (STACK == NULL) return;
+    free(family->items);
+    free(family);
   } else {
     inc_crank(cur);
   }

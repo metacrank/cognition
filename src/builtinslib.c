@@ -25,6 +25,15 @@ bool word_truth(value_t *v) {
   return str->length;
 }
 
+stack_t **value_stack(value_t *v) {
+  if (v->type == VSTACK)
+    return &v->container->stack;
+  else if (v->type == VMACRO)
+    return &v->macro;
+  else die("BAD VALUE ON STACK");
+  return NULL;
+}
+
 void contain_copy_attributes(contain_t *c, contain_t *newc) {
   if (c == NULL) {
     return NULL;
@@ -68,6 +77,13 @@ void print_value(value_t *v, const char *end) {
         print_value(v->container->stack->items[i], " ");
       }
       printf("]");
+      break;
+    case VMACRO:
+      printf("( ");
+      for (int i = 0; i < v->macro->size; i++) {
+        print_value(v->macro->items[i], " ");
+      }
+      printf(")");
       break;
     case VERR:
       printf("'%s':%s%s%s", v->error->str_word->value, RED, v->error->error->value, COLOR_RESET);
