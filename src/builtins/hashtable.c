@@ -88,15 +88,43 @@ void cog_unglue(value_t *v) {
     eval_error("BAD ARGUMENT TYPE", v);
     return;
   }
-  contain_t *def = ht_get(cur->word_table, wordval->str_word);;
+  contain_t *def = ht_get(cur->word_table, wordval->str_word);
   if (def == NULL) {
-    eval_error("UNDEFINED WORD", v);
+    stack_t *macro = ht_get(cur->flit, wordval->str_word);
+    if (macro == NULL) {
+      eval_error("UNDEFINED WORD", v);
+      return;
+    }
+    value_free(wordval);
+    if (wordc->type == VMACRO) {
+      wordc->macro->size = 0;
+      for (int i = 0; i < macro->size; i++) {
+        stack_push(wordc->macro, value_copy(macro->items[i]));
+      }
+      return;
+    }
+    wordc->type = VMACRO;
+    stack_t *temp = wordc->container->stack;
+    temp->size = 0;
+    wordc->container->stack = NULL;
+    contain_free(wordc->container);
+    wordc->macro = temp;
+    for (int i = 0; i < macro->size; i++) {
+      stack_push(wordc->macro, value_copy(macro->items[i]));
+    }
     return;
   }
+  if (wordc->type == VMACRO) {
+    wordc->type = VSTACK;
+    value_stack_free(wordc->macro);
+    wordc->container = contain_copy(def, value_copy);
+    return;
+  }
+  contain_copy_attributes(def, wordc->container);
   value_free(wordval);
-  value_stack(wordc)[0]->size = 0;
+  wordc->container->stack->size = 0;
   for (int i = 0; i < def->stack->size; i++) {
-    stack_push(value_stack(wordc)[0], value_copy(def->stack->items[i]));
+    stack_push(wordc->container->stack, value_copy(def->stack->items[i]));
   }
 }
 

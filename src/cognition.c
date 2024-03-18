@@ -673,8 +673,9 @@ void dec_crank(contain_t *cur) {
     crank = cur->cranks->items[i];
     crank[0][0]--;
     if (crank[0][0] < 0) {
-      crank[0][0] = crank[0][1];
+      crank[0][0] = crank[0][1] - 1;
     }
+    printf("%d, %d\n", crank[0][0], crank[0][1]);
   }
 }
 
@@ -759,11 +760,12 @@ void evalf() {
   stack_push(EVAL_STACK, v);
   stack_t *family = init_stack(10);
   stack_push(family, cur);
-  if (v->type == VSTACK)
+  if (v->type == VSTACK) {
     evalstack(v->container, family, NULL);
-  else if (v->type == VMACRO)
+  } else if (v->type == VMACRO) {
     evalmacro(v->macro, NULL, family);
-  else die("BAD VALUE TYPE ON STACK");
+    inc_crank(cur);
+  } else die("BAD VALUE TYPE ON STACK");
   free(family->items);
   free(family);
   value_t *vf = stack_pop(EVAL_STACK);
@@ -864,13 +866,36 @@ void evalstack(contain_t *c, stack_t *family, value_t *callword) {
   inc_crank(old);
 }
 
+void print_crank(char prefix[]) {
+  contain_t *cur = stack_peek(STACK);
+  int mod = 0;
+  int base = 0;
+  int(*cr)[2] = NULL;
+  if (cur->cranks)
+    if (cur->cranks->size)
+      cr = cur->cranks->items[0];
+  if (cr) {
+    mod = cr[0][0];
+    base = cr[0][1];
+  }
+  printf("%s: modcrank %d, crankbase %d\n", prefix, mod, base);
+}
+
 void evalmacro(stack_t *macro, value_t *word, stack_t *family) {
   value_t *v;
+  value_t *prntval = init_value(VMACRO);
+  prntval->macro = macro;
+  bool repl = false;
+  if (macro->size == 5) {
+    repl = true;
+    printf("repl\n");
+  }
+  print_value(prntval, "\n");
   for (int i = 0; i < macro->size; i++) {
     contain_t *cur = stack_peek(STACK);
-      if (word)
-        if (!(ht_exists(cur->flit, word->str_word) || ht_exists(cur->word_table, word->str_word)))
-          return;
+    if (word)
+      if (!(ht_exists(cur->flit, word->str_word) || ht_exists(cur->word_table, word->str_word)))
+        return;
     v = macro->items[i];
     switch (v->type) {
       case VCLIB:

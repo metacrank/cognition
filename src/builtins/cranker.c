@@ -5,6 +5,7 @@
 #include <ctype.h>
 #include <math.h>
 #include <stdio.h>
+#include <string.h>
 
 extern stack_t *STACK;
 extern stack_t *EVAL_STACK;
@@ -24,24 +25,20 @@ void cog_metacrank(value_t *v) {
     stack_push(stack, tmp);
     return;
   }
-  contain_t *ctmp = tmp->container;
-  if (ctmp->stack->size != 1) {
+  if (value_stack(tmp)[0]->size != 1) {
     eval_error("BAD ARGUMENT TYPE", v);
     stack_push(stack, tmp2);
     stack_push(stack, tmp);
     return;
   }
-  value_t *v2 = ctmp->stack->items[0];
-
-  contain_t *ctmp2 = tmp2->container;
-  if (ctmp2->stack->size != 1) {
+  value_t *v2 = value_stack(tmp)[0]->items[0];
+  if (value_stack(tmp2)[0]->size != 1) {
     eval_error("BAD ARGUMENT TYPE", v);
     stack_push(stack, tmp2);
     stack_push(stack, tmp);
     return;
   }
-  value_t *v1 = ctmp2->stack->items[0];
-
+  value_t *v1 = value_stack(tmp2)[0]->items[0];
   if (v1 == NULL || v2 == NULL) {
     eval_error("BAD ARGUMENT TYPE", v);
     stack_push(stack, tmp2);
@@ -88,13 +85,12 @@ void cog_crank(value_t *v) {
     eval_error("TOO FEW ARGUMENTS", v);
     return;
   }
-  contain_t *ctmp = tmp->container;
-  if (ctmp->stack->size != 1) {
+  if (value_stack(tmp)[0]->size != 1) {
     eval_error("BAD ARGUMENT TYPE", v);
     stack_push(stack, tmp);
     return;
   }
-  value_t *v1 = ctmp->stack->items[0];
+  value_t *v1 = value_stack(tmp)[0]->items[0];
   if (v1->type != VWORD) {
     eval_error("BAD ARGUMENT TYPE", v);
     stack_push(stack, tmp);
@@ -129,13 +125,12 @@ void cog_crankall(value_t *v) {
     eval_error("TOO FEW ARGUMENTS", v);
     return;
   }
-  contain_t *ctmp = tmp->container;
-  if (ctmp->stack->size != 1) {
+  if (value_stack(tmp)[0]->size != 1) {
     eval_error("BAD ARGUMENT TYPE", v);
     stack_push(stack, tmp);
     return;
   }
-  value_t *v1 = ctmp->stack->items[0];
+  value_t *v1 = value_stack(tmp)[0]->items[0];
   if (v1->type != VWORD) {
     eval_error("BAD ARGUMENT TYPE", v);
     stack_push(stack, tmp);
@@ -386,15 +381,41 @@ void cog_crankbase(value_t *v) {
   if (cur->cranks) {
     if (cur->cranks->size) {
       int(*cr)[2] = cur->cranks->items[0];
-      int base = cr[0][1];
+      base = cr[0][1];
     }
   }
   if (base < 0) base = 0;
-  char *str = malloc(sizeof(char) * (int)(log10(base) + 2));
-  sprintf(str, "%d", base);
-  v1->str_word = init_string(str);
-  free(str);
-  stack_push(cur->stack, v1);
+  v1->str_word = malloc(sizeof(string_t));
+  string_t *str = v1->str_word;
+  if (base != 0)
+    str->bufsize = (int)(log10(base) + 2);
+  else str->bufsize = 2;
+  str->value = calloc(str->bufsize, sizeof(char));
+  sprintf(str->value, "%d", base);
+  str->length = strlen(str->value);
+  push_quoted(cur, v1);
+}
+
+void cog_modcrank(value_t *v) {
+  value_t *v1 = init_value(VWORD);
+  contain_t *cur = stack_peek(STACK);
+  int mod = -1;
+  if (cur->cranks) {
+    if (cur->cranks->size) {
+      int(*cr)[2] = cur->cranks->items[0];
+      mod = cr[0][0];
+    }
+  }
+  if (mod < 0) mod = 0;
+  v1->str_word = malloc(sizeof(string_t));
+  string_t *str = v1->str_word;
+  if (mod != 0)
+    str->bufsize = (int)(log10(mod) + 2);
+  else str->bufsize = 2;
+  str->value = calloc(str->bufsize, sizeof(char));
+  sprintf(str->value, "%d", mod);
+  str->length = strlen(str->value);
+  push_quoted(cur, v1);
 }
 
 void add_funcs_cranker(ht_t *flit) {
@@ -402,9 +423,6 @@ void add_funcs_cranker(ht_t *flit) {
   add_func(flit, cog_crank, "crank");
   add_func(flit, cog_crankall, "crankall");
   add_func(flit, cog_halt, "halt");
-  /* add_func(flit, cog_metacrankc, "metacrankc"); */
-  /* add_func(flit, cog_crankc, "crankc"); */
-  /* add_func(flit, cog_crankallc, "crankallc"); */
-  /* add_func(flit, cog_haltc, "haltc"); */
   add_func(flit, cog_crankbase, "crankbase");
+  add_func(flit, cog_modcrank, "modcrank");
 }

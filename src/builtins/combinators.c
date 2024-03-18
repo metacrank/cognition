@@ -338,6 +338,18 @@ void cog_if(value_t *v) {
   }
   bool v1_fixed = word_truth(w1);
   value_free(v1);
+  printf("called 'if'\n");
+  int mod = 0;
+  int base = 0;
+  int(*cr)[2] = NULL;
+  if (cur->cranks)
+    if (cur->cranks->size)
+      cr = cur->cranks->items[0];
+  if (cr) {
+    mod = cr[0][0];
+    base = cr[0][1];
+  }
+  printf("modcrank %d, crankbase %d\n", mod, base);
   if (v1_fixed) {
     stack_push(stack, v2);
     value_free(v3);
@@ -349,6 +361,17 @@ void cog_if(value_t *v) {
   }
   if (!cur) return;
   dec_crank(cur);
+  mod = 0;
+  base = 0;
+  cr = NULL;
+  if (cur->cranks)
+    if (cur->cranks->size)
+      cr = cur->cranks->items[0];
+  if (cr) {
+    mod = cr[0][0];
+    base = cr[0][1];
+  }
+  printf("modcrank %d, crankbase %d\n", mod, base);
 }
 
 /* // currenty equivalent to evalf'ing the loop body every repetition */

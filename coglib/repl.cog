@@ -6,7 +6,7 @@ dfiff1 crank f
 repl
 getd _ getd _ concat d i_cognition> _concat_swap_dup_i d quote
 2 crank print compose read compose evalstr compose
-ssize compose 0 compose = compose
+ssize compose 0 quote compose eval = compose
 1 crank getd _ getd _ concat d i_
 _concat_swap_dup_i d quote
 2 crank print compose ? compose
