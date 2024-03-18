@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <string.h>
 
+extern ht_t *OBJ_TABLE;
+
 /* macros taken from stackoverflow */
 #define MAX 1000
 #define JUSTDO(a)                                                              \
@@ -89,7 +91,7 @@ void print_value(value_t *v, const char *end) {
       printf("'%s':%s%s%s", v->error->str_word->value, RED, v->error->error->value, COLOR_RESET);
       break;
     case VCUSTOM:
-      c = ht_get(ot_get(), v->str_word);
+      c = ht_get(OBJ_TABLE, v->str_word);
       c->printfunc(v->custom);
       break;
     case VCLIB:

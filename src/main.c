@@ -11,7 +11,7 @@
 extern stack_t *STACK;
 extern parser_t *PARSER;
 extern stack_t *EVAL_STACK;
-extern stack_t *OBJ_STACK;
+extern ht_t *OBJ_TABLE;
 extern string_t *EXIT_CODE;
 
 /*! prints usage then exits */
@@ -81,7 +81,7 @@ void print_end() {
 /*! frees all global variables */
 void global_free() {
   free(PARSER->source);
-  stack_free(OBJ_STACK, obj_free);
+  ht_free(OBJ_TABLE, free);
   if (STACK) {
     contain_free(STACK->items[0]);
     free(STACK->items);
@@ -161,7 +161,7 @@ int main(int argc, char **argv) {
   PARSER = init_parser(buf);
   STACK = init_stack(DEFAULT_STACK_SIZE);
   EVAL_STACK = init_stack(DEFAULT_STACK_SIZE);
-  OBJ_STACK = init_stack(DEFAULT_STACK_SIZE);
+  OBJ_TABLE = init_ht(DEFAULT_STACK_SIZE);
   EXIT_CODE = NULL;
 
   /* initialise environment */
@@ -172,8 +172,6 @@ int main(int argc, char **argv) {
   stack_push(stack->faliases, init_string("f"));
   add_funcs(stack->flit);
   stack_push(STACK, stack);
-  void *(ot)[2] = {stack, init_ht(DEFAULT_HT_SIZE)};
-  stack_push(OBJ_STACK, ot);
 
   /* parse and eval loop */
   while (1) {

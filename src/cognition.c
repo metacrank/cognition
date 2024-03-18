@@ -13,8 +13,7 @@
 /* Global variables defined */
 stack_t *STACK;
 stack_t *EVAL_STACK;
-// stack of tuples of: pointer to 'root' stack, ht_t*
-stack_t *OBJ_STACK;
+ht_t *OBJ_TABLE;
 parser_t *PARSER;
 string_t *EXIT_CODE;
 
@@ -160,8 +159,7 @@ void *value_copy(void *v) {
     a->str_word = string_copy(v1->str_word);
     a->custom = v1->custom;
   } else if (v1->type == VCUSTOM) {
-    ht_t *ot = ot_get();
-    custom_t *c = ht_get(ot, a->str_word);
+    custom_t *c = ht_get(OBJ_TABLE, a->str_word);
     a->custom = c->copyfunc(v1->custom);
     a->str_word = string_copy(v1->str_word);
   }
@@ -187,7 +185,7 @@ void value_free(void *vtmp) {
     error_free(v->error);
   }
   if (v->type == VCUSTOM) {
-    void (*freefunc)(void *) = ht_get(ot_get(), v->str_word);
+    void (*freefunc)(void *) = ht_get(OBJ_TABLE, v->str_word);
     freefunc(v->custom);
   }
   free(v);
@@ -200,30 +198,6 @@ void error_free(void *err) {
   string_free(e->error);
   string_free(e->str_word);
   free(e);
-}
-
-ht_t *ot_get() {
-  if (STACK->size > 0) {
-    contain_t *root = STACK->items[0];
-    contain_t *ref;
-    ht_t *ot;
-    void *(*entry)[2];
-    for (int i = 0; i < OBJ_STACK->size; i++) {
-      entry = OBJ_STACK->items[i];
-      ref = *entry[0];
-      if (ref == root) {
-        ot = *entry[1];
-        return ot;
-      }
-    }
-  }
-  return NULL;
-}
-
-void obj_free(void *v) {
-  void **entry = v;
-  ht_t *ot = entry[1];
-  ht_free(ot, free);
 }
 
 custom_t *init_custom(void (*printfunc)(void *), void (*freefunc)(void *),
@@ -675,7 +649,6 @@ void dec_crank(contain_t *cur) {
     if (crank[0][0] < 0) {
       crank[0][0] = crank[0][1] - 1;
     }
-    printf("%d, %d\n", crank[0][0], crank[0][1]);
   }
 }
 
@@ -866,31 +839,8 @@ void evalstack(contain_t *c, stack_t *family, value_t *callword) {
   inc_crank(old);
 }
 
-void print_crank(char prefix[]) {
-  contain_t *cur = stack_peek(STACK);
-  int mod = 0;
-  int base = 0;
-  int(*cr)[2] = NULL;
-  if (cur->cranks)
-    if (cur->cranks->size)
-      cr = cur->cranks->items[0];
-  if (cr) {
-    mod = cr[0][0];
-    base = cr[0][1];
-  }
-  printf("%s: modcrank %d, crankbase %d\n", prefix, mod, base);
-}
-
 void evalmacro(stack_t *macro, value_t *word, stack_t *family) {
   value_t *v;
-  value_t *prntval = init_value(VMACRO);
-  prntval->macro = macro;
-  bool repl = false;
-  if (macro->size == 5) {
-    repl = true;
-    printf("repl\n");
-  }
-  print_value(prntval, "\n");
   for (int i = 0; i < macro->size; i++) {
     contain_t *cur = stack_peek(STACK);
     if (word)
@@ -914,6 +864,7 @@ void evalmacro(stack_t *macro, value_t *word, stack_t *family) {
         break;
       default:
         push_quoted(cur, value_copy(v));
+        break;
     }
   }
 }

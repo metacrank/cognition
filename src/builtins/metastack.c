@@ -108,12 +108,12 @@ void cog_exit(value_t *v) {
     eval_error("TOO FEW ARGUMENTS", v);
     return;
   }
-  if (codec->container->stack->size != 1) {
+  if (value_stack(codec)[0]->size != 1) {
     eval_error("BAD ARGUMENT TYPE", v);
     stack_push(cur->stack, codec);
     return;
   }
-  value_t *code = codec->container->stack->items[0];
+  value_t *code = value_stack(codec)[0]->items[0];
   if (code->type != VWORD) {
     eval_error("BAD ARGUMENT TYPE", v);
     stack_push(cur->stack, codec);
