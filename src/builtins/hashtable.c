@@ -108,11 +108,11 @@ void cog_isdef(value_t *v) {
     eval_error("TOO FEW ARGUMENTS", v);
     return;
   }
-  if (wordc->container->stack->size != 1) {
+  if (value_stack(wordc)[0]->size != 1) {
     eval_error("BAD ARGUMENT TYPE", v);
     return;
   }
-  value_t *wordval = wordc->container->stack->items[0];
+  value_t *wordval = value_stack(wordc)[0]->items[0];
   if (wordval->type != VWORD) {
     eval_error("BAD ARGUMENT TYPE", v);
     return;
