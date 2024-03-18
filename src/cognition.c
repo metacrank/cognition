@@ -761,7 +761,7 @@ void evalf() {
   stack_push(EVAL_STACK, v);
   stack_t *family = init_stack(10);
   stack_push(family, cur);
-  evalstack(v->container, family);
+  evalstack(v->container, family, NULL);
   free(family->items);
   free(family);
   value_t *vf = stack_pop(EVAL_STACK);
@@ -787,7 +787,7 @@ void push_quoted(contain_t *cur, value_t *v) {
   stack_push(cur->stack, q);
 }
 
-void eval_value(contain_t *c, stack_t *family, contain_t *cur, value_t *val) {
+void eval_value(contain_t *c, stack_t *family, contain_t *cur, value_t *val, value_t *callword) {
   switch (val->type) {
     case VWORD:
       stack_push(family, c);
@@ -800,7 +800,7 @@ void eval_value(contain_t *c, stack_t *family, contain_t *cur, value_t *val) {
       inc_crank(cur);
       break;
     case VCLIB:
-      ((void (*)(value_t * v))(val->custom))(NULL);
+      ((void (*)(value_t * v))(val->custom))(callword);
       if (STACK == NULL) return;
       inc_crank(cur);
       break;
@@ -810,21 +810,24 @@ void eval_value(contain_t *c, stack_t *family, contain_t *cur, value_t *val) {
   }
 }
 
-void evalstack(contain_t *c, stack_t *family) {
+void evalstack(contain_t *c, stack_t *family, value_t *callword) {
   contain_t *old = stack_peek(STACK);
   if (!old) return;
   if (c->stack->size) {
-    eval_value(c, family, old, c->stack->items[0]);
+    eval_value(c, family, old, c->stack->items[0], callword);
     if (STACK == NULL) return;
     int(*cr)[2];
     for (int i = 1; i < c->stack->size; i++) {
       contain_t *cur = stack_peek(STACK);
+      if (callword)
+        if (!(ht_exists(cur->flit, callword->str_word) || ht_exists(cur->word_table, callword->str_word)))
+          return;
       family->items[0] = cur;
       value_t *newval = c->stack->items[i];
       if (cur->cranks) {
         cr = cur->cranks->items[0];
         if (cr[0][0] == 0 && cr[0][1]) {
-          eval_value(c, family, cur, newval);
+          eval_value(c, family, cur, newval, callword);
           if (STACK == NULL) return;
           continue;
         }
@@ -859,6 +862,9 @@ void evalmacro(stack_t *macro, value_t *word, stack_t *family) {
   value_t *v;
   for (int i = 0; i < macro->size; i++) {
     contain_t *cur = stack_peek(STACK);
+      if (word)
+        if (!(ht_exists(cur->flit, word->str_word) || ht_exists(cur->word_table, word->str_word)))
+          return;
     v = macro->items[i];
     switch (v->type) {
       case VCLIB:
@@ -887,18 +893,14 @@ void evalword(value_t *v, stack_t *family, bool m) {
   for (int i = family->size - 1; i >= 0; i--) {
     contain_t *parent = family->items[i];
     if ((macro = ht_get(parent->flit, v->str_word))) {
-      stack_t *mcpy = value_stack_copy(macro);
-      evalmacro(mcpy, v, family);
+      evalmacro(macro, v, family);
       if (STACK == NULL) return;
-      value_stack_free(mcpy);
       inc_crank(old);
       evald = true;
       break;
     } else if ((expand = ht_get(parent->word_table, v->str_word))) {
-      contain_t *ecpy = contain_value_copy(expand);
-      evalstack(ecpy, family);
+      evalstack(expand, family, v);
       if (STACK == NULL) return;
-      contain_free(ecpy);
       evald = true;
       break;
     } else if (m && isfaliasin(parent, v)) {
@@ -938,7 +940,7 @@ void crank() {
     stack_push(EVAL_STACK, needseval);
     stack_t *family = init_stack(10);
     stack_push(family, cur);
-    evalstack(needseval->container, family);
+    evalstack(needseval->container, family, NULL);
     if (STACK == NULL) return;
     free(family->items);
     free(family);

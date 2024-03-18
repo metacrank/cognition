@@ -331,11 +331,13 @@ void *cranks_copy(void *cranks);
 /* pushes a value to a container */
 void contain_push(contain_t *c, value_t *v);
 
-// inits with zero crank; is this ideal?
 void push_quoted(contain_t *cur, value_t *v);
 
+/* eval's a value in a stack being evalstack'd */
+void eval_value(contain_t *c, stack_t *family,  contain_t *cur, value_t *val, value_t *callval);
+
 /* recursively evaluates a stack, with cranking */
-void evalstack(contain_t *c, stack_t *family);
+void evalstack(contain_t *c, stack_t *family, value_t *callval);
 
 /* recursively evaluates a flit macro without cranking */
 void evalmacro(stack_t *c, value_t *word, stack_t *family);

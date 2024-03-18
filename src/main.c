@@ -73,7 +73,8 @@ void print_end() {
   } else printf("null crank\n");
   if (EXIT_CODE)
     printf("\nExit code: '%s'\n", EXIT_CODE->value);
-  else printf("\nExit code: ''\n");
+  //else printf("\nExit code: ''\n");
+  else printf("\nExit code: (none)\n");
 }
 
 /*! frees all global variables */

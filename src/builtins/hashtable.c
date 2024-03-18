@@ -151,7 +151,7 @@ void cog_alias(value_t *v) {
   expandstack(quot->container, macro, family);
   free(family->items);
   free(family);
-  ht_add(cur->flit, string_copy(wordval->str_word), macro, contain_free);
+  ht_add(cur->flit, string_copy(wordval->str_word), macro, value_stack_free);
   value_free(wordc);
   value_free(quot);
 }
