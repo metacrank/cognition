@@ -14,11 +14,16 @@ void cog_cd(value_t *v) {
     eval_error("TOO FEW ARGUMENTS", v);
     return;
   }
+  if (child->type == VMACRO) {
+    eval_error("BAD ARGUMENT TYPE", v);
+    stack_push(cur->stack, child);
+    return;
+  }
   stack_push(STACK, child->container);
   cur = child->container;
   for (int i = 0; i < cur->stack->size; i++) {
     value_t *val = cur->stack->items[i];
-    if (val->type != VSTACK) {
+    if (val->type != VSTACK && val->type != VMACRO) {
       value_t *newval = init_value(VSTACK);
       newval->container = init_contain(NULL, NULL, NULL);
       stack_push(newval->container->stack, val);
@@ -35,13 +40,18 @@ void cog_ccd(value_t *v) {
     eval_error("TOO FEW ARGUMENTS", v);
     return;
   }
+  if (child->type == VMACRO) {
+    eval_error("BAD ARGUMENT TYPE", v);
+    stack_push(cur->stack, child);
+    return;
+  }
   stack_push(STACK, child->container);
   child->container = NULL;
   contain_free(cur);
   cur = child->container;
   for (int i = 0; i < cur->stack->size; i++) {
     value_t *val = cur->stack->items[i];
-    if (val->type != VSTACK) {
+    if (val->type != VSTACK && val->type != VMACRO) {
       value_t *newval = init_value(VSTACK);
       newval->container = init_contain(NULL, NULL, NULL);
       stack_push(newval->container->stack, val);

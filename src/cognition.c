@@ -829,7 +829,7 @@ void evalstack(contain_t *c, stack_t *family, value_t *callword) {
             return;
           }
           if (strword)
-            if (!(ht_exists(cur->flit, strword) || ht_exists(cur->word_table, strword))) {
+            if (!(ht_exists(old->flit, strword) || ht_exists(old->word_table, strword))) {
               string_free(strword);
               return;
             }
@@ -844,7 +844,7 @@ void evalstack(contain_t *c, stack_t *family, value_t *callword) {
           return;
         }
         if (strword)
-          if (!(ht_exists(cur->flit, strword) || ht_exists(cur->word_table, strword))) {
+          if (!(ht_exists(old->flit, strword) || ht_exists(old->word_table, strword))) {
             string_free(strword);
             return;
           }
@@ -865,7 +865,7 @@ void evalstack(contain_t *c, stack_t *family, value_t *callword) {
       }
       if (evald) {
         if (strword)
-          if (!(ht_exists(cur->flit, strword) || ht_exists(cur->word_table, strword))) {
+          if (!(ht_exists(old->flit, strword) || ht_exists(old->word_table, strword))) {
             string_free(strword);
             return;
           }
@@ -875,7 +875,7 @@ void evalstack(contain_t *c, stack_t *family, value_t *callword) {
         evalf();
       }
       if (strword)
-        if (!(ht_exists(cur->flit, strword) || ht_exists(cur->word_table, strword))) {
+        if (!(ht_exists(old->flit, strword) || ht_exists(old->word_table, strword))) {
           string_free(strword);
           return;
         }
@@ -888,6 +888,7 @@ void evalstack(contain_t *c, stack_t *family, value_t *callword) {
 }
 
 void evalmacro(stack_t *macro, value_t *word, stack_t *family) {
+  contain_t *old = stack_peek(STACK);
   value_t *v;
   string_t *strword = NULL;
   if (word)
@@ -921,7 +922,7 @@ void evalmacro(stack_t *macro, value_t *word, stack_t *family) {
         break;
     }
     if (strword)
-      if (!(ht_exists(cur->flit, strword) || ht_exists(cur->word_table, strword))) {
+      if (!(ht_exists(old->flit, strword) || ht_exists(old->word_table, strword))) {
         string_free(strword);
         return;
       }
