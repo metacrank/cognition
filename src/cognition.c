@@ -46,6 +46,7 @@ stack_t *init_stack(size_t size) {
 }
 
 void stack_push(stack_t *a, void *v) {
+  if (a == NULL) return;
   if (a->size >= a->capacity - 2) {
     a->capacity = a->capacity * 2;
     a->items = realloc(a->items, a->capacity * sizeof(value_t *));
@@ -55,6 +56,7 @@ void stack_push(stack_t *a, void *v) {
 }
 
 void stack_add(stack_t *a, value_t *v, int index) {
+  if (a == NULL) return;
   if (a->size >= a->capacity - 3) {
     a->capacity = a->capacity * 2;
     a->items = realloc(a->items, a->capacity * sizeof(value_t *));
@@ -67,6 +69,7 @@ void stack_add(stack_t *a, value_t *v, int index) {
 }
 
 void *stack_popdeep(stack_t *a, int index) {
+  if (a == NULL) return NULL;
   if (index >= a->size || index < 0)
     return NULL;
   void *retval = a->items[index];
@@ -78,6 +81,7 @@ void *stack_popdeep(stack_t *a, int index) {
 }
 
 void *stack_pop(stack_t *a) {
+  if (a == NULL) return NULL;
   if (a->size > 0) {
     void *v = a->items[a->size - 1];
     a->size--;
@@ -87,6 +91,7 @@ void *stack_pop(stack_t *a) {
 }
 
 void *stack_peek(stack_t *s) {
+  if (s == NULL) return NULL;
   if (s->size > 0) {
     void *v = s->items[s->size - 1];
     return v;
@@ -95,6 +100,7 @@ void *stack_peek(stack_t *s) {
 }
 
 void stack_extend(stack_t *a, stack_t *b) {
+  if (a == NULL || b == NULL) return;
   for (int i = 0; i < b->size; i++) {
     stack_push(a, b->items[i]);
   }
@@ -769,8 +775,8 @@ void eval_value(contain_t *c, stack_t *family, contain_t *cur, value_t *val, val
     case VWORD:
       stack_push(family, c);
       evalword(val, family, false);
-      if (STACK == NULL) return;
       stack_pop(family);
+      if (STACK == NULL) return;
       break;
     case VSTACK:
       stack_push(cur->stack, value_copy(val));
@@ -933,9 +939,9 @@ void crank() {
     if (vf) {
       value_free(vf);
     }
-    if (STACK == NULL) return;
     free(family->items);
     free(family);
+    if (STACK == NULL) return;
   } else {
     inc_crank(cur);
   }

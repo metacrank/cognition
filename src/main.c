@@ -89,6 +89,7 @@ void global_free() {
   }
   free(PARSER);
   stack_free(EVAL_STACK, value_free);
+  string_free(EXIT_CODE);
 }
 
 int main(int argc, char **argv) {

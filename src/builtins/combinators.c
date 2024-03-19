@@ -22,7 +22,9 @@ void cog_quote(value_t *v) {
 void cog_eval(value_t *v) {
   contain_t *old = stack_peek(STACK);
   evalf();
+  printf("%p\n", STACK);
   old = stack_peek(STACK);
+  printf("%p\n", old);
   if (!old) return;
   dec_crank(old);
 }
