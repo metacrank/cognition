@@ -797,32 +797,57 @@ void eval_value(contain_t *c, stack_t *family, contain_t *cur, value_t *val, val
   }
 }
 
+//temporary undef fix
 void evalstack(contain_t *c, stack_t *family, value_t *callword) {
   contain_t *old = stack_peek(STACK);
   if (!old) return;
+  string_t *strword = NULL;
+  if (callword)
+    strword = string_copy(callword->str_word);
   if (c->stack->size) {
     eval_value(c, family, old, c->stack->items[0], callword);
-    if (STACK == NULL) return;
+    if (STACK == NULL) {
+      string_free(strword);
+      return;
+    }
+    if (strword)
+      if (!(ht_exists(old->flit, strword) || ht_exists(old->word_table, strword))) {
+        string_free(strword);
+        return;
+      }
     int(*cr)[2];
     for (int i = 1; i < c->stack->size; i++) {
       contain_t *cur = stack_peek(STACK);
-      if (callword)
-        if (!(ht_exists(cur->flit, callword->str_word) || ht_exists(cur->word_table, callword->str_word)))
-          return;
       family->items[0] = cur;
       value_t *newval = c->stack->items[i];
       if (cur->cranks) {
         cr = cur->cranks->items[0];
         if (cr[0][0] == 0 && cr[0][1]) {
           eval_value(c, family, cur, newval, callword);
-          if (STACK == NULL) return;
+          if (STACK == NULL) {
+            string_free(strword);
+            return;
+          }
+          if (strword)
+            if (!(ht_exists(cur->flit, strword) || ht_exists(cur->word_table, strword))) {
+              string_free(strword);
+              return;
+            }
           continue;
         }
       }
       if (newval->type != VWORD) {
         push_quoted(cur, value_copy(newval));
         crank();
-        if (STACK == NULL) return;
+        if (STACK == NULL) {
+          string_free(strword);
+          return;
+        }
+        if (strword)
+          if (!(ht_exists(cur->flit, strword) || ht_exists(cur->word_table, strword))) {
+            string_free(strword);
+            return;
+          }
         continue;
       }
       bool evald = false;
@@ -830,33 +855,53 @@ void evalstack(contain_t *c, stack_t *family, value_t *callword) {
         contain_t *parent = family->items[i];
         if (isfaliasin(parent, newval)) {
           evalf();
-          if (STACK == NULL) return;
+          if (STACK == NULL) {
+            string_free(strword);
+            return;
+          }
           evald = true;
           break;
         }
       }
-      if (evald) continue;
+      if (evald) {
+        if (strword)
+          if (!(ht_exists(cur->flit, strword) || ht_exists(cur->word_table, strword))) {
+            string_free(strword);
+            return;
+          }
+        continue;
+      }
       if (isfaliasin(c, newval)) {
         evalf();
       }
+      if (strword)
+        if (!(ht_exists(cur->flit, strword) || ht_exists(cur->word_table, strword))) {
+          string_free(strword);
+          return;
+        }
     }
+    string_free(strword);
     return;
   }
+  string_free(strword);
   inc_crank(old);
 }
 
 void evalmacro(stack_t *macro, value_t *word, stack_t *family) {
   value_t *v;
+  string_t *strword = NULL;
+  if (word)
+    strword = string_copy(word->str_word);
   for (int i = 0; i < macro->size; i++) {
     contain_t *cur = stack_peek(STACK);
-    if (word)
-      if (!(ht_exists(cur->flit, word->str_word) || ht_exists(cur->word_table, word->str_word)))
-        return;
     v = macro->items[i];
     switch (v->type) {
       case VCLIB:
         ((void (*)(value_t *))(v->custom))(word);
-        if (STACK == NULL) return;
+        if (STACK == NULL) {
+          string_free(strword);
+          return;
+        }
         break;
       case VSTACK:
         stack_push(cur->stack, value_copy(v));
@@ -866,13 +911,22 @@ void evalmacro(stack_t *macro, value_t *word, stack_t *family) {
         break;
       case VWORD:
         evalword(v, family, true);
-        if (STACK == NULL) return;
+        if (STACK == NULL) {
+          string_free(strword);
+          return;
+        }
         break;
       default:
         push_quoted(cur, value_copy(v));
         break;
     }
+    if (strword)
+      if (!(ht_exists(cur->flit, strword) || ht_exists(cur->word_table, strword))) {
+        string_free(strword);
+        return;
+      }
   }
+  string_free(strword);
 }
 
 void evalword(value_t *v, stack_t *family, bool m) {
