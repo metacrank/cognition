@@ -299,6 +299,9 @@ void ht_delete(ht_t *h, string_t *key, void (*freefunc)(void *));
 /*! returns true if key exists in hash table. false otherwise */
 bool ht_exists(ht_t *h, string_t *key);
 
+/* returns true if key exists in hashtable and associated value is not null */
+bool ht_defined(ht_t *h, string_t *key);
+
 /*! deep copy of hash table */
 ht_t *ht_copy(ht_t *h, void *(*copyfunc)(void *));
 

@@ -118,3 +118,5 @@ char *get_line(FILE *f) {
     *e = '\0';
   return ret;
 }
+
+void nop(void *v) { }

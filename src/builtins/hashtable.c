@@ -4,6 +4,8 @@
 #include <string.h>
 
 extern stack_t *STACK;
+extern stack_t *CONTAIN_DEF_STACK;
+extern stack_t *MACRO_DEF_STACK;
 
 void cog_def(value_t *v) {
   contain_t *cur = stack_peek(STACK);
@@ -60,15 +62,24 @@ void cog_undef(value_t *v) {
     stack_push(stack, wordc);
     return;
   }
-  bool exists = ht_exists(cur->word_table, word->str_word) || ht_exists(cur->flit, word->str_word);
-  if (!exists) {
-    eval_error("UNDEFINED WORD", v);
-    stack_push(stack, wordc);
+  contain_t *def;
+  if ((def = ht_get(cur->word_table, word->str_word))) {
+    ht_add(cur->word_table, word->str_word, NULL, nop);
+    stack_push(CONTAIN_DEF_STACK, def);
+    word->str_word = NULL;
+    value_free(wordc);
     return;
   }
-  ht_delete(cur->word_table, word->str_word, contain_free);
-  ht_delete(cur->flit, word->str_word, value_stack_free);
-  value_free(wordc);
+  stack_t *macro;
+  if ((macro = ht_get(cur->flit, word->str_word))) {
+    ht_add(cur->flit, word->str_word, NULL, nop);
+    stack_push(MACRO_DEF_STACK, macro);
+    word->str_word = NULL;
+    value_free(wordc);
+    return;
+  }
+  eval_error("UNDEFINED WORD", v);
+  stack_push(stack, wordc);
 }
 
 void cog_unglue(value_t *v) {
@@ -145,7 +156,7 @@ void cog_isdef(value_t *v) {
     eval_error("BAD ARGUMENT TYPE", v);
     return;
   }
-  bool exists = ht_exists(cur->word_table, wordval->str_word) || ht_exists(cur->flit, wordval->str_word);
+  bool exists = ht_defined(cur->word_table, wordval->str_word) || ht_defined(cur->flit, wordval->str_word);
   wordval->str_word->length = 0;
   wordval->str_word->value[0] = '\0';
   if (exists) {

@@ -18,4 +18,6 @@ void print_value(value_t *v, const char *end);
 
 char *get_line(FILE *f);
 
+void nop(void *v);
+
 #endif // BUILTINSLIB_H_
