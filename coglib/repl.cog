@@ -13,8 +13,8 @@ _concat_swap_dup_i d quote
 2 crank if compose repl compose
 1 crank VMACRO cast expand
 
-dup repl swap def qstack
-2 crank eval compose repl swap
-1 crank def
+dup repl swap def quote
+2 crank eval compose repl bequeath repl swap
+1 crank expand def
 
 repl
