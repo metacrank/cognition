@@ -776,10 +776,13 @@ void evalf() {
     evalstack(v->container, family, NULL, false, cur);
   } else if (v->type == VMACRO) {
     evalmacro(v->macro, NULL, family, false, cur);
+    // needs existence checking
     inc_crank(cur);
   } else die("BAD VALUE TYPE ON STACK");
   free(family->items);
   free(family);
+  stack_empty(CONTAIN_DEF_STACK, contain_free);
+  stack_empty(MACRO_DEF_STACK, value_stack_free);
   value_t *vf = stack_pop(EVAL_STACK);
   if (vf) {
     value_free(vf);
@@ -999,9 +1002,11 @@ void crank() {
       evalstack(needseval->container, family, NULL, false, cur);
     else if (needseval->type == VMACRO) {
       evalmacro(needseval->macro, NULL, family, false, cur);
+      // needs existence checking
       inc_crank(cur);
-    }
-    else die("BAD VALUE ON STACK");
+    } else die("BAD VALUE ON STACK");
+    stack_empty(CONTAIN_DEF_STACK, contain_free);
+    stack_empty(MACRO_DEF_STACK, value_stack_free);
     value_t *vf = stack_pop(EVAL_STACK);
     if (vf) {
       value_free(vf);
