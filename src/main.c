@@ -11,6 +11,8 @@
 extern stack_t *STACK;
 extern parser_t *PARSER;
 extern stack_t *EVAL_STACK;
+extern stack_t *CONTAIN_DEF_STACK;
+extern stack_t *MACRO_DEF_STACK;
 extern ht_t *OBJ_TABLE;
 extern string_t *EXIT_CODE;
 
@@ -89,6 +91,8 @@ void global_free() {
   }
   free(PARSER);
   stack_free(EVAL_STACK, value_free);
+  stack_free(CONTAIN_DEF_STACK, contain_free);
+  stack_free(MACRO_DEF_STACK, value_stack_free);
   string_free(EXIT_CODE);
 }
 

@@ -2,7 +2,6 @@
 #include <builtins/cranker.h>
 #include <builtinslib.h>
 #include <macros.h>
-#include <ctype.h>
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
@@ -72,8 +71,8 @@ void cog_metacrank(value_t *v) {
   int(*cr)[2] = cranks->items[v1val];
   cr[0][0] = 0;
   cr[0][1] = v2val;
-  value_free(tmp);
-  value_free(tmp2);
+  value_free_safe(tmp);
+  value_free_safe(tmp2);
 }
 
 /*sets 0th crank value to specified period*/
@@ -113,7 +112,7 @@ void cog_crank(value_t *v) {
   int(*c)[2] = cranks->items[0];
   c[0][0] = 0;
   c[0][1] = v1val;
-  value_free(tmp);
+  value_free_safe(tmp);
 }
 
 /* sets all crank values to specified period */
@@ -167,7 +166,7 @@ void cog_crankall(value_t *v) {
       free(stack_pop(cranks));
     }
   }
-  value_free(tmp);
+  value_free_safe(tmp);
 }
 
 void cog_halt(value_t *v) {
@@ -249,8 +248,8 @@ void cog_halt(value_t *v) {
 /*   int(*cr)[2] = cranks->items[v1val]; */
 /*   cr[0][0] = 0; */
 /*   cr[0][1] = v2val; */
-/*   value_free(tmp); */
-/*   value_free(tmp2); */
+/*   value_free_safe(tmp); */
+/*   value_free_safe(tmp2); */
 /* } */
 
 /* void cog_crankc(value_t *v) { */
@@ -298,7 +297,7 @@ void cog_halt(value_t *v) {
 /*   int(*c)[2] = cranks->items[0]; */
 /*   c[0][0] = 0; */
 /*   c[0][1] = v1val; */
-/*   value_free(tmp); */
+/*   value_free_safe(tmp); */
 /* } */
 
 /* void cog_crankallc(value_t *v) { */
@@ -360,7 +359,7 @@ void cog_halt(value_t *v) {
 /*       free(stack_pop(cranks)); */
 /*     } */
 /*   } */
-/*   value_free(tmp); */
+/*   value_free_safe(tmp); */
 /* } */
 
 /* void cog_haltc(value_t *v) { */

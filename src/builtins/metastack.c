@@ -1,10 +1,9 @@
 #include <builtins/metastack.h>
 #include <builtinslib.h>
 #include <macros.h>
-#include <math.h>
-#include <limits.h>
 
 extern stack_t *STACK;
+extern stack_t *CONTAIN_DEF_STACK;
 extern string_t *EXIT_CODE;
 
 void cog_cd(value_t *v) {
@@ -14,11 +13,16 @@ void cog_cd(value_t *v) {
     eval_error("TOO FEW ARGUMENTS", v);
     return;
   }
+  if (child->type == VMACRO) {
+    eval_error("BAD ARGUMENT TYPE", v);
+    stack_push(cur->stack, child);
+    return;
+  }
   stack_push(STACK, child->container);
   cur = child->container;
   for (int i = 0; i < cur->stack->size; i++) {
     value_t *val = cur->stack->items[i];
-    if (val->type != VSTACK) {
+    if (val->type != VSTACK && val->type != VMACRO) {
       value_t *newval = init_value(VSTACK);
       newval->container = init_contain(NULL, NULL, NULL);
       stack_push(newval->container->stack, val);
@@ -35,13 +39,19 @@ void cog_ccd(value_t *v) {
     eval_error("TOO FEW ARGUMENTS", v);
     return;
   }
-  stack_push(STACK, child->container);
-  child->container = NULL;
-  contain_free(cur);
+  if (child->type == VMACRO) {
+    eval_error("BAD ARGUMENT TYPE", v);
+    stack_push(STACK, cur);
+    stack_push(cur->stack, child);
+    return;
+  }
+  stack_push(CONTAIN_DEF_STACK, cur);
   cur = child->container;
+  stack_push(STACK, cur);
+  child->container = NULL;
   for (int i = 0; i < cur->stack->size; i++) {
     value_t *val = cur->stack->items[i];
-    if (val->type != VSTACK) {
+    if (val->type != VSTACK && val->type != VMACRO) {
       value_t *newval = init_value(VSTACK);
       newval->container = init_contain(NULL, NULL, NULL);
       stack_push(newval->container->stack, val);
@@ -121,8 +131,13 @@ void cog_exit(value_t *v) {
   }
   EXIT_CODE = code->str_word;
   code->str_word = NULL;
-  value_free(codec);
+  value_free_safe(codec);
   stack_free(STACK, contain_free);
+  /* while(STACK->size) { */
+  /*   stack_push(CONTAIN_DEF_STACK, stack_pop(STACK)); */
+  /* } */
+  /* free(STACK->items); */
+  /* free(STACK); */
   STACK = NULL;
 }
 

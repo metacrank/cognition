@@ -1,4 +1,5 @@
 #include <builtins/parser.h>
+#include <builtinslib.h>
 #include <macros.h>
 #include <stdio.h>
 #include <string.h>
@@ -517,7 +518,7 @@ void cog_evalstr(value_t *v) {
     free(parser);
     if (STACK == NULL) break;
   }
-  value_free(strc);
+  value_free_safe(strc);
 }
 
 void add_funcs_parser(ht_t* flit) {

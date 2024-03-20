@@ -1,4 +1,5 @@
 #include <builtins/stackops.h>
+#include <builtinslib.h>
 #include <stdio.h>
 
 extern stack_t *STACK;
@@ -10,7 +11,7 @@ void cog_clear(value_t *v) {
   stack_t *stack = cur->stack;
   value_t *item;
   while((item = stack_pop(stack))) {
-    value_free(item);
+    value_free_safe(item);
   }
 }
 
@@ -22,7 +23,7 @@ void cog_dsc(value_t *v) {
     eval_error("TOO FEW ARGUMENTS", v);
     return;
   }
-  value_free(v1);
+  value_free_safe(v1);
 }
 
 void cog_swap(value_t *v) {

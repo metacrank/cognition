@@ -3,7 +3,6 @@ df
  
 dfiff1 crank f
 
-repl
 getd _ getd _ concat d i_cognition> _concat_swap_dup_i d quote
 2 crank print compose read compose evalstr compose
 ssize compose 0 quote compose eval = compose
@@ -12,6 +11,10 @@ _concat_swap_dup_i d quote
 2 crank print compose ? compose
 1 crank VMACRO cast expand quote macro quote prepose compose
 2 crank if compose repl compose
-1 crank VMACRO cast expand def
+1 crank VMACRO cast expand
+
+dup repl swap def quote
+2 crank eval compose repl bequeath repl swap
+1 crank expand def
 
 repl

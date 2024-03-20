@@ -172,6 +172,12 @@ void *value_stack_copy(void *a);
 /*! Concatenate two stacks and put the result in a1. */
 void stack_extend(stack_t *a1, stack_t *a2);
 
+/*! Free elements in stack and set stack size to zero. */
+void stack_empty(void *a, void (*freefunc)(void *));
+
+/* returns true if and only if e is in stack */
+bool stack_exists(stack_t *a, void *e);
+
 /*! Free stack and all value_t elements. */
 void stack_free(void *a, void (*freefunc)(void *));
 
@@ -299,6 +305,9 @@ void ht_delete(ht_t *h, string_t *key, void (*freefunc)(void *));
 /*! returns true if key exists in hash table. false otherwise */
 bool ht_exists(ht_t *h, string_t *key);
 
+/* returns true if key exists in hashtable and associated value is not null */
+bool ht_defined(ht_t *h, string_t *key);
+
 /*! deep copy of hash table */
 ht_t *ht_copy(ht_t *h, void *(*copyfunc)(void *));
 
@@ -336,16 +345,17 @@ void contain_push(contain_t *c, value_t *v);
 void push_quoted(contain_t *cur, value_t *v);
 
 /* eval's a value in a stack being evalstack'd */
-void eval_value(contain_t *c, stack_t *family,  contain_t *cur, value_t *val, value_t *callval);
+void eval_value(contain_t *c, stack_t *family,  contain_t *cur, value_t *val, value_t *callword, contain_t *callcontain);
 
-/* recursively evaluates a stack, with cranking */
-void evalstack(contain_t *c, stack_t *family, value_t *callval);
+/* recursively evaluates a stack, with cranking. defcontain is the container of definition,
+ * callstack is the stack calling callval, which contains the callval pointer */
+void evalstack(contain_t *c, stack_t *family, value_t *callword, bool isdefinition, contain_t *callcontain);
 
 /* recursively evaluates a flit macro without cranking */
-void evalmacro(stack_t *c, value_t *word, stack_t *family);
+void evalmacro(stack_t *macro, value_t *word, stack_t *family, bool isdefinition, contain_t *callcontain);
 
 /* expands and recursively evaluates a word value, with cranking */
-void evalword(value_t *v, stack_t *family, bool m);
+void evalword(value_t *v, stack_t *family, contain_t *callcontain);
 
 /* performs one crank */
 void crank();

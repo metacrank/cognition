@@ -18,4 +18,12 @@ void print_value(value_t *v, const char *end);
 
 char *get_line(FILE *f);
 
+void nop(void *v);
+
+void value_free_safe(void *v);
+
+void contain_def_stack_push(void *v);
+
+void macro_def_stack_push(void *v);
+
 #endif // BUILTINSLIB_H_
