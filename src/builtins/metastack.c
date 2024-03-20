@@ -1,10 +1,9 @@
 #include <builtins/metastack.h>
 #include <builtinslib.h>
 #include <macros.h>
-#include <math.h>
-#include <limits.h>
 
 extern stack_t *STACK;
+extern stack_t *CONTAIN_DEF_STACK;
 extern string_t *EXIT_CODE;
 
 void cog_cd(value_t *v) {
@@ -42,13 +41,14 @@ void cog_ccd(value_t *v) {
   }
   if (child->type == VMACRO) {
     eval_error("BAD ARGUMENT TYPE", v);
+    stack_push(STACK, cur);
     stack_push(cur->stack, child);
     return;
   }
-  stack_push(STACK, child->container);
-  child->container = NULL;
-  contain_free(cur);
+  stack_push(CONTAIN_DEF_STACK, cur);
   cur = child->container;
+  stack_push(STACK, cur);
+  child->container = NULL;
   for (int i = 0; i < cur->stack->size; i++) {
     value_t *val = cur->stack->items[i];
     if (val->type != VSTACK && val->type != VMACRO) {

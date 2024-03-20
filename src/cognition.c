@@ -117,6 +117,18 @@ void stack_empty(void *a, void (*freefunc)(void *)) {
   s->size = 0;
 }
 
+bool stack_exists(stack_t *a, void *e) {
+  if (a == NULL) return false;
+  bool retval = false;
+  for (int i = 0; i < a->size; i++) {
+    if (a->items[i] == e) {
+      retval = true;
+      break;
+    }
+  }
+  return retval;
+}
+
 void stack_free(void *a, void (*freefunc)(void *)) {
   if (a == NULL)
     return;
@@ -761,9 +773,9 @@ void evalf() {
   stack_t *family = init_stack(10);
   stack_push(family, cur);
   if (v->type == VSTACK) {
-    evalstack(v->container, family, NULL);
+    evalstack(v->container, family, NULL, NULL, NULL, false);
   } else if (v->type == VMACRO) {
-    evalmacro(v->macro, NULL, family);
+    evalmacro(v->macro, NULL, family, NULL, NULL, false);
     inc_crank(cur);
   } else die("BAD VALUE TYPE ON STACK");
   free(family->items);
@@ -795,7 +807,7 @@ void eval_value(contain_t *c, stack_t *family, contain_t *cur, value_t *val, val
   switch (val->type) {
     case VWORD:
       stack_push(family, c);
-      evalword(val, family, false);
+      evalword(val, family, c, false);
       stack_pop(family);
       if (STACK == NULL) return;
       break;
@@ -818,17 +830,49 @@ void eval_value(contain_t *c, stack_t *family, contain_t *cur, value_t *val, val
   }
 }
 
-void evalstack(contain_t *c, stack_t *family, value_t *callword) {
+bool evalstack_return_function(void *callstack, value_t *callword, contain_t *defcontain, bool callstackismacro) {
+  bool returning = false;
+  if (STACK == NULL) return true;
+  if (defcontain && stack_exists(CONTAIN_DEF_STACK, defcontain)) {
+    defcontain = NULL;
+    returning = true;
+    //printf("defcontain in CONTAIN_DEF_STACK\n");
+  }
+  if (callstack) {
+    if (callstackismacro) {
+      if (stack_exists(MACRO_DEF_STACK, callstack)) {
+        //printf("callstack in MACRO_DEF_STACK\n");
+        callstack = NULL;
+        // if the callstack stops existing, this implies the defcontain will, too.
+        // this is because the defcontain is in the callstack's hashtable family.
+        returning = true;
+      }
+    } else if (stack_exists(CONTAIN_DEF_STACK, callstack)) {
+      printf("callstack in CONTAIN_DEF_STACK\n");
+      callstack = NULL;
+      returning = true;
+    }
+  }
+  stack_empty(CONTAIN_DEF_STACK, contain_free);
+  stack_empty(MACRO_DEF_STACK, value_stack_free);
+  if (callstack && defcontain) {
+    //printf("callstack and defcontain\n");
+    if (!(ht_defined(defcontain->flit, callword->str_word) || ht_defined(defcontain->word_table, callword->str_word))) {
+      //printf("... not defined\n");
+      //returning = true;
+      return true;
+    }
+  }
+  //if (returning) printf("RETURNING EARLY\n");
+  return returning;
+}
+
+void evalstack(contain_t *c, stack_t *family, value_t *callword, contain_t *defcontain, void *callstack, bool callstackismacro) {
   contain_t *old = stack_peek(STACK);
   if (!old) return;
   if (c->stack->size) {
     eval_value(c, family, old, c->stack->items[0], callword);
-    if (STACK == NULL) return;
-    stack_empty(CONTAIN_DEF_STACK, contain_free);
-    stack_empty(MACRO_DEF_STACK, value_stack_free);
-    if (callword)
-      if (!(ht_defined(old->flit, callword->str_word) || ht_defined(old->word_table, callword->str_word)))
-        return;
+    if (evalstack_return_function(callstack, callword, defcontain, callstackismacro)) return;
     int(*cr)[2];
     for (int i = 1; i < c->stack->size; i++) {
       contain_t *cur = stack_peek(STACK);
@@ -838,24 +882,14 @@ void evalstack(contain_t *c, stack_t *family, value_t *callword) {
         cr = cur->cranks->items[0];
         if (cr[0][0] == 0 && cr[0][1]) {
           eval_value(c, family, cur, newval, callword);
-          if (STACK == NULL) return;
-          stack_empty(CONTAIN_DEF_STACK, contain_free);
-          stack_empty(MACRO_DEF_STACK, value_stack_free);
-          if (callword)
-            if (!(ht_defined(old->flit, callword->str_word) || ht_defined(old->word_table, callword->str_word)))
-              return;
+          if (evalstack_return_function(callstack, callword, defcontain, callstackismacro)) return;
           continue;
         }
       }
       if (newval->type != VWORD) {
         push_quoted(cur, value_copy(newval));
         crank();
-        if (STACK == NULL) return;
-        stack_empty(CONTAIN_DEF_STACK, contain_free);
-        stack_empty(MACRO_DEF_STACK, value_stack_free);
-        if (callword)
-          if (!(ht_defined(old->flit, callword->str_word) || ht_defined(old->word_table, callword->str_word)))
-            return;
+        if (evalstack_return_function(callstack, callword, defcontain, callstackismacro)) return;
         continue;
       }
       bool evald = false;
@@ -869,28 +903,20 @@ void evalstack(contain_t *c, stack_t *family, value_t *callword) {
         }
       }
       if (evald) {
-        stack_empty(CONTAIN_DEF_STACK, contain_free);
-        stack_empty(MACRO_DEF_STACK, value_stack_free);
-        if (callword)
-          if (!(ht_defined(old->flit, callword->str_word) || ht_defined(old->word_table, callword->str_word)))
-            return;
+        if (evalstack_return_function(callstack, callword, defcontain, callstackismacro)) return;
         continue;
       }
       if (isfaliasin(c, newval)) {
         evalf();
       }
-      stack_empty(CONTAIN_DEF_STACK, contain_free);
-      stack_empty(MACRO_DEF_STACK, value_stack_free);
-      if (callword)
-        if (!(ht_defined(old->flit, callword->str_word) || ht_defined(old->word_table, callword->str_word)))
-          return;
+      if (evalstack_return_function(callstack, callword, defcontain, callstackismacro)) return;
     }
     return;
   }
   inc_crank(old);
 }
 
-void evalmacro(stack_t *macro, value_t *word, stack_t *family) {
+void evalmacro(stack_t *macro, value_t *word, stack_t *family, contain_t *defcontain, void *callstack, bool callstackismacro) {
   contain_t *old = stack_peek(STACK);
   value_t *v;
   for (int i = 0; i < macro->size; i++) {
@@ -908,22 +934,18 @@ void evalmacro(stack_t *macro, value_t *word, stack_t *family) {
         stack_push(cur->stack, value_copy(v));
         break;
       case VWORD:
-        evalword(v, family, true);
+        evalword(v, family, macro, true);
         if (STACK == NULL) return;
         break;
       default:
         push_quoted(cur, value_copy(v));
         break;
     }
-    stack_empty(CONTAIN_DEF_STACK, contain_free);
-    stack_empty(MACRO_DEF_STACK, value_stack_free);
-    if (word)
-      if (!(ht_defined(old->flit, word->str_word) || ht_defined(old->word_table, word->str_word)))
-        return;
+    if (evalstack_return_function(callstack, word, defcontain, callstackismacro)) return;
   }
 }
 
-void evalword(value_t *v, stack_t *family, bool m) {
+void evalword(value_t *v, stack_t *family, void *callstack, bool callstackismacro) {
   contain_t *old = stack_peek(STACK);
   contain_t *expand;
   stack_t *macro;
@@ -931,17 +953,15 @@ void evalword(value_t *v, stack_t *family, bool m) {
   for (int i = family->size - 1; i >= 0; i--) {
     contain_t *parent = family->items[i];
     if ((macro = ht_get(parent->flit, v->str_word))) {
-      evalmacro(macro, v, family);
-      if (STACK == NULL) return;
-      inc_crank(old);
+      evalmacro(macro, v, family, parent, callstack, callstackismacro);
+      if (STACK) inc_crank(old);
       evald = true;
       break;
     } else if ((expand = ht_get(parent->word_table, v->str_word))) {
-      evalstack(expand, family, v);
-      if (STACK == NULL) return;
+      evalstack(expand, family, v, parent, callstack, callstackismacro);
       evald = true;
       break;
-    } else if (m && isfaliasin(parent, v)) {
+    } else if (isfaliasin(parent, v)) {
       evalf();
       evald = true;
       break;
@@ -979,9 +999,9 @@ void crank() {
     stack_t *family = init_stack(10);
     stack_push(family, cur);
     if (needseval->type == VSTACK)
-      evalstack(needseval->container, family, NULL);
+      evalstack(needseval->container, family, NULL, NULL, NULL, false);
     else if (needseval->type == VMACRO) {
-      evalmacro(needseval->macro, NULL, family);
+      evalmacro(needseval->macro, NULL, family, NULL, NULL, false);
       inc_crank(cur);
     }
     else die("BAD VALUE ON STACK");
