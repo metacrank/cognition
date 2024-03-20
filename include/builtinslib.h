@@ -20,4 +20,6 @@ char *get_line(FILE *f);
 
 void nop(void *v);
 
+void value_free_safe(void *v);
+
 #endif // BUILTINSLIB_H_

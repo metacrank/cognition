@@ -5,6 +5,8 @@
 #include <string.h>
 
 extern ht_t *OBJ_TABLE;
+extern stack_t *CONTAIN_DEF_STACK;
+extern stack_t *MACRO_DEF_STACK;
 
 /* macros taken from stackoverflow */
 #define MAX 1000
@@ -120,3 +122,28 @@ char *get_line(FILE *f) {
 }
 
 void nop(void *v) { }
+
+void value_free_safe(void *vtmp) {
+  if (vtmp == NULL)
+    return;
+  value_t *v = (value_t *)vtmp;
+  if (v == NULL)
+    return;
+  if (v->type == VWORD || v->type == VCLIB || v->type == VCUSTOM) {
+    string_free(v->str_word);
+  }
+  if (v->type == VSTACK) {
+    stack_push(CONTAIN_DEF_STACK, v->container);
+  }
+  if (v->type == VMACRO) {
+    stack_push(MACRO_DEF_STACK, v->macro);
+  }
+  if (v->type == VERR) {
+    error_free(v->error);
+  }
+  if (v->type == VCUSTOM) {
+    custom_t *cstm = ht_get(OBJ_TABLE, v->str_word);
+    cstm->freefunc(v->custom);
+  }
+  free(v);
+}

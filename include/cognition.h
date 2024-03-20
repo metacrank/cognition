@@ -345,17 +345,17 @@ void contain_push(contain_t *c, value_t *v);
 void push_quoted(contain_t *cur, value_t *v);
 
 /* eval's a value in a stack being evalstack'd */
-void eval_value(contain_t *c, stack_t *family,  contain_t *cur, value_t *val, value_t *callval);
+void eval_value(contain_t *c, stack_t *family,  contain_t *cur, value_t *val, value_t *callword, contain_t *callcontain);
 
 /* recursively evaluates a stack, with cranking. defcontain is the container of definition,
  * callstack is the stack calling callval, which contains the callval pointer */
-void evalstack(contain_t *c, stack_t *family, value_t *callval, contain_t *defcontain, void *callstack, bool callstackismacro);
+void evalstack(contain_t *c, stack_t *family, value_t *callword, bool isdefinition, contain_t *callcontain);
 
 /* recursively evaluates a flit macro without cranking */
-void evalmacro(stack_t *c, value_t *word, stack_t *family, contain_t *defcontain, void *callstack, bool callstackismacro);
+void evalmacro(stack_t *macro, value_t *word, stack_t *family, bool isdefinition, contain_t *callcontain);
 
 /* expands and recursively evaluates a word value, with cranking */
-void evalword(value_t *v, stack_t *family, void *callstack, bool callstackismacro);
+void evalword(value_t *v, stack_t *family, contain_t *callcontain);
 
 /* performs one crank */
 void crank();

@@ -173,19 +173,19 @@ void cog_cast(value_t *v) {
   }
   if (strcmp(num->str_word->value, "0") == 0 || strcmp(num->str_word->value, "VSTACK") == 0) {
     if (quot->type == VSTACK) {
-      value_free(v1);
+      value_free_safe(v1);
       return;
     }
     quot->type = VSTACK;
     contain_t *c = init_contain(NULL, NULL, NULL);
     c->stack = quot->macro;
     quot->container = c;
-    value_free(v1);
+    value_free_safe(v1);
     return;
   }
   if (strcmp(num->str_word->value, "1") == 0 || strcmp(num->str_word->value, "VMACRO") == 0) {
     if (quot->type == VMACRO) {
-      value_free(v1);
+      value_free_safe(v1);
       return;
     }
     quot->type = VMACRO;
@@ -193,7 +193,7 @@ void cog_cast(value_t *v) {
     quot->container->stack = NULL;
     contain_free(quot->container);
     quot->macro = s;
-    value_free(v1);
+    value_free_safe(v1);
     return;
   }
   eval_error("INDEX OUT OF RANGE", v);
@@ -218,14 +218,14 @@ void cog_compose(value_t *v) {
   value_t *v2 = stack_pop(cur->stack);
   stack_t **v2stack = value_stack(v2);
   if ((*v2stack)->size == 0) {
-    value_free(v2);
+    value_free_safe(v2);
     return;
   }
   value_t *v1 = stack_peek(cur->stack);
   stack_t **v1stack = value_stack(v1);
   stack_extend(*v1stack, *v2stack);
   (*v2stack)->size = 0;
-  value_free(v2);
+  value_free_safe(v2);
 }
 
 void cog_prepose(value_t *v) {
@@ -238,7 +238,7 @@ void cog_prepose(value_t *v) {
   stack_t **v2stackp = value_stack(v2);
   stack_t *v2stack = *v2stackp;
   if (v2stack->size == 0) {
-    value_free(v2);
+    value_free_safe(v2);
     return;
   }
   value_t *v1 = stack_peek(cur->stack);
@@ -249,7 +249,7 @@ void cog_prepose(value_t *v) {
   v1stack->size = 0;
   *v2stackp = *v1stackp;
   *v1stackp = stack;
-  value_free(v2);
+  value_free_safe(v2);
 }
 
 void cog_put(value_t *v) {
@@ -284,7 +284,7 @@ void cog_put(value_t *v) {
     eval_error("OUT OF RANGE", v);
     return;
   }
-  value_free(index);
+  value_free_safe(index);
   stack_push(stack->container->stack, NULL);
   for (int i = idx + 1; i < stack->container->stack->size; i++) {
     stack->container->stack->items[i] = stack->container->stack->items[i-1];
@@ -338,14 +338,14 @@ void cog_if(value_t *v) {
     return;
   }
   bool v1_fixed = word_truth(w1);
-  value_free(v1);
+  value_free_safe(v1);
   if (v1_fixed) {
     stack_push(stack, v2);
-    value_free(v3);
+    value_free_safe(v3);
     evalf();
   } else {
     stack_push(stack, v3);
-    value_free(v2);
+    value_free_safe(v2);
     evalf();
   }
   if (!cur) return;
@@ -384,7 +384,7 @@ void cog_if(value_t *v) {
 /*     cont = word_truth(cont_val_value); */
 /*   } while (cont); */
 /*   value_t *b = stack_pop(EVAL_STACK); */
-/*   value_free(b); */
+/*   value_free_safe(b); */
 /*   free(family->items); */
 /*   free(family); */
 /* } */
@@ -422,8 +422,8 @@ void cog_if(value_t *v) {
 /*   } */
 /*   free(family->items); */
 /*   free(family); */
-/*   value_free(body); */
-/*   value_free(q1); */
+/*   value_free_safe(body); */
+/*   value_free_safe(q1); */
 /* } */
 
 void cog_split(value_t *v) {
@@ -501,7 +501,7 @@ void cog_vat(value_t *v) {
     eval_error("OUT OF RANGE", v);
     return;
   }
-  value_free(index);
+  value_free_safe(index);
   value_t *v1 = value_copy(quot->container->stack->items[n]);
   stack_push(stack, v1);
 }
@@ -537,12 +537,12 @@ void cog_vat(value_t *v) {
 /*     stack_push(stack, v1); */
 /*     return; */
 /*   } */
-/*   value_free(v1); */
+/*   value_free_safe(v1); */
 /*   for (int i = 0; i < n; i++) { */
-/*     value_free(quot->container->stack->items[i]); */
+/*     value_free_safe(quot->container->stack->items[i]); */
 /*   } */
 /*   for (int i = n + 1; i < quot->container->stack->size; i++) { */
-/*     value_free(quot->container->stack->items[i]); */
+/*     value_free_safe(quot->container->stack->items[i]); */
 /*   } */
 /*   quot->container->stack->items[0] = quot->container->stack->items[n]; */
 /*   quot->container->stack->size = 0; */
@@ -586,14 +586,14 @@ void cog_substack(value_t *v) {
     eval_error("OUT OF RANGE", v);
     return;
   }
-  value_free(index1);
-  value_free(index2);
+  value_free_safe(index1);
+  value_free_safe(index2);
   stack_t *qstack = quot->container->stack;
   for (int i = 0; i < n1; i++) {
-    value_free(qstack->items[i]);
+    value_free_safe(qstack->items[i]);
   }
   for (int i = n2 + 1; i < qstack->size; i++) {
-    value_free(qstack->items[i]);
+    value_free_safe(qstack->items[i]);
   }
   for (int i = 0; i <= n2 - n1; i++) {
     qstack->items[i] = qstack->items[i + n1];
@@ -632,8 +632,8 @@ void cog_del(value_t *v) {
     eval_error("OUT OF RANGE", v);
     return;
   }
-  value_free(index);
-  value_free(stack_popdeep(quot->container->stack, n));
+  value_free_safe(index);
+  value_free_safe(stack_popdeep(quot->container->stack, n));
 }
 
 void cog_uncompose(value_t *v) {
@@ -654,7 +654,7 @@ void cog_uncompose(value_t *v) {
     stack_push(stack, element);
   }
   quot->container->stack->size = 0;
-  value_free(quot);
+  value_free_safe(quot);
 }
 
 void cog_size(value_t *v) {
