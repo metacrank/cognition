@@ -776,7 +776,7 @@ void evalf() {
     evalstack(v->container, family, NULL, false, cur);
   } else if (v->type == VMACRO) {
     evalmacro(v->macro, NULL, family, false, cur);
-    inc_crank(cur);
+    if (STACK) inc_crank(cur);
   } else die("BAD VALUE TYPE ON STACK");
   free(family->items);
   free(family);

@@ -30,17 +30,15 @@ void cog_def(value_t *v) {
     return;
   }
   if (quot->type == VSTACK) {
-    ht_add(cur->word_table, word->str_word, quot->container, contain_free);
-    ht_delete(cur->flit, word->str_word, value_stack_free);
-    quot->container = NULL;
+    ht_delete(cur->flit, word->str_word, macro_def_stack_push);
+    ht_add(cur->word_table, word->str_word, quot->container, contain_def_stack_push);
   } else {
-    ht_add(cur->flit, word->str_word, quot->macro, value_stack_free);
-    ht_delete(cur->word_table, word->str_word, contain_free);
-    quot->macro = NULL;
+    ht_delete(cur->word_table, word->str_word, contain_def_stack_push);
+    ht_add(cur->flit, word->str_word, quot->macro, macro_def_stack_push);
   }
   word->str_word = NULL;
   value_free_safe(wordc);
-  value_free_safe(quot);
+  free(quot);
 }
 
 void cog_undef(value_t *v) {

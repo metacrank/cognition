@@ -147,3 +147,11 @@ void value_free_safe(void *vtmp) {
   }
   free(v);
 }
+
+void contain_def_stack_push(void *c) {
+  if (c) stack_push(CONTAIN_DEF_STACK, c);
+}
+
+void macro_def_stack_push(void *m) {
+  if (m) stack_push(MACRO_DEF_STACK, m);
+}
