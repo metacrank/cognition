@@ -6,8 +6,7 @@
 /* negates a number */
 void cog_neg(value_t *v);
 
-/* inverses a number */
-void cog_inv(value_t *v);
+/* REMOVE cog_inv: inverses a number, reason: just do 1/n */
 
 /*! @brief adds two numbers together, pushes result on the stack */
 /*! call in stem with num1 num2 + => num */

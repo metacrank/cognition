@@ -1,7 +1,422 @@
 #include <builtins/math.h>
+#include <math.h>
+#include <stdio.h>
 #include <string.h>
 
 extern stack_t *STACK;
+
+
+void cog_add(value_t *v) {
+  contain_t *cur = stack_peek(STACK);
+  stack_t *stack = cur->stack;
+  if (stack->size < 2) {
+    eval_error("TOO FEW ARGUMENTS", v);
+    return;
+  }
+  value_t *v2 = stack_pop(stack);
+  if (v2->container->stack->size != 1) {
+    eval_error("BAD ARGUMENT TYPE", v);
+    stack_push(stack, v2);
+    return;
+  }
+  value_t *w2 = v2->container->stack->items[0];
+  if (w2->type != VWORD) {
+    eval_error("BAD ARGUMENT TYPE", v);
+    stack_push(stack, v2);
+    return;
+  }
+  value_t *v1 = stack_pop(stack);
+  if (v1->container->stack->size != 1) {
+    eval_error("BAD ARGUMENT TYPE", v);
+    stack_push(stack, v1);
+    stack_push(stack, v2);
+    return;
+  }
+  value_t *w1 = v1->container->stack->items[0];
+  if (w1->type != VWORD) {
+    eval_error("BAD ARGUMENT TYPE", v);
+    stack_push(stack, v1);
+    stack_push(stack, v2);
+    return;
+  }
+  double y = atof(w1->str_word->value);
+  double x = atof(w2->str_word->value);
+  double z = x + y;
+  free(w1->str_word->value);
+  int len = snprintf(NULL, 0, "%f", z);
+  char *result = malloc(len + 10);
+  snprintf(result, len + 10, "%f", z);
+  string_t *s = calloc(1, sizeof(string_t));
+  free(w1->str_word->value);
+  w1->str_word->bufsize = len + 10;
+  w1->str_word->length = len;
+  w1->str_word->value = result;
+  value_free(w2);
+  stack_push(stack, v1);
+}
+
+void cog_pow(value_t *v) {
+  contain_t *cur = stack_peek(STACK);
+  stack_t *stack = cur->stack;
+  if (stack->size < 2) {
+    eval_error("TOO FEW ARGUMENTS", v);
+    return;
+  }
+  value_t *v2 = stack_pop(stack);
+  if (v2->container->stack->size != 1) {
+    eval_error("BAD ARGUMENT TYPE", v);
+    stack_push(stack, v2);
+    return;
+  }
+  value_t *w2 = v2->container->stack->items[0];
+  if (w2->type != VWORD) {
+    eval_error("BAD ARGUMENT TYPE", v);
+    stack_push(stack, v2);
+    return;
+  }
+  value_t *v1 = stack_pop(stack);
+  if (v1->container->stack->size != 1) {
+    eval_error("BAD ARGUMENT TYPE", v);
+    stack_push(stack, v1);
+    stack_push(stack, v2);
+    return;
+  }
+  value_t *w1 = v1->container->stack->items[0];
+  if (w1->type != VWORD) {
+    eval_error("BAD ARGUMENT TYPE", v);
+    stack_push(stack, v1);
+    stack_push(stack, v2);
+    return;
+  }
+  double y = atof(w1->str_word->value);
+  double x = atof(w2->str_word->value);
+  double z = pow(x, y);
+  free(w1->str_word->value);
+  int len = snprintf(NULL, 0, "%f", z);
+  char *result = malloc(len + 10);
+  snprintf(result, len + 10, "%f", z);
+  string_t *s = calloc(1, sizeof(string_t));
+  free(w1->str_word->value);
+  w1->str_word->bufsize = len + 10;
+  w1->str_word->length = len;
+  w1->str_word->value = result;
+  value_free(w2);
+  stack_push(stack, v1);
+}
+void cog_divide(value_t *v) {
+  contain_t *cur = stack_peek(STACK);
+  stack_t *stack = cur->stack;
+  if (stack->size < 2) {
+    eval_error("TOO FEW ARGUMENTS", v);
+    return;
+  }
+  value_t *v2 = stack_pop(stack);
+  if (v2->container->stack->size != 1) {
+    eval_error("BAD ARGUMENT TYPE", v);
+    stack_push(stack, v2);
+    return;
+  }
+  value_t *w2 = v2->container->stack->items[0];
+  if (w2->type != VWORD) {
+    eval_error("BAD ARGUMENT TYPE", v);
+    stack_push(stack, v2);
+    return;
+  }
+  value_t *v1 = stack_pop(stack);
+  if (v1->container->stack->size != 1) {
+    eval_error("BAD ARGUMENT TYPE", v);
+    stack_push(stack, v1);
+    stack_push(stack, v2);
+    return;
+  }
+  value_t *w1 = v1->container->stack->items[0];
+  if (w1->type != VWORD) {
+    eval_error("BAD ARGUMENT TYPE", v);
+    stack_push(stack, v1);
+    stack_push(stack, v2);
+    return;
+  }
+  double y = atof(w1->str_word->value);
+  double x = atof(w2->str_word->value);
+  double z = x / y;
+  free(w1->str_word->value);
+  int len = snprintf(NULL, 0, "%f", z);
+  char *result = malloc(len + 10);
+  snprintf(result, len + 10, "%f", z);
+  string_t *s = calloc(1, sizeof(string_t));
+  free(w1->str_word->value);
+  w1->str_word->bufsize = len + 10;
+  w1->str_word->length = len;
+  w1->str_word->value = result;
+  value_free(w2);
+  stack_push(stack, v1);
+}
+
+void cog_subtract(value_t *v) {
+  contain_t *cur = stack_peek(STACK);
+  stack_t *stack = cur->stack;
+  if (stack->size < 2) {
+    eval_error("TOO FEW ARGUMENTS", v);
+    return;
+  }
+  value_t *v2 = stack_pop(stack);
+  if (v2->container->stack->size != 1) {
+    eval_error("BAD ARGUMENT TYPE", v);
+    stack_push(stack, v2);
+    return;
+  }
+  value_t *w2 = v2->container->stack->items[0];
+  if (w2->type != VWORD) {
+    eval_error("BAD ARGUMENT TYPE", v);
+    stack_push(stack, v2);
+    return;
+  }
+  value_t *v1 = stack_pop(stack);
+  if (v1->container->stack->size != 1) {
+    eval_error("BAD ARGUMENT TYPE", v);
+    stack_push(stack, v1);
+    stack_push(stack, v2);
+    return;
+  }
+  value_t *w1 = v1->container->stack->items[0];
+  if (w1->type != VWORD) {
+    eval_error("BAD ARGUMENT TYPE", v);
+    stack_push(stack, v1);
+    stack_push(stack, v2);
+    return;
+  }
+  double y = atof(w1->str_word->value);
+  double x = atof(w2->str_word->value);
+  double z = x - y;
+  free(w1->str_word->value);
+  int len = snprintf(NULL, 0, "%f", z);
+  char *result = malloc(len + 10);
+  snprintf(result, len + 10, "%f", z);
+  string_t *s = calloc(1, sizeof(string_t));
+  free(w1->str_word->value);
+  w1->str_word->bufsize = len + 10;
+  w1->str_word->length = len;
+  w1->str_word->value = result;
+  value_free(w2);
+  stack_push(stack, v1);
+}
+
+void cog_exp(value_t *v) {
+  contain_t *cur = stack_peek(STACK);
+  stack_t *stack = cur->stack;
+  if (stack->size < 1) {
+    eval_error("TOO FEW ARGUMENTS", v);
+    return;
+  }
+  value_t *v1 = stack_pop(stack);
+  if (v1->container->stack->size != 1) {
+    eval_error("BAD ARGUMENT TYPE", v);
+    stack_push(stack, v1);
+    return;
+  }
+  value_t *w1 = v1->container->stack->items[0];
+  if (w1->type != VWORD) {
+    eval_error("BAD ARGUMENT TYPE", v);
+    stack_push(stack, v1);
+    return;
+  }
+  double x = exp(atof(w1->str_word->value));
+  int len = snprintf(NULL, 0, "%f", x);
+  char *result = malloc(len + 10);
+  snprintf(result, len + 10, "%f", x);
+  string_t *s = calloc(1, sizeof(string_t));
+  free(w1->str_word->value);
+  w1->str_word->bufsize = len + 10;
+  w1->str_word->length = len;
+  w1->str_word->value = result;
+  stack_push(stack, v1);
+}
+
+void cog_sin(value_t *v) {
+  contain_t *cur = stack_peek(STACK);
+  stack_t *stack = cur->stack;
+  if (stack->size < 1) {
+    eval_error("TOO FEW ARGUMENTS", v);
+    return;
+  }
+  value_t *v1 = stack_pop(stack);
+  if (v1->container->stack->size != 1) {
+    eval_error("BAD ARGUMENT TYPE", v);
+    stack_push(stack, v1);
+    return;
+  }
+  value_t *w1 = v1->container->stack->items[0];
+  if (w1->type != VWORD) {
+    eval_error("BAD ARGUMENT TYPE", v);
+    stack_push(stack, v1);
+    return;
+  }
+  double x = sin(atof(w1->str_word->value));
+  int len = snprintf(NULL, 0, "%f", x);
+  char *result = malloc(len + 10);
+  snprintf(result, len + 10, "%f", x);
+  string_t *s = calloc(1, sizeof(string_t));
+  free(w1->str_word->value);
+  w1->str_word->bufsize = len + 10;
+  w1->str_word->length = len;
+  w1->str_word->value = result;
+  stack_push(stack, v1);
+}
+
+void cog_cos(value_t *v) {
+  contain_t *cur = stack_peek(STACK);
+  stack_t *stack = cur->stack;
+  if (stack->size < 1) {
+    eval_error("TOO FEW ARGUMENTS", v);
+    return;
+  }
+  value_t *v1 = stack_pop(stack);
+  if (v1->container->stack->size != 1) {
+    eval_error("BAD ARGUMENT TYPE", v);
+    stack_push(stack, v1);
+    return;
+  }
+  value_t *w1 = v1->container->stack->items[0];
+  if (w1->type != VWORD) {
+    eval_error("BAD ARGUMENT TYPE", v);
+    stack_push(stack, v1);
+    return;
+  }
+  double x = cos(atof(w1->str_word->value));
+  int len = snprintf(NULL, 0, "%f", x);
+  char *result = malloc(len + 10);
+  snprintf(result, len + 10, "%f", x);
+  string_t *s = calloc(1, sizeof(string_t));
+  free(w1->str_word->value);
+  w1->str_word->bufsize = len + 10;
+  w1->str_word->length = len;
+  w1->str_word->value = result;
+  stack_push(stack, v1);
+}
+
+void cog_floor(value_t *v) {
+  contain_t *cur = stack_peek(STACK);
+  stack_t *stack = cur->stack;
+  if (stack->size < 1) {
+    eval_error("TOO FEW ARGUMENTS", v);
+    return;
+  }
+  value_t *v1 = stack_pop(stack);
+  if (v1->container->stack->size != 1) {
+    eval_error("BAD ARGUMENT TYPE", v);
+    stack_push(stack, v1);
+    return;
+  }
+  value_t *w1 = v1->container->stack->items[0];
+  if (w1->type != VWORD) {
+    eval_error("BAD ARGUMENT TYPE", v);
+    stack_push(stack, v1);
+    return;
+  }
+  double x = floor(atof(w1->str_word->value));
+  int len = snprintf(NULL, 0, "%f", x);
+  char *result = malloc(len + 10);
+  snprintf(result, len + 10, "%f", x);
+  string_t *s = calloc(1, sizeof(string_t));
+  free(w1->str_word->value);
+  w1->str_word->bufsize = len + 10;
+  w1->str_word->length = len;
+  w1->str_word->value = result;
+  stack_push(stack, v1);
+}
+
+void cog_ceil(value_t *v) {
+  contain_t *cur = stack_peek(STACK);
+  stack_t *stack = cur->stack;
+  if (stack->size < 1) {
+    eval_error("TOO FEW ARGUMENTS", v);
+    return;
+  }
+  value_t *v1 = stack_pop(stack);
+  if (v1->container->stack->size != 1) {
+    eval_error("BAD ARGUMENT TYPE", v);
+    stack_push(stack, v1);
+    return;
+  }
+  value_t *w1 = v1->container->stack->items[0];
+  if (w1->type != VWORD) {
+    eval_error("BAD ARGUMENT TYPE", v);
+    stack_push(stack, v1);
+    return;
+  }
+  double x = ceil(atof(w1->str_word->value));
+  int len = snprintf(NULL, 0, "%f", x);
+  char *result = malloc(len + 10);
+  snprintf(result, len + 10, "%f", x);
+  string_t *s = calloc(1, sizeof(string_t));
+  free(w1->str_word->value);
+  w1->str_word->bufsize = len + 10;
+  w1->str_word->length = len;
+  w1->str_word->value = result;
+  stack_push(stack, v1);
+}
+
+void cog_ln(value_t *v) {
+  contain_t *cur = stack_peek(STACK);
+  stack_t *stack = cur->stack;
+  if (stack->size < 1) {
+    eval_error("TOO FEW ARGUMENTS", v);
+    return;
+  }
+  value_t *v1 = stack_pop(stack);
+  if (v1->container->stack->size != 1) {
+    eval_error("BAD ARGUMENT TYPE", v);
+    stack_push(stack, v1);
+    return;
+  }
+  value_t *w1 = v1->container->stack->items[0];
+  if (w1->type != VWORD) {
+    eval_error("BAD ARGUMENT TYPE", v);
+    stack_push(stack, v1);
+    return;
+  }
+  double x = log(atof(w1->str_word->value));
+  int len = snprintf(NULL, 0, "%f", x);
+  char *result = malloc(len + 10);
+  snprintf(result, len + 10, "%f", x);
+  string_t *s = calloc(1, sizeof(string_t));
+  free(w1->str_word->value);
+  w1->str_word->bufsize = len + 10;
+  w1->str_word->length = len;
+  w1->str_word->value = result;
+  stack_push(stack, v1);
+}
+
+void cog_neg(value_t *v) {
+  contain_t *cur = stack_peek(STACK);
+  stack_t *stack = cur->stack;
+  if (stack->size < 1) {
+    eval_error("TOO FEW ARGUMENTS", v);
+    return;
+  }
+  value_t *v1 = stack_pop(stack);
+  if (v1->container->stack->size != 1) {
+    eval_error("BAD ARGUMENT TYPE", v);
+    stack_push(stack, v1);
+    return;
+  }
+  value_t *w1 = v1->container->stack->items[0];
+  if (w1->type != VWORD) {
+    eval_error("BAD ARGUMENT TYPE", v);
+    stack_push(stack, v1);
+    return;
+  }
+  double x = atof(w1->str_word->value) * -1;
+  int len = snprintf(NULL, 0, "%f", x);
+  char *result = malloc(len + 10);
+  snprintf(result, len + 10, "%f", x);
+  string_t *s = calloc(1, sizeof(string_t));
+  free(w1->str_word->value);
+  w1->str_word->bufsize = len + 10;
+  w1->str_word->length = len;
+  w1->str_word->value = result;
+  stack_push(stack, v1);
+}
 
 void cog_equals(value_t *v) {
   contain_t *cur = stack_peek(STACK);
@@ -48,6 +463,55 @@ void cog_equals(value_t *v) {
   stack_push(stack, v1);
 }
 
+void cog_nequals(value_t *v) {
+  contain_t *cur = stack_peek(STACK);
+  stack_t *stack = cur->stack;
+  if (stack->size < 2) {
+    eval_error("TOO FEW ARGUMENTS", v);
+    return;
+  }
+  value_t *v2 = stack_pop(stack);
+  if (v2->container->stack->size != 1) {
+    eval_error("BAD ARGUMENT TYPE", v);
+    stack_push(stack, v2);
+    return;
+  }
+  value_t *w2 = v2->container->stack->items[0];
+  if (w2->type != VWORD) {
+    eval_error("BAD ARGUMENT TYPE", v);
+    stack_push(stack, v2);
+    return;
+  }
+  value_t *v1 = stack_pop(stack);
+  if (v1->container->stack->size != 1) {
+    eval_error("BAD ARGUMENT TYPE", v);
+    stack_push(stack, v1);
+    stack_push(stack, v2);
+    return;
+  }
+  value_t *w1 = v1->container->stack->items[0];
+  if (w1->type != VWORD) {
+    eval_error("BAD ARGUMENT TYPE", v);
+    stack_push(stack, v1);
+    stack_push(stack, v2);
+    return;
+  }
+  if (strcmp(w1->str_word->value, w2->str_word->value) != 0) {
+    w1->str_word->length = 1;
+    w1->str_word->value[0] = 't';
+    w1->str_word->value[1] = '\0';
+  } else {
+    w1->str_word->length = 0;
+    w1->str_word->value[0] = '\0';
+  }
+  value_free(v2);
+  stack_push(stack, v1);
+}
+
 void add_funcs_math(ht_t *flit) {
   add_func(flit, cog_equals, "=");
+  add_func(flit, cog_add, "+");
+  add_func(flit, cog_cos, "cos");
+  add_func(flit, cog_sin, "sin");
+  add_func(flit, cog_exp, "exp");
 }
