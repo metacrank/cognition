@@ -259,12 +259,12 @@ void cog_put(value_t *v) {
     return;
   }
   value_t *index = stack_pop(cur->stack);
-  if (index->container->stack->size != 1) {
+  if (value_stack(index)[0]->size != 1) {
     stack_push(cur->stack, index);
     eval_error("BAD ARGUMENT TYPE", v);
     return;
   }
-  value_t *idxval = index->container->stack->items[0];
+  value_t *idxval = value_stack(index)[0]->items[0];
   if (idxval->type != VWORD) {
     stack_push(cur->stack, index);
     eval_error("BAD ARGUMENT TYPE", v);
@@ -278,18 +278,19 @@ void cog_put(value_t *v) {
   value_t *v1 = stack_pop(cur->stack);
   value_t *stack = stack_peek(cur->stack);
   int idx = atoi(idxval->str_word->value);
-  if (idx < 0 || idx > stack->container->stack->size) {
+  stack_t *stackstack = *value_stack(stack);
+  if (idx < 0 || idx > stackstack->size) {
     stack_push(cur->stack, v1);
     stack_push(cur->stack, index);
     eval_error("OUT OF RANGE", v);
     return;
   }
   value_free_safe(index);
-  stack_push(stack->container->stack, NULL);
-  for (int i = idx + 1; i < stack->container->stack->size; i++) {
-    stack->container->stack->items[i] = stack->container->stack->items[i-1];
+  stack_push(stackstack, NULL);
+  for (int i = idx + 1; i < stackstack->size; i++) {
+    stackstack->items[i] = stackstack->items[i-1];
   }
-  stack->container->stack->items[idx] = v1;
+  stackstack->items[idx] = v1;
 }
 
 void cog_dip(value_t *v) {
@@ -701,7 +702,7 @@ void add_funcs_combinators(ht_t *flit) {
   add_func(flit, cog_sub, "sub");
   add_func(flit, cog_compose, "compose");
   add_func(flit, cog_prepose, "prepose");
-  /* add_func(flit, cog_put, "put"); */
+  add_func(flit, cog_put, "put");
   add_func(flit, cog_dip, "dip");
   add_func(flit, cog_if, "if");
   /* add_func(flit, cog_split, "split"); */

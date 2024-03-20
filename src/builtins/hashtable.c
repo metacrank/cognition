@@ -39,8 +39,8 @@ void cog_def(value_t *v) {
     quot->macro = NULL;
   }
   word->str_word = NULL;
-  value_free(wordc);
-  value_free(quot);
+  value_free_safe(wordc);
+  value_free_safe(quot);
 }
 
 void cog_undef(value_t *v) {
@@ -67,7 +67,7 @@ void cog_undef(value_t *v) {
     ht_add(cur->word_table, word->str_word, NULL, nop);
     stack_push(CONTAIN_DEF_STACK, def);
     word->str_word = NULL;
-    value_free(wordc);
+    value_free_safe(wordc);
     return;
   }
   stack_t *macro;
@@ -75,7 +75,7 @@ void cog_undef(value_t *v) {
     ht_add(cur->flit, word->str_word, NULL, nop);
     stack_push(MACRO_DEF_STACK, macro);
     word->str_word = NULL;
-    value_free(wordc);
+    value_free_safe(wordc);
     return;
   }
   eval_error("UNDEFINED WORD", v);
@@ -106,7 +106,7 @@ void cog_unglue(value_t *v) {
       eval_error("UNDEFINED WORD", v);
       return;
     }
-    value_free(wordval);
+    value_free_safe(wordval);
     if (wordc->type == VMACRO) {
       wordc->macro->size = 0;
       for (int i = 0; i < macro->size; i++) {
@@ -132,7 +132,7 @@ void cog_unglue(value_t *v) {
     return;
   }
   contain_copy_attributes(def, wordc->container);
-  value_free(wordval);
+  value_free_safe(wordval);
   wordc->container->stack->size = 0;
   for (int i = 0; i < def->stack->size; i++) {
     stack_push(wordc->container->stack, value_copy(def->stack->items[i]));
@@ -198,8 +198,8 @@ void cog_isdef(value_t *v) {
 /*   free(family->items); */
 /*   free(family); */
 /*   ht_add(cur->flit, string_copy(wordval->str_word), macro, value_stack_free); */
-/*   value_free(wordc); */
-/*   value_free(quot); */
+/*   value_free_safe(wordc); */
+/*   value_free_safe(quot); */
 /* } */
 
 /* void cog_compile(value_t *v) { */
@@ -256,6 +256,11 @@ void cog_bequeath(value_t *v) {
     return;
   }
   value_t *child = stack_peek(stack);
+  if (!child) {
+    stack_push(stack, wordc);
+    eval_error("TOO FEW ARGUMENTS", v);
+    return;
+  }
   if (child->type != VSTACK) {
     stack_push(stack, wordc);
     eval_error("BAD ARGUMENT TYPE", v);
@@ -287,11 +292,15 @@ void cog_bequeath(value_t *v) {
   for (int i = 0; i < stacksize; i++) {
     value_t *wordval = value_stack(wordc)[0]->items[i];
     if (defs[i]) {
+      if (!child->container->word_table)
+        child->container->word_table = init_ht(DEFAULT_HT_SIZE);
       ht_add(child->container->word_table,
              string_copy(wordval->str_word),
              contain_value_copy(defs[i]),
              contain_free);
     } else if (aliases[i]) {
+      if (!child->container->flit)
+        child->container->flit = init_ht(DEFAULT_HT_SIZE);
       ht_add(child->container->flit,
              string_copy(wordval->str_word),
              value_stack_copy(aliases[i]),
@@ -303,7 +312,7 @@ void cog_bequeath(value_t *v) {
       wordval->str_word = NULL;
     }
   }
-  value_free(wordc);
+  value_free_safe(wordc);
 }
 
 void add_funcs_hashtable(ht_t *flit) {

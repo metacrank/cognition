@@ -131,8 +131,13 @@ void cog_exit(value_t *v) {
   }
   EXIT_CODE = code->str_word;
   code->str_word = NULL;
-  value_free(codec);
-  stack_free(STACK, contain_free);
+  value_free_safe(codec);
+  //stack_free(STACK, contain_free);
+  while(STACK->size) {
+    stack_push(CONTAIN_DEF_STACK, stack_pop(STACK));
+  }
+  free(STACK->items);
+  free(STACK);
   STACK = NULL;
 }
 
