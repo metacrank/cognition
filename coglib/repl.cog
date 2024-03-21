@@ -14,7 +14,7 @@ _concat_swap_dup_i d quote
 1 crank VMACRO cast expand
 
 dup repl swap def quote
-2 crank eval compose repl bequeath repl swap
-1 crank expand def
+2 crank evalf compose repl bequeath repl swap evalf dup
+1 crank aliasf bequeath def
 
 repl

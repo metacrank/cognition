@@ -203,7 +203,8 @@ void cog_cast(value_t *v) {
 void cog_sub(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   value_t *v1 = init_value(VSTACK);
-  v1->container = init_contain(NULL, NULL, NULL);
+  v1->container = init_contain(NULL, init_ht(DEFAULT_HT_SIZE), NULL);
+  v1->container->faliases = init_stack(DEFAULT_STACK_SIZE);
   stack_push(v1->container->faliases, init_string("f"));
   add_funcs(v1->container->flit);
   stack_push(cur->stack, v1);
