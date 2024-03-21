@@ -19,8 +19,13 @@ void cog_err_peek(value_t *v) {
   value_t *v1 = stack_peek(estack);
   value_t *r1 = init_value(VWORD);
   value_t *r2 = init_value(VWORD);
-  r1->str_word = string_copy(v1->error->error);
-  r2->str_word = string_copy(v1->error->str_word);
+  if (v1) {
+    r1->str_word = string_copy(v1->error->error);
+    r2->str_word = string_copy(v1->error->str_word);
+  } else {
+    r1->str_word = init_string("NO ERRORS");
+    r2->str_word = string_copy(v->str_word);
+  }
   push_quoted(cur, r1);
   push_quoted(cur, r2);
 }
@@ -31,12 +36,17 @@ void cog_err_pop(value_t *v) {
   value_t *v1 = stack_pop(estack);
   value_t *r1 = init_value(VWORD);
   value_t *r2 = init_value(VWORD);
-  r1->str_word = v1->error->error;
-  r2->str_word = v1->error->str_word;
+  if (v1) {
+    r1->str_word = v1->error->error;
+    r2->str_word = v1->error->str_word;
+    v1->error->str_word = NULL;
+    v1->error->error = NULL;
+  } else {
+    r1->str_word = init_string("NO ERRORS");
+    r2->str_word = string_copy(v->str_word);
+  }
   push_quoted(cur, r1);
   push_quoted(cur, r2);
-  v1->error->str_word = NULL;
-  v1->error->error = NULL;
   value_free(v1);
 }
 
