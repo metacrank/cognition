@@ -10,7 +10,7 @@ OBJECTS := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.o))
 CFLAGS := -fpic
 LIB := -L lib -lm
 INC := -I include
-
+DESTDIR := /usr/local/bin/
 $(TARGET): $(OBJECTS)
 	@echo " Linking..."
 	@echo " $(CC) $^ -o $(TARGET) $(LIB)"; $(CC) $^ -o $(TARGET) $(LIB) -O3
@@ -27,3 +27,5 @@ clean:
 site:
 	doxygen
 	rsync -uvrP --delete-after "html/" root@nullring.xyz:/var/www/stemdoc
+install:
+	cp crank "$(DESTDIR)"

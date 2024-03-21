@@ -61,7 +61,7 @@
           in a token stream, giving it the property of tokenizing and parsing future characters differently than it does
           current characters. The result is an unopinionated language that can replicate a wide variety of different
           syntaxes, allowing Cognition to modify syntax entirely during runtime. This paper investigates the implications
-          of this system, which has potential applications in parsing and self-modifying systems.
+          of this programming language, which has potential applications in parsing and self-modifying systems.
         \end{abstract}
 }
 
@@ -91,9 +91,9 @@ languages are not perfect candidates for a perfectly postfix language.
 Cognition solves this problem using three mechanisms: first, tokens are one character long by default and information
 about how Cognition will tokenize based on certain delimiter rules are made public to the language; second, Cognition
 uses a unique metacrank system which allows it to modify the execution order of the code, allowing Cognition to
-\emph{simulate} reading ahead, and allow for metaprogramming; third, it uses what we call an \emph{falias} system which we
-believe to be computationally equivalent to metacrank, but makes for easier bootstrapping to an environment that is more
-desirable to program in.
+\emph{modify the syntax for changing the execution order itself} due to the metacrank system's postfix syntax, and allow
+for metaprogramming; third, it uses what we call an \emph{falias} system which we believe to be equivalent to metacrank, but makes
+for easier bootstrapping to an environment that is more desirable to program in.
 
 
 %------------------------------------------------
@@ -101,7 +101,38 @@ desirable to program in.
 \section{Language Design}
 As of the release of this paper, the language design is incomplete yet still covers many general cases. Tradeoffs
 in the implementation have been made such that the esscence of the design is there but the implementation is simplified.
-In this section, we describe the 
+In this section, we describe the high level overview of the public components of Cognition, and we compare and contrast
+it with other similarly flexible programming languages such as Forth and Lisp.
+
+In languages like lisp and forth, syntax can be modified using \emph{macros}. The usage of macros allows for the publicity
+of the AST; that is, it allows for the change in execution order of symbols or words. Similarily, Cognition allows for this
+behavior, by using a \emph{metacranking} system, which allows it to specify every \emph{nth} word \emph{n} items down the
+stack to be executed, where all the other words are not evaluated. Metacranking behavior can be modified using a postfix
+syntax, allowing metacrank execution order itself to be changed, meaning not only can the AST be modified, but the system
+used to modify the AST is itself a part of the AST and can be modified. This allows full AST modification, and we believe
+it to not be possible with many more naive implementations of Forth and many, if not all implementations of Lisp.
+
+Because everything is written in postfix notation, there is almost no need for a special character that denotes the AST
+like in the case with the parentheses in Lisp. Instead, there is an falias system which force evaluates the top item
+on the stack in a \emph{fast} way, without waiting for the cranker. It is conceptually possible to modify the bracket
+syntax for lisp and for Forth, but it is unwieldy due to its prefix nature.
+
+This gives Cognition the benefit of never reading ahead. Because it never has to read more characters than it has to, only obeying
+a couple of delimiter, ignored character, and singlet laws, it allows the tokenization strategy of the parser to be changed
+without affecting the current token or future tokens in unwanted or conflicting ways. This allows other special characters
+that denote the delimiter between different tokens, for example, to be made public, and allows them to therefore be changed
+dynamically and programmatically, giving even more power to the AST manipulation as operations modifying the tokenizer can be
+stored in the stack and changed via the metacranker. Furthermore, string operations in Cognition modify the tokens
+post-tokenization, making post tokenization decisions about token execution possible.
+
+The hash table that stores variable definitions is also made public, allowing the program to access currently defined variables,
+modify them, and delete them. This principle is made more powerful with metastack operations which have the main focus of
+reducing the possibility of hash table collisions and making program simulation and program introspection easy.
+
+Metastack operations extend the definition of Forth quotes, attaching a hash table and other data structures required to make
+a complete cognition environment to quotes, making them self similar to the original environment. This is important for
+implementing scope, containerization, and self-simulation. This allows Cognition to be used as a permission system in a
+Cognition-centric virtual machine or operating system in the future.
 \subsection{Parser Design}
 The parser is designed to make public the specifics of how characters are parsed into tokens by delimiter rules,
 and by a few other constructs called \emph{ignores} and \emph{singlets}. Ignores allow the parser to ignore a list
@@ -114,6 +145,8 @@ When the parser hits a delimiter, the parser stops and the token gets packaged, 
 a singlet, the parser skips the singlet character. This enables a wide range of source file text manipulation.
 If characters were not ignored, at least one character must be parsed into a word, and if not, a word containing
 no characters can be created with singlets.
+\subsection{Metacrank Design}
+\subsection{Metastack Design}
 \subsection{Builtins}
 
 This line shows how to use a footnote to further explain or cite text\footnote{Example footnote text.}.
