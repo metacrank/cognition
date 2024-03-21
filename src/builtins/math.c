@@ -1,4 +1,5 @@
 #include <builtins/math.h>
+#include <builtinslib.h>
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
@@ -14,25 +15,25 @@ void cog_multiply(value_t *v) {
     return;
   }
   value_t *v2 = stack_pop(stack);
-  if (v2->container->stack->size != 1) {
+  if (value_stack(v2)[0]->size != 1) {
     eval_error("BAD ARGUMENT TYPE", v);
     stack_push(stack, v2);
     return;
   }
-  value_t *w2 = v2->container->stack->items[0];
+  value_t *w2 = value_stack(v2)[0]->items[0];
   if (w2->type != VWORD) {
     eval_error("BAD ARGUMENT TYPE", v);
     stack_push(stack, v2);
     return;
   }
   value_t *v1 = stack_pop(stack);
-  if (v1->container->stack->size != 1) {
+  if (value_stack(v1)[0]->size != 1) {
     eval_error("BAD ARGUMENT TYPE", v);
     stack_push(stack, v1);
     stack_push(stack, v2);
     return;
   }
-  value_t *w1 = v1->container->stack->items[0];
+  value_t *w1 = value_stack(v1)[0]->items[0];
   if (w1->type != VWORD) {
     eval_error("BAD ARGUMENT TYPE", v);
     stack_push(stack, v1);
@@ -50,7 +51,7 @@ void cog_multiply(value_t *v) {
   w1->str_word->bufsize = len + 10;
   w1->str_word->length = len;
   w1->str_word->value = result;
-  value_free(v2);
+  value_free_safe(v2);
   stack_push(stack, v1);
 }
 void cog_add(value_t *v) {
@@ -61,25 +62,25 @@ void cog_add(value_t *v) {
     return;
   }
   value_t *v2 = stack_pop(stack);
-  if (v2->container->stack->size != 1) {
+  if (value_stack(v2)[0]->size != 1) {
     eval_error("BAD ARGUMENT TYPE", v);
     stack_push(stack, v2);
     return;
   }
-  value_t *w2 = v2->container->stack->items[0];
+  value_t *w2 = value_stack(v2)[0]->items[0];
   if (w2->type != VWORD) {
     eval_error("BAD ARGUMENT TYPE", v);
     stack_push(stack, v2);
     return;
   }
   value_t *v1 = stack_pop(stack);
-  if (v1->container->stack->size != 1) {
+  if (value_stack(v1)[0]->size != 1) {
     eval_error("BAD ARGUMENT TYPE", v);
     stack_push(stack, v1);
     stack_push(stack, v2);
     return;
   }
-  value_t *w1 = v1->container->stack->items[0];
+  value_t *w1 = value_stack(v1)[0]->items[0];
   if (w1->type != VWORD) {
     eval_error("BAD ARGUMENT TYPE", v);
     stack_push(stack, v1);
@@ -97,7 +98,7 @@ void cog_add(value_t *v) {
   w1->str_word->bufsize = len + 10;
   w1->str_word->length = len;
   w1->str_word->value = result;
-  value_free(v2);
+  value_free_safe(v2);
   stack_push(stack, v1);
 }
 
@@ -109,25 +110,25 @@ void cog_pow(value_t *v) {
     return;
   }
   value_t *v2 = stack_pop(stack);
-  if (v2->container->stack->size != 1) {
+  if (value_stack(v2)[0]->size != 1) {
     eval_error("BAD ARGUMENT TYPE", v);
     stack_push(stack, v2);
     return;
   }
-  value_t *w2 = v2->container->stack->items[0];
+  value_t *w2 = value_stack(v2)[0]->items[0];
   if (w2->type != VWORD) {
     eval_error("BAD ARGUMENT TYPE", v);
     stack_push(stack, v2);
     return;
   }
   value_t *v1 = stack_pop(stack);
-  if (v1->container->stack->size != 1) {
+  if (value_stack(v1)[0]->size != 1) {
     eval_error("BAD ARGUMENT TYPE", v);
     stack_push(stack, v1);
     stack_push(stack, v2);
     return;
   }
-  value_t *w1 = v1->container->stack->items[0];
+  value_t *w1 = value_stack(v1)[0]->items[0];
   if (w1->type != VWORD) {
     eval_error("BAD ARGUMENT TYPE", v);
     stack_push(stack, v1);
@@ -145,7 +146,7 @@ void cog_pow(value_t *v) {
   w1->str_word->bufsize = len + 10;
   w1->str_word->length = len;
   w1->str_word->value = result;
-  value_free(v2);
+  value_free_safe(v2);
   stack_push(stack, v1);
 }
 void cog_divide(value_t *v) {
@@ -156,25 +157,25 @@ void cog_divide(value_t *v) {
     return;
   }
   value_t *v2 = stack_pop(stack);
-  if (v2->container->stack->size != 1) {
+  if (value_stack(v2)[0]->size != 1) {
     eval_error("BAD ARGUMENT TYPE", v);
     stack_push(stack, v2);
     return;
   }
-  value_t *w2 = v2->container->stack->items[0];
+  value_t *w2 = value_stack(v2)[0]->items[0];
   if (w2->type != VWORD) {
     eval_error("BAD ARGUMENT TYPE", v);
     stack_push(stack, v2);
     return;
   }
   value_t *v1 = stack_pop(stack);
-  if (v1->container->stack->size != 1) {
+  if (value_stack(v1)[0]->size != 1) {
     eval_error("BAD ARGUMENT TYPE", v);
     stack_push(stack, v1);
     stack_push(stack, v2);
     return;
   }
-  value_t *w1 = v1->container->stack->items[0];
+  value_t *w1 = value_stack(v1)[0]->items[0];
   if (w1->type != VWORD) {
     eval_error("BAD ARGUMENT TYPE", v);
     stack_push(stack, v1);
@@ -192,7 +193,7 @@ void cog_divide(value_t *v) {
   w1->str_word->bufsize = len + 10;
   w1->str_word->length = len;
   w1->str_word->value = result;
-  value_free(v2);
+  value_free_safe(v2);
   stack_push(stack, v1);
 }
 
@@ -204,25 +205,25 @@ void cog_subtract(value_t *v) {
     return;
   }
   value_t *v2 = stack_pop(stack);
-  if (v2->container->stack->size != 1) {
+  if (value_stack(v2)[0]->size != 1) {
     eval_error("BAD ARGUMENT TYPE", v);
     stack_push(stack, v2);
     return;
   }
-  value_t *w2 = v2->container->stack->items[0];
+  value_t *w2 = value_stack(v2)[0]->items[0];
   if (w2->type != VWORD) {
     eval_error("BAD ARGUMENT TYPE", v);
     stack_push(stack, v2);
     return;
   }
   value_t *v1 = stack_pop(stack);
-  if (v1->container->stack->size != 1) {
+  if (value_stack(v1)[0]->size != 1) {
     eval_error("BAD ARGUMENT TYPE", v);
     stack_push(stack, v1);
     stack_push(stack, v2);
     return;
   }
-  value_t *w1 = v1->container->stack->items[0];
+  value_t *w1 = value_stack(v1)[0]->items[0];
   if (w1->type != VWORD) {
     eval_error("BAD ARGUMENT TYPE", v);
     stack_push(stack, v1);
@@ -240,7 +241,7 @@ void cog_subtract(value_t *v) {
   w1->str_word->bufsize = len + 10;
   w1->str_word->length = len;
   w1->str_word->value = result;
-  value_free(v2);
+  value_free_safe(v2);
   stack_push(stack, v1);
 }
 
@@ -252,12 +253,12 @@ void cog_exp(value_t *v) {
     return;
   }
   value_t *v1 = stack_pop(stack);
-  if (v1->container->stack->size != 1) {
+  if (value_stack(v1)[0]->size != 1) {
     eval_error("BAD ARGUMENT TYPE", v);
     stack_push(stack, v1);
     return;
   }
-  value_t *w1 = v1->container->stack->items[0];
+  value_t *w1 = value_stack(v1)[0]->items[0];
   if (w1->type != VWORD) {
     eval_error("BAD ARGUMENT TYPE", v);
     stack_push(stack, v1);
@@ -283,7 +284,7 @@ void cog_sin(value_t *v) {
     return;
   }
   value_t *v1 = stack_pop(stack);
-  if (v1->container->stack->size != 1) {
+  if (value_stack(v1)[0]->size != 1) {
     eval_error("BAD ARGUMENT TYPE", v);
     stack_push(stack, v1);
     return;
@@ -314,12 +315,12 @@ void cog_cos(value_t *v) {
     return;
   }
   value_t *v1 = stack_pop(stack);
-  if (v1->container->stack->size != 1) {
+  if (value_stack(v1)[0]->size != 1) {
     eval_error("BAD ARGUMENT TYPE", v);
     stack_push(stack, v1);
     return;
   }
-  value_t *w1 = v1->container->stack->items[0];
+  value_t *w1 = value_stack(v1)[0]->items[0];
   if (w1->type != VWORD) {
     eval_error("BAD ARGUMENT TYPE", v);
     stack_push(stack, v1);
@@ -345,12 +346,12 @@ void cog_floor(value_t *v) {
     return;
   }
   value_t *v1 = stack_pop(stack);
-  if (v1->container->stack->size != 1) {
+  if (value_stack(v1)[0]->size != 1) {
     eval_error("BAD ARGUMENT TYPE", v);
     stack_push(stack, v1);
     return;
   }
-  value_t *w1 = v1->container->stack->items[0];
+  value_t *w1 = value_stack(v1)[0]->items[0];
   if (w1->type != VWORD) {
     eval_error("BAD ARGUMENT TYPE", v);
     stack_push(stack, v1);
@@ -376,12 +377,12 @@ void cog_ceil(value_t *v) {
     return;
   }
   value_t *v1 = stack_pop(stack);
-  if (v1->container->stack->size != 1) {
+  if (value_stack(v1)[0]->size != 1) {
     eval_error("BAD ARGUMENT TYPE", v);
     stack_push(stack, v1);
     return;
   }
-  value_t *w1 = v1->container->stack->items[0];
+  value_t *w1 = value_stack(v1)[0]->items[0];
   if (w1->type != VWORD) {
     eval_error("BAD ARGUMENT TYPE", v);
     stack_push(stack, v1);
@@ -407,12 +408,12 @@ void cog_ln(value_t *v) {
     return;
   }
   value_t *v1 = stack_pop(stack);
-  if (v1->container->stack->size != 1) {
+  if (value_stack(v1)[0]->size != 1) {
     eval_error("BAD ARGUMENT TYPE", v);
     stack_push(stack, v1);
     return;
   }
-  value_t *w1 = v1->container->stack->items[0];
+  value_t *w1 = value_stack(v1)[0]->items[0];
   if (w1->type != VWORD) {
     eval_error("BAD ARGUMENT TYPE", v);
     stack_push(stack, v1);
@@ -438,12 +439,12 @@ void cog_neg(value_t *v) {
     return;
   }
   value_t *v1 = stack_pop(stack);
-  if (v1->container->stack->size != 1) {
+  if (value_stack(v1)[0]->size != 1) {
     eval_error("BAD ARGUMENT TYPE", v);
     stack_push(stack, v1);
     return;
   }
-  value_t *w1 = v1->container->stack->items[0];
+  value_t *w1 = value_stack(v1)[0]->items[0];
   if (w1->type != VWORD) {
     eval_error("BAD ARGUMENT TYPE", v);
     stack_push(stack, v1);
@@ -469,25 +470,25 @@ void cog_equals(value_t *v) {
     return;
   }
   value_t *v2 = stack_pop(stack);
-  if (v2->container->stack->size != 1) {
+  if (value_stack(v2)[0]->size != 1) {
     eval_error("BAD ARGUMENT TYPE", v);
     stack_push(stack, v2);
     return;
   }
-  value_t *w2 = v2->container->stack->items[0];
+  value_t *w2 = value_stack(v2)[0]->items[0];
   if (w2->type != VWORD) {
     eval_error("BAD ARGUMENT TYPE", v);
     stack_push(stack, v2);
     return;
   }
   value_t *v1 = stack_pop(stack);
-  if (v1->container->stack->size != 1) {
+  if (value_stack(v1)[0]->size != 1) {
     eval_error("BAD ARGUMENT TYPE", v);
     stack_push(stack, v1);
     stack_push(stack, v2);
     return;
   }
-  value_t *w1 = v1->container->stack->items[0];
+  value_t *w1 = value_stack(v1)[0]->items[0];
   if (w1->type != VWORD) {
     eval_error("BAD ARGUMENT TYPE", v);
     stack_push(stack, v1);
@@ -502,7 +503,7 @@ void cog_equals(value_t *v) {
     w1->str_word->length = 0;
     w1->str_word->value[0] = '\0';
   }
-  value_free(v2);
+  value_free_safe(v2);
   stack_push(stack, v1);
 }
 
@@ -514,25 +515,25 @@ void cog_nequals(value_t *v) {
     return;
   }
   value_t *v2 = stack_pop(stack);
-  if (v2->container->stack->size != 1) {
+  if (value_stack(v2)[0]->size != 1) {
     eval_error("BAD ARGUMENT TYPE", v);
     stack_push(stack, v2);
     return;
   }
-  value_t *w2 = v2->container->stack->items[0];
+  value_t *w2 = value_stack(v2)[0]->items[0];
   if (w2->type != VWORD) {
     eval_error("BAD ARGUMENT TYPE", v);
     stack_push(stack, v2);
     return;
   }
   value_t *v1 = stack_pop(stack);
-  if (v1->container->stack->size != 1) {
+  if (value_stack(v1)[0]->size != 1) {
     eval_error("BAD ARGUMENT TYPE", v);
     stack_push(stack, v1);
     stack_push(stack, v2);
     return;
   }
-  value_t *w1 = v1->container->stack->items[0];
+  value_t *w1 = value_stack(v1)[0]->items[0];
   if (w1->type != VWORD) {
     eval_error("BAD ARGUMENT TYPE", v);
     stack_push(stack, v1);
@@ -547,7 +548,7 @@ void cog_nequals(value_t *v) {
     w1->str_word->length = 0;
     w1->str_word->value[0] = '\0';
   }
-  value_free(v2);
+  value_free_safe(v2);
   stack_push(stack, v1);
 }
 
