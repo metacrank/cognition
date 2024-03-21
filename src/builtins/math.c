@@ -6,6 +6,53 @@
 extern stack_t *STACK;
 
 
+void cog_multiply(value_t *v) {
+  contain_t *cur = stack_peek(STACK);
+  stack_t *stack = cur->stack;
+  if (stack->size < 2) {
+    eval_error("TOO FEW ARGUMENTS", v);
+    return;
+  }
+  value_t *v2 = stack_pop(stack);
+  if (v2->container->stack->size != 1) {
+    eval_error("BAD ARGUMENT TYPE", v);
+    stack_push(stack, v2);
+    return;
+  }
+  value_t *w2 = v2->container->stack->items[0];
+  if (w2->type != VWORD) {
+    eval_error("BAD ARGUMENT TYPE", v);
+    stack_push(stack, v2);
+    return;
+  }
+  value_t *v1 = stack_pop(stack);
+  if (v1->container->stack->size != 1) {
+    eval_error("BAD ARGUMENT TYPE", v);
+    stack_push(stack, v1);
+    stack_push(stack, v2);
+    return;
+  }
+  value_t *w1 = v1->container->stack->items[0];
+  if (w1->type != VWORD) {
+    eval_error("BAD ARGUMENT TYPE", v);
+    stack_push(stack, v1);
+    stack_push(stack, v2);
+    return;
+  }
+  double y = atof(w1->str_word->value);
+  double x = atof(w2->str_word->value);
+  double z = x * y;
+  int len = snprintf(NULL, 0, "%f", z);
+  char *result = malloc(len + 10);
+  snprintf(result, len, "%f", z);
+  string_t *s = calloc(1, sizeof(string_t));
+  free(w1->str_word->value);
+  w1->str_word->bufsize = len + 10;
+  w1->str_word->length = len;
+  w1->str_word->value = result;
+  value_free(v2);
+  stack_push(stack, v1);
+}
 void cog_add(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   stack_t *stack = cur->stack;
@@ -506,8 +553,17 @@ void cog_nequals(value_t *v) {
 
 void add_funcs_math(ht_t *flit) {
   add_func(flit, cog_equals, "=");
+  add_func(flit, cog_nequals, "!=");
   add_func(flit, cog_add, "+");
+  add_func(flit, cog_subtract, "-");
+  add_func(flit, cog_multiply, "*");
+  add_func(flit, cog_divide, "/");
+  add_func(flit, cog_neg, "neg");
+  add_func(flit, cog_pow, "pow");
+  add_func(flit, cog_floor, "floor");
+  add_func(flit, cog_ceil, "ceil");
   add_func(flit, cog_cos, "cos");
+  add_func(flit, cog_ln, "ln");
   add_func(flit, cog_sin, "sin");
   add_func(flit, cog_exp, "exp");
 }

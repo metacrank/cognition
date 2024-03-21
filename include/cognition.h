@@ -127,11 +127,11 @@ struct CONTAINER_STRUCT {
   stack_t *faliases;
   /*! @brief list of ignored characters */
   string_t *ignored;
-  /* @brief false is ignored blacklist */
+  /*! @brief false is ignored blacklist */
   bool iflag;
-  /* list of singlet characters */
+  /*! list of singlet characters */
   string_t *singlets;
-  /* false is singlet blacklist */
+  /*! false is singlet blacklist */
   bool sflag;
 };
 
