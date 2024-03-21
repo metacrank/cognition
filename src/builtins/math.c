@@ -45,11 +45,11 @@ void cog_multiply(value_t *v) {
   double z = x * y;
   int len = snprintf(NULL, 0, "%f", z);
   char *result = malloc(len + 10);
-  snprintf(result, len, "%f", z);
+  snprintf(result, len + 1, "%f", z);
   /* string_t *s = calloc(1, sizeof(string_t)); */
   free(w1->str_word->value);
   w1->str_word->bufsize = len + 10;
-  w1->str_word->length = len;
+  w1->str_word->length = len + 1;
   w1->str_word->value = result;
   value_free_safe(v2);
   stack_push(stack, v1);
@@ -92,11 +92,11 @@ void cog_add(value_t *v) {
   double z = x + y;
   int len = snprintf(NULL, 0, "%f", z);
   char *result = malloc(len + 10);
-  snprintf(result, len, "%f", z);
+  snprintf(result, len + 1, "%f", z);
   /* string_t *s = calloc(1, sizeof(string_t)); */
   free(w1->str_word->value);
   w1->str_word->bufsize = len + 10;
-  w1->str_word->length = len;
+  w1->str_word->length = len + 1;
   w1->str_word->value = result;
   value_free_safe(v2);
   stack_push(stack, v1);
@@ -140,11 +140,11 @@ void cog_pow(value_t *v) {
   double z = pow(x, y);
   int len = snprintf(NULL, 0, "%f", z);
   char *result = malloc(len + 10);
-  snprintf(result, len, "%f", z);
+  snprintf(result, len + 1, "%f", z);
   /* string_t *s = calloc(1, sizeof(string_t)); */
   free(w1->str_word->value);
   w1->str_word->bufsize = len + 10;
-  w1->str_word->length = len;
+  w1->str_word->length = len + 1;
   w1->str_word->value = result;
   value_free_safe(v2);
   stack_push(stack, v1);
@@ -187,11 +187,11 @@ void cog_divide(value_t *v) {
   double z = x / y;
   int len = snprintf(NULL, 0, "%f", z);
   char *result = malloc(len + 10);
-  snprintf(result, len, "%f", z);
+  snprintf(result, len + 1, "%f", z);
   /* string_t *s = calloc(1, sizeof(string_t)); */
   free(w1->str_word->value);
   w1->str_word->bufsize = len + 10;
-  w1->str_word->length = len;
+  w1->str_word->length = len + 1;
   w1->str_word->value = result;
   value_free_safe(v2);
   stack_push(stack, v1);
@@ -235,11 +235,11 @@ void cog_subtract(value_t *v) {
   double z = x - y;
   int len = snprintf(NULL, 0, "%f", z);
   char *result = malloc(len + 10);
-  snprintf(result, len, "%f", z);
+  snprintf(result, len + 1, "%f", z);
   /* string_t *s = calloc(1, sizeof(string_t)); */
   free(w1->str_word->value);
   w1->str_word->bufsize = len + 10;
-  w1->str_word->length = len;
+  w1->str_word->length = len + 1;
   w1->str_word->value = result;
   value_free_safe(v2);
   stack_push(stack, v1);
@@ -267,11 +267,11 @@ void cog_exp(value_t *v) {
   double x = exp(atof(w1->str_word->value));
   int len = snprintf(NULL, 0, "%f", x);
   char *result = malloc(len + 10);
-  snprintf(result, len, "%f", x);
+  snprintf(result, len + 1, "%f", x);
   /* string_t *s = calloc(1, sizeof(string_t)); */
   free(w1->str_word->value);
   w1->str_word->bufsize = len + 10;
-  w1->str_word->length = len;
+  w1->str_word->length = len + 1;
   w1->str_word->value = result;
   stack_push(stack, v1);
 }
@@ -298,11 +298,11 @@ void cog_sin(value_t *v) {
   double x = sin(atof(w1->str_word->value));
   int len = snprintf(NULL, 0, "%f", x);
   char *result = malloc(len + 10);
-  snprintf(result, len, "%f", x);
+  snprintf(result, len + 1, "%f", x);
   /* string_t *s = calloc(1, sizeof(string_t)); */
   free(w1->str_word->value);
   w1->str_word->bufsize = len + 10;
-  w1->str_word->length = len;
+  w1->str_word->length = len + 1;
   w1->str_word->value = result;
   stack_push(stack, v1);
 }
@@ -329,11 +329,11 @@ void cog_cos(value_t *v) {
   double x = cos(atof(w1->str_word->value));
   int len = snprintf(NULL, 0, "%f", x);
   char *result = malloc(len + 10);
-  snprintf(result, len, "%f", x);
+  snprintf(result, len + 1, "%f", x);
   /* string_t *s = calloc(1, sizeof(string_t)); */
   free(w1->str_word->value);
   w1->str_word->bufsize = len + 10;
-  w1->str_word->length = len;
+  w1->str_word->length = len + 1;
   w1->str_word->value = result;
   stack_push(stack, v1);
 }
@@ -360,11 +360,11 @@ void cog_floor(value_t *v) {
   double x = floor(atof(w1->str_word->value));
   int len = snprintf(NULL, 0, "%f", x);
   char *result = malloc(len + 10);
-  snprintf(result, len, "%f", x);
+  snprintf(result, len + 1, "%f", x);
   /* string_t *s = calloc(1, sizeof(string_t)); */
   free(w1->str_word->value);
   w1->str_word->bufsize = len + 10;
-  w1->str_word->length = len;
+  w1->str_word->length = len + 1;
   w1->str_word->value = result;
   stack_push(stack, v1);
 }
@@ -391,11 +391,11 @@ void cog_ceil(value_t *v) {
   double x = ceil(atof(w1->str_word->value));
   int len = snprintf(NULL, 0, "%f", x);
   char *result = malloc(len + 10);
-  snprintf(result, len, "%f", x);
+  snprintf(result, len + 1, "%f", x);
   /* string_t *s = calloc(1, sizeof(string_t)); */
   free(w1->str_word->value);
   w1->str_word->bufsize = len + 10;
-  w1->str_word->length = len;
+  w1->str_word->length = len + 1;
   w1->str_word->value = result;
   stack_push(stack, v1);
 }
@@ -422,11 +422,11 @@ void cog_ln(value_t *v) {
   double x = log(atof(w1->str_word->value));
   int len = snprintf(NULL, 0, "%f", x);
   char *result = malloc(len + 10);
-  snprintf(result, len, "%f", x);
+  snprintf(result, len + 1, "%f", x);
   /* string_t *s = calloc(1, sizeof(string_t)); */
   free(w1->str_word->value);
   w1->str_word->bufsize = len + 10;
-  w1->str_word->length = len;
+  w1->str_word->length = len + 1;
   w1->str_word->value = result;
   stack_push(stack, v1);
 }
@@ -453,11 +453,11 @@ void cog_neg(value_t *v) {
   double x = atof(w1->str_word->value) * -1;
   int len = snprintf(NULL, 0, "%f", x);
   char *result = malloc(len + 10);
-  snprintf(result, len, "%f", x);
+  snprintf(result, len + 1, "%f", x);
   /* string_t *s = calloc(1, sizeof(string_t)); */
   free(w1->str_word->value);
   w1->str_word->bufsize = len + 10;
-  w1->str_word->length = len;
+  w1->str_word->length = len + 1;
   w1->str_word->value = result;
   stack_push(stack, v1);
 }
@@ -484,11 +484,11 @@ void cog_int(value_t *v) {
   int x = (int) atof(w1->str_word->value);
   int len = (int)((ceil(log10(x))+1)*sizeof(char));
   char *result = malloc(len + 10);
-  snprintf(result, len, "%d", x);
+  snprintf(result, len + 1, "%d", x);
   /* string_t *s = calloc(1, sizeof(string_t)); */
   free(w1->str_word->value);
   w1->str_word->bufsize = len + 10;
-  w1->str_word->length = len;
+  w1->str_word->length = len + 1;
   w1->str_word->value = result;
   stack_push(stack, v1);
 }

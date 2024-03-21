@@ -29,7 +29,7 @@ void cog_setf(value_t *v) {
   if (list->container->stack->size == 0) {
     value_stack_free(cur->faliases);
     cur->faliases = NULL;
-    value_free(list);
+    value_free_safe(list);
     return;
   }
   for (int i = 0; i < list->container->stack->size; i++) {
@@ -53,7 +53,7 @@ void cog_setf(value_t *v) {
       val->str_word = NULL;
     }
   }
-  value_free(list);
+  value_free_safe(list);
 }
 
 void cog_aliasf(value_t *v) {
@@ -64,7 +64,7 @@ void cog_aliasf(value_t *v) {
     return;
   }
   if (list->container->stack->size == 0) {
-    value_free(list);
+    value_free_safe(list);
     return;
   }
   for (int i = 0; i < list->container->stack->size; i++) {
@@ -84,7 +84,7 @@ void cog_aliasf(value_t *v) {
       val->str_word = NULL;
     }
   }
-  value_free(list);
+  value_free_safe(list);
 }
 
 void cog_unaliasf(value_t *v) {
@@ -113,7 +113,7 @@ void cog_unaliasf(value_t *v) {
         string_free(stack_popdeep(cur->faliases, j));
     }
   }
-  value_free(list);
+  value_free_safe(list);
 }
 
 void cog_d(value_t *v) {
@@ -136,7 +136,7 @@ void cog_d(value_t *v) {
   }
   string_free(cur->delims);
   cur->delims = string_copy(word->str_word);
-  value_free(stack);
+  value_free_safe(stack);
 }
 
 void cog_i(value_t *v) {
@@ -159,7 +159,7 @@ void cog_i(value_t *v) {
   }
   string_free(cur->ignored);
   cur->ignored = string_copy(word->str_word);
-  value_free(stack);
+  value_free_safe(stack);
 }
 
 void cog_s(value_t *v) {
@@ -182,7 +182,7 @@ void cog_s(value_t *v) {
   }
   string_free(cur->singlets);
   cur->singlets = string_copy(word->str_word);
-  value_free(stack);
+  value_free_safe(stack);
 }
 
 void cog_dtgl(value_t *v) {
@@ -246,7 +246,7 @@ void cog_delim(value_t *v) {
     return;
   }
   if (!strv->str_word->length) {
-    value_free(strc);
+    value_free_safe(strc);
     return;
   }
   if (!cur->delims) {
@@ -269,7 +269,7 @@ void cog_delim(value_t *v) {
       }
     }
   }
-  value_free(strc);
+  value_free_safe(strc);
 }
 
 void cog_ignore(value_t *v) {
@@ -291,7 +291,7 @@ void cog_ignore(value_t *v) {
     return;
   }
   if (!strv->str_word->length) {
-    value_free(strc);
+    value_free_safe(strc);
     return;
   }
   if (!cur->ignored) {
@@ -314,7 +314,7 @@ void cog_ignore(value_t *v) {
       }
     }
   }
-  value_free(strc);
+  value_free_safe(strc);
 }
 
 void cog_singlet(value_t *v) {
@@ -336,7 +336,7 @@ void cog_singlet(value_t *v) {
     return;
   }
   if (!strv->str_word->length) {
-    value_free(strc);
+    value_free_safe(strc);
     return;
   }
   if (!cur->singlets) {
@@ -359,7 +359,7 @@ void cog_singlet(value_t *v) {
       }
     }
   }
-  value_free(strc);
+  value_free_safe(strc);
 }
 
 void cog_undelim(value_t *v) {
@@ -381,7 +381,7 @@ void cog_undelim(value_t *v) {
     return;
   }
   if (!strv->str_word->length) {
-    value_free(strc);
+    value_free_safe(strc);
     return;
   }
   if (!cur->delims) {
@@ -404,7 +404,7 @@ void cog_undelim(value_t *v) {
       }
     }
   }
-  value_free(strc);
+  value_free_safe(strc);
 }
 
 void cog_unignore(value_t *v) {
@@ -426,7 +426,7 @@ void cog_unignore(value_t *v) {
     return;
   }
   if (!strv->str_word->length) {
-    value_free(strc);
+    value_free_safe(strc);
     return;
   }
   if (!cur->ignored) {
@@ -449,7 +449,7 @@ void cog_unignore(value_t *v) {
       }
     }
   }
-  value_free(strc);
+  value_free_safe(strc);
 }
 
 void cog_unsinglet(value_t *v) {
@@ -471,7 +471,7 @@ void cog_unsinglet(value_t *v) {
     return;
   }
   if (!strv->str_word->length) {
-    value_free(strc);
+    value_free_safe(strc);
     return;
   }
   if (!cur->singlets) {
@@ -494,7 +494,7 @@ void cog_unsinglet(value_t *v) {
       }
     }
   }
-  value_free(strc);
+  value_free_safe(strc);
 }
 
 void cog_evalstr(value_t *v) {

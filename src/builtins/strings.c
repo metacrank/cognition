@@ -111,7 +111,7 @@ void cog_len(value_t *v) {
   int x = w1->str_word->length;
   int len = (int)((ceil(log10(x))+1)*sizeof(char));
   char *result = malloc(len + 10);
-  snprintf(result, len, "%d", x);
+  snprintf(result, len + 1, "%d", x);
   /* string_t *s = calloc(1, sizeof(string_t)); */
   r1->str_word->bufsize = len + 10;
   r1->str_word->length = len;
