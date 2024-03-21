@@ -46,6 +46,9 @@ void cog_ceil(value_t *v);
 /*! @brief takes floor function of first value on the stack */
 void cog_floor(value_t *v);
 
+/*! @brief turns float value into int */
+void cog_int(value_t *v);
+
 /*! @brief greater than or equals */
 void cog_gtequals(value_t *v);
 

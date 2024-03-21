@@ -40,7 +40,7 @@ stack_t **value_stack(value_t *v) {
 
 void contain_copy_attributes(contain_t *c, contain_t *newc) {
   if (c == NULL) {
-    return NULL;
+    return;
   }
   newc->flit = ht_copy(c->flit, value_stack_copy);
   newc->word_table = ht_copy(c->word_table, contain_value_copy);

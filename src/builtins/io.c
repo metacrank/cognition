@@ -22,7 +22,7 @@ void cog_period(value_t *v) {
     return;
   }
   print_value(elt, "\n");
-  value_free(elt);
+  value_free_safe(elt);
 }
 
 void cog_print(value_t *v) {
@@ -44,7 +44,8 @@ void cog_print(value_t *v) {
     return;
   }
   printf("%s", word->str_word->value);
-  value_free(v1);
+
+  value_free_safe(v1);
 }
 
 void cog_read(value_t *v) {

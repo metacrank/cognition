@@ -46,7 +46,7 @@ void cog_multiply(value_t *v) {
   int len = snprintf(NULL, 0, "%f", z);
   char *result = malloc(len + 10);
   snprintf(result, len, "%f", z);
-  string_t *s = calloc(1, sizeof(string_t));
+  /* string_t *s = calloc(1, sizeof(string_t)); */
   free(w1->str_word->value);
   w1->str_word->bufsize = len + 10;
   w1->str_word->length = len;
@@ -93,7 +93,7 @@ void cog_add(value_t *v) {
   int len = snprintf(NULL, 0, "%f", z);
   char *result = malloc(len + 10);
   snprintf(result, len, "%f", z);
-  string_t *s = calloc(1, sizeof(string_t));
+  /* string_t *s = calloc(1, sizeof(string_t)); */
   free(w1->str_word->value);
   w1->str_word->bufsize = len + 10;
   w1->str_word->length = len;
@@ -141,7 +141,7 @@ void cog_pow(value_t *v) {
   int len = snprintf(NULL, 0, "%f", z);
   char *result = malloc(len + 10);
   snprintf(result, len, "%f", z);
-  string_t *s = calloc(1, sizeof(string_t));
+  /* string_t *s = calloc(1, sizeof(string_t)); */
   free(w1->str_word->value);
   w1->str_word->bufsize = len + 10;
   w1->str_word->length = len;
@@ -188,7 +188,7 @@ void cog_divide(value_t *v) {
   int len = snprintf(NULL, 0, "%f", z);
   char *result = malloc(len + 10);
   snprintf(result, len, "%f", z);
-  string_t *s = calloc(1, sizeof(string_t));
+  /* string_t *s = calloc(1, sizeof(string_t)); */
   free(w1->str_word->value);
   w1->str_word->bufsize = len + 10;
   w1->str_word->length = len;
@@ -236,7 +236,7 @@ void cog_subtract(value_t *v) {
   int len = snprintf(NULL, 0, "%f", z);
   char *result = malloc(len + 10);
   snprintf(result, len, "%f", z);
-  string_t *s = calloc(1, sizeof(string_t));
+  /* string_t *s = calloc(1, sizeof(string_t)); */
   free(w1->str_word->value);
   w1->str_word->bufsize = len + 10;
   w1->str_word->length = len;
@@ -268,7 +268,7 @@ void cog_exp(value_t *v) {
   int len = snprintf(NULL, 0, "%f", x);
   char *result = malloc(len + 10);
   snprintf(result, len, "%f", x);
-  string_t *s = calloc(1, sizeof(string_t));
+  /* string_t *s = calloc(1, sizeof(string_t)); */
   free(w1->str_word->value);
   w1->str_word->bufsize = len + 10;
   w1->str_word->length = len;
@@ -299,7 +299,7 @@ void cog_sin(value_t *v) {
   int len = snprintf(NULL, 0, "%f", x);
   char *result = malloc(len + 10);
   snprintf(result, len, "%f", x);
-  string_t *s = calloc(1, sizeof(string_t));
+  /* string_t *s = calloc(1, sizeof(string_t)); */
   free(w1->str_word->value);
   w1->str_word->bufsize = len + 10;
   w1->str_word->length = len;
@@ -330,7 +330,7 @@ void cog_cos(value_t *v) {
   int len = snprintf(NULL, 0, "%f", x);
   char *result = malloc(len + 10);
   snprintf(result, len, "%f", x);
-  string_t *s = calloc(1, sizeof(string_t));
+  /* string_t *s = calloc(1, sizeof(string_t)); */
   free(w1->str_word->value);
   w1->str_word->bufsize = len + 10;
   w1->str_word->length = len;
@@ -361,7 +361,7 @@ void cog_floor(value_t *v) {
   int len = snprintf(NULL, 0, "%f", x);
   char *result = malloc(len + 10);
   snprintf(result, len, "%f", x);
-  string_t *s = calloc(1, sizeof(string_t));
+  /* string_t *s = calloc(1, sizeof(string_t)); */
   free(w1->str_word->value);
   w1->str_word->bufsize = len + 10;
   w1->str_word->length = len;
@@ -392,7 +392,7 @@ void cog_ceil(value_t *v) {
   int len = snprintf(NULL, 0, "%f", x);
   char *result = malloc(len + 10);
   snprintf(result, len, "%f", x);
-  string_t *s = calloc(1, sizeof(string_t));
+  /* string_t *s = calloc(1, sizeof(string_t)); */
   free(w1->str_word->value);
   w1->str_word->bufsize = len + 10;
   w1->str_word->length = len;
@@ -423,7 +423,7 @@ void cog_ln(value_t *v) {
   int len = snprintf(NULL, 0, "%f", x);
   char *result = malloc(len + 10);
   snprintf(result, len, "%f", x);
-  string_t *s = calloc(1, sizeof(string_t));
+  /* string_t *s = calloc(1, sizeof(string_t)); */
   free(w1->str_word->value);
   w1->str_word->bufsize = len + 10;
   w1->str_word->length = len;
@@ -454,7 +454,38 @@ void cog_neg(value_t *v) {
   int len = snprintf(NULL, 0, "%f", x);
   char *result = malloc(len + 10);
   snprintf(result, len, "%f", x);
-  string_t *s = calloc(1, sizeof(string_t));
+  /* string_t *s = calloc(1, sizeof(string_t)); */
+  free(w1->str_word->value);
+  w1->str_word->bufsize = len + 10;
+  w1->str_word->length = len;
+  w1->str_word->value = result;
+  stack_push(stack, v1);
+}
+
+void cog_int(value_t *v) {
+  contain_t *cur = stack_peek(STACK);
+  stack_t *stack = cur->stack;
+  if (stack->size < 1) {
+    eval_error("TOO FEW ARGUMENTS", v);
+    return;
+  }
+  value_t *v1 = stack_pop(stack);
+  if (value_stack(v1)[0]->size != 1) {
+    eval_error("BAD ARGUMENT TYPE", v);
+    stack_push(stack, v1);
+    return;
+  }
+  value_t *w1 = value_stack(v1)[0]->items[0];
+  if (w1->type != VWORD) {
+    eval_error("BAD ARGUMENT TYPE", v);
+    stack_push(stack, v1);
+    return;
+  }
+  int x = (int) atof(w1->str_word->value);
+  int len = (int)((ceil(log10(x))+1)*sizeof(char));
+  char *result = malloc(len + 10);
+  snprintf(result, len, "%d", x);
+  /* string_t *s = calloc(1, sizeof(string_t)); */
   free(w1->str_word->value);
   w1->str_word->bufsize = len + 10;
   w1->str_word->length = len;
@@ -567,4 +598,5 @@ void add_funcs_math(ht_t *flit) {
   add_func(flit, cog_ln, "ln");
   add_func(flit, cog_sin, "sin");
   add_func(flit, cog_exp, "exp");
+  add_func(flit, cog_int, "int");
 }
