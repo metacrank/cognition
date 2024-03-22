@@ -391,7 +391,7 @@ void cog_crankbase(value_t *v) {
   else str->bufsize = 2;
   str->value = calloc(str->bufsize, sizeof(char));
   sprintf(str->value, "%d", base);
-  str->length = strlen(str->value);
+  str->length = string_len(str->value);
   push_quoted(cur, v1);
 }
 
@@ -413,7 +413,7 @@ void cog_modcrank(value_t *v) {
   else str->bufsize = 2;
   str->value = calloc(str->bufsize, sizeof(char));
   sprintf(str->value, "%d", mod);
-  str->length = strlen(str->value);
+  str->length = string_len(str->value);
   push_quoted(cur, v1);
 }
 

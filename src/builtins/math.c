@@ -526,7 +526,7 @@ void cog_equals(value_t *v) {
     stack_push(stack, v2);
     return;
   }
-  if (strcmp(w1->str_word->value, w2->str_word->value) == 0) {
+  if (string_comp(w1->str_word->value, w2->str_word->value) == 0) {
     w1->str_word->length = 1;
     w1->str_word->value[0] = 't';
     w1->str_word->value[1] = '\0';
@@ -571,7 +571,7 @@ void cog_nequals(value_t *v) {
     stack_push(stack, v2);
     return;
   }
-  if (strcmp(w1->str_word->value, w2->str_word->value) != 0) {
+  if (string_comp(w1->str_word->value, w2->str_word->value) != 0) {
     w1->str_word->length = 1;
     w1->str_word->value[0] = 't';
     w1->str_word->value[1] = '\0';

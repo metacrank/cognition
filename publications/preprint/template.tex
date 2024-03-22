@@ -133,6 +133,8 @@ Metastack operations extend the definition of Forth quotes, attaching a hash tab
 a complete cognition environment to quotes, making them self similar to the original environment. This is important for
 implementing scope, containerization, and self-simulation. This allows Cognition to be used as a permission system in a
 Cognition-centric virtual machine or operating system in the future.
+
+Otherwise, Cognition is much like the programming language forth, with a stack-based postfix programming environment.
 \subsection{Parser Design}
 The parser is designed to make public the specifics of how characters are parsed into tokens by delimiter rules,
 and by a few other constructs called \emph{ignores} and \emph{singlets}. Ignores allow the parser to ignore a list
@@ -145,9 +147,25 @@ When the parser hits a delimiter, the parser stops and the token gets packaged, 
 a singlet, the parser skips the singlet character. This enables a wide range of source file text manipulation.
 If characters were not ignored, at least one character must be parsed into a word, and if not, a word containing
 no characters can be created with singlets.
+
+By default, the parser starts with.
+\subsection{Falias Design}
+Force aliases, or faliases for short, are a list of special tokens that evaluate the top word on the stack unconditionally
+when tokenized. One can change the list of faliases and one can even make the list empty, effectively removing the falias
+functionality.
+
 \subsection{Metacrank Design}
+The metacranker is a cyclic automatic word evaluation system, where \emph{cranking} refers to metacranking the first
+element on the stack, meaning that the top element of the stack executes once every \emph{n} words executed. \emph{Metacranking}
+refers to the mth element down the current stack executing once every \emph{n} words executed. There can only be one word
+executed every crank, although all metacrank positions are incremented every cycle. Therefore, the top of the stack executes
+first, and the highest metacrank has the lowest priority, executing only if every other crank above doesn't execute.
+
+The metacrank default is set to zero, which you can take to represent an infinite crank cycle (it doesn't make sense to talk
+about a zero metacrank base otherwise). In this state, the only way one can execute words is using the \emph{falias} system.
+However, one can quickly set a crank and get into a comfortable environment without having to use faliases.
 \subsection{Metastack Design}
-\subsection{Builtins}
+\subsection{Builtins and the FLIT}
 
 This line shows how to use a footnote to further explain or cite text\footnote{Example footnote text.}.
 

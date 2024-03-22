@@ -56,7 +56,7 @@ struct VALUE_STRUCT {
  * returns a value until it reaches EOF or end of string. */
 typedef struct PARSER_STRUCT {
   /*! @brief The string that contains valid stem code. */
-  char *source;
+  byte_t *source;
   /*! @brief Index of current character */
   int i;
   /*! @brief The current character */
@@ -140,7 +140,7 @@ struct CONTAINER_STRUCT {
 void func_free(void *f);
 
 /* push error to error stack */
-void eval_error(char *s, value_t *w);
+void eval_error(byte_t *s, value_t *w);
 
 /*! Allocates memory for new stack */
 stack_t *init_stack(size_t size);
@@ -206,16 +206,16 @@ custom_t *init_custom(void (*)(void *), void (*)(void *), void *(*)(void *));
 void custom_free(void *);
 
 /*! Adds function to FLIT. */
-void add_func(ht_t *h, void (*func)(/*value_t **/), char *key);
+void add_func(ht_t *h, void (*func)(/*value_t **/), byte_t *key);
 
 /* Adds function stack to FLIT */
-void add_macro(ht_t *h, stack_t *macro, char *key);
+void add_macro(ht_t *h, stack_t *macro, byte_t *key);
 
 /*! Adds object functions to OBJ_TABLE and adds constructor for custom type to
  * FLIT. */
 void add_obj(ht_t *h, ht_t *h2, void (*printfunc)(void *),
              void (*freefunc)(void *), void *(*copyfunc)(void *),
-             void (*createfunc)(void *), char *key);
+             void (*createfunc)(void *), byte_t *key);
 
 /*! Allocates memory for new container */
 contain_t *init_contain(ht_t *h, ht_t *flit, stack_t *cranks);
@@ -233,7 +233,7 @@ void contain_free(void *con);
 void *falias_copy(void *f);
 
 /*! Allocates memory for new parser */
-parser_t *init_parser(char *source);
+parser_t *init_parser(byte_t *source);
 
 void parser_move(parser_t *p);
 
@@ -241,7 +241,7 @@ void parser_move(parser_t *p);
 /* parser_t *parser_pp(char *s); */
 
 /*! Resets state of parser */
-void parser_reset(parser_t *p, char *source);
+void parser_reset(parser_t *p, byte_t *source);
 
 /* gets the next word */
 value_t *parse_word(parser_t *p, bool skipped);
@@ -253,13 +253,13 @@ bool parser_skip_ignore(parser_t *p);
 value_t *parser_get_next(parser_t *p);
 
 /* returns true if p is a singlet character */
-bool issinglet(char c);
+bool issinglet(byte_t c);
 
 /* returns true if p is an ignored character */
-bool isignore(char c);
+bool isignore(byte_t c);
 
 /* returns true if p is a delimiter character */
-bool isdelim(char c);
+bool isdelim(byte_t c);
 
 /*! Allocates memory for new node struct. */
 node_t *init_node(string_t *key, void *v);
@@ -315,7 +315,7 @@ ht_t *ht_copy(ht_t *h, void *(*copyfunc)(void *));
 void ht_free(ht_t *h, void (*freefunc)(void *));
 
 /*! hashes key into integer for hash table */
-unsigned long hash(ht_t *h, char *key);
+unsigned long hash(ht_t *h, byte_t *key);
 
 /* checks if a value_t is an falias in a container */
 bool isfaliasin(contain_t *c, value_t *v);

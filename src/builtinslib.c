@@ -1,6 +1,6 @@
 #include <builtinslib.h>
-#include <macros.h>
 #include <ctype.h>
+#include <macros.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -34,7 +34,8 @@ stack_t **value_stack(value_t *v) {
     return &v->container->stack;
   else if (v->type == VMACRO)
     return &v->macro;
-  else die("BAD VALUE ON STACK");
+  else
+    die("BAD VALUE ON STACK");
   return NULL;
 }
 
@@ -55,7 +56,8 @@ void contain_copy_attributes(contain_t *c, contain_t *newc) {
 }
 
 void print_str_formatted(string_t *string) {
-  if (!string) return;
+  if (!string)
+    return;
   for (int i = 0; i < string->length; i++) {
     if (string->value[i] == '\n') {
       printf("\\n");
@@ -67,37 +69,38 @@ void print_str_formatted(string_t *string) {
   }
 }
 
-void print_value(value_t *v, const char *end) {
+void print_value(value_t *v, byte_t *end) {
   custom_t *c;
   switch (v->type) {
-    case VWORD:
-      printf("'");
-      print_str_formatted(v->str_word);
-      printf("'");
-      break;
-    case VSTACK:
-      printf("[ ");
-      for (int i = 0; i < v->container->stack->size; i++) {
-        print_value(v->container->stack->items[i], " ");
-      }
-      printf("]");
-      break;
-    case VMACRO:
-      printf("( ");
-      for (int i = 0; i < v->macro->size; i++) {
-        print_value(v->macro->items[i], " ");
-      }
-      printf(")");
-      break;
-    case VERR:
-      printf("'%s':%s%s%s", v->error->str_word->value, RED, v->error->error->value, COLOR_RESET);
-      break;
-    case VCUSTOM:
-      c = ht_get(OBJ_TABLE, v->str_word);
-      c->printfunc(v->custom);
-      break;
-    case VCLIB:
-      printf("CLIB_FUNC");
+  case VWORD:
+    printf("'");
+    print_str_formatted(v->str_word);
+    printf("'");
+    break;
+  case VSTACK:
+    printf("[ ");
+    for (int i = 0; i < v->container->stack->size; i++) {
+      print_value(v->container->stack->items[i], (unsigned char *)" ");
+    }
+    printf("]");
+    break;
+  case VMACRO:
+    printf("( ");
+    for (int i = 0; i < v->macro->size; i++) {
+      print_value(v->macro->items[i], (unsigned char *)" ");
+    }
+    printf(")");
+    break;
+  case VERR:
+    printf("'%s':%s%s%s", v->error->str_word->value, RED,
+           v->error->error->value, COLOR_RESET);
+    break;
+  case VCUSTOM:
+    c = ht_get(OBJ_TABLE, v->str_word);
+    c->printfunc(v->custom);
+    break;
+  case VCLIB:
+    printf("CLIB_FUNC");
   }
   printf("%s", end);
 }
@@ -121,7 +124,7 @@ char *get_line(FILE *f) {
   return ret;
 }
 
-void nop(void *v) { }
+void nop(void *v) {}
 
 void value_free_safe(void *vtmp) {
   if (vtmp == NULL)
@@ -149,9 +152,11 @@ void value_free_safe(void *vtmp) {
 }
 
 void contain_def_stack_push(void *c) {
-  if (c) stack_push(CONTAIN_DEF_STACK, c);
+  if (c)
+    stack_push(CONTAIN_DEF_STACK, c);
 }
 
 void macro_def_stack_push(void *m) {
-  if (m) stack_push(MACRO_DEF_STACK, m);
+  if (m)
+    stack_push(MACRO_DEF_STACK, m);
 }

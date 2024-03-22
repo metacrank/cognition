@@ -1,8 +1,10 @@
+#include "better_string.h"
 #include <builtins.h>
 #include <builtinslib.h>
 #include <cognition.h>
-#include <macros.h>
 #include <dlfcn.h>
+#include <locale.h>
+#include <macros.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -33,8 +35,8 @@ void version() {
 void print_end() {
   printf("\n");
   if (STACK == NULL) {
-      printf("Exit code: '%s'\n", EXIT_CODE->value);
-      //printf("Exit code: '%s' (called exit)\n", EXIT_CODE->value);
+    printf("Exit code: '%s'\n", EXIT_CODE->value);
+    // printf("Exit code: '%s' (called exit)\n", EXIT_CODE->value);
     return;
   }
   printf("Stack at end:\n");
@@ -50,19 +52,32 @@ void print_end() {
       print_value(error_stack->items[i], "\n");
     }
   }
+  if (cur->faliases) {
+    printf("\n");
+    printf("Faliases: ");
+    for (int i = 0; i < cur->faliases->size; i++) {
+      printf("%s", (byte_t *)cur->faliases->items[i]);
+    }
+  }
   printf("\n");
   printf("delims: '");
   print_str_formatted(cur->delims);
-  if (cur->dflag) printf("' (whitelist)\n");
-  else printf("' (blacklist)\n");
+  if (cur->dflag)
+    printf("' (whitelist)\n");
+  else
+    printf("' (blacklist)\n");
   printf("ignored: '");
   print_str_formatted(cur->ignored);
-  if (cur->iflag) printf("' (whitelist)\n");
-  else printf("' (blacklist)\n");
+  if (cur->iflag)
+    printf("' (whitelist)\n");
+  else
+    printf("' (blacklist)\n");
   printf("singlets: '");
   print_str_formatted(cur->singlets);
-  if (cur->sflag) printf("' (whitelist)\n");
-  else printf("' (blacklist)\n");
+  if (cur->sflag)
+    printf("' (whitelist)\n");
+  else
+    printf("' (blacklist)\n");
 
   if (cur->cranks) {
     if (cur->cranks->size) {
@@ -72,12 +87,15 @@ void print_end() {
         printf(" %d:(%d,%d)", i, cr[0][0], cr[0][1]);
       }
       printf("\n");
-    } else printf("crank 0\n");
-  } else printf("null crank\n");
+    } else
+      printf("crank 0\n");
+  } else
+    printf("null crank\n");
   if (EXIT_CODE)
     printf("\nExit code: '%s'\n", EXIT_CODE->value);
-  //else printf("\nExit code: ''\n");
-  else printf("\nExit code: (none)\n");
+  // else printf("\nExit code: ''\n");
+  else
+    printf("\nExit code: (none)\n");
 }
 
 /*! frees all global variables */
@@ -99,8 +117,7 @@ void global_free() {
 int main(int argc, char **argv) {
   value_t *v;
   size_t len = 0;
-  char *buf = "";
-
+  char *locale = setlocale(LC_ALL, "");
   /* Parsing arguments */
   if (argc < 2) {
     usage(1);
@@ -128,7 +145,8 @@ int main(int argc, char **argv) {
         break;
       }
       args.q = true;
-    } else if (strcmp(argv[i], "-v") == 0 || strcmp(argv[i], "--version") == 0) {
+    } else if (strcmp(argv[i], "-v") == 0 ||
+               strcmp(argv[i], "--version") == 0) {
       if (args.v) {
         usage(1);
         break;
@@ -159,20 +177,26 @@ int main(int argc, char **argv) {
     usage(1);
   }
 
-  ssize_t bytes_read = getdelim(&buf, &len, '\0', FP);
+  string_t *buffer = init_string(NULL);
+  int character;
+  character = fgetc(FP);
+  while ((character = fgetc(FP)) != EOF) {
+    string_append(buffer, (unsigned char)character);
+    printf("%s\n", buffer->value);
+  }
   fclose(FP);
-
   /* Set up global variables */
-  PARSER = init_parser(buf);
+  PARSER = init_parser(buffer->value);
+  free(buffer);
   STACK = init_stack(DEFAULT_STACK_SIZE);
   EVAL_STACK = init_stack(DEFAULT_STACK_SIZE);
   OBJ_TABLE = init_ht(DEFAULT_STACK_SIZE);
   EXIT_CODE = NULL;
 
   /* initialise environment */
-  contain_t *stack = init_contain(init_ht(DEFAULT_HT_SIZE),
-                                  init_ht(DEFAULT_HT_SIZE),
-                                  init_stack(DEFAULT_STACK_SIZE));
+  contain_t *stack =
+      init_contain(init_ht(DEFAULT_HT_SIZE), init_ht(DEFAULT_HT_SIZE),
+                   init_stack(DEFAULT_STACK_SIZE));
   stack->faliases = init_stack(DEFAULT_STACK_SIZE);
   stack_push(stack->faliases, init_string("f"));
   add_funcs(stack->flit);

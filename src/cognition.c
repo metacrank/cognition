@@ -21,7 +21,7 @@ string_t *EXIT_CODE;
 
 void func_free(void *f) {}
 
-void eval_error(char *s, value_t *w) {
+void eval_error(byte_t *s, value_t *w) {
   value_t *v = init_value(VERR);
   v->error = calloc(1, sizeof(error_t));
   if (w)
@@ -242,7 +242,7 @@ custom_t *init_custom(void (*printfunc)(void *), void (*freefunc)(void *),
 
 void custom_free(void *c) { free(c); }
 
-void add_func(ht_t *h, void (*func)(value_t *), char *key) {
+void add_func(ht_t *h, void (*func)(value_t *), byte_t *key) {
   stack_t *macro = init_stack(1);
   value_t *v = init_value(VCLIB);
   v->str_word = init_string(key);
@@ -251,13 +251,13 @@ void add_func(ht_t *h, void (*func)(value_t *), char *key) {
   ht_add(h, init_string(key), macro, value_stack_free);
 }
 
-void add_macro(ht_t *h, stack_t *macro, char *key) {
+void add_macro(ht_t *h, stack_t *macro, byte_t *key) {
   ht_add(h, init_string(key), macro, value_stack_free);
 }
 
 void add_obj(ht_t *h, ht_t *h2, void (*printfunc)(void *),
              void (*freefunc)(void *), void *(*copyfunc)(void *),
-             void (*createfunc)(void *), char *key) {
+             void (*createfunc)(void *), byte_t *key) {
 
   custom_t *c = init_custom(printfunc, freefunc, copyfunc);
   ht_add(h, init_string(key), c, custom_free);
@@ -322,7 +322,7 @@ contain_t *contain_copy(contain_t *c, void *(*copyfunc)(void *)) {
   return contain;
 }
 
-parser_t *init_parser(char *source) {
+parser_t *init_parser(byte_t *source) {
   parser_t *p = calloc(1, sizeof(parser_t));
   if (!p)
     die("calloc on parser");
@@ -332,14 +332,14 @@ parser_t *init_parser(char *source) {
   return p;
 }
 
-void parser_reset(parser_t *p, char *source) {
+void parser_reset(parser_t *p, byte_t *source) {
   p->source = source;
   p->i = 0;
   p->c = source[0];
 }
 
 void parser_move(parser_t *p) {
-  if (p->i < strlen(p->source) && p->c != '\0') {
+  if (p->i < string_len(p->source) && p->c != '\0') {
     p->i++;
     p->c = p->source[p->i];
   }
@@ -369,7 +369,7 @@ value_t *parse_word(parser_t *p, bool skipped) {
   return retval;
 }
 
-bool issinglet(char c) {
+bool issinglet(byte_t c) {
   contain_t *cur = stack_peek(STACK);
   if (cur->sflag) {
     if (cur->singlets == NULL)
@@ -391,7 +391,7 @@ bool issinglet(char c) {
   return true;
 }
 
-bool isignore(char c) {
+bool isignore(byte_t c) {
   contain_t *cur = stack_peek(STACK);
   if (cur->iflag) {
     if (cur->ignored == NULL)
@@ -413,7 +413,7 @@ bool isignore(char c) {
   return true;
 }
 
-bool isdelim(char c) {
+bool isdelim(byte_t c) {
   contain_t *cur = stack_peek(STACK);
   if (cur->dflag) {
     if (cur->delims == NULL)
@@ -497,7 +497,7 @@ void sll_add(sll_t *l, string_t *s, void *v, void (*freefunc)(void *)) {
   }
   node_t *cur = l->head;
   while (cur->next != NULL) {
-    if (strcmp(s->value, cur->key->value) == 0) {
+    if (string_comp(s->value, cur->key->value) == 0) {
       freefunc(cur->value);
       string_free(s);
       cur->value = v;
@@ -505,7 +505,7 @@ void sll_add(sll_t *l, string_t *s, void *v, void (*freefunc)(void *)) {
     }
     cur = cur->next;
   }
-  if (strcmp(s->value, cur->key->value) == 0) {
+  if (string_comp(s->value, cur->key->value) == 0) {
     freefunc(cur->value);
     string_free(s);
     cur->value = v;
@@ -520,7 +520,7 @@ void *sll_get(sll_t *l, string_t *k) {
     return NULL;
   node_t *cur = l->head;
   while (cur != NULL) {
-    if (strcmp(k->value, cur->key->value) == 0)
+    if (string_comp(k->value, cur->key->value) == 0)
       return cur->value;
     cur = cur->next;
   }
@@ -532,13 +532,13 @@ void sll_delete(sll_t *l, string_t *k, void (*freefunc)(void *)) {
   node_t *tmp;
   if (cur == NULL)
     return;
-  if (strcmp(cur->key->value, k->value) == 0) {
+  if (string_comp(cur->key->value, k->value) == 0) {
     node_free(cur, freefunc);
     l->head = NULL;
     return;
   }
   while (cur->next != NULL) {
-    if (strcmp(cur->next->key->value, k->value) == 0) {
+    if (string_comp(cur->next->key->value, k->value) == 0) {
       tmp = cur->next->next;
       node_free(cur->next, freefunc);
       cur->next = tmp;
@@ -630,7 +630,7 @@ bool ht_exists(ht_t *h, string_t *key) {
   if (l->head == NULL) return false;
   node_t *cur = l->head;
   while (cur != NULL) {
-    if (strcmp(key->value, cur->key->value) == 0) return true;
+    if (string_comp(key->value, cur->key->value) == 0) return true;
     cur = cur->next;
   }
   return false;
@@ -655,7 +655,7 @@ void ht_free(ht_t *h, void (*func)(void *)) {
 }
 
 /* DJB2 HASH FUNCTION */
-unsigned long hash(ht_t *h, char *key) {
+unsigned long hash(ht_t *h, byte_t *key) {
   unsigned long hash = 5381;
   int c;
 
@@ -698,7 +698,7 @@ bool isfaliasin(contain_t *c, value_t *v) {
   if (c->faliases) {
     for (int i = 0; i < c->faliases->size; i++) {
       falias = c->faliases->items[i];
-      if (strcmp(falias->value, v->str_word->value) == 0)
+      if (string_comp(falias->value, v->str_word->value) == 0)
         return true;
     }
     return false;

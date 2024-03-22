@@ -7,7 +7,7 @@ TARGET := crank
 SRCEXT := c
 SOURCES := $(shell find $(SRCDIR) $(BUILTINS_SRCDIR) -type f -name *.$(SRCEXT))
 OBJECTS := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.o))
-CFLAGS := -fpic
+CFLAGS := -fpic -std=c11
 LIB := -L lib -lm
 INC := -I include
 DESTDIR := /usr/local/bin/
