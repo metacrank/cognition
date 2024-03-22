@@ -139,6 +139,11 @@ struct CONTAINER_STRUCT {
  */
 void func_free(void *f);
 
+
+//for debugging
+void print_crank(char prefix[]);
+
+
 /* push error to error stack */
 void eval_error(byte_t *s, value_t *w);
 
