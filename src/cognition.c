@@ -925,6 +925,7 @@ void evalmacro(stack_t *macro, value_t *word, stack_t *family, bool isdefinition
   value_t *v;
   for (int i = 0; i < macro->size; i++) {
     contain_t *cur = stack_peek(STACK);
+    family->items[0] = cur;
     v = macro->items[i];
     switch (v->type) {
       case VCLIB:
