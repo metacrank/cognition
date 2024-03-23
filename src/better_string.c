@@ -34,7 +34,7 @@ byte_t *utf8cpy(byte_t *dst, byte_t *src, size_t sizeDest) {
   return dst;
 }
 
-bool string_comp(byte_t *u1, byte_t *u2) {
+bool string_comp(void *u1, void *u2) {
   return strcmp(u1, u2);
   if (string_len(u1) != string_len(u2)) return true;
   for (int i = 0; i < string_len(u1); i ++) {
@@ -43,7 +43,7 @@ bool string_comp(byte_t *u1, byte_t *u2) {
   return false;
 }
 
-string_t *init_string(byte_t *s) {
+string_t *init_string(void *s) {
   string_t *str = malloc(sizeof(string_t));
   if (str == NULL)
     die("malloc in init_string");

@@ -20,10 +20,10 @@ size_t string_len(byte_t *str);
 
 byte_t *utf8cpy(byte_t *dst, byte_t *src, size_t sizeDest);
 
-bool string_comp(byte_t *u1, byte_t *u2);
+bool string_comp(void *u1, void *u2);
 
 /*! Allocates memory for new string */
-string_t *init_string(byte_t *value);
+string_t *init_string(void *value);
 
 /*! Copies string to another string */
 string_t *string_copy(string_t *s);
