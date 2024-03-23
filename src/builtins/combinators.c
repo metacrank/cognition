@@ -206,6 +206,7 @@ void cog_sub(value_t *v) {
   v1->container = init_contain(NULL, init_ht(DEFAULT_HT_SIZE), NULL);
   v1->container->faliases = init_stack(DEFAULT_STACK_SIZE);
   stack_push(v1->container->faliases, init_string("f"));
+  stack_push(v1->container->faliases, init_string("ing"));
   add_funcs(v1->container->flit);
   stack_push(cur->stack, v1);
 }
