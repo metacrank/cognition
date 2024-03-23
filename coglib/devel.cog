@@ -1,0 +1,31 @@
+ldfgldftgldfdtgl
+df 
+ 
+dfiff1 crank ing
+
+
+getd dup _ concat _ swap d i 
+_quote_swap_quote_compose_swap_dup_d_i eval
+spc swap quote def
+endl swap quote def
+
+space 2 crank print unglue spc unglue 1 crank prepose def
+newline 2 crank print unglue endl unglue 1 crank prepose def
+
+ff 1 cut unaliasf 0 cut swap quote def
+
+addon 2 crank unglue unglue compose unglue 1 crank compose def
+push 2 crank quote unglue compose addon 1 crank def
+curry 2 crank swap unglue quote addon prepose addon 1 crank def
+
+# dup gets concat s dup getd concat d
+2 crank geti unglue getd addon gets addon crankbase addon
+f eval d f i endl s unglue
+1 crank curry swap unglue prepose curry swap unglue prepose curry compose
+2 crank drop unglue crank addon 1 push 0 push metacrank addon s addon d addon i addon
+1 crank push
+2 crank halt addon 1 push 1 push metacrank addon
+1 crank def
+
+# this is a comment
+#demonstration of singlets in action!

@@ -41,7 +41,7 @@ newline
 help space me!newline
 
 getd geti getd _ concat _ swap d i_
-_dsc_quote_swap_quote_compose_dip_d_i
+_drop_quote_swap_quote_compose_dip_d_i
 2 crank false swap 1 crank 
 quote def
 
@@ -56,7 +56,7 @@ false swap compose compose compose compose
 2 crank
 1 quote crank compose 1 quote 0 quote metacrank compose
 1 crank compose compose
-2 crank dsc compose s compose d compose i compose
+2 crank drop compose s compose d compose i compose
 1 crank
 quote compose
 2 crank
@@ -67,31 +67,8 @@ def
 
 # this is a comment
 
-# code for printing delim/ignore/singlet characters:
-2 crank - dup 1 crank print
-getd print dup print geti print dup print gets print print newline newline
-#2 crank - dup 1 crank print
-#getd print dup print geti print dup print gets print print newline newline
-
 # Wow, comments are the best invention ever made
 
-
-#okay i'm going to write some actual code
-4 crank ! # 1 crank s undelim
-5 crank Hello, World! print 1 crank
-#comments still work
-dip space print newline
-
-
-<<<<<<< HEAD
-
-2 crank a nop Hello, nop print compose space compose World compose print compose ! compose 1 crank def
-a a a a
-=======
-2 crank a nop
-Hello, nop print compose space compose World compose print compose ! compose newline compose 1 crank def
-a
->>>>>>> 0415857505412015d6b8a1ba7737b1a62bb9c55b
 
 # implementing quotes [
 # [ === [ 1 0 metacrank eval 1 crank dup ']' = [ dsc nip ] [ dup '[' =  [ eval quote compose ] [ compose over ] if ] if ] [ ]
@@ -120,5 +97,5 @@ def
 
 #[ hello world ]
 
-
+2 crank # unglue 1 crank
 

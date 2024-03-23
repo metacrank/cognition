@@ -15,7 +15,7 @@ void cog_clear(value_t *v) {
   }
 }
 
-void cog_dsc(value_t *v) {
+void cog_drop(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   stack_t *stack = cur->stack;
   value_t *v1 = stack_pop(stack);
@@ -75,7 +75,7 @@ void cog_ssize(value_t *v) {
 void add_funcs_stackops(ht_t* flit) {
   add_func(flit, cog_nop, "nop");
   add_func(flit, cog_clear, "clear");
-  add_func(flit, cog_dsc, "dsc");
+  add_func(flit, cog_drop, "drop");
   add_func(flit, cog_swap, "swap");
   add_func(flit, cog_dup, "dup");
   /* add_func(flit, cog_copy, "copy"); */

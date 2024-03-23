@@ -60,13 +60,11 @@ void cog_metacrank(value_t *v) {
   stack_t *cranks = cur->cranks;
   int v1val = atoi(v1->str_word->value);
   int v2val = atoi(v2->str_word->value);
-  if (v1val >= cranks->size) {
-    for (int _ = 0; _ < v1val - cranks->size + 1; _++) {
-      int(*arr)[2] = malloc(sizeof(int[2]));
-      arr[0][0] = 0;
-      arr[0][1] = 0;
-      stack_push(cranks, arr);
-    }
+  while (cranks->size <= v1val) {
+    int(*arr)[2] = malloc(sizeof(int[2]));
+    arr[0][0] = 0;
+    arr[0][1] = 0;
+    stack_push(cranks, arr);
   }
   int(*cr)[2] = cranks->items[v1val];
   cr[0][0] = 0;
