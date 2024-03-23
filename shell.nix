@@ -8,6 +8,8 @@ pkgs.mkShellNoCC {
     doxygen
     nano
     gdb
+    git
+    glibc
   ];
 }
 
