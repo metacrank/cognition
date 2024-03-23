@@ -20,7 +20,7 @@ size_t string_len(byte_t *str);
 
 byte_t *utf8cpy(byte_t *dst, byte_t *src, size_t sizeDest);
 
-bool string_comp(void *u1, void *u2);
+bool string_comp(string_t *s1, string_t *s2);
 
 /*! Allocates memory for new string */
 string_t *init_string(void *value);

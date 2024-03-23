@@ -38,7 +38,7 @@ void print_crank(char prefix[]) {
 
 void func_free(void *f) {}
 
-void eval_error(byte_t *s, value_t *w) {
+void eval_error(void *s, value_t *w) {
   value_t *v = init_value(VERR);
   v->error = calloc(1, sizeof(error_t));
   if (w)
@@ -259,7 +259,7 @@ custom_t *init_custom(void (*printfunc)(void *), void (*freefunc)(void *),
 
 void custom_free(void *c) { free(c); }
 
-void add_func(ht_t *h, void (*func)(value_t *), byte_t *key) {
+void add_func(ht_t *h, void (*func)(value_t *), void *key) {
   stack_t *macro = init_stack(1);
   value_t *v = init_value(VCLIB);
   v->str_word = init_string(key);
@@ -512,7 +512,7 @@ void sll_add(sll_t *l, string_t *s, void *v, void (*freefunc)(void *)) {
   }
   node_t *cur = l->head;
   while (cur->next != NULL) {
-    if (string_comp(s->value, cur->key->value) == 0) {
+    if (string_comp(s, cur->key) == 0) {
       freefunc(cur->value);
       string_free(s);
       cur->value = v;
@@ -520,7 +520,7 @@ void sll_add(sll_t *l, string_t *s, void *v, void (*freefunc)(void *)) {
     }
     cur = cur->next;
   }
-  if (string_comp(s->value, cur->key->value) == 0) {
+  if (string_comp(s, cur->key) == 0) {
     freefunc(cur->value);
     string_free(s);
     cur->value = v;
@@ -535,7 +535,7 @@ void *sll_get(sll_t *l, string_t *k) {
     return NULL;
   node_t *cur = l->head;
   while (cur != NULL) {
-    if (string_comp(k->value, cur->key->value) == 0)
+    if (string_comp(k, cur->key) == 0)
       return cur->value;
     cur = cur->next;
   }
@@ -547,13 +547,13 @@ void sll_delete(sll_t *l, string_t *k, void (*freefunc)(void *)) {
   node_t *tmp;
   if (cur == NULL)
     return;
-  if (string_comp(cur->key->value, k->value) == 0) {
+  if (string_comp(cur->key, k) == 0) {
     node_free(cur, freefunc);
     l->head = NULL;
     return;
   }
   while (cur->next != NULL) {
-    if (string_comp(cur->next->key->value, k->value) == 0) {
+    if (string_comp(cur->next->key, k) == 0) {
       tmp = cur->next->next;
       node_free(cur->next, freefunc);
       cur->next = tmp;
@@ -645,7 +645,7 @@ bool ht_exists(ht_t *h, string_t *key) {
   if (l->head == NULL) return false;
   node_t *cur = l->head;
   while (cur != NULL) {
-    if (string_comp(key->value, cur->key->value) == 0) return true;
+    if (string_comp(key, cur->key) == 0) return true;
     cur = cur->next;
   }
   return false;
@@ -713,7 +713,7 @@ bool isfaliasin(contain_t *c, value_t *v) {
   if (c->faliases) {
     for (int i = 0; i < c->faliases->size; i++) {
       falias = c->faliases->items[i];
-      if (string_comp(falias->value, v->str_word->value) == 0)
+      if (string_comp(falias, v->str_word) == 0)
         return true;
     }
     return false;

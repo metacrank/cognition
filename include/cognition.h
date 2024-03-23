@@ -145,7 +145,7 @@ void print_crank(char prefix[]);
 
 
 /* push error to error stack */
-void eval_error(byte_t *s, value_t *w);
+void eval_error(void *s, value_t *w);
 
 /*! Allocates memory for new stack */
 stack_t *init_stack(size_t size);
@@ -211,7 +211,7 @@ custom_t *init_custom(void (*)(void *), void (*)(void *), void *(*)(void *));
 void custom_free(void *);
 
 /*! Adds function to FLIT. */
-void add_func(ht_t *h, void (*func)(/*value_t **/), byte_t *key);
+void add_func(ht_t *h, void (*func)(value_t *), void *key);
 
 /* Adds function stack to FLIT */
 void add_macro(ht_t *h, stack_t *macro, byte_t *key);

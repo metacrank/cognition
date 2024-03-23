@@ -69,7 +69,8 @@ void print_str_formatted(string_t *string) {
   }
 }
 
-void print_value(value_t *v, byte_t *end) {
+void print_value(value_t *v, void *e) {
+  byte_t *end = e;
   custom_t *c;
   switch (v->type) {
   case VWORD:

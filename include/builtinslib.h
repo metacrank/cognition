@@ -14,7 +14,7 @@ void contain_copy_attributes(contain_t *c, contain_t *newc);
 
 void print_str_formatted(string_t *string);
 
-void print_value(value_t *v, byte_t *end);
+void print_value(value_t *v, void *e);
 
 char *get_line(FILE *f);
 
