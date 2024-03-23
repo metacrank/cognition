@@ -179,10 +179,8 @@ int main(int argc, char **argv) {
 
   string_t *buffer = init_string(NULL);
   int character;
-  character = fgetc(FP);
   while ((character = fgetc(FP)) != EOF) {
     string_append(buffer, (unsigned char)character);
-    printf("%s\n", buffer->value);
   }
   fclose(FP);
   /* Set up global variables */
@@ -202,6 +200,8 @@ int main(int argc, char **argv) {
   stack_push(stack->faliases, init_string("ing"));
   add_funcs(stack->flit);
   stack_push(STACK, stack);
+
+
 
   /* parse and eval loop */
   while (1) {

@@ -29,8 +29,8 @@ void cog_stack(value_t *v);
 /* makes an empty child macro */
 void cog_macro(value_t *v);
 
-/* expands macro or stack based on word definitions */
-void cog_expand(value_t *v);
+/* /\* expands macro or stack based on word definitions *\/ */
+/* void cog_expand(value_t *v); */
 
 // >macro or 2macro: macro swap compose
 // >stack or 2stack: stack swap compose

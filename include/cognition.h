@@ -328,11 +328,11 @@ bool isfaliasin(contain_t *c, value_t *v);
 /* checks if a value_t is an falias */
 bool isfalias(value_t *v);
 
-/* expands a stack as much as possible (i.e. before def'ing it) */
-void expandstack(stack_t *s, stack_t *new, stack_t *family);
+/* /\* expands a stack as much as possible (i.e. before def'ing it) *\/ */
+/* void expandstack(stack_t *s, stack_t *new, stack_t *family); */
 
-/* similarly for a single word */
-bool expandword(value_t *v, stack_t *new, stack_t *family);
+/* /\* similarly for a single word *\/ */
+/* bool expandword(value_t *v, stack_t *new, stack_t *family); */
 
 /* crankless evaluation on the stack */
 void evalf();

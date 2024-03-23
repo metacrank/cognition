@@ -126,30 +126,30 @@ void cog_macro(value_t *v) {
   stack_push(cur->stack, v1);
 }
 
-void cog_expand(value_t *v) {
-  contain_t *cur = stack_peek(STACK);
-  value_t *v1 = stack_peek(cur->stack);
-  if (!v1) {
-    eval_error("TOO FEW ARGUMENTS", v);
-    return;
-  }
-  stack_t *family = init_stack(DEFAULT_STACK_SIZE);
-  stack_t *new = init_stack(DEFAULT_STACK_SIZE);
-  stack_push(family, cur);
-  if (v1->type == VSTACK) {
-    stack_push(family, v1->container);
-    expandstack(v1->container->stack, new, family);
-    value_stack_free(v1->container->stack);
-    v1->container->stack = new;
-  }
-  else {
-    expandstack(v1->macro, new, family);
-    value_stack_free(v1->macro);
-    v1->macro = new;
-  }
-  free(family->items);
-  free(family);
-}
+/* void cog_expand(value_t *v) { */
+/*   contain_t *cur = stack_peek(STACK); */
+/*   value_t *v1 = stack_peek(cur->stack); */
+/*   if (!v1) { */
+/*     eval_error("TOO FEW ARGUMENTS", v); */
+/*     return; */
+/*   } */
+/*   stack_t *family = init_stack(DEFAULT_STACK_SIZE); */
+/*   stack_t *new = init_stack(DEFAULT_STACK_SIZE); */
+/*   stack_push(family, cur); */
+/*   if (v1->type == VSTACK) { */
+/*     stack_push(family, v1->container); */
+/*     expandstack(v1->container->stack, new, family); */
+/*     value_stack_free(v1->container->stack); */
+/*     v1->container->stack = new; */
+/*   } */
+/*   else { */
+/*     expandstack(v1->macro, new, family); */
+/*     value_stack_free(v1->macro); */
+/*     v1->macro = new; */
+/*   } */
+/*   free(family->items); */
+/*   free(family); */
+/* } */
 
 void cog_cast(value_t *v) {
   contain_t *cur = stack_peek(STACK);
@@ -699,7 +699,6 @@ void add_funcs_combinators(ht_t *flit) {
   add_func(flit, cog_child, "child");
   add_func(flit, cog_stack, "stack");
   add_func(flit, cog_macro, "macro");
-  add_func(flit, cog_expand, "expand");
   add_func(flit, cog_cast, "cast");
   add_func(flit, cog_sub, "sub");
   add_func(flit, cog_compose, "compose");
