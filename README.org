@@ -1,6 +1,9 @@
 #+title: Cognition
 #+description: An unopinionated programming language which offers full publicity of syntax and tokenizing.
 #+author: Preston Pan, Matthew Hinton
+
+An unopinionated programming language which offers full publicity of syntax and tokenizing.
+
 * Introduction
 Cognition is a fully introspective system designed so that the syntax and hierarchy
 structure of the language is fully /public/; that is, a file that contains cognition
