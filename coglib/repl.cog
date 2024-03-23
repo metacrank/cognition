@@ -3,10 +3,17 @@ df
  
 dfiff1 crank ing
 
+5 crank addon unglue compose 1 crank compose VMACRO cast def
+
 getd _ getd _ concat d i_cognition> _concat_swap_dup_i d quote
-2 crank print compose read compose evalstr compose
-ssize compose 0 quote compose eval = compose
+2 crank print addon read addon evalstr addon
+ssize addon 0 quote compose eval = addon
 1 crank getd _ getd _ concat d i_
 _concat_swap_dup_i d quote
-2 crank print compose ? compose
-1 crank VMACRO cast
+2 crank print addon ? addon
+1 crank VMACRO cast quote
+stack quote prepose compose
+2 crank if addon repl compose
+1 crank VMACRO cast repl swap def
+
+repl
