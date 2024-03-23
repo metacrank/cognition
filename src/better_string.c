@@ -60,7 +60,6 @@ string_t *init_string(byte_t *s) {
   }
   /* Otherwise we want the initial value to be equal to the parameter */
   size_t leng = string_len(s);
-  str->length = leng;
   str->bufsize = 2 * leng;
   str->value = calloc(str->bufsize, sizeof(byte_t));
   if (str->value == NULL)
@@ -68,6 +67,7 @@ string_t *init_string(byte_t *s) {
   for (int i = 0; i < leng + 1; i ++) {
     string_append(str, s[i]);
   }
+  str->length = leng;
   return str;
 }
 
@@ -103,10 +103,9 @@ void string_append(string_t *s, byte_t c) {
     s->bufsize = s->bufsize * 2;
     s->value = realloc_zero(s->value, oldsize, s->bufsize * sizeof(byte_t));
   }
-  byte_t *cur =s->value + s->length;
+  byte_t *cur = s->value + s->length;
   memcpy(cur, str, 2 * sizeof (byte_t));
   s->length++;
-  printf("%s\n", cur);
 }
 
 void string_free(string_t *s) {
