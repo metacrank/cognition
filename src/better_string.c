@@ -59,15 +59,15 @@ string_t *init_string(byte_t *s) {
     return str;
   }
   /* Otherwise we want the initial value to be equal to the parameter */
+  str->length = 0;
   size_t leng = string_len(s);
   str->bufsize = 2 * leng;
   str->value = calloc(str->bufsize, sizeof(byte_t));
   if (str->value == NULL)
     die("calloc in init_string");
-  for (int i = 0; i < leng + 1; i ++) {
+  for (int i = 0; i < leng; i ++) {
     string_append(str, s[i]);
   }
-  str->length = leng;
   return str;
 }
 
