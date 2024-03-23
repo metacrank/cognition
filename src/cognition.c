@@ -19,6 +19,23 @@ ht_t *OBJ_TABLE;
 parser_t *PARSER;
 string_t *EXIT_CODE;
 
+//for debugging
+void print_crank(char prefix[]) {
+  contain_t *cur = stack_peek(STACK);
+  int mod = 0;
+  int base = 0;
+  int(*cr)[2] = NULL;
+  if (cur->cranks)
+    if (cur->cranks->size)
+      cr = cur->cranks->items[0];
+  if (cr) {
+    mod = cr[0][0];
+    base = cr[0][1];
+  }
+  printf("%s: modcrank %d, crankbase %d\n", prefix, mod, base);
+}
+
+
 void func_free(void *f) {}
 
 void eval_error(byte_t *s, value_t *w) {
@@ -752,7 +769,7 @@ bool expandword(value_t *v, stack_t *new, stack_t *family) {
     } else if ((isfaliasin(parent, v))) {
       value_t *f = init_value(VCLIB);
       f->str_word = string_copy(v->str_word);
-      void (*func)(value_t *) = cog_eval;
+      void (*func)(value_t *) = evalf;
       f->custom = func;
       stack_push(new, f);
       evald = true;
