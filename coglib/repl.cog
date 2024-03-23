@@ -16,4 +16,6 @@ stack quote prepose compose
 2 crank if addon repl compose
 1 crank VMACRO cast repl swap def
 
-repl
+stack 2 crank repl bequeath repl compose repl undef 1 crank
+
+eval
