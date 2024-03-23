@@ -199,6 +199,7 @@ int main(int argc, char **argv) {
                    init_stack(DEFAULT_STACK_SIZE));
   stack->faliases = init_stack(DEFAULT_STACK_SIZE);
   stack_push(stack->faliases, init_string("f"));
+  stack_push(stack->faliases, init_string("ing"));
   add_funcs(stack->flit);
   stack_push(STACK, stack);
 

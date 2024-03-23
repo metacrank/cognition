@@ -60,7 +60,7 @@ typedef struct PARSER_STRUCT {
   /*! @brief Index of current character */
   int i;
   /*! @brief The current character */
-  char c;
+  byte_t c;
 } parser_t;
 
 /*! @brief This structure is to be used in singly linked lists that hold

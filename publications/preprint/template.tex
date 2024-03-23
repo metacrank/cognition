@@ -148,12 +148,14 @@ a singlet, the parser skips the singlet character. This enables a wide range of 
 If characters were not ignored, at least one character must be parsed into a word, and if not, a word containing
 no characters can be created with singlets.
 
-By default, the parser starts with.
+By default, the parser starts with no ignored characters, no blacklisted delimiters (everything is a delimiter), and no
+singlets.
 \subsection{Falias Design}
 Force aliases, or faliases for short, are a list of special tokens that evaluate the top word on the stack unconditionally
 when tokenized. One can change the list of faliases and one can even make the list empty, effectively removing the falias
 functionality.
 
+By default, \emph{f} is the only falias.
 \subsection{Metacrank Design}
 The metacranker is a cyclic automatic word evaluation system, where \emph{cranking} refers to metacranking the first
 element on the stack, meaning that the top element of the stack executes once every \emph{n} words executed. \emph{Metacranking}
@@ -161,10 +163,15 @@ refers to the mth element down the current stack executing once every \emph{n} w
 executed every crank, although all metacrank positions are incremented every cycle. Therefore, the top of the stack executes
 first, and the highest metacrank has the lowest priority, executing only if every other crank above doesn't execute.
 
+There are two kinds of words that can be evaluated: macros, and definitions. Macros
 The metacrank default is set to zero, which you can take to represent an infinite crank cycle (it doesn't make sense to talk
 about a zero metacrank base otherwise). In this state, the only way one can execute words is using the \emph{falias} system.
 However, one can quickly set a crank and get into a comfortable environment without having to use faliases.
 \subsection{Metastack Design}
+The metastack is a system by which the current working stack can be set. Each current working stack has a hash table associated
+and an error stack associated,
+\subsection{Error Stack Design}
+
 \subsection{Builtins and the FLIT}
 
 This line shows how to use a footnote to further explain or cite text\footnote{Example footnote text.}.
