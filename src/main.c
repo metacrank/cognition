@@ -188,6 +188,8 @@ int main(int argc, char **argv) {
   free(buffer);
   STACK = init_stack(DEFAULT_STACK_SIZE);
   EVAL_STACK = init_stack(DEFAULT_STACK_SIZE);
+  CONTAIN_DEF_STACK = init_stack(DEFAULT_STACK_SIZE);
+  MACRO_DEF_STACK = init_stack(DEFAULT_STACK_SIZE);
   OBJ_TABLE = init_ht(DEFAULT_STACK_SIZE);
   EXIT_CODE = NULL;
 
@@ -200,8 +202,6 @@ int main(int argc, char **argv) {
   stack_push(stack->faliases, init_string("ing"));
   add_funcs(stack->flit);
   stack_push(STACK, stack);
-
-
 
   /* parse and eval loop */
   while (1) {

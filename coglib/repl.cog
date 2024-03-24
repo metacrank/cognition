@@ -3,7 +3,7 @@ df
  
 dfiff1 crank ing
 
-5 crank addon unglue compose 1 crank compose VMACRO cast def
+addon 2 crank unglue unglue compose unglue 1 crank compose def
 
 getd _ getd _ concat d i_cognition> _concat_swap_dup_i d quote
 2 crank print addon read addon evalstr addon

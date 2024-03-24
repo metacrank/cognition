@@ -115,7 +115,7 @@ void cog_unaliasf(value_t *v) {
   }
   value_free_safe(list);
 }
-
+extern stack_t *CONTAIN_DEF_STACK;
 void cog_d(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   value_t *stack = stack_pop(cur->stack);
@@ -123,12 +123,12 @@ void cog_d(value_t *v) {
     eval_error("TOO FEW ARGUMENTS", v);
     return;
   }
-  if (stack->container->stack->size != 1) {
+  if (value_stack(stack)[0]->size != 1) {
     stack_push(cur->stack, stack);
     eval_error("BAD ARGUMENT TYPE", v);
     return;
   }
-  value_t *word = stack->container->stack->items[0];
+  value_t *word = value_stack(stack)[0]->items[0];
   if (word->type != VWORD) {
     stack_push(cur->stack, stack);
     eval_error("BAD ARGUMENT TYPE", v);
