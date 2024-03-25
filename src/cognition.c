@@ -24,7 +24,7 @@ parser_t *PARSER;
 string_t *EXIT_CODE;
 bool *EXITED;
 
-//for debugging
+// for debugging
 void print_crank(char prefix[]) {
   contain_t *cur = stack_peek(STACK);
   int mod = 0;
@@ -40,6 +40,133 @@ void print_crank(char prefix[]) {
   printf("%s: modcrank %d, crankbase %d\n", prefix, mod, base);
 }
 
+bst_t *init_bst() { return calloc(1, sizeof(bst_t)); }
+
+void bst_add(bst_t *bst, string_t *key, void *value) {
+  if (!key)
+    return;
+  bst_t *parent = NULL;
+  bst_t *cur = bst;
+  bool isleft = true;
+  long l;
+  while (cur) {
+    l = strcmp(cur->key->value, key->value);
+    if (l < 0) {
+      parent = cur;
+      cur = cur->left;
+      isleft = true;
+    } else if (l > 0) {
+      parent = cur;
+      cur = cur->right;
+      isleft = false;
+    } else {
+      return;
+    }
+  }
+  if (parent) {
+    if (isleft) {
+      parent->left = init_bst();
+      parent->left->key = key;
+      parent->left->value = value;
+    } else {
+      parent->right = init_bst();
+      parent->right->key = key;
+      parent->right->value = value;
+    }
+  } else {
+    bst_t *b = init_bst();
+    b->key = key;
+    b->value = value;
+  }
+}
+
+void bst_del(bst_t *bst, string_t *key, void (*freefunc)(void *)) {
+  if (!bst)
+    return;
+  bst_t *parent = NULL;
+  bst_t *cur = bst;
+  long l;
+  bool isleft;
+  while (cur) {
+    l = strcmp(cur->key->value, key->value);
+    if (l < 0) {
+      parent = cur;
+      cur = cur->left;
+      isleft = true;
+    } else if (l > 0) {
+      parent = cur;
+      cur = cur->right;
+      isleft = false;
+    } else
+      break;
+  }
+  bst_t *left = cur->left;
+  bst_t *right = cur->right;
+  if (parent) {
+    if (!left && !right) {
+      string_free(cur->key);
+      freefunc(cur->value);
+      free(cur);
+    } else if (left && !right) {
+      string_free(cur->key);
+      freefunc(cur->value);
+      free(cur);
+      if (isleft)
+        parent->left = left;
+      else
+        parent->right = left;
+    } else if (!left && right) {
+      string_free(cur->key);
+      freefunc(cur->value);
+      free(cur);
+      if (isleft)
+        parent->left = right;
+      else
+        parent->right = right;
+    } else {
+      bst_t *ioparent = cur;
+      bst_t *inorder = right;
+      while (inorder->left) {
+	ioparent = inorder;
+	inorder = inorder->left;
+      }
+      string_free(cur->key);
+      freefunc(cur->value);
+      cur->key = inorder->key;
+      cur->value = inorder->value;
+      if (inorder->right)
+	ioparent->left = inorder->right;
+      free(inorder);
+    }
+  }
+}
+
+void *bst_get(bst_t *bst, string_t *key) {
+  if (!bst)
+    return NULL;
+  long l = strcmp(key->value, bst->key->value);
+  if (l < 0)
+    return bst_get(bst->left, key);
+  else if (l > 0)
+    return bst_get(bst->right, key);
+  else
+    return bst->value;
+}
+
+void bst_free(bst_t *bst, void (*freefunc)(void *)) {
+  if (!bst)
+    return;
+  if (bst->left)
+    bst_free(bst->left, freefunc);
+  if (bst->right)
+    bst_free(bst->right, freefunc);
+  if (bst) {
+    string_free(bst->key);
+    if (bst->value)
+      freefunc(bst->value);
+    free(bst);
+  }
+}
 
 void func_free(void *f) {}
 
@@ -70,7 +197,8 @@ stack_t *init_stack(size_t size) {
 }
 
 void stack_push(stack_t *a, void *v) {
-  if (a == NULL) return;
+  if (a == NULL)
+    return;
   if (a->size >= a->capacity - 2) {
     a->capacity = a->capacity * 2;
     a->items = realloc(a->items, a->capacity * sizeof(value_t *));
@@ -80,7 +208,8 @@ void stack_push(stack_t *a, void *v) {
 }
 
 void stack_add(stack_t *a, value_t *v, int index) {
-  if (a == NULL) return;
+  if (a == NULL)
+    return;
   if (a->size >= a->capacity - 3) {
     a->capacity = a->capacity * 2;
     a->items = realloc(a->items, a->capacity * sizeof(value_t *));
@@ -93,7 +222,8 @@ void stack_add(stack_t *a, value_t *v, int index) {
 }
 
 void *stack_popdeep(stack_t *a, int index) {
-  if (a == NULL) return NULL;
+  if (a == NULL)
+    return NULL;
   if (index >= a->size || index < 0)
     return NULL;
   void *retval = a->items[index];
@@ -105,7 +235,8 @@ void *stack_popdeep(stack_t *a, int index) {
 }
 
 void *stack_pop(stack_t *a) {
-  if (a == NULL) return NULL;
+  if (a == NULL)
+    return NULL;
   if (a->size > 0) {
     void *v = a->items[a->size - 1];
     a->size--;
@@ -115,7 +246,8 @@ void *stack_pop(stack_t *a) {
 }
 
 void *stack_peek(stack_t *s) {
-  if (s == NULL) return NULL;
+  if (s == NULL)
+    return NULL;
   if (s->size > 0) {
     void *v = s->items[s->size - 1];
     return v;
@@ -124,14 +256,16 @@ void *stack_peek(stack_t *s) {
 }
 
 void stack_extend(stack_t *a, stack_t *b) {
-  if (a == NULL || b == NULL) return;
+  if (a == NULL || b == NULL)
+    return;
   for (int i = 0; i < b->size; i++) {
     stack_push(a, b->items[i]);
   }
 }
 
 void stack_empty(void *a, void (*freefunc)(void *)) {
-  if (a == NULL) return;
+  if (a == NULL)
+    return;
   stack_t *s = a;
   for (int i = 0; i < s->size; i++) {
     freefunc(s->items[i]);
@@ -140,9 +274,11 @@ void stack_empty(void *a, void (*freefunc)(void *)) {
 }
 
 bool stack_exists(stack_t *a, void *e) {
-  if (a == NULL || e == NULL) return false;
+  if (a == NULL || e == NULL)
+    return false;
   for (int i = 0; i < a->size; i++) {
-    if (a->items[i] == e) return true;
+    if (a->items[i] == e)
+      return true;
   }
   return false;
 }
@@ -565,10 +701,11 @@ void sll_delete(sll_t *l, string_t *k, void (*freefunc)(void *)) {
 }
 
 sll_t *sll_copy(sll_t *l, void *(*copyfunc)(void *)) {
-  if (!l) return NULL;
+  if (!l)
+    return NULL;
   sll_t *list = init_sll();
   node_t *n = l->head;
-  while(n) {
+  while (n) {
     if (n->value) {
       list->head = node_copy(n, copyfunc);
       break;
@@ -588,7 +725,8 @@ sll_t *sll_copy(sll_t *l, void *(*copyfunc)(void *)) {
 }
 
 void sll_free(sll_t *l, void (*func)(void *)) {
-  if (!l) return;
+  if (!l)
+    return;
   node_t *cur = l->head;
   node_t *tmp;
   while (cur != NULL) {
@@ -637,16 +775,19 @@ void *ht_get(ht_t *h, string_t *key) {
   return sll_get(h->buckets[hash(h, key->value)], key);
 }
 
-//bool ht_exists(ht_t *h, string_t *key) { return ht_get(h, key) != NULL; }
+// bool ht_exists(ht_t *h, string_t *key) { return ht_get(h, key) != NULL; }
 bool ht_defined(ht_t *h, string_t *key) { return ht_get(h, key) != NULL; }
 
 bool ht_exists(ht_t *h, string_t *key) {
-  if (key == NULL || h == NULL) return false;
+  if (key == NULL || h == NULL)
+    return false;
   sll_t *l = h->buckets[hash(h, key->value)];
-  if (l->head == NULL) return false;
+  if (l->head == NULL)
+    return false;
   node_t *cur = l->head;
   while (cur != NULL) {
-    if (string_comp(key, cur->key) == 0) return true;
+    if (string_comp(key, cur->key) == 0)
+      return true;
     cur = cur->next;
   }
   return false;
@@ -792,7 +933,8 @@ void evalf() {
     stack_pop(FAMILY);
   } else if (v->type == VMACRO) {
     evalmacro(v->macro, NULL);
-  } else die("BAD VALUE TYPE ON STACK");
+  } else
+    die("BAD VALUE TYPE ON STACK");
   inc_crank(cur);
   value_t *vf = stack_pop(EVAL_STACK);
   if (vf) {
@@ -820,25 +962,26 @@ void push_quoted(contain_t *cur, value_t *v) {
 
 void eval_value(contain_t *c, contain_t *cur, value_t *val, value_t *callword) {
   switch (val->type) {
-    case VWORD:
-      evalword(val);
-      break;
-    case VSTACK:
-      stack_push(cur->stack, value_copy(val));
-      break;
-    case VMACRO:
-      stack_push(cur->stack, value_copy(val));
-      break;
-    case VCLIB:
-      ((void (*)(value_t * v))(val->custom))(callword);
-      break;
-    default:
-      push_quoted(cur, value_copy(val));
+  case VWORD:
+    evalword(val);
+    break;
+  case VSTACK:
+    stack_push(cur->stack, value_copy(val));
+    break;
+  case VMACRO:
+    stack_push(cur->stack, value_copy(val));
+    break;
+  case VCLIB:
+    ((void (*)(value_t * v))(val->custom))(callword);
+    break;
+  default:
+    push_quoted(cur, value_copy(val));
   }
 }
 
 bool return_function(void *stack, bool macro) {
-  if (EXITED) return true;
+  if (EXITED)
+    return true;
   if (macro) {
     if (stack_exists(MACRO_DEF_STACK, stack)) {
       return true;
@@ -863,11 +1006,13 @@ bool return_function(void *stack, bool macro) {
 
 void evalstack(contain_t *c, value_t *callword) {
   contain_t *cur = stack_peek(STACK);
-  if (!cur) return;
+  if (!cur)
+    return;
   if (c->stack->size) {
     FAMILY->items[0] = cur;
     eval_value(c, cur, c->stack->items[0], callword);
-    if (return_function(c, false)) return;
+    if (return_function(c, false))
+      return;
     int(*cr)[2];
     for (int i = 1; i < c->stack->size; i++) {
       inc_crank(cur);
@@ -878,14 +1023,16 @@ void evalstack(contain_t *c, value_t *callword) {
         cr = cur->cranks->items[0];
         if (cr[0][0] == 0 && cr[0][1]) {
           eval_value(c, cur, newval, callword);
-          if (return_function(c, false)) return;
+          if (return_function(c, false))
+            return;
           continue;
         }
       }
       if (newval->type != VWORD) {
         push_quoted(cur, value_copy(newval));
         crank();
-        if (return_function(c, false)) return;
+        if (return_function(c, false))
+          return;
         continue;
       }
       bool evald = false;
@@ -907,13 +1054,15 @@ void evalstack(contain_t *c, value_t *callword) {
         }
       }
       if (evald) {
-        if (return_function(c, false)) return;
+        if (return_function(c, false))
+          return;
         continue;
       }
       if (isfaliasin(c, newval)) {
         evalf();
       }
-      if (return_function(c, false)) return;
+      if (return_function(c, false))
+        return;
     }
   }
 }
@@ -926,23 +1075,24 @@ void evalmacro(stack_t *macro, value_t *word) {
     FAMILY->items[0] = cur;
     v = macro->items[i];
     switch (v->type) {
-      case VCLIB:
-        ((void (*)(value_t *))(v->custom))(word);
-        break;
-      case VSTACK:
-        stack_push(cur->stack, value_copy(v));
-        break;
-      case VMACRO:
-        stack_push(cur->stack, value_copy(v));
-        break;
-      case VWORD:
-        evalword(v);
-        break;
-      default:
-        push_quoted(cur, value_copy(v));
-        break;
+    case VCLIB:
+      ((void (*)(value_t *))(v->custom))(word);
+      break;
+    case VSTACK:
+      stack_push(cur->stack, value_copy(v));
+      break;
+    case VMACRO:
+      stack_push(cur->stack, value_copy(v));
+      break;
+    case VWORD:
+      evalword(v);
+      break;
+    default:
+      push_quoted(cur, value_copy(v));
+      break;
     }
-    if (return_function(macro, true)) return;
+    if (return_function(macro, true))
+      return;
   }
 }
 
@@ -1000,8 +1150,10 @@ void evalword(value_t *v) {
           if (cr[0][0] != 1 || cr[0][1] == 0) {
             evalf();
           }
-        } else evalf();
-      } else evalf();
+        } else
+          evalf();
+      } else
+        evalf();
       evald = true;
       break;
     }
@@ -1013,7 +1165,8 @@ void evalword(value_t *v) {
 
 void crank() {
   contain_t *cur = stack_peek(STACK);
-  if (!cur) return;
+  if (!cur)
+    return;
   if (cur->cranks == NULL)
     return;
   int cindex = -1;
@@ -1040,7 +1193,8 @@ void crank() {
       stack_pop(FAMILY);
     } else if (needseval->type == VMACRO) {
       evalmacro(needseval->macro, NULL);
-    } else die("BAD VALUE ON STACK");
+    } else
+      die("BAD VALUE ON STACK");
     inc_crank(cur);
     value_t *vf = stack_pop(EVAL_STACK);
     if (vf) {
@@ -1054,7 +1208,8 @@ void crank() {
 
 void eval(value_t *v) {
   contain_t *cur = stack_peek(STACK);
-  if (!cur) return;
+  if (!cur)
+    return;
   if (isfalias(v)) {
     value_free(v);
     if (!cur->cranks) {

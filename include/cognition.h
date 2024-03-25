@@ -20,6 +20,22 @@ struct STACK_STRUCT {
   size_t capacity;
 };
 
+typedef struct BST_STRUCT {
+  struct BST_STRUCT *left;
+  struct BST_STRUCT *right;
+  string_t *key;
+  void *value;
+} bst_t;
+
+bst_t *init_bst();
+
+void bst_add(bst_t *bst, string_t *key, void *value);
+
+void bst_del(bst_t *bst, string_t *key, void (*freefunc)(void *));
+
+void *bst_get(bst_t *bst, string_t *key);
+
+void bst_free(bst_t *bst, void (*freefunc)(void *));
 /* holds a str_word with the name of the word that produced the error, and an error string */
 struct ERROR_STRUCT {
   string_t *error;
