@@ -60,12 +60,14 @@ void cog_cut(value_t *v) {
   value_t *quot = stack_pop(stack);
   if (quot->container->stack->size != 1) {
     eval_error("BAD ARGUMENT TYPE", v);
+    stack_push(stack, quot);
     stack_push(stack, v1);
     return;
   }
   value_t *wq = quot->container->stack->items[0];
   if (wq->type != VWORD) {
     eval_error("BAD ARGUMENT TYPE", v);
+    stack_push(stack, quot);
     stack_push(stack, v1);
     return;
   }
@@ -73,18 +75,19 @@ void cog_cut(value_t *v) {
   int n = atoi(w1->str_word->value);
   if (n < 0 || n >= str->length) {
     eval_error("INDEX OUT OF RANGE", v);
+    stack_push(stack, quot);
     stack_push(stack, v1);
     return;
   }
-  value_t *r1 = init_value(VWORD);
-  r1->str_word = init_string(NULL);
+  w1->str_word->length = 0;
+  w1->str_word->value[0] = '\n';
   for (int i = n; i < wq->str_word->length; i++) {
-    string_append(r1->str_word, wq->str_word->value[i]);
+    string_append(w1->str_word, wq->str_word->value[i]);
   }
   wq->str_word->length = n;
   wq->str_word->value[n] = '\0';
   stack_push(stack, quot);
-  push_quoted(cur, r1);
+  stack_push(stack, v1);
 }
 
 void cog_len(value_t *v) {

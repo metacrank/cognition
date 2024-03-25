@@ -12,10 +12,4 @@ endl swap quote def
 space 2 crank print unglue spc unglue 1 crank prepose def
 newline 2 crank print unglue endl unglue 1 crank prepose def
 
-ff 1 cut unaliasf 0 cut swap quote def
-
-addon 2 crank unglue unglue compose unglue 1 crank compose def
-push 2 crank quote unglue compose addon 1 crank def
-curry 2 crank swap unglue quote addon prepose addon 1 crank def
-
-# 
+ff 1 cut unaliasf 0 cut
