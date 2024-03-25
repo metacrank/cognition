@@ -132,7 +132,9 @@ void cog_exit(value_t *v) {
   EXIT_CODE = code->str_word;
   code->str_word = NULL;
   value_free_safe(codec);
-  stack_free(STACK, contain_free);
+  contain_def_stack_push(STACK->items[0]);
+  free(STACK->items);
+  free(STACK);
   STACK = NULL;
 }
 

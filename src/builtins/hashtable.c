@@ -295,14 +295,14 @@ void cog_bequeath(value_t *v) {
       ht_add(child->container->word_table,
              string_copy(wordval->str_word),
              contain_value_copy(defs[i]),
-             contain_free);
+             contain_def_stack_push);
     } else if (aliases[i]) {
       if (!child->container->flit)
         child->container->flit = init_ht(DEFAULT_HT_SIZE);
       ht_add(child->container->flit,
              string_copy(wordval->str_word),
              value_stack_copy(aliases[i]),
-             contain_free);
+             macro_def_stack_push);
     } else {
       if (child->container->faliases == NULL)
         child->container->faliases = init_stack(DEFAULT_STACK_SIZE);
