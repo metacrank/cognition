@@ -12,18 +12,10 @@
           devShells.default = import ./shell.nix { inherit pkgs; };
           stdenv.mkDerivation =
             {
-              shellHook = ''
- alias l="ls -la"
- alias c="clear"
- alias g="git"
- alias gp="git push"
- alias gc="git commit"
- alias gP="git pull"
-'';
               name = "crank";
               src = self;
               buildPhase = ''
-mkdir -p build src/builtins
+mkdir -p build build/builtins
 gcc  -fpic -std=c11 -I include -c -o build/better_string.o src/better_string.c
 gcc  -fpic -std=c11 -I include -c -o build/builtins.o src/builtins.c
 gcc  -fpic -std=c11 -I include -c -o build/cognition.o src/cognition.c
