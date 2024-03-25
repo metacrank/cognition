@@ -40,134 +40,6 @@ void print_crank(char prefix[]) {
   printf("%s: modcrank %d, crankbase %d\n", prefix, mod, base);
 }
 
-bst_t *init_bst() { return calloc(1, sizeof(bst_t)); }
-
-void bst_add(bst_t *bst, string_t *key, void *value) {
-  if (!key)
-    return;
-  bst_t *parent = NULL;
-  bst_t *cur = bst;
-  bool isleft = true;
-  long l;
-  while (cur) {
-    l = strcmp(cur->key->value, key->value);
-    if (l < 0) {
-      parent = cur;
-      cur = cur->left;
-      isleft = true;
-    } else if (l > 0) {
-      parent = cur;
-      cur = cur->right;
-      isleft = false;
-    } else {
-      return;
-    }
-  }
-  if (parent) {
-    if (isleft) {
-      parent->left = init_bst();
-      parent->left->key = key;
-      parent->left->value = value;
-    } else {
-      parent->right = init_bst();
-      parent->right->key = key;
-      parent->right->value = value;
-    }
-  } else {
-    bst_t *b = init_bst();
-    b->key = key;
-    b->value = value;
-  }
-}
-
-void bst_del(bst_t *bst, string_t *key, void (*freefunc)(void *)) {
-  if (!bst)
-    return;
-  bst_t *parent = NULL;
-  bst_t *cur = bst;
-  long l;
-  bool isleft;
-  while (cur) {
-    l = strcmp(cur->key->value, key->value);
-    if (l < 0) {
-      parent = cur;
-      cur = cur->left;
-      isleft = true;
-    } else if (l > 0) {
-      parent = cur;
-      cur = cur->right;
-      isleft = false;
-    } else
-      break;
-  }
-  bst_t *left = cur->left;
-  bst_t *right = cur->right;
-  if (parent) {
-    if (!left && !right) {
-      string_free(cur->key);
-      freefunc(cur->value);
-      free(cur);
-    } else if (left && !right) {
-      string_free(cur->key);
-      freefunc(cur->value);
-      free(cur);
-      if (isleft)
-        parent->left = left;
-      else
-        parent->right = left;
-    } else if (!left && right) {
-      string_free(cur->key);
-      freefunc(cur->value);
-      free(cur);
-      if (isleft)
-        parent->left = right;
-      else
-        parent->right = right;
-    } else {
-      bst_t *ioparent = cur;
-      bst_t *inorder = right;
-      while (inorder->left) {
-	ioparent = inorder;
-	inorder = inorder->left;
-      }
-      string_free(cur->key);
-      freefunc(cur->value);
-      cur->key = inorder->key;
-      cur->value = inorder->value;
-      if (inorder->right)
-	ioparent->left = inorder->right;
-      free(inorder);
-    }
-  }
-}
-
-void *bst_get(bst_t *bst, string_t *key) {
-  if (!bst)
-    return NULL;
-  long l = strcmp(key->value, bst->key->value);
-  if (l < 0)
-    return bst_get(bst->left, key);
-  else if (l > 0)
-    return bst_get(bst->right, key);
-  else
-    return bst->value;
-}
-
-void bst_free(bst_t *bst, void (*freefunc)(void *)) {
-  if (!bst)
-    return;
-  if (bst->left)
-    bst_free(bst->left, freefunc);
-  if (bst->right)
-    bst_free(bst->right, freefunc);
-  if (bst) {
-    string_free(bst->key);
-    if (bst->value)
-      freefunc(bst->value);
-    free(bst);
-  }
-}
-
 void func_free(void *f) {}
 
 void eval_error(void *s, value_t *w) {
@@ -735,6 +607,147 @@ void sll_free(sll_t *l, void (*func)(void *)) {
     node_free(tmp, func);
   }
   free(l);
+}
+
+bst_t *init_bst() { return calloc(1, sizeof(bst_t)); }
+
+void bst_add(bst_t *bst, string_t *key, void *value) {
+  if (!key)
+    return;
+  bst_t *parent = NULL;
+  bst_t *cur = bst;
+  bool isleft = true;
+  long l;
+  while (cur) {
+    l = strcmp(cur->key->value, key->value);
+    if (l < 0) {
+      parent = cur;
+      cur = cur->left;
+      isleft = true;
+    } else if (l > 0) {
+      parent = cur;
+      cur = cur->right;
+      isleft = false;
+    } else {
+      return;
+    }
+  }
+  if (parent) {
+    if (isleft) {
+      parent->left = init_bst();
+      parent->left->key = key;
+      parent->left->value = value;
+    } else {
+      parent->right = init_bst();
+      parent->right->key = key;
+      parent->right->value = value;
+    }
+  } else {
+    bst_t *b = init_bst();
+    b->key = key;
+    b->value = value;
+  }
+}
+
+void bst_del(bst_t *bst, string_t *key, void (*freefunc)(void *)) {
+  if (!bst)
+    return;
+  bst_t *parent = NULL;
+  bst_t *cur = bst;
+  long l;
+  bool isleft;
+  while (cur) {
+    l = strcmp(cur->key->value, key->value);
+    if (l < 0) {
+      parent = cur;
+      cur = cur->left;
+      isleft = true;
+    } else if (l > 0) {
+      parent = cur;
+      cur = cur->right;
+      isleft = false;
+    } else
+      break;
+  }
+  bst_t *left = cur->left;
+  bst_t *right = cur->right;
+  if (parent) {
+    if (!left && !right) {
+      string_free(cur->key);
+      freefunc(cur->value);
+      free(cur);
+    } else if (left && !right) {
+      string_free(cur->key);
+      freefunc(cur->value);
+      free(cur);
+      if (isleft)
+        parent->left = left;
+      else
+        parent->right = left;
+    } else if (!left && right) {
+      string_free(cur->key);
+      freefunc(cur->value);
+      free(cur);
+      if (isleft)
+        parent->left = right;
+      else
+        parent->right = right;
+    } else {
+      bst_t *ioparent = cur;
+      bst_t *inorder = right;
+      while (inorder->left) {
+        ioparent = inorder;
+        inorder = inorder->left;
+      }
+      string_free(cur->key);
+      freefunc(cur->value);
+      cur->key = inorder->key;
+      cur->value = inorder->value;
+      if (inorder->right)
+        ioparent->left = inorder->right;
+      free(inorder);
+    }
+  }
+}
+
+void *bst_get(bst_t *bst, string_t *key) {
+  if (!bst)
+    return NULL;
+  long l = strcmp(key->value, bst->key->value);
+  if (l < 0)
+    return bst_get(bst->left, key);
+  else if (l > 0)
+    return bst_get(bst->right, key);
+  else
+    return bst->value;
+}
+
+bst_t *bst_copy(bst_t *bst, void *(*copyfunc)(void *)) {
+  if (!bst)
+    return NULL;
+  bst_t *b = init_bst();
+  b->key = string_copy(bst->key);
+  b->value = copyfunc(b->value);
+  if (bst->left)
+    b->left = bst_copy(bst->left, copyfunc);
+  if (bst->right)
+    b->right = bst_copy(bst->right, copyfunc);
+  return b;
+}
+
+void bst_free(bst_t *bst, void (*freefunc)(void *)) {
+  if (!bst)
+    return;
+  if (bst->left)
+    bst_free(bst->left, freefunc);
+  if (bst->right)
+    bst_free(bst->right, freefunc);
+  if (bst) {
+    string_free(bst->key);
+    if (bst->value)
+      freefunc(bst->value);
+    free(bst);
+  }
 }
 
 ht_t *init_ht(size_t size) {

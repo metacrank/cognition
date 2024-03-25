@@ -20,22 +20,6 @@ struct STACK_STRUCT {
   size_t capacity;
 };
 
-typedef struct BST_STRUCT {
-  struct BST_STRUCT *left;
-  struct BST_STRUCT *right;
-  string_t *key;
-  void *value;
-} bst_t;
-
-bst_t *init_bst();
-
-void bst_add(bst_t *bst, string_t *key, void *value);
-
-void bst_del(bst_t *bst, string_t *key, void (*freefunc)(void *));
-
-void *bst_get(bst_t *bst, string_t *key);
-
-void bst_free(bst_t *bst, void (*freefunc)(void *));
 /* holds a str_word with the name of the word that produced the error, and an error string */
 struct ERROR_STRUCT {
   string_t *error;
@@ -97,6 +81,21 @@ typedef struct {
   /*! @brief current size of hash table */
   size_t size;
 } sll_t;
+
+/*! @brief binary search tree (BST) implementation */
+/*! This BST is used as an improved bucket for a hash table structure,
+  thus requiring the storage of a key-value pair.
+ */
+typedef struct BST_STRUCT {
+  /*! @brief stores the left node */
+  struct BST_STRUCT *left;
+  /*! @brief stores the right node */
+  struct BST_STRUCT *right;
+  /*! @brief stores the hash table key */
+  string_t *key;
+  /*! @brief stores the hash table value */
+  void *value;
+} bst_t;
 
 /*! @brief hash table implementation */
 /*! this hash table stores a value in a numbered bucket according to what number
@@ -309,6 +308,24 @@ sll_t *sll_copy(sll_t *l, void *(*copyfunc)(void *));
 
 /*! Frees singly linked list */
 void sll_free(sll_t *l, void (*freefunc)(void *));
+
+/*! Allocates memory for new BST node. */
+bst_t *init_bst();
+
+/*! inserts key value pair into BST */
+void bst_add(bst_t *bst, string_t *key, void *value);
+
+/*! deletes node from BST by key */
+void bst_del(bst_t *bst, string_t *key, void (*freefunc)(void *));
+
+/*! gets value from BST by key */
+void *bst_get(bst_t *bst, string_t *key);
+
+/*! Copies BST tree recursively */
+bst_t *bst_copy(bst_t *bst, void *(*copyfunc)(void *));
+
+/*! Frees BST */
+void bst_free(bst_t *bst, void (*freefunc)(void *));
 
 /*! Allocates memory for new hash table */
 ht_t *init_ht(size_t size);
