@@ -17,6 +17,8 @@ extern stack_t *CONTAIN_DEF_STACK;
 extern stack_t *MACRO_DEF_STACK;
 extern stack_t *FAMILY;
 extern stack_t *FAMILY_IDX;
+extern stack_t *CONTAINERS;
+extern stack_t *MACROS;
 extern ht_t *OBJ_TABLE;
 extern string_t *EXIT_CODE;
 
@@ -115,6 +117,8 @@ void global_free() {
   stack_free(MACRO_DEF_STACK, value_stack_free);
   stack_free(FAMILY, nop);
   stack_free(FAMILY_IDX, nop);
+  stack_free(CONTAINERS, nop);
+  stack_free(MACROS, nop);
   string_free(EXIT_CODE);
 }
 
@@ -197,6 +201,8 @@ int main(int argc, char **argv) {
   FAMILY = init_stack(DEFAULT_STACK_SIZE);
   stack_push(FAMILY, NULL);
   FAMILY_IDX = init_stack(DEFAULT_STACK_SIZE);
+  CONTAINERS = init_stack(DEFAULT_STACK_SIZE);
+  MACROS = init_stack(DEFAULT_STACK_SIZE);
   OBJ_TABLE = init_ht(DEFAULT_STACK_SIZE);
   EXIT_CODE = NULL;
 

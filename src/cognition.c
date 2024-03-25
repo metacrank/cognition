@@ -17,6 +17,8 @@ stack_t *CONTAIN_DEF_STACK;
 stack_t *MACRO_DEF_STACK;
 stack_t *FAMILY;
 stack_t *FAMILY_IDX;
+stack_t *CONTAINERS;
+stack_t *MACROS;
 ht_t *OBJ_TABLE;
 parser_t *PARSER;
 string_t *EXIT_CODE;
@@ -138,14 +140,10 @@ void stack_empty(void *a, void (*freefunc)(void *)) {
 
 bool stack_exists(stack_t *a, void *e) {
   if (a == NULL || e == NULL) return false;
-  bool retval = false;
   for (int i = 0; i < a->size; i++) {
-    if (a->items[i] == e) {
-      retval = true;
-      break;
-    }
+    if (a->items[i] == e) return true;
   }
-  return retval;
+  return false;
 }
 
 void stack_free(void *a, void (*freefunc)(void *)) {
@@ -799,7 +797,7 @@ void evalf() {
   if (vf) {
     value_free_safe(vf);
   }
-  evalstack_return_function(NULL, false);
+  return_function(NULL, false);
 }
 
 void *func_copy(void *funcs) { return NULL; }
@@ -838,7 +836,7 @@ void eval_value(contain_t *c, contain_t *cur, value_t *val, value_t *callword) {
   }
 }
 
-bool evalstack_return_function(void *stack, bool macro) {
+bool return_function(void *stack, bool macro) {
   if (STACK == NULL) return true;
   if (macro) {
     if (stack_exists(MACRO_DEF_STACK, stack)) {
@@ -847,18 +845,15 @@ bool evalstack_return_function(void *stack, bool macro) {
   } else if (stack_exists(CONTAIN_DEF_STACK, stack)) {
     return true;
   }
-  int family_idx = FAMILY_IDX->size - 1;
-  for (int i = 1; i < FAMILY->size; i++) {
-    contain_t *parent = FAMILY->items[i];
-    if (family_idx >= 0) {
-      contain_t **idx_ptr = FAMILY_IDX->items[family_idx];
-      if (parent == *idx_ptr) {
-        contain_t **new_ptr = FAMILY_IDX->items[family_idx - 1];
-        i += new_ptr - idx_ptr + 1;
-        family_idx -= 2;
-      }
+  for (int i = 0; i < CONTAIN_DEF_STACK->size; i++) {
+    if (stack_exists(CONTAINERS, CONTAIN_DEF_STACK->items[i])) {
+      return true;
     }
-    if (stack_exists(CONTAIN_DEF_STACK, parent)) return true;
+  }
+  for (int i = 0; i < MACRO_DEF_STACK->size; i++) {
+    if (stack_exists(MACROS, MACRO_DEF_STACK->items[i])) {
+      return true;
+    }
   }
   stack_empty(CONTAIN_DEF_STACK, contain_free);
   stack_empty(MACRO_DEF_STACK, value_stack_free);
@@ -871,7 +866,7 @@ void evalstack(contain_t *c, value_t *callword) {
   if (c->stack->size) {
     FAMILY->items[0] = cur;
     eval_value(c, cur, c->stack->items[0], callword);
-    if (evalstack_return_function(c, false)) return;
+    if (return_function(c, false)) return;
     int(*cr)[2];
     for (int i = 1; i < c->stack->size; i++) {
       inc_crank(cur);
@@ -882,14 +877,14 @@ void evalstack(contain_t *c, value_t *callword) {
         cr = cur->cranks->items[0];
         if (cr[0][0] == 0 && cr[0][1]) {
           eval_value(c, cur, newval, callword);
-          if (evalstack_return_function(c, false)) return;
+          if (return_function(c, false)) return;
           continue;
         }
       }
       if (newval->type != VWORD) {
         push_quoted(cur, value_copy(newval));
         crank();
-        if (evalstack_return_function(c, false)) return;
+        if (return_function(c, false)) return;
         continue;
       }
       bool evald = false;
@@ -911,13 +906,13 @@ void evalstack(contain_t *c, value_t *callword) {
         }
       }
       if (evald) {
-        if (evalstack_return_function(c, false)) return;
+        if (return_function(c, false)) return;
         continue;
       }
       if (isfaliasin(c, newval)) {
         evalf();
       }
-      if (evalstack_return_function(c, false)) return;
+      if (return_function(c, false)) return;
     }
   }
 }
@@ -946,7 +941,7 @@ void evalmacro(stack_t *macro, value_t *word) {
         push_quoted(cur, value_copy(v));
         break;
     }
-    if (evalstack_return_function(macro, true)) return;
+    if (return_function(macro, true)) return;
   }
 }
 
@@ -968,14 +963,30 @@ void evalword(value_t *v) {
     }
 
     if ((macro = ht_get(parent->flit, v->str_word))) {
-      evalmacro(macro, v);
+      stack_push(MACROS, macro);
+      if (i == 0) {
+        stack_push(CONTAINERS, parent);
+        evalmacro(macro, v);
+        stack_pop(CONTAINERS);
+      } else {
+        evalmacro(macro, v);
+      }
+      stack_pop(MACROS);
       evald = true;
       break;
     } else if ((expand = ht_get(parent->word_table, v->str_word))) {
       stack_push(FAMILY_IDX, &FAMILY->items[i]);
       stack_push(FAMILY, expand);
       stack_push(FAMILY_IDX, &FAMILY->items[FAMILY->size - 1]);
-      evalstack(expand, v);
+      stack_push(CONTAINERS, expand);
+      if (i == 0) {
+        stack_push(CONTAINERS, parent);
+        evalstack(expand, v);
+        stack_pop(CONTAINERS);
+      } else {
+        evalstack(expand, v);
+      }
+      stack_pop(CONTAINERS);
       stack_pop(FAMILY);
       stack_pop(FAMILY_IDX);
       stack_pop(FAMILY_IDX);
@@ -1034,7 +1045,7 @@ void crank() {
     if (vf) {
       value_free_safe(vf);
     }
-    evalstack_return_function(NULL, false);
+    return_function(NULL, false);
   } else {
     inc_crank(cur);
   }

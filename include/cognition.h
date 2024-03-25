@@ -352,7 +352,7 @@ void push_quoted(contain_t *cur, value_t *v);
 /* eval's a value in a stack being evalstack'd */
 void eval_value(contain_t *c, contain_t *cur, value_t *val, value_t *callword);
 
-bool evalstack_return_function(void *stack, bool macro);
+bool return_function(void *stack, bool macro);
 
 /* recursively evaluates a stack, with cranking. defcontain is the container of definition,
  * callstack is the stack calling callval, which contains the callval pointer */
