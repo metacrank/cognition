@@ -60,7 +60,8 @@ void print_end() {
     printf("\n");
     printf("Faliases: ");
     for (int i = 0; i < cur->faliases->size; i++) {
-      printf("%s", (byte_t *)cur->faliases->items[i]);
+      string_t *s = cur->faliases->items[i];
+      printf("'%s' ", s->value);
     }
   }
   printf("\n");
