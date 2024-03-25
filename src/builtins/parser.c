@@ -109,7 +109,7 @@ void cog_unaliasf(value_t *v) {
     value_t *val = list->container->stack->items[i];
     for (int j = 0; j < cur->faliases->size; j++) {
       string_t *str = cur->faliases->items[j];
-      if (strcmp(val->str_word->value, str->value) == 0)
+      if (string_comp(val->str_word, str) == 0)
         string_free(stack_popdeep(cur->faliases, j));
     }
   }
