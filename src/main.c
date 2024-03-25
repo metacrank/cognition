@@ -21,6 +21,7 @@ extern stack_t *CONTAINERS;
 extern stack_t *MACROS;
 extern ht_t *OBJ_TABLE;
 extern string_t *EXIT_CODE;
+extern bool EXITED;
 
 /*! prints usage then exits */
 void usage(int e) {
@@ -38,11 +39,6 @@ void version() {
 /*! prints state of program when execution stops */
 void print_end() {
   printf("\n");
-  if (STACK == NULL) {
-    printf("Exit code: '%s'\n", EXIT_CODE->value);
-    // printf("Exit code: '%s' (called exit)\n", EXIT_CODE->value);
-    return;
-  }
   printf("Stack at end:\n");
   contain_t *cur = stack_peek(STACK);
   for (int i = 0; i < cur->stack->size; i++) {
@@ -107,11 +103,11 @@ void print_end() {
 void global_free() {
   free(PARSER->source);
   ht_free(OBJ_TABLE, free);
-  if (STACK) {
+  if (!EXITED) {
     contain_free(STACK->items[0]);
-    free(STACK->items);
-    free(STACK);
   }
+  free(STACK->items);
+  free(STACK);
   free(PARSER);
   stack_free(EVAL_STACK, value_free);
   stack_free(CONTAIN_DEF_STACK, contain_free);
@@ -223,7 +219,7 @@ int main(int argc, char **argv) {
     if (v == NULL)
       break;
     eval(v);
-    if (STACK == NULL)
+    if (EXITED)
       break;
   }
   if (!args.q) {

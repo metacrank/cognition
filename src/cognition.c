@@ -22,6 +22,7 @@ stack_t *MACROS;
 ht_t *OBJ_TABLE;
 parser_t *PARSER;
 string_t *EXIT_CODE;
+bool *EXITED;
 
 //for debugging
 void print_crank(char prefix[]) {
@@ -792,7 +793,7 @@ void evalf() {
   } else if (v->type == VMACRO) {
     evalmacro(v->macro, NULL);
   } else die("BAD VALUE TYPE ON STACK");
-  if (STACK && !stack_exists(CONTAIN_DEF_STACK, cur)) inc_crank(cur);
+  inc_crank(cur);
   value_t *vf = stack_pop(EVAL_STACK);
   if (vf) {
     value_free_safe(vf);
@@ -837,7 +838,7 @@ void eval_value(contain_t *c, contain_t *cur, value_t *val, value_t *callword) {
 }
 
 bool return_function(void *stack, bool macro) {
-  if (STACK == NULL) return true;
+  if (EXITED) return true;
   if (macro) {
     if (stack_exists(MACRO_DEF_STACK, stack)) {
       return true;
@@ -1040,7 +1041,7 @@ void crank() {
     } else if (needseval->type == VMACRO) {
       evalmacro(needseval->macro, NULL);
     } else die("BAD VALUE ON STACK");
-    if (STACK && !stack_exists(CONTAIN_DEF_STACK, cur)) inc_crank(cur);
+    inc_crank(cur);
     value_t *vf = stack_pop(EVAL_STACK);
     if (vf) {
       value_free_safe(vf);

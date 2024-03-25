@@ -5,6 +5,7 @@
 extern stack_t *STACK;
 extern stack_t *CONTAIN_DEF_STACK;
 extern string_t *EXIT_CODE;
+extern bool EXITED;
 
 void cog_cd(value_t *v) {
   contain_t *cur = stack_peek(STACK);
@@ -133,9 +134,7 @@ void cog_exit(value_t *v) {
   code->str_word = NULL;
   value_free_safe(codec);
   contain_def_stack_push(STACK->items[0]);
-  free(STACK->items);
-  free(STACK);
-  STACK = NULL;
+  EXITED = true;
 }
 
 void add_funcs_metastack(ht_t *flit) {

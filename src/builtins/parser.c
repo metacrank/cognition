@@ -5,6 +5,7 @@
 #include <string.h>
 
 extern stack_t *STACK;
+extern bool EXITED;
 
 void cog_getf(value_t *v) {
   contain_t *cur = stack_peek(STACK);
@@ -512,11 +513,11 @@ void cog_evalstr(value_t *v) {
       if (w == NULL)
         break;
       eval(w);
-      if (STACK == NULL)
+      if (EXITED)
         break;
     }
     free(parser);
-    if (STACK == NULL) break;
+    if (EXITED) break;
   }
   value_free_safe(strc);
 }
