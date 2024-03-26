@@ -1,6 +1,7 @@
 #include <hash_table.h>
 #include <macros.h>
 #include <better_string.h>
+#include <string.h>
 
 node_t *init_node(string_t *key, void *value) {
   node_t *n = calloc(1, sizeof(node_t));
