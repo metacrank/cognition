@@ -3,6 +3,7 @@
 #include <better_string.h>
 #include <macros.h>
 #include <stdbool.h>
+#include <tgmath.h>
 
 void init_math();
 
@@ -16,11 +17,15 @@ long order(string_t *s);
 
 long string_to_int(string_t *s);
 
-long double string_to_double(string_t *s);
+double complex string_to_double(string_t *s);
 
 string_t *int_to_string(long d);
 
-string_t *double_to_string(long double f);
+string_t *double_to_string(double complex f);
+
+string_t *real(string_t *s);
+
+string_t *imaginary(string_t *s);
 
 string_t *neg(string_t *s);
 

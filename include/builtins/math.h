@@ -24,6 +24,9 @@ void cog_multiply(value_t *v);
 /*! call in stem with num1 num2 / => num */
 void cog_divide(value_t *v);
 
+void cog_real(value_t *v);
+void cog_imaginary(value_t *v);
+
 /*! @brief takes first number to the power of the second, pushes result on the
  * stack */
 void cog_pow(value_t *v);

@@ -278,12 +278,14 @@ long string_to_int(string_t *s) {
   return d;
 }
 
-long double string_to_double(string_t *s) {
-  char32_t *p = s->value + s->length - 1;
+double complex string_to_double(string_t *s) {
+  string_t *sre = real(s);
+  string_t *sim = imaginary(s);
+  char32_t *p = sre->value + sre->length - 1;
   long double d = 0;
   long r = 0;
   long i;
-  for (i = 0; p >= s->value; i++) {
+  for (i = 0; p >= sre->value; i++) {
     if (*p == '.') {
       r = i;
       i--;
@@ -294,7 +296,23 @@ long double string_to_double(string_t *s) {
     p--;
   }
   d = d / pow(BASE, r);
-  return d;
+
+  p = sim->value + sim->length - 1;
+  long double dim = 0;
+  r = 0;
+  for (i = 0; p >= sim->value; i++) {
+    if (*p == '.') {
+      r = i;
+      i--;
+      p--;
+      continue;
+    }
+    dim += digit_values[di(*p)] * pow(BASE, i);
+    p--;
+  }
+  dim = dim / pow(BASE, r);
+  double complex cd = d + dim * I;
+  return cd;
 }
 
 string_t *int_to_string(long d) {
@@ -330,7 +348,7 @@ string_t *int_to_string(long d) {
   return s;
 }
 
-string_t *double_to_string(long double f) {
+string_t *double_to_string(double complex f) {
   // get from pool;
   string_t *s = init_string(U"");
   return s;
@@ -338,7 +356,7 @@ string_t *double_to_string(long double f) {
 
 string_t *neg(string_t *s) {
   for (int idx = 0; idx < s->length; idx++) {
-    if (s->value[idx] != '.') {
+    if (s->value[idx] != '.' && s->value[idx] != ',') {
       s->value[idx] = negation_table[di(s->value[idx])];
     }
   }
@@ -368,114 +386,35 @@ string_t *fp(string_t *s) {
   return s;
 }
 
+string_t *real(string_t *s) {
+  string_t *re = init_string(U"");
+  for (long i = 0; i < s->length; i++) {
+    if (s->value[i] == ',') break;
+    string_append(re, s->value[i]);
+  }
+  return re;
+}
+
+string_t *imaginary(string_t *s) {
+  string_t *im = init_string(U"");
+  long i;
+  for (i = 0; i < s->length; i++) {
+    if (s->value[i] == ',') break;
+  }
+  i++;
+  while (i < s->length) {
+    string_append(im, s->value[i]);
+    i++;
+  }
+  return im;
+}
+
+
 bool sum_positive(string_t *m, string_t *n) {
   return true;
 }
 
-/* string_t *sum(string_t *m, string_t *n, char32_t *m_radix, char32_t *n_radix, */
-/*               string_t *sum_buffer, char32_t *sb_radix) { */
-/*   // TODO: get from pool */
-/*   // and check whether string will be long enough and won't need to be realloced */
-/*   string_t *s = init_string(U""); */
-/*   char32_t *svalue = s->value; */
-
-/*   bool m_high = false; */
-/*   char32_t *pm = m->value; */
-/*   char32_t *pn = n->value; */
-/*   char32_t sum; */
-/*   char32_t carry = digits[0]; */
-
-/*   char32_t *m_end = pm + m->length; */
-/*   char32_t *n_end = pn + n->length; */
-/*   while(true) { */
-/*     pm++; pn++; */
-/*     if (pm == m_end || *pm == '.') { */
-/*       while (pn != n_end && *pn != '.') { */
-/*         pn++; */
-/*       } */
-/*       break; */
-/*     } else if (pn == n_end || *pn == '.') { */
-/*       while (pm != m_end && *pm != '.') { */
-/*         pm++; */
-/*       } */
-/*       m_high = true; */
-/*       break; */
-/*     } */
-/*   } */
-/*   if (pm != m_end) { */
-/*     if (pn != n_end) { */
-/*       char32_t *pm2 = pm + 1; */
-/*       char32_t *pn2 = pn + 1; */
-/*       while(true) { */
-/*         if (pm2 == m_end) { */
-/*           if (pn2 != n_end) { */
-/*             char32_t *p = n_end - 1; */
-/*             while(p >= pn2) { */
-/*               // replace with memcpy when bufsize is guaranteed to be enough */
-/*               string_append(s, *p); */
-/*               p--; */
-/*             } */
-/*           } */
-/*           break; */
-/*         } else if (pn2 == n_end) { */
-/*           char32_t *p = m_end - 1; */
-/*           while (p >= pm2) { */
-/*             // replace with memcpy */
-/*             string_append(s, *p); */
-/*             p--; */
-/*           } */
-/*           break; */
-/*         } */
-/*         pm2++; */
-/*         pn2++; */
-/*       } */
-/*       // add up until radix point */
-/*       pm2--; pn2--; */
-/*       //TODO: for even bases, check if rightmost digit will be a positive or negative form of 0 or B/2 */
-/*       while(pm2 > pm) { */
-/*         sum = addition_sum_table[di(*pm2)][di(*pn2)]; */
-/*         sum = addition_sum_table[di(sum)][di(carry)]; */
-/*         carry = addition_carry_table[di(*pm2)][di(*pn2)]; */
-/*         // replace with memcpy */
-/*         string_append(s, sum); */
-/*         pm2--; */
-/*         pn2--; */
-/*       } */
-/*       //replace with memcpy */
-/*       string_append(s, *pm); */
-
-/*     } else { */
-/*       char32_t *p = m_end - 1; */
-/*       while(p >= pm) { */
-/*         // replace with memcpy */
-/*         string_append(s, *p); */
-/*         p--; */
-/*       } */
-/*     } */
-/*   } else { */
-/*     if (pn != n_end) { */
-/*       char32_t *p = n_end - 1; */
-/*       while(p >= pn) { */
-/*         string_append(s, *p); */
-/*         p--; */
-/*       } */
-/*     } */
-/*   } */
-
-/*   while(pm > m->value) { */
-/*     pm--; pn--; */
-/*     sum = addition_sum_table[di(*pm)][di(*pn)]; */
-/*     sum = addition_sum_table[di(sum)][di(carry)]; */
-/*     carry = addition_carry_table[di(*pm)][di(*pn)]; */
-/*     //replace with memcpy */
-/*     string_append(s, sum); */
-/*   } */
-
-/*   string_reverse(s); */
-/*   return s; */
-/* } */
-
-string_t *sum(string_t *m, string_t *n, char32_t *m_radix, char32_t *n_radix,
+string_t *sum_real(string_t *m, string_t *n, char32_t *m_radix, char32_t *n_radix,
               string_t *sum_buffer, char32_t *sb_radix) {
   char32_t *m_rad, *n_rad;
   char32_t *m_end = m->value + m->length;
@@ -553,9 +492,7 @@ string_t *sum(string_t *m, string_t *n, char32_t *m_radix, char32_t *n_radix,
         n_mant--;
       }
       // addition
-      //
-      // include radix point
-      //TODO: for even bases, check if rightmost digit will be a positive or negative form of 0 or B/2
+      // includes radix point
       while(pm > m_rad) {
         sum = addition_sum_table[di(*pm)][di(*pn)];
         sum = addition_sum_table[di(carry)][di(sum)];
@@ -641,6 +578,26 @@ string_t *sum(string_t *m, string_t *n, char32_t *m_radix, char32_t *n_radix,
   return s;
 }
 
+string_t *sum(string_t *m, string_t *n, char32_t *m_radix, char32_t *n_radix,
+              string_t *sum_buffer, char32_t *sb_radix) {
+  string_t *mre = real(m);
+  string_t *nre = real(n);
+  string_t *mim = imaginary(m);
+  string_t *nim = imaginary(n);
+  string_t *rsum = sum_real(mre, nre, NULL, NULL, NULL, NULL);
+  string_t *isum = sum_real(mim, nim, NULL, NULL, NULL, NULL);
+  string_free(mim);
+  string_free(nim);
+  string_free(nre);
+  string_free(mre);
+  if (isum->length) {
+    string_append(rsum, ',');
+    string_concat(rsum, isum);
+  }
+  string_free(isum);
+  return rsum;
+}
+
 string_t *diff(string_t *m, string_t *n) {
   // temporary definition
   string_t *nneg = string_copy(n);
@@ -651,34 +608,34 @@ string_t *diff(string_t *m, string_t *n) {
 }
 
 string_t *product(string_t *m, string_t *n) {
-  long double mf = string_to_double(m);
-  long double nf = string_to_double(n);
+  double complex mf = string_to_double(m);
+  double complex nf = string_to_double(n);
   return double_to_string(mf * nf);
 }
 
 string_t *quotient(string_t *m, string_t *n) {
-  long double mf = string_to_double(m);
-  long double nf = string_to_double(n);
+  double complex mf = string_to_double(m);
+  double complex nf = string_to_double(n);
   return double_to_string(mf / nf);
 }
 
 string_t *str_sqrt(string_t *m) {
-  long double mf = string_to_double(m);
+  double complex mf = string_to_double(m);
   return double_to_string(sqrt(mf));
 }
 
 string_t *gaussian(string_t *m) {
-  long double mf = string_to_double(m);
+  double complex mf = string_to_double(m);
   return double_to_string(exp(-mf * mf));
 }
 
 string_t *str_exp(string_t *m) {
-  long double mf = string_to_double(m);
+  double complex mf = string_to_double(m);
   return double_to_string(exp(mf));
 }
 
 string_t *str_ln(string_t *m) {
-  long double mf = string_to_double(m);
+  double complex mf = string_to_double(m);
   return double_to_string(log(mf));
 }
 
@@ -690,53 +647,53 @@ string_t *str_pow(string_t *m, string_t *n) {
 
 string_t *str_sin(string_t *m) {
   // replace with complex form
-  long double mf = string_to_double(m);
+  double complex mf = string_to_double(m);
   return double_to_string(sin(mf));
 }
 
 string_t *str_cos(string_t *m) {
   // replace with complex form
-  long double mf = string_to_double(m);
+  double complex mf = string_to_double(m);
   return double_to_string(cos(mf));
 }
 
 string_t *str_ceil(string_t *m) {
-  long double mf = string_to_double(m);
+  double mf = string_to_double(m);
   return double_to_string(ceil(mf));
 }
 
 string_t *str_floor(string_t *m) {
-  long double mf = string_to_double(m);
+  double mf = string_to_double(m);
   return double_to_string(floor(mf));
 }
 
 string_t *geq(string_t *m, string_t *n) {
-  long double mf = string_to_double(m);
-  long double nf = string_to_double(n);
+  double mf = string_to_double(m);
+  double nf = string_to_double(n);
   if (mf >= nf)
     return init_string(U"t");
   return init_string(U"");
 }
 
 string_t *leq(string_t *m, string_t *n) {
-  long double mf = string_to_double(m);
-  long double nf = string_to_double(n);
+  double mf = string_to_double(m);
+  double nf = string_to_double(n);
   if (mf <= nf)
     return init_string(U"t");
   return init_string(U"");
 }
 
 string_t *gthan(string_t *m, string_t *n) {
-  long double mf = string_to_double(m);
-  long double nf = string_to_double(n);
+  double mf = string_to_double(m);
+  double nf = string_to_double(n);
   if (mf > nf)
     return init_string(U"t");
   return init_string(U"");
 }
 
 string_t *lthan(string_t *m, string_t *n) {
-  long double mf = string_to_double(m);
-  long double nf = string_to_double(n);
+  double mf = string_to_double(m);
+  double nf = string_to_double(n);
   if (mf < nf)
     return init_string(U"t");
   return init_string(U"");
