@@ -73,7 +73,7 @@ ht_t *ht_copy(ht_t *h, void *(*copyfunc)(void *));
 void ht_free(ht_t *h, void (*freefunc)(void *));
 
 /*! hashes key into integer for hash table */
-unsigned long hash(ht_t *h, byte_t *key);
+unsigned long hash(ht_t *h, string_t *key);
 
 /*! Allocates memory for new node struct. */
 node_t *init_node(string_t *key, void *v);

@@ -142,7 +142,7 @@ void bst_add(bst_t *bst, string_t *key, void *value) {
   bool isleft = true;
   long l;
   while (cur) {
-    l = strcmp(cur->key->value, key->value);
+    l = string_comp(cur->key, key);
     if (l < 0) {
       parent = cur;
       cur = cur->left;
@@ -180,7 +180,7 @@ void bst_del(bst_t *bst, string_t *key, void (*freefunc)(void *)) {
   long l;
   bool isleft;
   while (cur) {
-    l = strcmp(cur->key->value, key->value);
+    l = string_comp(cur->key, key);
     if (l < 0) {
       parent = cur;
       cur = cur->left;
@@ -236,7 +236,7 @@ void bst_del(bst_t *bst, string_t *key, void (*freefunc)(void *)) {
 void *bst_get(bst_t *bst, string_t *key) {
   if (!bst)
     return NULL;
-  long l = strcmp(key->value, bst->key->value);
+  long l = string_comp(key, bst->key);
   if (l < 0)
     return bst_get(bst->left, key);
   else if (l > 0)
@@ -302,13 +302,13 @@ ht_t *ht_copy(ht_t *h, void *(*copyfunc)(void *)) {
 void ht_add(ht_t *h, string_t *key, void *v, void (*freefunc)(void *)) {
   if (key == NULL)
     return;
-  sll_add(h->buckets[hash(h, key->value)], key, v, freefunc);
+  sll_add(h->buckets[hash(h, key)], key, v, freefunc);
 }
 
 void *ht_get(ht_t *h, string_t *key) {
   if (key == NULL || h == NULL)
     return NULL;
-  return sll_get(h->buckets[hash(h, key->value)], key);
+  return sll_get(h->buckets[hash(h, key)], key);
 }
 
 // bool ht_exists(ht_t *h, string_t *key) { return ht_get(h, key) != NULL; }
@@ -317,7 +317,7 @@ bool ht_defined(ht_t *h, string_t *key) { return ht_get(h, key) != NULL; }
 bool ht_exists(ht_t *h, string_t *key) {
   if (key == NULL || h == NULL)
     return false;
-  sll_t *l = h->buckets[hash(h, key->value)];
+  sll_t *l = h->buckets[hash(h, key)];
   if (l->head == NULL)
     return false;
   node_t *cur = l->head;
@@ -334,7 +334,7 @@ void ht_delete(ht_t *h, string_t *key, void (*freefunc)(void *)) {
     return;
   if (key == NULL)
     return;
-  sll_delete(h->buckets[hash(h, key->value)], key, freefunc);
+  sll_delete(h->buckets[hash(h, key)], key, freefunc);
 }
 
 void ht_free(ht_t *h, void (*func)(void *)) {
@@ -348,12 +348,12 @@ void ht_free(ht_t *h, void (*func)(void *)) {
 }
 
 /* DJB2 HASH FUNCTION */
-unsigned long hash(ht_t *h, byte_t *key) {
+unsigned long hash(ht_t *h, string_t *key) {
   unsigned long hash = 5381;
-  int c;
-
-  while ((c = *key++))
-    hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
-
+  char32_t *keyend = key->value + key->length;
+  char32_t *c = key->value;
+  while (c < keyend) {
+    hash = ((hash << 5) + hash) + *c++; /* hash * 33 + c */
+  }
   return hash % h->size;
 }

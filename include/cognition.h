@@ -57,11 +57,11 @@ struct VALUE_STRUCT {
  * returns a value until it reaches EOF or end of string. */
 typedef struct PARSER_STRUCT {
   /*! @brief The string that contains valid stem code. */
-  byte_t *source;
+  string_t *source;
   /*! @brief Index of current character */
   int i;
   /*! @brief The current character */
-  byte_t c;
+  char32_t c;
 } parser_t;
 
 
@@ -117,7 +117,7 @@ void print_crank(char prefix[]);
 
 
 /* push error to error stack */
-void eval_error(void *s, value_t *w);
+void eval_error(char32_t *s, value_t *w);
 
 /*! Allocates memory for new stack */
 stack_t *init_stack(size_t size);
@@ -183,16 +183,16 @@ custom_t *init_custom(void (*)(void *), void (*)(void *), void *(*)(void *));
 void custom_free(void *);
 
 /*! Adds function to FLIT. */
-void add_func(ht_t *h, void (*func)(value_t *), void *key);
+void add_func(ht_t *h, void (*func)(value_t *), char32_t *key);
 
 /* Adds function stack to FLIT */
-void add_macro(ht_t *h, stack_t *macro, byte_t *key);
+void add_macro(ht_t *h, stack_t *macro, char32_t *key);
 
 /*! Adds object functions to OBJ_TABLE and adds constructor for custom type to
  * FLIT. */
 void add_obj(ht_t *h, ht_t *h2, void (*printfunc)(void *),
              void (*freefunc)(void *), void *(*copyfunc)(void *),
-             void (*createfunc)(void *), byte_t *key);
+             void (*createfunc)(void *), char32_t *key);
 
 /*! Allocates memory for new container */
 contain_t *init_contain(ht_t *h, ht_t *flit, stack_t *cranks);
@@ -210,13 +210,13 @@ void contain_free(void *con);
 void *falias_copy(void *f);
 
 /*! Allocates memory for new parser */
-parser_t *init_parser(byte_t *source);
+parser_t *init_parser(string_t *source);
 
 /*! Moves parser by one character. */
 void parser_move(parser_t *p);
 
 /*! Resets state of parser */
-void parser_reset(parser_t *p, byte_t *source);
+void parser_reset(parser_t *p, string_t *source);
 
 /* gets the next word */
 value_t *parse_word(parser_t *p, bool skipped);
@@ -228,13 +228,13 @@ bool parser_skip_ignore(parser_t *p);
 value_t *parser_get_next(parser_t *p);
 
 /* returns true if p is a singlet character */
-bool issinglet(byte_t c);
+bool issinglet(char32_t c);
 
 /* returns true if p is an ignored character */
-bool isignore(byte_t c);
+bool isignore(char32_t c);
 
 /* returns true if p is a delimiter character */
-bool isdelim(byte_t c);
+bool isdelim(char32_t c);
 
 
 /* checks if a value_t is an falias in a container */

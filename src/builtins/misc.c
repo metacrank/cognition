@@ -15,7 +15,7 @@ void cog_reset(value_t *v) {
   while((str = stack_pop(cur->faliases))) {
     string_free(str);
   }
-  stack_push(cur->faliases, init_string("f"));
+  stack_push(cur->faliases, init_string(U"f"));
   stack_free(cur->cranks, free);
   cur->cranks = NULL;
   stack_free(cur->err_stack, value_free);
@@ -31,5 +31,5 @@ void cog_reset(value_t *v) {
 }
 
 void add_funcs_misc(ht_t *flit) {
-  add_func(flit, cog_reset, "reset");
+  add_func(flit, cog_reset, U"reset");
 }

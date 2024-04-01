@@ -2,6 +2,7 @@
 #include <builtins.h>
 #include <builtinslib.h>
 #include <cognition.h>
+#include <strnum.h>
 #include <dlfcn.h>
 #include <locale.h>
 #include <macros.h>
@@ -22,6 +23,7 @@ extern stack_t *MACROS;
 extern ht_t *OBJ_TABLE;
 extern string_t *EXIT_CODE;
 extern bool EXITED;
+extern string_t **CAST_ARGS;
 
 /*! prints usage then exits */
 void usage(int e) {
@@ -56,8 +58,9 @@ void print_end() {
     printf("\n");
     printf("Faliases: ");
     for (int i = 0; i < cur->faliases->size; i++) {
-      string_t *s = cur->faliases->items[i];
-      printf("'%s' ", s->value);
+      printf("'");
+      print(cur->faliases->items[i]);
+      printf("' ");
     }
   }
   printf("\n");
@@ -92,16 +95,18 @@ void print_end() {
       printf("crank 0\n");
   } else
     printf("null crank\n");
-  if (EXIT_CODE)
-    printf("\nExit code: '%s'\n", EXIT_CODE->value);
-  // else printf("\nExit code: ''\n");
+  if (EXIT_CODE) {
+    printf("\nExit code: '");
+    print(EXIT_CODE);
+    printf("'\n");
+  }
   else
     printf("\nExit code: (none)\n");
 }
 
 /*! frees all global variables */
 void global_free() {
-  free(PARSER->source);
+  string_free(PARSER->source);
   ht_free(OBJ_TABLE, free);
   if (!EXITED) {
     contain_free(STACK->items[0]);
@@ -117,6 +122,10 @@ void global_free() {
   stack_free(CONTAINERS, nop);
   stack_free(MACROS, nop);
   string_free(EXIT_CODE);
+  for (int i = 0; i < 4; i++) {
+    string_free(CAST_ARGS[i]);
+  }
+  free(CAST_ARGS);
 }
 
 int main(int argc, char **argv) {
@@ -177,20 +186,15 @@ int main(int argc, char **argv) {
 
   /* Read code from file */
   FILE *FP = fopen(argv[fileidx], "rb");
-
   if (!FP) {
     usage(1);
   }
 
-  string_t *buffer = init_string(NULL);
-  int character;
-  while ((character = fgetc(FP)) != EOF) {
-    string_append(buffer, (unsigned char)character);
-  }
+  string_t *buffer = file_read(FP);
   fclose(FP);
+
   /* Set up global variables */
-  PARSER = init_parser(buffer->value);
-  free(buffer);
+  PARSER = init_parser(buffer);
   STACK = init_stack(DEFAULT_STACK_SIZE);
   EVAL_STACK = init_stack(DEFAULT_STACK_SIZE);
   CONTAIN_DEF_STACK = init_stack(DEFAULT_STACK_SIZE);
@@ -202,16 +206,22 @@ int main(int argc, char **argv) {
   MACROS = init_stack(DEFAULT_STACK_SIZE);
   OBJ_TABLE = init_ht(DEFAULT_STACK_SIZE);
   EXIT_CODE = NULL;
+  CAST_ARGS = malloc(4 * sizeof(string_t*));
+  CAST_ARGS[0] = init_string(U"VSTACK");
+  CAST_ARGS[1] = init_string(U"0");
+  CAST_ARGS[2] = init_string(U"VMACRO");
+  CAST_ARGS[3] = init_string(U"1");
 
   /* initialise environment */
   contain_t *stack =
-      init_contain(init_ht(DEFAULT_HT_SIZE), init_ht(DEFAULT_HT_SIZE),
-                   init_stack(DEFAULT_STACK_SIZE));
+      init_contain(init_ht(DEFAULT_HT_SIZE), init_ht(DEFAULT_HT_SIZE), NULL);
   stack->faliases = init_stack(DEFAULT_STACK_SIZE);
-  stack_push(stack->faliases, init_string("f"));
-  stack_push(stack->faliases, init_string("ing"));
+  stack_push(stack->faliases, init_string(U"f"));
+  stack_push(stack->faliases, init_string(U"ing"));
   add_funcs(stack->flit);
   stack_push(STACK, stack);
+
+  init_math();
 
   /* parse and eval loop */
   while (1) {

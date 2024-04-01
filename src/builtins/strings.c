@@ -1,36 +1,38 @@
 #include <builtins/strings.h>
 #include <builtinslib.h>
-#include <math.h>
+#include <better_string.h>
+#include <strnum.h>
+
 extern stack_t *STACK;
 
 void cog_concat(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   stack_t *stack = cur->stack;
   if (stack->size < 2) {
-    eval_error("TOO FEW ARGUMENTS", v);
+    eval_error(U"TOO FEW ARGUMENTS", v);
     return;
   }
   value_t *c2 = stack_pop(stack);
-  if (c2->container->stack->size != 1) {
-    eval_error("TYPE ERROR", v);
+  if (value_stack(c2)[0]->size != 1) {
+    eval_error(U"TYPE ERROR", v);
     stack_push(stack, c2);
     return;
   }
-  value_t *w2 = c2->container->stack->items[0];
+  value_t *w2 = value_stack(c2)[0]->items[0];
   if (w2->type != VWORD) {
-    eval_error("TYPE ERROR", v);
+    eval_error(U"TYPE ERROR", v);
     stack_push(stack, c2);
     return;
   }
   value_t *c1 = stack_peek(stack);
-  if (c1->container->stack->size != 1) {
-    eval_error("TYPE ERROR", v);
+  if (value_stack(c1)[0]->size != 1) {
+    eval_error(U"TYPE ERROR", v);
     stack_push(stack, c2);
     return;
   }
-  value_t *w1 = c1->container->stack->items[0];
+  value_t *w1 = value_stack(c1)[0]->items[0];
   if (w1->type != VWORD) {
-    eval_error("TYPE ERROR", v);
+    eval_error(U"TYPE ERROR", v);
     stack_push(stack, c2);
     return;
   }
@@ -42,39 +44,39 @@ void cog_cut(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   stack_t *stack = cur->stack;
   if (stack->size < 2) {
-    eval_error("TOO FEW ARGUMENTS", v);
+    eval_error(U"TOO FEW ARGUMENTS", v);
     return;
   }
   value_t *v1 = stack_pop(stack);
-  if (v1->container->stack->size != 1) {
-    eval_error("BAD ARGUMENT TYPE", v);
+  if (value_stack(v1)[0]->size != 1) {
+    eval_error(U"BAD ARGUMENT TYPE", v);
     stack_push(stack, v1);
     return;
   }
-  value_t *w1 = v1->container->stack->items[0];
+  value_t *w1 = value_stack(v1)[0]->items[0];
   if (w1->type != VWORD) {
-    eval_error("BAD ARGUMENT TYPE", v);
+    eval_error(U"BAD ARGUMENT TYPE", v);
     stack_push(stack, v1);
     return;
   }
   value_t *quot = stack_pop(stack);
-  if (quot->container->stack->size != 1) {
-    eval_error("BAD ARGUMENT TYPE", v);
+  if (value_stack(quot)[0]->size != 1) {
+    eval_error(U"BAD ARGUMENT TYPE", v);
     stack_push(stack, quot);
     stack_push(stack, v1);
     return;
   }
-  value_t *wq = quot->container->stack->items[0];
+  value_t *wq = value_stack(quot)[0]->items[0];
   if (wq->type != VWORD) {
-    eval_error("BAD ARGUMENT TYPE", v);
+    eval_error(U"BAD ARGUMENT TYPE", v);
     stack_push(stack, quot);
     stack_push(stack, v1);
     return;
   }
   string_t *str = wq->str_word;
-  int n = atoi(w1->str_word->value);
+  size_t n = string_to_int(w1->str_word);
   if (n < 0 || n >= str->length) {
-    eval_error("INDEX OUT OF RANGE", v);
+    eval_error(U"INDEX OUT OF RANGE", v);
     stack_push(stack, quot);
     stack_push(stack, v1);
     return;
@@ -94,32 +96,21 @@ void cog_len(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   stack_t *stack = cur->stack;
   if (stack->size < 1) {
-    eval_error("TOO FEW ARGUMENTS", v);
+    eval_error(U"TOO FEW ARGUMENTS", v);
     return;
   }
-  value_t *v1 = stack_pop(stack);
-  if (v1->container->stack->size != 1) {
-    eval_error("BAD ARGUMENT TYPE", v);
-    stack_push(stack, v1);
+  value_t *v1 = stack_peek(stack);
+  if (value_stack(v1)[0]->size != 1) {
+    eval_error(U"BAD ARGUMENT TYPE", v);
     return;
   }
-  value_t *w1 = v1->container->stack->items[0];
+  value_t *w1 = value_stack(v1)[0]->items[0];
   if (w1->type != VWORD) {
-    eval_error("BAD ARGUMENT TYPE", v);
-    stack_push(stack, v1);
+    eval_error(U"BAD ARGUMENT TYPE", v);
     return;
   }
   value_t *r1 = init_value(VWORD);
-  r1->str_word = init_string(NULL);
-  int x = w1->str_word->length;
-  int len = (int)((ceil(log10(x))+1)*sizeof(char));
-  char *result = malloc(len + 10);
-  snprintf(result, len + 1, "%d", x);
-  /* string_t *s = calloc(1, sizeof(string_t)); */
-  r1->str_word->bufsize = len + 10;
-  r1->str_word->length = len;
-  r1->str_word->value = result;
-  stack_push(stack, v1);
+  r1->str_word = int_to_string(w1->str_word->length);
   push_quoted(cur, r1);
 }
 
@@ -127,42 +118,37 @@ void cog_nth(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   stack_t *stack = cur->stack;
   if (stack->size < 2) {
-    eval_error("TOO FEW ARGUMENTS", v);
+    eval_error(U"TOO FEW ARGUMENTS", v);
     return;
   }
   value_t *v1 = stack_pop(stack);
-  if (v1->container->stack->size != 1) {
-    eval_error("BAD ARGUMENT TYPE", v);
+  if (value_stack(v1)[0]->size != 1) {
+    eval_error(U"BAD ARGUMENT TYPE", v);
     stack_push(stack, v1);
     return;
   }
-  value_t *w1 = v1->container->stack->items[0];
+  value_t *w1 = value_stack(v1)[0]->items[0];
   if (w1->type != VWORD) {
-    eval_error("BAD ARGUMENT TYPE", v);
-    stack_push(stack, v1);
-    return;
-  }
-  if (!strisint(w1->str_word)) {
-    eval_error("BAD ARGUMENT TYPE", v);
+    eval_error(U"BAD ARGUMENT TYPE", v);
     stack_push(stack, v1);
     return;
   }
   value_t *quot = stack_peek(stack);
-  if (quot->container->stack->size != 1) {
-    eval_error("BAD ARGUMENT TYPE", v);
+  if (value_stack(quot)[0]->size != 1) {
+    eval_error(U"BAD ARGUMENT TYPE", v);
     stack_push(stack, v1);
     return;
   }
-  value_t *wq = quot->container->stack->items[0];
+  value_t *wq = value_stack(quot)[0]->items[0];
   if (wq->type != VWORD) {
-    eval_error("BAD ARGUMENT TYPE", v);
+    eval_error(U"BAD ARGUMENT TYPE", v);
     stack_push(stack, v1);
     return;
   }
   string_t *str = wq->str_word;
-  int n = atoi(w1->str_word->value);
+  int n = string_to_int(w1->str_word);
   if (n < 0 || n >= str->length) {
-    eval_error("INDEX OUT OF RANGE", v);
+    eval_error(U"INDEX OUT OF RANGE", v);
     stack_push(stack, v1);
     return;
   }
@@ -174,8 +160,8 @@ void cog_nth(value_t *v) {
 
 
 void add_funcs_strings(ht_t *flit) {
-  add_func(flit, cog_concat, "concat");
-  add_func(flit, cog_len, "len");
-  add_func(flit, cog_cut, "cut");
-  add_func(flit, cog_nth, "nth");
+  add_func(flit, cog_concat, U"concat");
+  add_func(flit, cog_len, U"len");
+  add_func(flit, cog_cut, U"cut");
+  add_func(flit, cog_nth, U"nth");
 }

@@ -6,16 +6,15 @@ extern stack_t *STACK;
 extern stack_t *CONTAIN_DEF_STACK;
 extern string_t *EXIT_CODE;
 extern bool EXITED;
-
 void cog_cd(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   value_t *child = stack_peek(cur->stack);
   if (child == NULL) {
-    eval_error("TOO FEW ARGUMENTS", v);
+    eval_error(U"TOO FEW ARGUMENTS", v);
     return;
   }
-  if (child->type == VMACRO) {
-    eval_error("BAD ARGUMENT TYPE", v);
+  if (child->type != VSTACK) {
+    eval_error(U"BAD ARGUMENT TYPE", v);
     stack_push(cur->stack, child);
     return;
   }
@@ -37,11 +36,11 @@ void cog_ccd(value_t *v) {
   value_t *child = stack_peek(cur->stack);
   if (child == NULL) {
     stack_push(STACK, cur);
-    eval_error("TOO FEW ARGUMENTS", v);
+    eval_error(U"TOO FEW ARGUMENTS", v);
     return;
   }
-  if (child->type == VMACRO) {
-    eval_error("BAD ARGUMENT TYPE", v);
+  if (child->type != VSTACK) {
+    eval_error(U"BAD ARGUMENT TYPE", v);
     stack_push(STACK, cur);
     stack_push(cur->stack, child);
     return;
@@ -78,7 +77,7 @@ void cog_pop(value_t *v) {
   contain_t *old = stack_pop(STACK);
   value_t *popval = stack_pop(old->stack);
   if (!popval) {
-    eval_error("TOO FEW ARGUMENTS", v);
+    eval_error(U"TOO FEW ARGUMENTS", v);
     stack_push(old->stack, popval);
     stack_push(STACK, old);
   }
@@ -116,17 +115,17 @@ void cog_exit(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   value_t *codec = stack_pop(cur->stack);
   if (!codec) {
-    eval_error("TOO FEW ARGUMENTS", v);
+    eval_error(U"TOO FEW ARGUMENTS", v);
     return;
   }
   if (value_stack(codec)[0]->size != 1) {
-    eval_error("BAD ARGUMENT TYPE", v);
+    eval_error(U"BAD ARGUMENT TYPE", v);
     stack_push(cur->stack, codec);
     return;
   }
   value_t *code = value_stack(codec)[0]->items[0];
   if (code->type != VWORD) {
-    eval_error("BAD ARGUMENT TYPE", v);
+    eval_error(U"BAD ARGUMENT TYPE", v);
     stack_push(cur->stack, codec);
     return;
   }
@@ -138,11 +137,11 @@ void cog_exit(value_t *v) {
 }
 
 void add_funcs_metastack(ht_t *flit) {
-  add_func(flit, cog_cd, "cd");
-  add_func(flit, cog_ccd, "ccd");
-  add_func(flit, cog_uncd, "uncd");
-  add_func(flit, cog_pop, "pop");
-  add_func(flit, cog_qstack, "qstack");
-  add_func(flit, cog_root, "root");
-  add_func(flit, cog_exit, "exit");
+  add_func(flit, cog_cd, U"cd");
+  add_func(flit, cog_ccd, U"ccd");
+  add_func(flit, cog_uncd, U"uncd");
+  add_func(flit, cog_pop, U"pop");
+  add_func(flit, cog_qstack, U"qstack");
+  add_func(flit, cog_root, U"root");
+  add_func(flit, cog_exit, U"exit");
 }

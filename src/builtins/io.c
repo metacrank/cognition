@@ -18,7 +18,7 @@ void cog_period(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   value_t *elt = stack_pop(cur->stack);
   if (elt == NULL) {
-    eval_error("TOO FEW ARGUMENTS", v);
+    eval_error(U"TOO FEW ARGUMENTS", v);
     return;
   }
   print_value(elt, "\n");
@@ -29,40 +29,34 @@ void cog_print(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   value_t *v1 = stack_pop(cur->stack);
   if (v1 == NULL) {
-    eval_error("TOO FEW ARGUMENTS", v);
+    eval_error(U"TOO FEW ARGUMENTS", v);
     return;
   }
-  if (v1->container->stack->size == 0) {
+  if (value_stack(v1)[0]->size == 0) {
     stack_push(cur->stack, v1);
-    eval_error("BAD ARGUMENT TYPE", v);
+    eval_error(U"BAD ARGUMENT TYPE", v);
     return;
   }
-  value_t *word = v1->container->stack->items[0];
+  value_t *word = value_stack(v1)[0]->items[0];
   if (word->type != VWORD) {
     stack_push(cur->stack, v1);
-    eval_error("BAD ARGUMENT TYPE", v);
+    eval_error(U"BAD ARGUMENT TYPE", v);
     return;
   }
-  printf("%s", word->str_word->value);
-
+  print(word->str_word);
   value_free_safe(v1);
 }
 
 void cog_read(value_t *v) {
   contain_t *cur = stack_peek(STACK);
-  value_t *strc = init_value(VSTACK);
-  strc->container = init_contain(NULL, NULL, NULL);
   value_t *strval = init_value(VWORD);
-  char *s = get_line(stdin);
-  strval->str_word = init_string(s);
-  stack_push(strc->container->stack, strval);
-  stack_push(cur->stack, strc);
-  free(s);
+  strval->str_word = get_line(stdin);
+  push_quoted(cur, strval);
 }
 
 void add_funcs_io(ht_t* flit) {
-  add_func(flit, cog_questionmark, "?");
-  add_func(flit, cog_period, ".");
-  add_func(flit, cog_print, "print");
-  add_func(flit, cog_read, "read");
+  add_func(flit, cog_questionmark, U"?");
+  add_func(flit, cog_period, U".");
+  add_func(flit, cog_print, U"print");
+  add_func(flit, cog_read, U"read");
 }

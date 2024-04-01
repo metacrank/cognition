@@ -77,8 +77,12 @@
 /* Set defaults */
 #define DEFAULT_HT_SIZE 1001
 #define DEFAULT_STACK_SIZE 10
+#define DEFAULT_NUMBER_BASE 10
+
+/* basic debug levels */
+#define DEBUG 0
 
 /*! Die in case of catastrophic memory problem */
-void die(char *message);
+void die(void *message);
 
 #endif

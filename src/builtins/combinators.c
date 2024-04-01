@@ -3,9 +3,11 @@
 #include <macros.h>
 #include <string.h>
 #include <stdio.h>
+#include <strnum.h>
 
 extern stack_t *STACK;
 extern stack_t *EVAL_STACK;
+string_t **CAST_ARGS;
 
 extern void add_funcs(ht_t *flit);
 
@@ -13,7 +15,7 @@ void cog_quote(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   value_t *v1 = stack_pop(cur->stack);
   if (v1 == NULL) {
-    eval_error("TOO FEW ARGUMENTS", v);
+    eval_error(U"TOO FEW ARGUMENTS", v);
     return;
   }
   push_quoted(cur, v1);
@@ -53,71 +55,6 @@ void cog_stack(value_t *v) {
   stack_push(cur->stack, v1);
 }
 
-/* void cog_wstack(value_t *v) { */
-/*   contain_t *cur = stack_peek(STACK); */
-/*   value_t *list = stack_pop(STACK); */
-/*   if (list == NULL) { */
-/*     eval_error("TOO FEW ARGUMENTS", v); */
-/*     return; */
-/*   } */
-/*   value_t *retval = init_value(VSTACK); */
-/*   retval->container = calloc(1, sizeof(contain_t)); */
-/*   retval->container->err_stack = init_stack(DEFAULT_STACK_SIZE); */
-/*   retval->container->stack = init_stack(DEFAULT_STACK_SIZE); */
-/*   retval->container->faliases = init_stack(DEFAULT_STACK_SIZE); */
-/*   retval->container->delims = string_copy(cur->delims); */
-/*   retval->container->singlets = string_copy(cur->singlets); */
-/*   retval->container->ignored = string_copy(cur->ignored); */
-/*   retval->container->dflag = cur->dflag; */
-/*   retval->container->iflag = cur->iflag; */
-/*   retval->container->sflag = cur->sflag; */
-/*   contain_t *expand; */
-/*   stack_t *macro; */
-/*   for (int i = 0; i < list->container->stack->size; i++) { */
-/*     value_t *v1 = list->container->stack->items[i]; */
-/*     if ((macro = ht_get(cur->flit, v1->str_word))) { */
-/*       ht_add(retval->container->flit, v1->str_word, value_stack_copy(macro), value_stack_free); */
-/*     } else if ((expand = ht_get(cur->word_table, v1->str_word))) { */
-/*       ht_add(retval->container->word_table, v1->str_word, contain_value_copy(expand), contain_free); */
-/*     } else if (isfalias(v1)) { */
-/*       stack_push(retval->container->faliases, string_copy(v1->str_word)); */
-/*     } else { */
-/*       eval_error("UNDEFINED WORD", v); */
-/*       return; */
-/*     } */
-/*   } */
-/*   stack_push(cur->stack, retval); */
-/* } */
-
-/* //needs to not rely on cog_child(), specifically because cranks should not be copied */
-/* void cog_bstack(value_t *v) { */
-/*   contain_t *cur = stack_peek(STACK); */
-/*   value_t *list = stack_pop(STACK); */
-/*   if (list == NULL) { */
-/*     eval_error("TOO FEW ARGUMENTS", v); */
-/*     return; */
-/*   } */
-/*   cog_child(v); */
-/*   value_t *v1 = stack_peek(cur->stack); */
-/*   for (int i = 0; i < list->container->stack->size; i++) { */
-/*     value_t *v2 = list->container->stack->items[i]; */
-/*     if (ht_exists(v1->container->flit, v2->str_word)) { */
-/*       ht_delete(v1->container->flit, v2->str_word, value_stack_free); */
-/*     } else if (ht_exists(v1->container->word_table, v2->str_word)) { */
-/*       ht_delete(v1->container->word_table, v2->str_word, contain_free); */
-/*     } else if (isfaliasin(v1->container, v2)) { */
-/*       for (int i = 0; i < v1->container->faliases->size; i++) { */
-/*         string_t *f = v1->container->faliases->items[i]; */
-/*         if (strcmp(f->value, v2->str_word->value) == 0) { */
-/*           stack_popdeep(v1->container->faliases, i); */
-/*         } */
-/*       } */
-/*     } else { */
-/*       eval_error("UNDEFINED WORD", v); */
-/*       return; */
-/*     } */
-/*   } */
-/* } */
 
 void cog_macro(value_t *v) {
   contain_t *cur = stack_peek(STACK);
@@ -126,52 +63,27 @@ void cog_macro(value_t *v) {
   stack_push(cur->stack, v1);
 }
 
-/* void cog_expand(value_t *v) { */
-/*   contain_t *cur = stack_peek(STACK); */
-/*   value_t *v1 = stack_peek(cur->stack); */
-/*   if (!v1) { */
-/*     eval_error("TOO FEW ARGUMENTS", v); */
-/*     return; */
-/*   } */
-/*   stack_t *family = init_stack(DEFAULT_STACK_SIZE); */
-/*   stack_t *new = init_stack(DEFAULT_STACK_SIZE); */
-/*   stack_push(family, cur); */
-/*   if (v1->type == VSTACK) { */
-/*     stack_push(family, v1->container); */
-/*     expandstack(v1->container->stack, new, family); */
-/*     value_stack_free(v1->container->stack); */
-/*     v1->container->stack = new; */
-/*   } */
-/*   else { */
-/*     expandstack(v1->macro, new, family); */
-/*     value_stack_free(v1->macro); */
-/*     v1->macro = new; */
-/*   } */
-/*   free(family->items); */
-/*   free(family); */
-/* } */
-
 void cog_cast(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   value_t *v1 = stack_pop(cur->stack);
   if (!v1) {
-    eval_error("TOO FEW ARGUMENTS", v);
+    eval_error(U"TOO FEW ARGUMENTS", v);
     return;
   }
   value_t *quot = stack_peek(cur->stack);
   stack_t *v1stack = *value_stack(v1);
   if (v1stack->size != 1) {
     stack_push(cur->stack, v1);
-    eval_error("BAD ARGUMENT TYPE", v);
+    eval_error(U"BAD ARGUMENT TYPE", v);
     return;
   }
   value_t *num = v1stack->items[0];
   if (num->type != VWORD) {
     stack_push(cur->stack, v1);
-    eval_error("BAD ARGUMENT TYPE", v);
+    eval_error(U"BAD ARGUMENT TYPE", v);
     return;
   }
-  if (strcmp(num->str_word->value, "0") == 0 || strcmp(num->str_word->value, "VSTACK") == 0) {
+  if (string_comp(num->str_word, CAST_ARGS[0]) == 0 || string_comp(num->str_word, CAST_ARGS[1]) == 0) {
     if (quot->type == VSTACK) {
       value_free_safe(v1);
       return;
@@ -183,7 +95,7 @@ void cog_cast(value_t *v) {
     value_free_safe(v1);
     return;
   }
-  if (strcmp(num->str_word->value, "1") == 0 || strcmp(num->str_word->value, "VMACRO") == 0) {
+  if (string_comp(num->str_word, CAST_ARGS[2]) == 0 || string_comp(num->str_word, CAST_ARGS[3]) == 0) {
     if (quot->type == VMACRO) {
       value_free_safe(v1);
       return;
@@ -196,7 +108,7 @@ void cog_cast(value_t *v) {
     value_free_safe(v1);
     return;
   }
-  eval_error("INDEX OUT OF RANGE", v);
+  eval_error(U"INDEX OUT OF RANGE", v);
   stack_push(cur->stack, v1);
 }
 
@@ -205,8 +117,8 @@ void cog_sub(value_t *v) {
   value_t *v1 = init_value(VSTACK);
   v1->container = init_contain(NULL, init_ht(DEFAULT_HT_SIZE), NULL);
   v1->container->faliases = init_stack(DEFAULT_STACK_SIZE);
-  stack_push(v1->container->faliases, init_string("f"));
-  stack_push(v1->container->faliases, init_string("ing"));
+  stack_push(v1->container->faliases, init_string(U"f"));
+  stack_push(v1->container->faliases, init_string(U"ing"));
   add_funcs(v1->container->flit);
   stack_push(cur->stack, v1);
 }
@@ -214,7 +126,7 @@ void cog_sub(value_t *v) {
 void cog_compose(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   if (cur->stack->size < 2) {
-    eval_error("TOO FEW ARGUMENTS", v);
+    eval_error(U"TOO FEW ARGUMENTS", v);
     return;
   }
   value_t *v2 = stack_pop(cur->stack);
@@ -233,7 +145,7 @@ void cog_compose(value_t *v) {
 void cog_prepose(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   if (cur->stack->size < 2) {
-    eval_error("TOO FEW ARGUMENTS", v);
+    eval_error(U"TOO FEW ARGUMENTS", v);
     return;
   }
   value_t *v2 = stack_pop(cur->stack);
@@ -257,49 +169,118 @@ void cog_prepose(value_t *v) {
 void cog_put(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   if (cur->stack->size < 3) {
-    eval_error("TOO FEW ARGUMENTS", v);
+    eval_error(U"TOO FEW ARGUMENTS", v);
     return;
   }
   value_t *index = stack_pop(cur->stack);
   if (value_stack(index)[0]->size != 1) {
     stack_push(cur->stack, index);
-    eval_error("BAD ARGUMENT TYPE", v);
+    eval_error(U"BAD ARGUMENT TYPE", v);
     return;
   }
   value_t *idxval = value_stack(index)[0]->items[0];
   if (idxval->type != VWORD) {
     stack_push(cur->stack, index);
-    eval_error("BAD ARGUMENT TYPE", v);
-    return;
-  }
-  if (!strisint(idxval->str_word)) {
-    stack_push(cur->stack, index);
-    eval_error("BAD ARGUMENT TYPE", v);
+    eval_error(U"BAD ARGUMENT TYPE", v);
     return;
   }
   value_t *v1 = stack_pop(cur->stack);
   value_t *stack = stack_peek(cur->stack);
-  int idx = atoi(idxval->str_word->value);
+  size_t idx = string_to_int(idxval->str_word);
   stack_t *stackstack = *value_stack(stack);
   if (idx < 0 || idx > stackstack->size) {
     stack_push(cur->stack, v1);
     stack_push(cur->stack, index);
-    eval_error("OUT OF RANGE", v);
+    eval_error(U"OUT OF RANGE", v);
     return;
   }
   value_free_safe(index);
   stack_push(stackstack, NULL);
-  for (int i = idx + 1; i < stackstack->size; i++) {
+  for (size_t i = idx + 1; i < stackstack->size; i++) {
     stackstack->items[i] = stackstack->items[i-1];
   }
   stackstack->items[idx] = v1;
 }
 
 void cog_dip(value_t *v) {
+/* // currenty equivalent to evalf'ing the loop body every repetition */
+/* // you could truly 'loop' the code by applying eval() to each member of the quote instead */
+/* void cog_loop(value_t *v) { */
+/*   contain_t *cur = stack_peek(STACK); */
+/*   if (cur->stack->size == 0) { */
+/*     eval_error(U"TOO FEW ARGUMENTS", v); */
+/*     return; */
+/*   } */
+/*   value_t *body = stack_pop(cur->stack); */
+/*   stack_push(EVAL_STACK, body); */
+/*   bool cont = true; */
+/*   stack_t *family = init_stack(DEFAULT_STACK_SIZE); */
+/*   stack_push(family, cur); */
+/*   do { */
+/*     evalstack(body->container, family); */
+/*     value_t *cont_val = stack_peek(STACK); */
+/*     if (cont_val == NULL) { */
+/*       eval_error(U"TOO FEW ARGUMENTS", v); */
+/*       break; */
+/*     } */
+/*     if (cont_val->container->stack->size != 1) { */
+/*       eval_error(U"BAD ARGUMENT TYPE", v); */
+/*       break; */
+/*     } */
+/*     value_t *cont_val_value = cont_val->container->stack->items[0]; */
+/*     if (cont_val_value->type != VWORD) { */
+/*       eval_error(U"BAD ARGUMENT TYPE", v); */
+/*       break; */
+/*     } */
+/*     cont = word_truth(cont_val_value); */
+/*   } while (cont); */
+/*   value_t *b = stack_pop(EVAL_STACK); */
+/*   value_free_safe(b); */
+/*   free(family->items); */
+/*   free(family); */
+/* } */
+
+/* void cog_times(value_t *v) { */
+/*   contain_t *cur = stack_peek(STACK); */
+/*   if (cur->stack->size < 2) { */
+/*     eval_error(U"TOO FEW ARGUMENTS", v); */
+/*     return; */
+/*   } */
+/*   value_t *q1 = stack_pop(cur->stack); */
+/*   if (q1->container->stack->size != 1) { */
+/*     stack_push(cur->stack, q1); */
+/*     eval_error(U"BAD ARGUMENT TYPE", v); */
+/*     return; */
+/*   } */
+/*   value_t *w1 = q1->container->stack->items[0]; */
+/*   if (w1->type != VWORD) { */
+/*     stack_push(cur->stack, q1); */
+/*     eval_error(U"BAD ARGUMENT TYPE", v); */
+/*     return; */
+/*   } */
+/*   if (!strisint(w1->str_word)) { */
+/*     stack_push(cur->stack, q1); */
+/*     eval_error(U"BAD ARGUMENT TYPE", v); */
+/*     return; */
+/*   } */
+/*   int n = atoi(w1->str_word->value); */
+/*   value_t *body = stack_pop(STACK); */
+/*   stack_push(EVAL_STACK, body); */
+/*   stack_t *family = init_stack(DEFAULT_STACK_SIZE); */
+/*   stack_push(family, cur); */
+/*   for (int i = 0; i < n; i++) { */
+/*     evalstack(body->container, family); */
+/*   } */
+/*   free(family->items); */
+/*   free(family); */
+/*   value_free_safe(body); */
+/*   value_free_safe(q1); */
+/* } */
+
   contain_t *cur = stack_peek(STACK);
   stack_t *stack = cur->stack;
   if (cur->stack->size < 2) {
-    eval_error("TOO FEW ARGUMENTS", v);
+    eval_error(U"TOO FEW ARGUMENTS", v);
     return;
   }
   value_t *quot = stack_pop(stack);
@@ -316,20 +297,20 @@ void cog_if(value_t *v) {
   stack_t *stack = cur->stack;
   value_t *v3 = stack_pop(stack);
   if (!v3) {
-    eval_error("TOO FEW ARGUMENTS", v);
+    eval_error(U"TOO FEW ARGUMENTS", v);
     return;
   }
   value_t *v2 = stack_pop(stack);
   if (!v2) {
     stack_push(cur->stack, v3);
-    eval_error("TOO FEW ARGUMENTS", v);
+    eval_error(U"TOO FEW ARGUMENTS", v);
     return;
   }
   value_t *v1 = stack_pop(stack);
   if (!v1) {
     stack_push(cur->stack, v2);
     stack_push(cur->stack, v3);
-    eval_error("TOO FEW ARGUMENTS", v);
+    eval_error(U"TOO FEW ARGUMENTS", v);
     return;
   }
   value_t *w1 = value_stack(v1)[0]->items[0];
@@ -337,7 +318,7 @@ void cog_if(value_t *v) {
     stack_push(stack, v1);
     stack_push(stack, v2);
     stack_push(stack, v3);
-    eval_error("BAD ARGUMENT TYPE", v);
+    eval_error(U"BAD ARGUMENT TYPE", v);
     return;
   }
   bool v1_fixed = word_truth(w1);
@@ -355,121 +336,45 @@ void cog_if(value_t *v) {
   dec_crank(cur);
 }
 
-/* // currenty equivalent to evalf'ing the loop body every repetition */
-/* // you could truly 'loop' the code by applying eval() to each member of the quote instead */
-/* void cog_loop(value_t *v) { */
-/*   contain_t *cur = stack_peek(STACK); */
-/*   if (cur->stack->size == 0) { */
-/*     eval_error("TOO FEW ARGUMENTS", v); */
-/*     return; */
-/*   } */
-/*   value_t *body = stack_pop(cur->stack); */
-/*   stack_push(EVAL_STACK, body); */
-/*   bool cont = true; */
-/*   stack_t *family = init_stack(DEFAULT_STACK_SIZE); */
-/*   stack_push(family, cur); */
-/*   do { */
-/*     evalstack(body->container, family); */
-/*     value_t *cont_val = stack_peek(STACK); */
-/*     if (cont_val == NULL) { */
-/*       eval_error("TOO FEW ARGUMENTS", v); */
-/*       break; */
-/*     } */
-/*     if (cont_val->container->stack->size != 1) { */
-/*       eval_error("BAD ARGUMENT TYPE", v); */
-/*       break; */
-/*     } */
-/*     value_t *cont_val_value = cont_val->container->stack->items[0]; */
-/*     if (cont_val_value->type != VWORD) { */
-/*       eval_error("BAD ARGUMENT TYPE", v); */
-/*       break; */
-/*     } */
-/*     cont = word_truth(cont_val_value); */
-/*   } while (cont); */
-/*   value_t *b = stack_pop(EVAL_STACK); */
-/*   value_free_safe(b); */
-/*   free(family->items); */
-/*   free(family); */
-/* } */
-
-/* void cog_times(value_t *v) { */
-/*   contain_t *cur = stack_peek(STACK); */
-/*   if (cur->stack->size < 2) { */
-/*     eval_error("TOO FEW ARGUMENTS", v); */
-/*     return; */
-/*   } */
-/*   value_t *q1 = stack_pop(cur->stack); */
-/*   if (q1->container->stack->size != 1) { */
-/*     stack_push(cur->stack, q1); */
-/*     eval_error("BAD ARGUMENT TYPE", v); */
-/*     return; */
-/*   } */
-/*   value_t *w1 = q1->container->stack->items[0]; */
-/*   if (w1->type != VWORD) { */
-/*     stack_push(cur->stack, q1); */
-/*     eval_error("BAD ARGUMENT TYPE", v); */
-/*     return; */
-/*   } */
-/*   if (!strisint(w1->str_word)) { */
-/*     stack_push(cur->stack, q1); */
-/*     eval_error("BAD ARGUMENT TYPE", v); */
-/*     return; */
-/*   } */
-/*   int n = atoi(w1->str_word->value); */
-/*   value_t *body = stack_pop(STACK); */
-/*   stack_push(EVAL_STACK, body); */
-/*   stack_t *family = init_stack(DEFAULT_STACK_SIZE); */
-/*   stack_push(family, cur); */
-/*   for (int i = 0; i < n; i++) { */
-/*     evalstack(body->container, family); */
-/*   } */
-/*   free(family->items); */
-/*   free(family); */
-/*   value_free_safe(body); */
-/*   value_free_safe(q1); */
-/* } */
-
 void cog_split(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   if (cur->stack->size < 2) {
-    eval_error("TOO FEW ARGUMENTS", v);
+    eval_error(U"TOO FEW ARGUMENTS", v);
     return;
   }
   value_t *num = stack_pop(cur->stack);
-  if (num->container->stack->size != 1) {
+  if (value_stack(num)[0]->size != 1) {
     stack_push(cur->stack, num);
-    eval_error("BAD ARGUMENT TYPE", v);
+    eval_error(U"BAD ARGUMENT TYPE", v);
     return;
   }
-  value_t *numval = num->container->stack->items[0];
+  value_t *numval = value_stack(num)[0]->items[0];
   if (numval->type != VWORD) {
     stack_push(cur->stack, num);
-    eval_error("BAD ARGUMENT TYPE", v);
+    eval_error(U"BAD ARGUMENT TYPE", v);
     return;
   }
-  if (!strisint(numval->str_word)) {
-    stack_push(cur->stack, num);
-    eval_error("BAD ARGUMENT TYPE", v);
-    return;
-  }
-  int n = atoi(numval->str_word->value);
+  int n = string_to_int(numval->str_word);
   value_t *q = stack_peek(STACK);
-  if (n < 0 || n > q->container->stack->size) {
+  stack_t *qstack = *value_stack(q);
+  if (n < 0 || n > qstack->size) {
     stack_push(cur->stack, num);
-    eval_error("OUT OF RANGE", v);
+    eval_error(U"OUT OF RANGE", v);
     return;
   }
   value_t *q2 = init_value(VSTACK);
 
   q2->container = calloc(1, sizeof(contain_t));
   q2->container->stack = init_stack(DEFAULT_STACK_SIZE);
-  q2->container->err_stack = stack_copy(q->container->err_stack, value_copy);
-  contain_copy_attributes(q->container, q2->container);
-
-  for (int i = n; i < q->container->stack->size; i++) {
-    stack_push(q2->container->stack, q->container->stack->items[i]);
+  if (q->type == VSTACK) {
+    q2->container->err_stack = stack_copy(q->container->err_stack, value_copy);
+    contain_copy_attributes(q->container, q2->container);
   }
-  q->container->stack->size = n;
+
+  for (int i = n; i < qstack->size; i++) {
+    stack_push(q2->container->stack, qstack->items[i]);
+  }
+  qstack->size = n;
   stack_push(cur->stack, q2);
 }
 
@@ -477,166 +382,113 @@ void cog_vat(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   stack_t *stack = cur->stack;
   if (stack->size < 2) {
-    eval_error("TOO FEW ARGUMENTS", v);
+    eval_error(U"TOO FEW ARGUMENTS", v);
     return;
   }
   value_t *index = stack_pop(stack);
-  if (index->container->stack->size != 1) {
+  if (value_stack(index)[0]->size != 1) {
     stack_push(stack, index);
-    eval_error("BAD ARGUMENT TYPE", v);
+    eval_error(U"BAD ARGUMENT TYPE", v);
     return;
   }
-  value_t *idxval = index->container->stack->items[0];
+  value_t *idxval = value_stack(index)[0]->items[0];
   if (idxval->type != VWORD) {
     stack_push(stack, index);
-    eval_error("BAD ARGUMENT TYPE", v);
+    eval_error(U"BAD ARGUMENT TYPE", v);
     return;
   }
-  if (!strisint(idxval->str_word)) {
-    stack_push(stack, index);
-    eval_error("BAD ARGUMENT TYPE", v);
-    return;
-  }
-  int n = atoi(idxval->str_word->value);
+  int n = string_to_int(idxval->str_word);
   value_t *quot = stack_peek(stack);
-  if (n < 0 || n >= quot->container->stack->size) {
+  if (n < 0 || n >= value_stack(quot)[0]->size) {
     stack_push(stack, index);
-    eval_error("OUT OF RANGE", v);
+    eval_error(U"OUT OF RANGE", v);
     return;
   }
   value_free_safe(index);
-  value_t *v1 = value_copy(quot->container->stack->items[n]);
+  value_t *v1 = value_copy(value_stack(quot)[0]->items[n]);
   stack_push(stack, v1);
 }
-
-/* void cog_nth(value_t *v) { */
-/*   contain_t *cur = stack_peek(STACK); */
-/*   stack_t *stack = cur->stack; */
-/*   if (stack->size < 2) { */
-/*     eval_error("TOO FEW ARGUMENTS", v); */
-/*     return; */
-/*   } */
-/*   value_t *v1 = stack_pop(stack); */
-/*   if (v1->container->stack->size != 1) { */
-/*     eval_error("BAD ARGUMENT TYPE", v); */
-/*     stack_push(stack, v1); */
-/*     return; */
-/*   } */
-/*   value_t *w1 = v1->container->stack->items[0]; */
-/*   if (w1->type != VWORD) { */
-/*     eval_error("BAD ARGUMENT TYPE", v); */
-/*     stack_push(stack, v1); */
-/*     return; */
-/*   } */
-/*   if (!strisint(w1->str_word)) { */
-/*     eval_error("BAD ARGUMENT TYPE", v); */
-/*     stack_push(stack, v1); */
-/*     return; */
-/*   } */
-/*   int n = atoi(w1->str_word->value); */
-/*   value_t *quot = stack_peek(STACK); */
-/*   if (quot->container->stack->size <= n || n < 0) { */
-/*     eval_error("INDEX OUT OF RANGE", v); */
-/*     stack_push(stack, v1); */
-/*     return; */
-/*   } */
-/*   value_free_safe(v1); */
-/*   for (int i = 0; i < n; i++) { */
-/*     value_free_safe(quot->container->stack->items[i]); */
-/*   } */
-/*   for (int i = n + 1; i < quot->container->stack->size; i++) { */
-/*     value_free_safe(quot->container->stack->items[i]); */
-/*   } */
-/*   quot->container->stack->items[0] = quot->container->stack->items[n]; */
-/*   quot->container->stack->size = 0; */
-/* } */
 
 void cog_substack(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   stack_t *stack = cur->stack;
   if (stack->size < 3) {
-    eval_error("TOO FEW ARGUMENTS", v);
+    eval_error(U"TOO FEW ARGUMENTS", v);
     return;
   }
   value_t *index2 = stack_pop(stack);
   value_t *index1 = stack_pop(stack);
-  if (index1->container->stack->size != 1 || index2->container->stack->size != 1) {
+  if (value_stack(index1)[0]->size != 1 || value_stack(index2)[0]->size != 1) {
     stack_push(stack, index1);
     stack_push(stack, index2);
-    eval_error("BAD ARGUMENT TYPE", v);
+    eval_error(U"BAD ARGUMENT TYPE", v);
     return;
   }
-  value_t *idxval1 = index1->container->stack->items[0];
-  value_t *idxval2 = index2->container->stack->items[0];
+  value_t *idxval1 = value_stack(index1)[0]->items[0];
+  value_t *idxval2 = value_stack(index2)[0]->items[0];
   if (idxval1->type != VWORD || idxval2->type != VWORD) {
     stack_push(stack, index1);
     stack_push(stack, index2);
-    eval_error("BAD ARGUMENT TYPE", v);
+    eval_error(U"BAD ARGUMENT TYPE", v);
     return;
   }
-  if (!strisint(idxval1->str_word) || !strisint(idxval2->str_word)) {
-    stack_push(stack, index1);
-    stack_push(stack, index2);
-    eval_error("BAD ARGUMENT TYPE", v);
-    return;
-  }
-  int n1 = atoi(idxval1->str_word->value);
-  int n2 = atoi(idxval2->str_word->value);
+  int n1 = string_to_int(idxval1->str_word);
+  int n2 = string_to_int(idxval2->str_word);
   value_t *quot = stack_peek(stack);
-  if (n1 < 0 || n2 < 0 || n1 >= quot->container->stack->size || n2 >= quot->container->stack->size || n2 < n1) {
+  stack_t *qstack = *value_stack(quot);
+  if (n1 < 0 || n2 < 0 || n1 >= qstack->size || n2 >= qstack->size) {
     stack_push(stack, index1);
     stack_push(stack, index2);
-    eval_error("OUT OF RANGE", v);
+    eval_error(U"INDEX OUT OF RANGE", v);
     return;
   }
   value_free_safe(index1);
   value_free_safe(index2);
-  stack_t *qstack = quot->container->stack;
   for (int i = 0; i < n1; i++) {
     value_free_safe(qstack->items[i]);
+    qstack->items[i] = NULL;
   }
   for (int i = n2 + 1; i < qstack->size; i++) {
     value_free_safe(qstack->items[i]);
+    qstack->items[i] = NULL;
   }
   for (int i = 0; i <= n2 - n1; i++) {
     qstack->items[i] = qstack->items[i + n1];
   }
   qstack->size = n2 - n1 + 1;
+  if (qstack->size < 0) {
+    qstack->size = 0;
+  }
 }
 
 void cog_del(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   stack_t *stack = cur->stack;
   if (stack->size < 2) {
-    eval_error("TOO FEW ARGUMENTS", v);
+    eval_error(U"TOO FEW ARGUMENTS", v);
     return;
   }
   value_t *index = stack_pop(stack);
-  if (index->container->stack->size != 1) {
+  if (value_stack(index)[0]->size != 1) {
     stack_push(stack, index);
-    eval_error("BAD ARGUMENT TYPE", v);
+    eval_error(U"BAD ARGUMENT TYPE", v);
     return;
   }
-  value_t *idxval = index->container->stack->items[0];
+  value_t *idxval = value_stack(index)[0]->items[0];
   if (idxval->type != VWORD) {
     stack_push(stack, index);
-    eval_error("BAD ARGUMENT TYPE", v);
+    eval_error(U"BAD ARGUMENT TYPE", v);
     return;
   }
-  if (!strisint(idxval->str_word)) {
-    stack_push(stack, index);
-    eval_error("BAD ARGUMENT TYPE", v);
-    return;
-  }
-  int n = atoi(idxval->str_word->value);
+  int n = string_to_int(idxval->str_word);
   value_t *quot = stack_peek(stack);
-  if (n < 0 || n >= quot->container->stack->size) {
+  if (n < 0 || n >= value_stack(quot)[0]->size) {
     stack_push(stack, index);
-    eval_error("OUT OF RANGE", v);
+    eval_error(U"OUT OF RANGE", v);
     return;
   }
   value_free_safe(index);
-  value_free_safe(stack_popdeep(quot->container->stack, n));
+  value_free_safe(stack_popdeep(value_stack(quot)[0], n));
 }
 
 void cog_uncompose(value_t *v) {
@@ -644,19 +496,24 @@ void cog_uncompose(value_t *v) {
   stack_t *stack = cur->stack;
   value_t *quot = stack_pop(STACK);
   if (quot == NULL) {
-    eval_error("TOO FEW ARGUMENTS", v);
+    eval_error(U"TOO FEW ARGUMENTS", v);
     return;
   }
-  for (int i = 0; i < quot->container->stack->size; i++) {
+  stack_t *qstack = *value_stack(quot);
+  for (int i = 0; i < qstack->size; i++) {
     value_t *element = init_value(VSTACK);
-    element->container = calloc(1, sizeof(contain_t));
-    element->container->stack = init_stack(DEFAULT_STACK_SIZE);
-    element->container->err_stack = stack_copy(quot->container->err_stack, value_copy);
-    contain_copy_attributes(quot->container, element->container);
-    stack_push(element->container->stack, quot->container->stack->items[i]);
-    stack_push(stack, element);
+    if (quot->type == VSTACK) {
+      element->container = calloc(1, sizeof(contain_t));
+      element->container->stack = init_stack(DEFAULT_STACK_SIZE);
+      element->container->err_stack = stack_copy(quot->container->err_stack, value_copy);
+      contain_copy_attributes(quot->container, element->container);
+      stack_push(element->container->stack, qstack->items[i]);
+      stack_push(stack, element);
+    } else {
+      push_quoted(cur, quot->macro->items[i]);
+    }
   }
-  quot->container->stack->size = 0;
+  qstack->size = 0;
   value_free_safe(quot);
 }
 
@@ -665,14 +522,12 @@ void cog_size(value_t *v) {
   stack_t *stack = cur->stack;
   value_t *v1 = stack_peek(stack);
   if (v1 == NULL) {
-    eval_error("TOO FEW ARGUMENTS", v);
+    eval_error(U"TOO FEW ARGUMENTS", v);
     return;
   }
-  int size = value_stack(v1)[0]->size;
-  char buffer[11];
-  snprintf(buffer, 11, "%d", size);
+  size_t size = value_stack(v1)[0]->size;
   value_t *sizeval = init_value(VWORD);
-  sizeval->str_word = init_string(buffer);
+  sizeval->str_word = int_to_string(size);
   push_quoted(cur, sizeval);
 }
 
@@ -681,36 +536,36 @@ void cog_type(value_t *v) {
   stack_t *stack = cur->stack;
   value_t *v1 = stack_peek(stack);
   if (v1 == NULL) {
-    eval_error("TOO FEW ARGUMENTS", v);
+    eval_error(U"TOO FEW ARGUMENTS", v);
     return;
   }
   value_t *typeval = init_value(VWORD);
   if (v1->type == VSTACK)
-    typeval->str_word = init_string("VSTACK");
+    typeval->str_word = string_copy(CAST_ARGS[0]);
   else if (v1->type == VMACRO)
-    typeval->str_word = init_string("VMACRO");
+    typeval->str_word = string_copy(CAST_ARGS[2]);
   else die("BAD VALUE ON STACK");
   push_quoted(cur, typeval);
 }
 
 void add_funcs_combinators(ht_t *flit) {
-  add_func(flit, cog_quote, "quote");
-  add_func(flit, cog_eval, "eval");
-  add_func(flit, cog_child, "child");
-  add_func(flit, cog_stack, "stack");
-  add_func(flit, cog_macro, "macro");
-  add_func(flit, cog_cast, "cast");
-  add_func(flit, cog_sub, "sub");
-  add_func(flit, cog_compose, "compose");
-  add_func(flit, cog_prepose, "prepose");
-  add_func(flit, cog_put, "put");
-  add_func(flit, cog_dip, "dip");
-  add_func(flit, cog_if, "if");
-  /* add_func(flit, cog_split, "split"); */
-  /* add_func(flit, cog_vat, "vat"); */
-  /* add_func(flit, cog_substack, "substack"); */
-  /* add_func(flit, cog_del, "del"); */
-  /* add_func(flit, cog_uncompose, "uncompose"); */
-  add_func(flit, cog_size, "size");
-  add_func(flit, cog_type, "type");
+  add_func(flit, cog_quote, U"quote");
+  add_func(flit, cog_eval, U"eval");
+  add_func(flit, cog_child, U"child");
+  add_func(flit, cog_stack, U"stack");
+  add_func(flit, cog_macro, U"macro");
+  add_func(flit, cog_cast, U"cast");
+  add_func(flit, cog_sub, U"sub");
+  add_func(flit, cog_compose, U"compose");
+  add_func(flit, cog_prepose, U"prepose");
+  add_func(flit, cog_put, U"put");
+  add_func(flit, cog_dip, U"dip");
+  add_func(flit, cog_if, U"if");
+  /* add_func(flit, cog_split, U"split"); */
+  /* add_func(flit, cog_vat, U"vat"); */
+  /* add_func(flit, cog_substack, U"substack"); */
+  /* add_func(flit, cog_del, U"del"); */
+  /* add_func(flit, cog_uncompose, U"uncompose"); */
+  add_func(flit, cog_size, U"size");
+  add_func(flit, cog_type, U"type");
 }

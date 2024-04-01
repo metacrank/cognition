@@ -43,7 +43,7 @@ void print_crank(char prefix[]) {
 
 void func_free(void *f) {}
 
-void eval_error(void *s, value_t *w) {
+void eval_error(char32_t *s, value_t *w) {
   value_t *v = init_value(VERR);
   v->error = calloc(1, sizeof(error_t));
   if (w)
@@ -269,7 +269,7 @@ custom_t *init_custom(void (*printfunc)(void *), void (*freefunc)(void *),
 
 void custom_free(void *c) { free(c); }
 
-void add_func(ht_t *h, void (*func)(value_t *), void *key) {
+void add_func(ht_t *h, void (*func)(value_t *), char32_t *key) {
   stack_t *macro = init_stack(1);
   value_t *v = init_value(VCLIB);
   v->str_word = init_string(key);
@@ -278,13 +278,13 @@ void add_func(ht_t *h, void (*func)(value_t *), void *key) {
   ht_add(h, init_string(key), macro, value_stack_free);
 }
 
-void add_macro(ht_t *h, stack_t *macro, byte_t *key) {
+void add_macro(ht_t *h, stack_t *macro, char32_t *key) {
   ht_add(h, init_string(key), macro, value_stack_free);
 }
 
 void add_obj(ht_t *h, ht_t *h2, void (*printfunc)(void *),
              void (*freefunc)(void *), void *(*copyfunc)(void *),
-             void (*createfunc)(void *), byte_t *key) {
+             void (*createfunc)(void *), char32_t *key) {
 
   custom_t *c = init_custom(printfunc, freefunc, copyfunc);
   ht_add(h, init_string(key), c, custom_free);
@@ -349,31 +349,38 @@ contain_t *contain_copy(contain_t *c, void *(*copyfunc)(void *)) {
   return contain;
 }
 
-parser_t *init_parser(byte_t *source) {
+parser_t *init_parser(string_t *source) {
   parser_t *p = calloc(1, sizeof(parser_t));
   if (!p)
     die("calloc on parser");
   p->i = 0;
   p->source = source;
-  p->c = source[0];
+  p->c = source->value[0];
   return p;
 }
 
-void parser_reset(parser_t *p, byte_t *source) {
+void parser_reset(parser_t *p, string_t *source) {
   p->source = source;
   p->i = 0;
-  p->c = source[0];
+  p->c = source->value[0];
 }
 
 void parser_move(parser_t *p) {
-  if (p->i < string_len(p->source) && p->c != '\0') {
+  if (p->i < p->source->length) {
     p->i++;
-    p->c = p->source[p->i];
+    p->c = p->source->value[p->i];
   }
 }
 
+bool parser_on(parser_t *p) {
+  if (p->i < p->source->length) {
+    return true;
+  }
+  return false;
+}
+
 value_t *parse_word(parser_t *p, bool skipped) {
-  string_t *strval = init_string(NULL);
+  string_t *strval = init_string(U"");
   value_t *retval = init_value(VWORD);
   retval->str_word = strval;
   if (issinglet(p->c)) {
@@ -381,11 +388,13 @@ value_t *parse_word(parser_t *p, bool skipped) {
     parser_move(p);
     return retval;
   }
-  if (!skipped && p->c) {
+  if (!skipped && parser_on(p)) {
     string_append(strval, p->c);
     parser_move(p);
   }
-  while (!isdelim(p->c) && p->c) {
+  while (parser_on(p)) {
+    if (isdelim(p->c))
+      break;
     string_append(strval, p->c);
     if (issinglet(p->c)) {
       parser_move(p);
@@ -396,7 +405,7 @@ value_t *parse_word(parser_t *p, bool skipped) {
   return retval;
 }
 
-bool issinglet(byte_t c) {
+bool issinglet(char32_t c) {
   contain_t *cur = stack_peek(STACK);
   if (cur->sflag) {
     if (cur->singlets == NULL)
@@ -418,7 +427,7 @@ bool issinglet(byte_t c) {
   return true;
 }
 
-bool isignore(byte_t c) {
+bool isignore(char32_t c) {
   contain_t *cur = stack_peek(STACK);
   if (cur->iflag) {
     if (cur->ignored == NULL)
@@ -440,7 +449,7 @@ bool isignore(byte_t c) {
   return true;
 }
 
-bool isdelim(byte_t c) {
+bool isdelim(char32_t c) {
   contain_t *cur = stack_peek(STACK);
   if (cur->dflag) {
     if (cur->delims == NULL)
@@ -464,7 +473,9 @@ bool isdelim(byte_t c) {
 
 bool parser_skip_ignore(parser_t *p) {
   bool skipped = false;
-  while (isignore(p->c) && p->c != '\0') {
+  while (parser_on(p)) {
+    if (!isignore(p->c))
+      break;
     parser_move(p);
     skipped = true;
   }
@@ -473,14 +484,10 @@ bool parser_skip_ignore(parser_t *p) {
 
 value_t *parser_get_next(parser_t *p) {
   bool skipped = parser_skip_ignore(p);
-  switch (p->c) {
-  case '\0':
-    return NULL;
-  default:
+  if (parser_on(p))
     return parse_word(p, skipped);
-  }
+  return NULL;
 }
-
 
 void inc_crank(contain_t *cur) {
   if (cur->cranks == NULL)
@@ -583,7 +590,7 @@ void evalf() {
   contain_t *cur = stack_peek(STACK);
   value_t *v = stack_pop(cur->stack);
   if (v == NULL) {
-    eval_error("EMPTY STACK", NULL);
+    eval_error(U"EMPTY STACK", NULL);
     return;
   }
   stack_push(EVAL_STACK, v);
@@ -842,7 +849,7 @@ void crank() {
     int fixedindex = cur->stack->size - 1 - cindex;
     value_t *needseval = stack_popdeep(cur->stack, fixedindex);
     if (!needseval) {
-      eval_error("CRANK TOO DEEP", NULL);
+      eval_error(U"CRANK TOO DEEP", NULL);
       inc_crank(cur);
       return;
     }

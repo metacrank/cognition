@@ -25,7 +25,7 @@ void cog_isdef(value_t *v);
 /* compiles child stack based on current environment and binds it to a word as a macro */
 /* note: will not have the same behaviour as 'alias' */
 /* currently does 'arbitrary name' swap dupd bind unglue */
-void cog_compile(value_t *v);
+/* void cog_compile(value_t *v); */
 
 /* returns an unordered list of the words defined in the current environment */
 /* should this return two separate lists, one for each the word_table and the flit? */

@@ -47,7 +47,10 @@ void cog_ceil(value_t *v);
 void cog_floor(value_t *v);
 
 /*! @brief turns float value into int */
-void cog_int(value_t *v);
+void cog_ip(value_t *v);
+
+/* gets the mantissa from a float */
+void cog_fp(value_t *v);
 
 /*! @brief greater than or equals */
 void cog_gtequals(value_t *v);

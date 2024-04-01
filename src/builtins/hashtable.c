@@ -11,20 +11,20 @@ void cog_def(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   stack_t *stack = cur->stack;
   if (stack->size < 2) {
-    eval_error("TOO FEW ARGUMENTS", v);
+    eval_error(U"TOO FEW ARGUMENTS", v);
     return;
   }
   value_t *quot = stack_pop(stack);
   value_t *wordc = stack_pop(stack);
   if (value_stack(wordc)[0]->size != 1) {
-    eval_error("BAD ARGUMENT TYPE", v);
+    eval_error(U"BAD ARGUMENT TYPE", v);
     stack_push(stack, wordc);
     stack_push(stack, quot);
     return;
   }
   value_t *word = value_stack(wordc)[0]->items[0];
   if (word->type != VWORD) {
-    eval_error("BAD ARGUMENT TYPE", v);
+    eval_error(U"BAD ARGUMENT TYPE", v);
     stack_push(stack, wordc);
     stack_push(stack, quot);
     return;
@@ -46,17 +46,17 @@ void cog_undef(value_t *v) {
   stack_t *stack = cur->stack;
   value_t *wordc = stack_pop(stack);
   if (!wordc) {
-    eval_error("TOO FEW ARGUMENTS", v);
+    eval_error(U"TOO FEW ARGUMENTS", v);
     return;
   }
   if (value_stack(wordc)[0]->size != 1) {
-    eval_error("BAD ARGUMENT TYPE", v);
+    eval_error(U"BAD ARGUMENT TYPE", v);
     stack_push(stack, wordc);
     return;
   }
   value_t *word = value_stack(wordc)[0]->items[0];
   if (word->type != VWORD) {
-    eval_error("BAD ARGUMENT TYPE", v);
+    eval_error(U"BAD ARGUMENT TYPE", v);
     stack_push(stack, wordc);
     return;
   }
@@ -76,7 +76,7 @@ void cog_undef(value_t *v) {
     value_free_safe(wordc);
     return;
   }
-  eval_error("UNDEFINED WORD", v);
+  eval_error(U"UNDEFINED WORD", v);
   stack_push(stack, wordc);
 }
 
@@ -85,23 +85,23 @@ void cog_unglue(value_t *v) {
   stack_t *stack = cur->stack;
   value_t *wordc = stack_peek(stack);
   if (!wordc) {
-    eval_error("TOO FEW ARGUMENTS", v);
+    eval_error(U"TOO FEW ARGUMENTS", v);
     return;
   }
   if (value_stack(wordc)[0]->size != 1) {
-    eval_error("BAD ARGUMENT TYPE", v);
+    eval_error(U"BAD ARGUMENT TYPE", v);
     return;
   }
   value_t *wordval = value_stack(wordc)[0]->items[0];
   if (wordval->type != VWORD) {
-    eval_error("BAD ARGUMENT TYPE", v);
+    eval_error(U"BAD ARGUMENT TYPE", v);
     return;
   }
   contain_t *def = ht_get(cur->word_table, wordval->str_word);
   if (def == NULL) {
     stack_t *macro = ht_get(cur->flit, wordval->str_word);
     if (macro == NULL) {
-      eval_error("UNDEFINED WORD", v);
+      eval_error(U"UNDEFINED WORD", v);
       return;
     }
     value_free_safe(wordval);
@@ -142,16 +142,16 @@ void cog_isdef(value_t *v) {
   stack_t *stack = cur->stack;
   value_t *wordc = stack_peek(stack);
   if (!wordc) {
-    eval_error("TOO FEW ARGUMENTS", v);
+    eval_error(U"TOO FEW ARGUMENTS", v);
     return;
   }
   if (value_stack(wordc)[0]->size != 1) {
-    eval_error("BAD ARGUMENT TYPE", v);
+    eval_error(U"BAD ARGUMENT TYPE", v);
     return;
   }
   value_t *wordval = value_stack(wordc)[0]->items[0];
   if (wordval->type != VWORD) {
-    eval_error("BAD ARGUMENT TYPE", v);
+    eval_error(U"BAD ARGUMENT TYPE", v);
     return;
   }
   bool exists = ht_defined(cur->word_table, wordval->str_word) || ht_defined(cur->flit, wordval->str_word);
@@ -161,62 +161,6 @@ void cog_isdef(value_t *v) {
     string_append(wordval->str_word, 't');
   }
 }
-
-/* void cog_alias(value_t *v) { */
-/*   contain_t *cur = stack_peek(STACK); */
-/*   stack_t *stack = cur->stack; */
-/*   value_t *quot = stack_pop(stack); */
-/*   if (!quot) { */
-/*     eval_error("TOO FEW ARGUMENTS", v); */
-/*     return; */
-/*   } */
-/*   value_t *wordc = stack_pop(stack); */
-/*   if (!wordc) { */
-/*     eval_error("TOO FEW ARGUMENTS", v); */
-/*     stack_push(stack, quot); */
-/*     return; */
-/*   } */
-/*   if (wordc->container->stack->size != 1) { */
-/*     eval_error("BAD ARGUMENT TYPE", v); */
-/*     stack_push(stack, wordc); */
-/*     stack_push(stack, quot); */
-/*     return; */
-/*   } */
-/*   value_t *wordval = wordc->container->stack->items[0]; */
-/*   if (wordval->type != VWORD) { */
-/*     eval_error("BAD ARGUMENT TYPE", v); */
-/*     stack_push(stack, wordc); */
-/*     stack_push(stack, quot); */
-/*     return; */
-/*   } */
-/*   stack_t *macro = init_stack(DEFAULT_STACK_SIZE); */
-/*   stack_t *family = init_stack(DEFAULT_STACK_SIZE); */
-/*   stack_push(family, cur); */
-/*   expandstack(quot->container, macro, family); */
-/*   free(family->items); */
-/*   free(family); */
-/*   ht_add(cur->flit, string_copy(wordval->str_word), macro, value_stack_free); */
-/*   value_free_safe(wordc); */
-/*   value_free_safe(quot); */
-/* } */
-
-/* void cog_compile(value_t *v) { */
-/*   contain_t *cur = stack_peek(STACK); */
-/*   stack_t *stack = cur->stack; */
-/*   value_t *quot = stack_peek(stack); */
-/*   if (!quot) { */
-/*     eval_error("TOO FEW ARGUMENTS", v); */
-/*     return; */
-/*   } */
-/*   stack_t *macro = init_stack(DEFAULT_STACK_SIZE); */
-/*   stack_t *family = init_stack(DEFAULT_STACK_SIZE); */
-/*   stack_push(family, cur); */
-/*   expandstack(quot->container->stack, macro, family); */
-/*   free(family->items); */
-/*   free(family); */
-/*   value_stack_free(quot->container->stack); */
-/*   quot->container->stack = macro; */
-/* } */
 
 void cog_wordlist(value_t *v) {
   contain_t *cur = stack_peek(STACK);
@@ -250,18 +194,18 @@ void cog_bequeath(value_t *v) {
   stack_t *stack = cur->stack;
   value_t *wordc = stack_pop(stack);
   if (!wordc) {
-    eval_error("TOO FEW ARGUMENTS", v);
+    eval_error(U"TOO FEW ARGUMENTS", v);
     return;
   }
   value_t *child = stack_peek(stack);
   if (!child) {
     stack_push(stack, wordc);
-    eval_error("TOO FEW ARGUMENTS", v);
+    eval_error(U"TOO FEW ARGUMENTS", v);
     return;
   }
   if (child->type != VSTACK) {
     stack_push(stack, wordc);
-    eval_error("BAD ARGUMENT TYPE", v);
+    eval_error(U"BAD ARGUMENT TYPE", v);
     return;
   }
   int stacksize = value_stack(wordc)[0]->size;
@@ -271,7 +215,7 @@ void cog_bequeath(value_t *v) {
     value_t *wordval = value_stack(wordc)[0]->items[i];
     if (wordval->type != VWORD) {
       stack_push(stack, wordc);
-      eval_error("BAD ARGUMENT TYPE", v);
+      eval_error(U"BAD ARGUMENT TYPE", v);
       return;
     }
     defs[i] = ht_get(cur->word_table, wordval->str_word);
@@ -282,7 +226,7 @@ void cog_bequeath(value_t *v) {
           continue;
         }
         stack_push(stack, wordc);
-        eval_error("UNDEFINED WORD", v);
+        eval_error(U"UNDEFINED WORD", v);
         return;
       }
     }
@@ -314,13 +258,10 @@ void cog_bequeath(value_t *v) {
 }
 
 void add_funcs_hashtable(ht_t *flit) {
-  add_func(flit, cog_def, "def");
-  add_func(flit, cog_undef, "undef");
-  add_func(flit, cog_unglue, "unglue");
-  add_func(flit, cog_isdef, "isdef");
-  /* add_func(flit, cog_alias, "alias"); */
-  /* add_func(flit, cog_bind, "bind"); */
-  /* add_func(flit, cog_compile, "compile"); */
-  add_func(flit, cog_wordlist, "wordlist");
-  add_func(flit, cog_bequeath, "bequeath");
+  add_func(flit, cog_def, U"def");
+  add_func(flit, cog_undef, U"undef");
+  add_func(flit, cog_unglue, U"unglue");
+  add_func(flit, cog_isdef, U"isdef");
+  add_func(flit, cog_wordlist, U"wordlist");
+  add_func(flit, cog_bequeath, U"bequeath");
 }

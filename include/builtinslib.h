@@ -4,8 +4,6 @@
 #include <cognition.h>
 #include <stdio.h>
 
-bool strisint(string_t *s);
-
 bool word_truth(value_t *v);
 
 stack_t **value_stack(value_t *v);
@@ -16,7 +14,7 @@ void print_str_formatted(string_t *string);
 
 void print_value(value_t *v, void *e);
 
-char *get_line(FILE *f);
+string_t *get_line(FILE *f);
 
 void nop(void *v);
 

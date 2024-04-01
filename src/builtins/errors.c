@@ -1,12 +1,14 @@
 #include <builtins/errors.h>
 #include <builtinslib.h>
 #include <cognition.h>
+#include <macros.h>
 
 extern stack_t *STACK;
 
 void cog_err_clean(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   stack_t *estack = cur->err_stack;
+  if (!estack) return;
   for (int i = 0; i < estack->size; i ++) {
     value_free(estack->items[i]);
   }
@@ -23,7 +25,7 @@ void cog_err_peek(value_t *v) {
     r1->str_word = string_copy(v1->error->error);
     r2->str_word = string_copy(v1->error->str_word);
   } else {
-    r1->str_word = init_string("NO ERRORS");
+    r1->str_word = init_string(U"NO ERRORS");
     r2->str_word = string_copy(v->str_word);
   }
   push_quoted(cur, r1);
@@ -42,7 +44,7 @@ void cog_err_pop(value_t *v) {
     v1->error->str_word = NULL;
     v1->error->error = NULL;
   } else {
-    r1->str_word = init_string("NO ERRORS");
+    r1->str_word = init_string(U"NO ERRORS");
     r2->str_word = string_copy(v->str_word);
   }
   push_quoted(cur, r1);
@@ -55,31 +57,31 @@ void cog_err_push(value_t *v) {
   stack_t *estack = cur->err_stack;
   stack_t *stack = cur->stack;
   if (stack->size < 2) {
-    eval_error("TOO FEW ARGUMENTS", v);
+    eval_error(U"TOO FEW ARGUMENTS", v);
     return;
   }
   value_t *v2 = stack_pop(stack);
   if (value_stack(v2)[0]->size != 1) {
-    eval_error("BAD ARGUMENT TYPE", v);
+    eval_error(U"BAD ARGUMENT TYPE", v);
     stack_push(stack, v2);
     return;
   }
   value_t *w2 = value_stack(v2)[0]->items[0];
   if (w2->type != VWORD) {
-    eval_error("BAD ARGUMENT TYPE", v);
+    eval_error(U"BAD ARGUMENT TYPE", v);
     stack_push(stack, v2);
     return;
   }
   value_t *v1 = stack_pop(stack);
   if (value_stack(v1)[0]->size != 1) {
-    eval_error("BAD ARGUMENT TYPE", v);
+    eval_error(U"BAD ARGUMENT TYPE", v);
     stack_push(stack, v1);
     stack_push(stack, v2);
     return;
   }
   value_t *w1 = value_stack(v1)[0]->items[0];
   if (w1->type != VWORD) {
-    eval_error("BAD ARGUMENT TYPE", v);
+    eval_error(U"BAD ARGUMENT TYPE", v);
     stack_push(stack, v1);
     stack_push(stack, v2);
     return;
@@ -92,12 +94,46 @@ void cog_err_push(value_t *v) {
   w1->str_word = NULL;
   value_free_safe(v1);
   value_free_safe(v2);
+  if (!estack) {
+    cur->err_stack = init_stack(DEFAULT_STACK_SIZE);
+  }
   stack_push(estack, e);
 }
 
+void cog_err_print(value_t *v) {
+  contain_t *cur = stack_peek(STACK);
+  stack_t *error_stack = cur->err_stack;
+  if (error_stack) {
+    value_t *e = stack_peek(error_stack);
+    if (e) {
+      print_value(e, "\n");
+      return;
+    }
+  }
+  printf("'");
+  print(v->str_word);
+  printf("':%sNO ERRORS%s", RED, COLOR_RESET);
+}
+
+void cog_err_show(value_t *v) {
+  contain_t *cur = stack_peek(STACK);
+  stack_t *error_stack = cur->err_stack;
+  printf("Error stack:\n");
+  if (error_stack) {
+    if (error_stack->size) {
+      for (long i = 0; i < error_stack->size; i++) {
+        value_t *e = error_stack->items[i];
+        print_value(e, "\n");
+      }
+    }
+  }
+}
+
 void add_funcs_errors(ht_t *flit) {
-  add_func(flit, cog_err_clean, "eclean");
-  add_func(flit, cog_err_push, "epush");
-  add_func(flit, cog_err_pop, "epop");
-  add_func(flit, cog_err_peek, "epeek");
+  add_func(flit, cog_err_clean, U"eclean");
+  add_func(flit, cog_err_peek, U"epeek");
+  add_func(flit, cog_err_pop, U"epop");
+  add_func(flit, cog_err_push, U"epush");
+  add_func(flit, cog_err_print, U"eprint");
+  add_func(flit, cog_err_show, U"eshow");
 }

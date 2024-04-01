@@ -17,17 +17,11 @@ void cog_child(value_t *v);
 /* creates a child stack with a blank hashtable */
 void cog_stack(value_t *v);
 
-/* takes a list of words as a child stack and creates a new child stack
- * with those words defined in its hashtable */
-/* should these two be library functions using bequeath? */
-/* void cog_wstack(value_t *v); */
-
-/* takes a list of words as a child stack and creates a new child stack
- * inheriting all but those words */
-/* void cog_bstack(value_t *v); */
-
 /* makes an empty child macro */
 void cog_macro(value_t *v);
+
+/* casts the type of the stack item. accepts VSTACK/VMACRO and 0/1 as arguments */
+void cog_cast(value_t *v);
 
 /* /\* expands macro or stack based on word definitions *\/ */
 /* void cog_expand(value_t *v); */

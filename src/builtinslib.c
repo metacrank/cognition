@@ -8,22 +8,6 @@ extern ht_t *OBJ_TABLE;
 extern stack_t *CONTAIN_DEF_STACK;
 extern stack_t *MACRO_DEF_STACK;
 
-/* macros taken from stackoverflow */
-#define MAX 1000
-#define JUSTDO(a)                                                              \
-  if (!(a)) {                                                                  \
-    perror(#a);                                                                \
-    exit(1);                                                                   \
-  }
-
-bool strisint(string_t *s) {
-  for (int i = 0; i < s->length; i++) {
-    if (!isdigit(s->value[i]))
-      return false;
-  }
-  return true;
-}
-
 bool word_truth(value_t *v) {
   string_t *str = v->str_word;
   return str->length;
@@ -64,7 +48,7 @@ void print_str_formatted(string_t *string) {
     } else if (string->value[i] == '\t') {
       printf("\\t");
     } else {
-      printf("%c", string->value[i]);
+      print_utf32(1, string->value[i]);
     }
   }
 }
@@ -93,8 +77,11 @@ void print_value(value_t *v, void *e) {
     printf(")");
     break;
   case VERR:
-    printf("'%s':%s%s%s", v->error->str_word->value, RED,
-           v->error->error->value, COLOR_RESET);
+    printf("'");
+    print(v->error->str_word);
+    printf("':%s", RED);
+    print(v->error->error);
+    printf("%s", COLOR_RESET);
     break;
   case VCUSTOM:
     c = ht_get(OBJ_TABLE, v->str_word);
@@ -106,23 +93,43 @@ void print_value(value_t *v, void *e) {
   printf("%s", end);
 }
 
-/* taken from stackoverflow */
-char *get_line(FILE *f) {
-  int len = MAX;
-  char buf[MAX], *e = NULL, *ret;
-  JUSTDO(ret = calloc(MAX, 1));
-  while (fgets(buf, MAX, f)) {
-    if (len - strlen(ret) < MAX)
-      JUSTDO(ret = realloc(ret, len *= 2));
-    strcat(ret, buf);
-    if ((e = strrchr(ret, '\n')))
-      break;
+string_t *get_line(FILE *f) {
+  if (!f) return NULL;
+  string_t *s = init_string(U"");
+  byte_t b;
+  int c;
+  char32_t utf32;
+  while ((c = fgetc(f)) != '\n') {
+    b = c;
+    switch (sizeof_utf8(&b)) {
+      case 1:
+        utf32 = b;
+        break;
+      case 2:
+        utf32 = b - 0xC0;
+        utf32 *= 0x40;
+        if ((c = fgetc(f)) == EOF) return s;
+        utf32 += c - 0x80;
+        break;
+      case 3:
+        utf32 = b - 0xE0;
+        for (int _ = 0; _ < 2; _++) {
+          utf32 *= 0x40;
+          if ((c = fgetc(f)) == EOF) return s;
+          utf32 += c - 0x80;
+        }
+      case 4:
+        utf32 = b - 0xF0;
+        for (int _ = 0; _ < 3; _++) {
+          utf32 *= 0x40;
+          if ((c = fgetc(f)) == EOF) return s;
+          utf32 += c - 0x80;
+        }
+        break;
+    }
+    string_append(s, utf32);
   }
-  /* stackoverflow code patch: clearerr */
-  clearerr(f);
-  if (e)
-    *e = '\0';
-  return ret;
+  return s;
 }
 
 void nop(void *v) {}
