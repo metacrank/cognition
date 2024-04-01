@@ -204,11 +204,9 @@ void cog_subtract(value_t *v) {
     stack_push(stack, v2);
     return;
   }
-  long double x = string_to_double(w1->str_word);
-  long double y = string_to_double(w2->str_word);
-  long double z = x - y;
+  string_t *stmp = diff(w1->str_word, w2->str_word);
   string_free(w1->str_word);
-  w1->str_word = double_to_string(z);
+  w1->str_word = stmp;
   value_free_safe(v2);
   stack_push(stack, v1);
 }
