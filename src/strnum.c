@@ -369,7 +369,7 @@ string_t *fp(string_t *s) {
 }
 
 bool sum_positive(string_t *m, string_t *n) {
-  return false;
+  return true;
 }
 
 /* string_t *sum(string_t *m, string_t *n, char32_t *m_radix, char32_t *n_radix, */
@@ -513,7 +513,7 @@ string_t *sum(string_t *m, string_t *n, char32_t *m_radix, char32_t *n_radix,
           }
           break;
         }
-        if (*n_rad == '.' || m_rad == m_end) {
+        if (*n_rad == '.' || n_rad == n_end) {
           while (m_rad < m_end) {
             if (*m_rad == '.') break;
             m_rad++;
@@ -650,6 +650,94 @@ string_t *diff(string_t *m, string_t *n) {
   return diff;
 }
 
-string_t *product(string_t *m, string_t *n) {}
+string_t *product(string_t *m, string_t *n) {
+  long double mf = string_to_double(m);
+  long double nf = string_to_double(n);
+  return double_to_string(mf * nf);
+}
 
-string_t *quotient(string_t *m, string_t *n) {}
+string_t *quotient(string_t *m, string_t *n) {
+  long double mf = string_to_double(m);
+  long double nf = string_to_double(n);
+  return double_to_string(mf / nf);
+}
+
+string_t *str_sqrt(string_t *m) {
+  long double mf = string_to_double(m);
+  return double_to_string(sqrt(mf));
+}
+
+string_t *gaussian(string_t *m) {
+  long double mf = string_to_double(m);
+  return double_to_string(exp(-mf * mf));
+}
+
+string_t *str_exp(string_t *m) {
+  long double mf = string_to_double(m);
+  return double_to_string(exp(mf));
+}
+
+string_t *str_ln(string_t *m) {
+  long double mf = string_to_double(m);
+  return double_to_string(log(mf));
+}
+
+string_t *str_pow(string_t *m, string_t *n) {
+  string_t *mln = str_ln(m);
+  string_t *pr = product(mln, n);
+  return str_exp(pr);
+}
+
+string_t *str_sin(string_t *m) {
+  // replace with complex form
+  long double mf = string_to_double(m);
+  return double_to_string(sin(mf));
+}
+
+string_t *str_cos(string_t *m) {
+  // replace with complex form
+  long double mf = string_to_double(m);
+  return double_to_string(cos(mf));
+}
+
+string_t *str_ceil(string_t *m) {
+  long double mf = string_to_double(m);
+  return double_to_string(ceil(mf));
+}
+
+string_t *str_floor(string_t *m) {
+  long double mf = string_to_double(m);
+  return double_to_string(floor(mf));
+}
+
+string_t *geq(string_t *m, string_t *n) {
+  long double mf = string_to_double(m);
+  long double nf = string_to_double(n);
+  if (mf >= nf)
+    return init_string(U"t");
+  return init_string(U"");
+}
+
+string_t *leq(string_t *m, string_t *n) {
+  long double mf = string_to_double(m);
+  long double nf = string_to_double(n);
+  if (mf <= nf)
+    return init_string(U"t");
+  return init_string(U"");
+}
+
+string_t *gthan(string_t *m, string_t *n) {
+  long double mf = string_to_double(m);
+  long double nf = string_to_double(n);
+  if (mf > nf)
+    return init_string(U"t");
+  return init_string(U"");
+}
+
+string_t *lthan(string_t *m, string_t *n) {
+  long double mf = string_to_double(m);
+  long double nf = string_to_double(n);
+  if (mf < nf)
+    return init_string(U"t");
+  return init_string(U"");
+}

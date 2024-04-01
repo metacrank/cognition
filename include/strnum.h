@@ -44,4 +44,30 @@ string_t *product(string_t *m, string_t *n);
 
 string_t *quotient(string_t *m, string_t *n);
 
+string_t *str_sqrt(string_t *m);
+
+string_t *gaussian(string_t *m);
+
+string_t *str_exp(string_t *m);
+
+string_t *str_ln(string_t *m);
+
+string_t *str_pow(string_t *m, string_t *n);
+
+string_t *str_sin(string_t *m);
+
+string_t *str_cos(string_t *m);
+
+string_t *str_ceil(string_t *m);
+
+string_t *str_floor(string_t *m);
+
+string_t *geq(string_t *m, string_t *n);
+
+string_t *leq(string_t *m, string_t *n);
+
+string_t *gthan(string_t *m, string_t *n);
+
+string_t *lthan(string_t *m, string_t *n);
+
 #endif // STRNUM_H_

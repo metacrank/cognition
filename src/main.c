@@ -126,6 +126,7 @@ void global_free() {
     string_free(CAST_ARGS[i]);
   }
   free(CAST_ARGS);
+  math_free();
 }
 
 int main(int argc, char **argv) {
