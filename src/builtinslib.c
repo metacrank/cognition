@@ -40,61 +40,69 @@ void contain_copy_attributes(contain_t *c, contain_t *newc) {
 }
 
 void print_str_formatted(string_t *string) {
+  fprint_str_formatted(stdout, string);
+}
+
+void fprint_str_formatted(FILE *f, string_t *string) {
   if (!string)
     return;
   for (int i = 0; i < string->length; i++) {
     if (string->value[i] == '\n') {
-      printf("\\n");
+      fprintf(f, "\\n");
     } else if (string->value[i] == '\t') {
-      printf("\\t");
+      fprintf(f, "\\t");
     } else {
-      print_utf32(1, string->value[i]);
+      fprint_utf32(f, 1, string->value[i]);
     }
   }
 }
 
 void print_value(value_t *v, void *e) {
+  fprint_value(stdout, v, e);
+}
+
+void fprint_value(FILE *f, value_t *v, void *e) {
   byte_t *end = e;
   custom_t *c;
   switch (v->type) {
   case VWORD:
     if (v->str_word) {
-      printf("'");
-      print_str_formatted(v->str_word);
-      printf("'");
+      fprintf(f, "'");
+      fprint_str_formatted(f, v->str_word);
+      fprintf(f, "'");
     } else {
-      printf("(null)");
+      fprintf(f, "(null)");
     }
     break;
   case VSTACK:
-    printf("[ ");
+    fprintf(f, "[ ");
     for (int i = 0; i < v->container->stack->size; i++) {
-      print_value(v->container->stack->items[i], (unsigned char *)" ");
+      fprint_value(f, v->container->stack->items[i], " ");
     }
-    printf("]");
+    fprintf(f, "]");
     break;
   case VMACRO:
-    printf("( ");
+    fprintf(f, "( ");
     for (int i = 0; i < v->macro->size; i++) {
-      print_value(v->macro->items[i], (unsigned char *)" ");
+      fprint_value(f, v->macro->items[i], " ");
     }
-    printf(")");
+    fprintf(f, ")");
     break;
   case VERR:
-    printf("'");
-    print(v->error->str_word);
-    printf("':%s", RED);
-    print(v->error->error);
-    printf("%s", COLOR_RESET);
+    fprintf(f, "'");
+    fprint(f, v->error->str_word);
+    fprintf(f, "':%s", RED);
+    fprint(f, v->error->error);
+    fprintf(f, "%s", COLOR_RESET);
     break;
   case VCUSTOM:
     c = ht_get(OBJ_TABLE, v->str_word);
-    c->printfunc(v->custom);
+    c->printfunc(f, v->custom);
     break;
   case VCLIB:
-    printf("CLIB_FUNC");
+    fprintf(f, "CLIB_FUNC");
   }
-  printf("%s", end);
+  fprintf(f, "%s", end);
 }
 
 string_t *get_line(FILE *f) {

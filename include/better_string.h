@@ -64,9 +64,11 @@ void print_formatted(const char32_t *format, ...);
 
 /* prints a single utf32 character */
 void print_utf32(int, ...);
+void fprint_utf32(FILE *, int, ...);
 
 /* prints a string */
 void print(string_t *s);
+void fprint(FILE *f, string_t *s);
 
 /* reads a utf8 file into string_t */
 string_t *file_read(FILE *FP);

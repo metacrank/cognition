@@ -12,7 +12,11 @@ void contain_copy_attributes(contain_t *c, contain_t *newc);
 
 void print_str_formatted(string_t *string);
 
+void fprint_str_formatted(FILE *f, string_t *string);
+
 void print_value(value_t *v, void *e);
+
+void fprint_value(FILE *f, value_t *v, void *e);
 
 string_t *get_line(FILE *f);
 

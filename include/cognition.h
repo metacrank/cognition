@@ -71,7 +71,7 @@ typedef struct PARSER_STRUCT {
  *functions that make the builtin functions memory safe. */
 typedef struct {
   /*! @brief Function that prints the custom struct */
-  void (*printfunc)(void *);
+  void (*printfunc)(FILE *f, void *);
   /*! @brief deep copy of custom struct */
   void *(*copyfunc)(void *);
   /*! @brief free function for custom struct */
@@ -177,7 +177,7 @@ ht_t *ot_get();
 void obj_free(void *v);
 
 /*! Allocates memory for new custom_t */
-custom_t *init_custom(void (*)(void *), void (*)(void *), void *(*)(void *));
+custom_t *init_custom(void (*)(FILE *, void *), void (*)(void *), void *(*)(void *));
 
 /*! Frees custom_t *. */
 void custom_free(void *);
@@ -190,7 +190,7 @@ void add_macro(ht_t *h, stack_t *macro, char32_t *key);
 
 /*! Adds object functions to OBJ_TABLE and adds constructor for custom type to
  * FLIT. */
-void add_obj(ht_t *h, ht_t *h2, void (*printfunc)(void *),
+void add_obj(ht_t *h, ht_t *h2, void (*printfunc)(FILE *, void *),
              void (*freefunc)(void *), void *(*copyfunc)(void *),
              void (*createfunc)(void *), char32_t *key);
 

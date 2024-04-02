@@ -28,6 +28,9 @@ void cog_fread(value_t *v);
 /*! @brief writes string to file */
 void cog_fwrite(value_t *v);
 
+/* appends string to file */
+void cog_fprint(value_t *v);
+
 /* adds io fuctions to flit */
 void add_funcs_io(ht_t *flit);
 
