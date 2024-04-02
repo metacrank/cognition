@@ -4,7 +4,7 @@
 #include <cognition.h>
 
 /* cleans entire error stack */
-void cog_err_clear(value_t *v);
+void cog_err_clean(value_t *v);
 
 /* returns the value of the last error on the error stack */
 void cog_err_peek(value_t *v);
