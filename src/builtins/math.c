@@ -570,6 +570,6 @@ void add_funcs_math(ht_t *flit) {
   add_func(flit, cog_exp, U"exp");
   add_func(flit, cog_ip, U"ip");
   add_func(flit, cog_fp, U"fp");
-  add_func(flit, cog_real, U"re");
-  add_func(flit, cog_imaginary, U"im");
+  add_func(flit, cog_real, U"real");
+  add_func(flit, cog_imaginary, U"imag");
 }

@@ -21,7 +21,7 @@ double complex string_to_double(string_t *s);
 
 string_t *int_to_string(long d);
 
-string_t *double_to_string(double complex f);
+string_t *double_to_string(double complex f, unsigned precision, bool isreal);
 
 string_t *real(string_t *s);
 

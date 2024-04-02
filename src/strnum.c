@@ -247,6 +247,38 @@ void init_math() {
 
 void math_free() {}
 
+int best_of_four(int mpr, int mpi, int npr, int npi) {
+  if (mpr > mpi) {
+    if (mpr > npr) {
+      if (mpr > npi) {
+        return mpr;
+      } else {
+        return npi;
+      }
+    } else {
+      if (npr > npi) {
+        return npr;
+      } else {
+        return npi;
+      }
+    }
+  } else {
+    if (mpi > npr) {
+      if (mpi > npi) {
+        return mpi;
+      } else {
+        return npi;
+      }
+    } else {
+      if (npr > npi) {
+        return npr;
+      } else {
+        return npi;
+      }
+    }
+  }
+}
+
 bool isfloat(string_t *s) {
   for (long i = 0; i < s->length; i++)
     if (!isdigit(s->value[i]) && s->value[i] != '.') return false;
@@ -266,6 +298,37 @@ long order(string_t *s) {
     i++;
   }
   return s->length - 1 - i;
+}
+
+void get_precision(string_t *s, int *a, int *b) {
+  int i;
+  if (s->length == 0) {
+    *a = 0;
+    *b = 0;
+    return;
+  }
+  for (i = 0; i < s->length; i++) {
+    if (s->value[i] == ',') {
+      *a = 0;
+      break;
+    }
+    if (s->value[i] == '.') {
+      int rad = i;
+      i++;
+      while (i < s->length) {
+        if (s->value[i] == ',') break;
+        i++;
+      }
+      *a = i - rad - 1;
+      break;
+    }
+  }
+  *b = 0;
+  while (i < s->length) {
+    if (s->value[i] == '.')
+      *b = s->length - i - 1;
+    i++;
+  }
 }
 
 long string_to_int(string_t *s) {
@@ -312,6 +375,8 @@ double complex string_to_double(string_t *s) {
   }
   dim = dim / pow(BASE, r);
   double complex cd = d + dim * I;
+  string_free(sre);
+  string_free(sim);
   return cd;
 }
 
@@ -348,10 +413,53 @@ string_t *int_to_string(long d) {
   return s;
 }
 
-string_t *double_to_string(double complex f) {
-  // get from pool;
-  string_t *s = init_string(U"");
-  return s;
+string_t *double_to_string(double complex f, unsigned precision, bool isreal) {
+  double fre = creal(f);
+  int dre = round(fre * pow(BASE, precision));
+  string_t *sre = int_to_string(dre);
+  while (sre->length < precision) {
+    string_append(sre, '\0');
+    for (int i = sre->length - 1; i > 0; i--) {
+      sre->value[i] = sre->value[i - 1];
+    }
+    if (sre->length >= 2)
+      sre->value[0] = addition_carry_table[di(sre->value[1])][didx(0)];
+    else sre->value[0] = digits[0];
+  }
+  if (precision) {
+    int rad_pos = sre->length - precision;
+    string_append(sre, '\0');
+    for (int i = sre->length - 1; i > rad_pos; i--) {
+      sre->value[i] = sre->value[i - 1];
+    }
+    sre->value[rad_pos] = '.';
+  }
+  if (isreal) return sre;
+
+  double fim = cimag(f);
+  int dim = round(fim * pow(BASE, precision));
+  string_t *sim = int_to_string(dim);
+  while (sim->length < precision) {
+    string_append(sim, '\0');
+    for (int i = sim->length - 1; i > 0; i--) {
+      sim->value[i] = sim->value[i - 1];
+    }
+    if (sim->length >= 2)
+      sim->value[0] = addition_carry_table[di(sim->value[1])][didx(0)];
+    else sim->value[0] = digits[0];
+  }
+  if (precision) {
+    int rad_pos = sim->length - precision;
+    string_append(sim, '\0');
+    for (int i = sim->length - 1; i > rad_pos; i--) {
+      sim->value[i] = sim->value[i - 1];
+    }
+    sim->value[rad_pos] = '.';
+  }
+  string_append(sre, ',');
+  string_concat(sre, sim);
+  string_free(sim);
+  return sre;
 }
 
 string_t *neg(string_t *s) {
@@ -416,6 +524,10 @@ bool sum_positive(string_t *m, string_t *n) {
 
 string_t *sum_real(string_t *m, string_t *n, char32_t *m_radix, char32_t *n_radix,
               string_t *sum_buffer, char32_t *sb_radix) {
+
+  if (m->length == 0) return string_copy(n);
+  if (n->length == 0) return string_copy(m);
+
   char32_t *m_rad, *n_rad;
   char32_t *m_end = m->value + m->length;
   char32_t *n_end = n->value + n->length;
@@ -610,33 +722,62 @@ string_t *diff(string_t *m, string_t *n) {
 string_t *product(string_t *m, string_t *n) {
   double complex mf = string_to_double(m);
   double complex nf = string_to_double(n);
-  return double_to_string(mf * nf);
+  int mpr, mpi, npr, npi;
+  get_precision(m, &mpr, &mpi);
+  get_precision(n, &npr, &npi);
+  bool b = (mpr + npr) > (mpi + npi);
+  int pr = (mpr + npr) * b + (mpi + npi) * (1 - b);
+  b = (mpi + npr) > (npi + mpr);
+  int pi = (mpi + npr) * b + (npi + mpr) * (1 - b);
+  b = pr > pi;
+  int sf = pr * b + pi * (1 - b);
+  return double_to_string(mf * nf, sf, (mf == creal(mf)) && (nf == creal(nf)));
 }
 
 string_t *quotient(string_t *m, string_t *n) {
   double complex mf = string_to_double(m);
   double complex nf = string_to_double(n);
-  return double_to_string(mf / nf);
+  int mpr, mpi, npr, npi;
+  get_precision(m, &mpr, &mpi);
+  get_precision(n, &npr, &npi);
+  int sf = best_of_four(mpr, mpi, npr, npi);
+  return double_to_string(mf / nf, sf, (mf == creal(mf)) && (nf == creal(nf)));
 }
 
 string_t *str_sqrt(string_t *m) {
   double complex mf = string_to_double(m);
-  return double_to_string(sqrt(mf));
+  int mpr, mpi;
+  get_precision(m, &mpr, &mpi);
+  bool b = mpr > mpi;
+  int sf = mpr * b + mpi * (1 - b);
+  return double_to_string(sqrt(mf), sf, (mf == creal(mf)));
 }
 
 string_t *gaussian(string_t *m) {
   double complex mf = string_to_double(m);
-  return double_to_string(exp(-mf * mf));
+  int mpr, mpi;
+  get_precision(m, &mpr, &mpi);
+  bool b = mpr > mpi;
+  int sf = mpr * b + mpi * (1 - b);
+  return double_to_string(exp(- mf * mf), sf, (mf == creal(mf)));
 }
 
 string_t *str_exp(string_t *m) {
   double complex mf = string_to_double(m);
-  return double_to_string(exp(mf));
+  int mpr, mpi;
+  get_precision(m, &mpr, &mpi);
+  bool b = mpr > mpi;
+  int sf = mpr * b + mpi * (1 - b);
+  return double_to_string(exp(mf), sf, (mf == creal(mf)));
 }
 
 string_t *str_ln(string_t *m) {
   double complex mf = string_to_double(m);
-  return double_to_string(log(mf));
+  int mpr, mpi;
+  get_precision(m, &mpr, &mpi);
+  bool b = mpr > mpi;
+  int sf = mpr * b + mpi * (1 - b);
+  return double_to_string(log(mf), sf, (mf == creal(mf)));
 }
 
 string_t *str_pow(string_t *m, string_t *n) {
@@ -648,23 +789,39 @@ string_t *str_pow(string_t *m, string_t *n) {
 string_t *str_sin(string_t *m) {
   // replace with complex form
   double complex mf = string_to_double(m);
-  return double_to_string(sin(mf));
+  int mpr, mpi;
+  get_precision(m, &mpr, &mpi);
+  bool b = mpr > mpi;
+  int sf = mpr * b + mpi * (1 - b);
+  return double_to_string(sin(mf), sf, (mf == creal(mf)));
 }
 
 string_t *str_cos(string_t *m) {
   // replace with complex form
   double complex mf = string_to_double(m);
-  return double_to_string(cos(mf));
+  int mpr, mpi;
+  get_precision(m, &mpr, &mpi);
+  bool b = mpr > mpi;
+  int sf = mpr * b + mpi * (1 - b);
+  return double_to_string(cos(mf), sf, (mf == creal(mf)));
 }
 
 string_t *str_ceil(string_t *m) {
   double mf = string_to_double(m);
-  return double_to_string(ceil(mf));
+  int mpr, mpi;
+  get_precision(m, &mpr, &mpi);
+  bool b = mpr > mpi;
+  int sf = mpr * b + mpi * (1 - b);
+  return double_to_string(ceil(mf), sf, (mf == creal(mf)));
 }
 
 string_t *str_floor(string_t *m) {
   double mf = string_to_double(m);
-  return double_to_string(floor(mf));
+  int mpr, mpi;
+  get_precision(m, &mpr, &mpi);
+  bool b = mpr > mpi;
+  int sf = mpr * b + mpi * (1 - b);
+  return double_to_string(floor(mf), sf, (mf == creal(mf)));
 }
 
 string_t *geq(string_t *m, string_t *n) {
