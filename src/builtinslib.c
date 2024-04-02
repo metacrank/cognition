@@ -18,8 +18,8 @@ stack_t **value_stack(value_t *v) {
     return &v->container->stack;
   else if (v->type == VMACRO)
     return &v->macro;
-  else
-    die("BAD VALUE ON STACK");
+  printf("value_stack error\n");
+  die("BAD VALUE ON STACK");
   return NULL;
 }
 
