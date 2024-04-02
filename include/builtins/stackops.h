@@ -13,11 +13,11 @@ void cog_nop(value_t *v);
 void cog_clear(value_t *v);
 
 /*! @brief discards and frees the first element(s) of the stack */
-void cog_dsc(value_t *v);
-/* void cog_dsc2(value_t *v); */
-/* void cog_dsc3(value_t *v); */
-/* void cog_dsc4(value_t *v); */
-/* void cog_dscn(value_t *v); */
+void cog_drop(value_t *v);
+/* void cog_drop2(value_t *v); */
+/* void cog_drop3(value_t *v); */
+/* void cog_drop4(value_t *v); */
+/* void cog_dropn(value_t *v); */
 
 /* discarding values further down the stack */
 /* void cog_nip(value_t *v); // dscd */

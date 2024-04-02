@@ -525,6 +525,31 @@ void cog_evalstr(value_t *v) {
   value_free_safe(strc);
 }
 
+void cog_strstack(value_t *v) {
+  contain_t *cur = stack_peek(STACK);
+  value_t *strc = stack_pop(cur->stack);
+  if (!strc) {
+    eval_error(U"TOO FEW ARGUMENTS", v);
+    return;
+  }
+  value_t *quot = init_value(VSTACK);
+  quot->container = init_contain(NULL, NULL, NULL);
+  stack_t *qstack = quot->container->stack;
+  for (int i = 0; i < value_stack(strc)[0]->size; i++) {
+    value_t *str = value_stack(strc)[0]->items[i];
+    parser_t *parser = init_parser(str->str_word);
+    while(1) {
+      value_t *w = parser_get_next(parser);
+      if (w == NULL)
+        break;
+      stack_push(qstack, w);
+    }
+    free(parser);
+  }
+  value_free_safe(strc);
+  stack_push(cur->stack, quot);
+}
+
 void add_funcs_parser(ht_t* flit) {
   add_func(flit, cog_getf, U"getf");
   add_func(flit, cog_setf, U"setf");
@@ -546,4 +571,5 @@ void add_funcs_parser(ht_t* flit) {
   add_func(flit, cog_unignore, U"unignore");
   add_func(flit, cog_unsinglet, U"unsinglet");
   add_func(flit, cog_evalstr, U"evalstr");
+  add_func(flit, cog_strstack, U"strstack");
 }

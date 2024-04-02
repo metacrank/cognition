@@ -25,17 +25,17 @@ void cog_qstack(value_t *v);
 /* void cog_parent(value_t *v); */
 
 /* cd's into stack with pointer at the top of the stack */
-void cog_pcd(value_t *v);
+/* void cog_pcd(value_t *v); */
 
 /* returns a pointer to the current stack */
-void cog_gstack(value_t *v);
+/* void cog_gstack(value_t *v); */
 
 /* returns a pointer to the stack at the top of the stack */
 /* coglib -- instant cd gstack pop */
 /* void cog_gchild(value_t *v); */
 
 /* returns a pointer to the root stack */
-void cog_groot(value_t *v);
+/* void cog_groot(value_t *v); */
 
 /* returns to root stack */
 void cog_root(value_t *v);

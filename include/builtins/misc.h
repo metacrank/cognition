@@ -6,6 +6,9 @@
 /* reset to baremetal cognition settings, definitions, and builtins */
 void cog_reset(value_t *v);
 
+/* adds a c library to the object table */
+void cog_clib(value_t *v);
+
 /* adds misc fuctions to flit */
 void add_funcs_misc(ht_t *flit);
 

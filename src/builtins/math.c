@@ -834,6 +834,6 @@ void add_funcs_math(ht_t *flit) {
   add_func(flit, cog_leq, U"<=");
   add_func(flit, cog_gthan, U">");
   add_func(flit, cog_lthan, U"<");
-  add_func(flit, cog_and, U"&&");
-  add_func(flit, cog_or, U"||");
+  add_func(flit, cog_and, U"and");
+  add_func(flit, cog_or, U"or");
 }

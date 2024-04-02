@@ -50,17 +50,6 @@ void cog_dup(value_t *v) {
   stack_push(stack, value_copy(v1));
 }
 
-/* void cog_copy(value_t *v) { */
-/*   contain_t *cur = stack_peek(STACK); */
-/*   stack_t *stack = cur->stack; */
-/*   value_t *v1 = stack_peek(stack); */
-/*   if (!v1) { */
-/*     eval_error(U"TOO FEW ARGUMENTS", v); */
-/*     return; */
-/*   } */
-/*   stack_push(stack, v1); */
-/* } */
-
 void cog_ssize(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   stack_t *stack = cur->stack;
@@ -76,6 +65,5 @@ void add_funcs_stackops(ht_t* flit) {
   add_func(flit, cog_drop, U"drop");
   add_func(flit, cog_swap, U"swap");
   add_func(flit, cog_dup, U"dup");
-  /* add_func(flit, cog_copy, U"copy"); */
   add_func(flit, cog_ssize, U"ssize");
 }
