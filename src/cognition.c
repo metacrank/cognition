@@ -366,8 +366,8 @@ void parser_reset(parser_t *p, string_t *source) {
 }
 
 void parser_move(parser_t *p) {
+  p->i++;
   if (p->i < p->source->length) {
-    p->i++;
     p->c = p->source->value[p->i];
   }
 }

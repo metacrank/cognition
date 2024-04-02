@@ -112,7 +112,7 @@ void cog_err_print(value_t *v) {
   }
   printf("'");
   print(v->str_word);
-  printf("':%sNO ERRORS%s", RED, COLOR_RESET);
+  printf("':%sNO ERRORS%s\n", RED, COLOR_RESET);
 }
 
 void cog_err_show(value_t *v) {
