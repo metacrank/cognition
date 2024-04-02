@@ -191,15 +191,21 @@ void cog_put(value_t *v) {
   if (idx < 0 || idx > stackstack->size) {
     stack_push(cur->stack, v1);
     stack_push(cur->stack, index);
-    eval_error(U"OUT OF RANGE", v);
+    eval_error(U"INDEX OUT OF RANGE", v);
     return;
   }
   value_free_safe(index);
-  stack_push(stackstack, NULL);
-  for (size_t i = idx + 1; i < stackstack->size; i++) {
-    stackstack->items[i] = stackstack->items[i-1];
+  stack_t *v1stack = *value_stack(v1);
+  size_t v1size = v1stack->size;
+  for (size_t i = 0; i < v1size; i++)
+    stack_push(stackstack, NULL);
+  for (size_t i = stackstack->size - 1; i >= idx + v1size; i--) {
+    stackstack->items[i] = stackstack->items[i-v1size];
   }
-  stackstack->items[idx] = v1;
+  for (size_t i = 0; i < v1size; i++)
+    stackstack->items[idx + i] = v1stack->items[i];
+  v1stack->size = 0;
+  value_free_safe(v1);
 }
 
 void cog_dip(value_t *v) {
@@ -414,7 +420,7 @@ void cog_del(value_t *v) {
   value_t *quot = stack_peek(stack);
   if (n < 0 || n >= value_stack(quot)[0]->size) {
     stack_push(stack, index);
-    eval_error(U"OUT OF RANGE", v);
+    eval_error(U"INDEX OUT OF RANGE", v);
     return;
   }
   value_free_safe(index);
