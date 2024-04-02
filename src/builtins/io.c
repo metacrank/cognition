@@ -51,7 +51,6 @@ void cog_read(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   value_t *strval = init_value(VWORD);
   strval->str_word = get_line(stdin);
-  printf("len=%lu,bfsz=%lu", strval->str_word->length, strval->str_word->bufsize);
   push_quoted(cur, strval);
 }
 

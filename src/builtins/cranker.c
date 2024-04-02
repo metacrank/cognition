@@ -161,14 +161,13 @@ void cog_halt(value_t *v) {
 void cog_crankbase(value_t *v) {
   value_t *v1 = init_value(VWORD);
   contain_t *cur = stack_peek(STACK);
-  int base = -1;
+  int base = 0;
   if (cur->cranks) {
     if (cur->cranks->size) {
       int(*cr)[2] = cur->cranks->items[0];
       base = cr[0][1];
     }
   }
-  if (base < 0) base = 0;
   v1->str_word = int_to_string(base);
   push_quoted(cur, v1);
 }
@@ -176,24 +175,87 @@ void cog_crankbase(value_t *v) {
 void cog_modcrank(value_t *v) {
   value_t *v1 = init_value(VWORD);
   contain_t *cur = stack_peek(STACK);
-  int mod = -1;
+  int mod = 0;
   if (cur->cranks) {
     if (cur->cranks->size) {
       int(*cr)[2] = cur->cranks->items[0];
       mod = cr[0][0];
     }
   }
-  if (mod < 0) mod = 0;
   v1->str_word = int_to_string(mod);
   push_quoted(cur, v1);
 }
 
 void cog_metacrankbase(value_t *v) {
-
+  contain_t *cur = stack_peek(STACK);
+  value_t *idxq = stack_peek(cur->stack);
+  if (idxq == NULL) {
+    eval_error(U"TOO FEW ARGUMENTS", v);
+    return;
+  }
+  if (value_stack(idxq)[0]->size != 1) {
+    eval_error(U"BAD ARGUMENT TYPE", v);
+    return;
+  }
+  value_t *idxval = value_stack(idxq)[0]->items[0];
+  if (idxval->type != VWORD) {
+    eval_error(U"BAD ARGUMENT TYPE", v);
+    return;
+  }
+  size_t idx = string_to_int(idxval->str_word);
+  size_t cranksize = 1;
+  if (cur->cranks)
+    if (cur->cranks->size)
+      cranksize = cur->cranks->size;
+  if (idx >= cranksize) {
+    eval_error(U"INDEX OUT OF RANGE", v);
+    return;
+  }
+  int base = 0;
+  if (cur->cranks) {
+    if (cur->cranks->size) {
+      int(*cr)[2] = cur->cranks->items[idx];
+      base = cr[0][1];
+    }
+  }
+  string_free(idxval->str_word);
+  idxval->str_word = int_to_string(base);
 }
 
 void cog_metamodcrank(value_t *v) {
-
+  contain_t *cur = stack_peek(STACK);
+  value_t *idxq = stack_peek(cur->stack);
+  if (idxq == NULL) {
+    eval_error(U"TOO FEW ARGUMENTS", v);
+    return;
+  }
+  if (value_stack(idxq)[0]->size != 1) {
+    eval_error(U"BAD ARGUMENT TYPE", v);
+    return;
+  }
+  value_t *idxval = value_stack(idxq)[0]->items[0];
+  if (idxval->type != VWORD) {
+    eval_error(U"BAD ARGUMENT TYPE", v);
+    return;
+  }
+  size_t idx = string_to_int(idxval->str_word);
+  size_t cranksize = 1;
+  if (cur->cranks)
+    if (cur->cranks->size)
+      cranksize = cur->cranks->size;
+  if (idx >= cranksize) {
+    eval_error(U"INDEX OUT OF RANGE", v);
+    return;
+  }
+  int mod = 0;
+  if (cur->cranks) {
+    if (cur->cranks->size) {
+      int(*cr)[2] = cur->cranks->items[idx];
+      mod = cr[0][0];
+    }
+  }
+  string_free(idxval->str_word);
+  idxval->str_word = int_to_string(mod);
 }
 
 void add_funcs_cranker(ht_t *flit) {
@@ -203,4 +265,6 @@ void add_funcs_cranker(ht_t *flit) {
   add_func(flit, cog_halt, U"halt");
   add_func(flit, cog_crankbase, U"crankbase");
   add_func(flit, cog_modcrank, U"modcrank");
+  add_func(flit, cog_metacrankbase, U"metacrankbase");
+  add_func(flit, cog_metamodcrank, U"metamodcrank");
 }

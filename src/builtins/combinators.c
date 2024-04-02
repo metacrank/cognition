@@ -84,28 +84,26 @@ void cog_cast(value_t *v) {
     return;
   }
   if (string_comp(num->str_word, CAST_ARGS[0]) == 0 || string_comp(num->str_word, CAST_ARGS[1]) == 0) {
-    if (quot->type == VSTACK) {
-      value_free_safe(v1);
+    value_free_safe(v1);
+    if (quot->type == VSTACK)
       return;
-    }
     quot->type = VSTACK;
-    contain_t *c = init_contain(NULL, NULL, NULL);
+    contain_t *c = calloc(1, sizeof(contain_t));
+    c->iflag = true;
+    c->sflag = true;
     c->stack = quot->macro;
     quot->container = c;
-    value_free_safe(v1);
     return;
   }
   if (string_comp(num->str_word, CAST_ARGS[2]) == 0 || string_comp(num->str_word, CAST_ARGS[3]) == 0) {
-    if (quot->type == VMACRO) {
-      value_free_safe(v1);
+    value_free_safe(v1);
+    if (quot->type == VMACRO)
       return;
-    }
     quot->type = VMACRO;
     stack_t *s = quot->container->stack;
     quot->container->stack = NULL;
-    contain_free(quot->container);
+    contain_def_stack_push(quot->container);
     quot->macro = s;
-    value_free_safe(v1);
     return;
   }
   eval_error(U"INDEX OUT OF RANGE", v);
