@@ -67,12 +67,12 @@ string_t *str_ceil(string_t *m);
 
 string_t *str_floor(string_t *m);
 
-string_t *geq(string_t *m, string_t *n);
+bool geq(string_t *m, string_t *n);
 
-string_t *leq(string_t *m, string_t *n);
+bool leq(string_t *m, string_t *n);
 
-string_t *gthan(string_t *m, string_t *n);
+bool gthan(string_t *m, string_t *n);
 
-string_t *lthan(string_t *m, string_t *n);
+bool lthan(string_t *m, string_t *n);
 
 #endif // STRNUM_H_

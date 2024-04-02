@@ -73,6 +73,10 @@ void cog_gthan(value_t *v);
 /*! @brief less than */
 void cog_lthan(value_t *v);
 
+void cog_and(value_t *v);
+
+void cog_or(value_t *v);
+
 /* takes a function giving the coefficient of a taylor series
  * and computes the series to arbitrary precision */
 void cog_taylor(value_t *v);

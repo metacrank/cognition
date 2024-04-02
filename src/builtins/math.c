@@ -553,6 +553,264 @@ void cog_neq(value_t *v) {
   stack_push(stack, v1);
 }
 
+void cog_geq(value_t *v) {
+  contain_t *cur = stack_peek(STACK);
+  stack_t *stack = cur->stack;
+  if (stack->size < 2) {
+    eval_error(U"TOO FEW ARGUMENTS", v);
+    return;
+  }
+  value_t *v2 = stack_pop(stack);
+  if (value_stack(v2)[0]->size != 1) {
+    eval_error(U"BAD ARGUMENT TYPE", v);
+    stack_push(stack, v2);
+    return;
+  }
+  value_t *w2 = value_stack(v2)[0]->items[0];
+  if (w2->type != VWORD) {
+    eval_error(U"BAD ARGUMENT TYPE", v);
+    stack_push(stack, v2);
+    return;
+  }
+  value_t *v1 = stack_pop(stack);
+  if (value_stack(v1)[0]->size != 1) {
+    eval_error(U"BAD ARGUMENT TYPE", v);
+    stack_push(stack, v1);
+    stack_push(stack, v2);
+    return;
+  }
+  value_t *w1 = value_stack(v1)[0]->items[0];
+  if (w1->type != VWORD) {
+    eval_error(U"BAD ARGUMENT TYPE", v);
+    stack_push(stack, v1);
+    stack_push(stack, v2);
+    return;
+  }
+  if (geq(w1->str_word, w2->str_word)) {
+    w1->str_word->length = 0;
+    string_append(w1->str_word, 't');
+  } else {
+    w1->str_word->length = 0;
+  }
+  value_free_safe(v2);
+  stack_push(stack, v1);
+}
+
+void cog_leq(value_t *v) {
+  contain_t *cur = stack_peek(STACK);
+  stack_t *stack = cur->stack;
+  if (stack->size < 2) {
+    eval_error(U"TOO FEW ARGUMENTS", v);
+    return;
+  }
+  value_t *v2 = stack_pop(stack);
+  if (value_stack(v2)[0]->size != 1) {
+    eval_error(U"BAD ARGUMENT TYPE", v);
+    stack_push(stack, v2);
+    return;
+  }
+  value_t *w2 = value_stack(v2)[0]->items[0];
+  if (w2->type != VWORD) {
+    eval_error(U"BAD ARGUMENT TYPE", v);
+    stack_push(stack, v2);
+    return;
+  }
+  value_t *v1 = stack_pop(stack);
+  if (value_stack(v1)[0]->size != 1) {
+    eval_error(U"BAD ARGUMENT TYPE", v);
+    stack_push(stack, v1);
+    stack_push(stack, v2);
+    return;
+  }
+  value_t *w1 = value_stack(v1)[0]->items[0];
+  if (w1->type != VWORD) {
+    eval_error(U"BAD ARGUMENT TYPE", v);
+    stack_push(stack, v1);
+    stack_push(stack, v2);
+    return;
+  }
+  if (leq(w1->str_word, w2->str_word)) {
+    w1->str_word->length = 0;
+    string_append(w1->str_word, 't');
+  } else {
+    w1->str_word->length = 0;
+  }
+  value_free_safe(v2);
+  stack_push(stack, v1);
+}
+
+void cog_gthan(value_t *v) {
+  contain_t *cur = stack_peek(STACK);
+  stack_t *stack = cur->stack;
+  if (stack->size < 2) {
+    eval_error(U"TOO FEW ARGUMENTS", v);
+    return;
+  }
+  value_t *v2 = stack_pop(stack);
+  if (value_stack(v2)[0]->size != 1) {
+    eval_error(U"BAD ARGUMENT TYPE", v);
+    stack_push(stack, v2);
+    return;
+  }
+  value_t *w2 = value_stack(v2)[0]->items[0];
+  if (w2->type != VWORD) {
+    eval_error(U"BAD ARGUMENT TYPE", v);
+    stack_push(stack, v2);
+    return;
+  }
+  value_t *v1 = stack_pop(stack);
+  if (value_stack(v1)[0]->size != 1) {
+    eval_error(U"BAD ARGUMENT TYPE", v);
+    stack_push(stack, v1);
+    stack_push(stack, v2);
+    return;
+  }
+  value_t *w1 = value_stack(v1)[0]->items[0];
+  if (w1->type != VWORD) {
+    eval_error(U"BAD ARGUMENT TYPE", v);
+    stack_push(stack, v1);
+    stack_push(stack, v2);
+    return;
+  }
+  if (gthan(w1->str_word, w2->str_word)) {
+    w1->str_word->length = 0;
+    string_append(w1->str_word, 't');
+  } else {
+    w1->str_word->length = 0;
+  }
+  value_free_safe(v2);
+  stack_push(stack, v1);
+}
+
+void cog_lthan(value_t *v) {
+  contain_t *cur = stack_peek(STACK);
+  stack_t *stack = cur->stack;
+  if (stack->size < 2) {
+    eval_error(U"TOO FEW ARGUMENTS", v);
+    return;
+  }
+  value_t *v2 = stack_pop(stack);
+  if (value_stack(v2)[0]->size != 1) {
+    eval_error(U"BAD ARGUMENT TYPE", v);
+    stack_push(stack, v2);
+    return;
+  }
+  value_t *w2 = value_stack(v2)[0]->items[0];
+  if (w2->type != VWORD) {
+    eval_error(U"BAD ARGUMENT TYPE", v);
+    stack_push(stack, v2);
+    return;
+  }
+  value_t *v1 = stack_pop(stack);
+  if (value_stack(v1)[0]->size != 1) {
+    eval_error(U"BAD ARGUMENT TYPE", v);
+    stack_push(stack, v1);
+    stack_push(stack, v2);
+    return;
+  }
+  value_t *w1 = value_stack(v1)[0]->items[0];
+  if (w1->type != VWORD) {
+    eval_error(U"BAD ARGUMENT TYPE", v);
+    stack_push(stack, v1);
+    stack_push(stack, v2);
+    return;
+  }
+  if (lthan(w1->str_word, w2->str_word)) {
+    w1->str_word->length = 0;
+    string_append(w1->str_word, 't');
+  } else {
+    w1->str_word->length = 0;
+  }
+  value_free_safe(v2);
+  stack_push(stack, v1);
+}
+
+void cog_and(value_t *v) {
+  contain_t *cur = stack_peek(STACK);
+  stack_t *stack = cur->stack;
+  if (stack->size < 2) {
+    eval_error(U"TOO FEW ARGUMENTS", v);
+    return;
+  }
+  value_t *v2 = stack_pop(stack);
+  if (value_stack(v2)[0]->size != 1) {
+    eval_error(U"BAD ARGUMENT TYPE", v);
+    stack_push(stack, v2);
+    return;
+  }
+  value_t *w2 = value_stack(v2)[0]->items[0];
+  if (w2->type != VWORD) {
+    eval_error(U"BAD ARGUMENT TYPE", v);
+    stack_push(stack, v2);
+    return;
+  }
+  value_t *v1 = stack_pop(stack);
+  if (value_stack(v1)[0]->size != 1) {
+    eval_error(U"BAD ARGUMENT TYPE", v);
+    stack_push(stack, v1);
+    stack_push(stack, v2);
+    return;
+  }
+  value_t *w1 = value_stack(v1)[0]->items[0];
+  if (w1->type != VWORD) {
+    eval_error(U"BAD ARGUMENT TYPE", v);
+    stack_push(stack, v1);
+    stack_push(stack, v2);
+    return;
+  }
+  if (word_truth(w1) && word_truth(w2)) {
+    w1->str_word->length = 0;
+    string_append(w1->str_word, 't');
+  } else {
+    w1->str_word->length = 0;
+  }
+  value_free_safe(v2);
+  stack_push(stack, v1);
+}
+
+void cog_or(value_t *v) {
+  contain_t *cur = stack_peek(STACK);
+  stack_t *stack = cur->stack;
+  if (stack->size < 2) {
+    eval_error(U"TOO FEW ARGUMENTS", v);
+    return;
+  }
+  value_t *v2 = stack_pop(stack);
+  if (value_stack(v2)[0]->size != 1) {
+    eval_error(U"BAD ARGUMENT TYPE", v);
+    stack_push(stack, v2);
+    return;
+  }
+  value_t *w2 = value_stack(v2)[0]->items[0];
+  if (w2->type != VWORD) {
+    eval_error(U"BAD ARGUMENT TYPE", v);
+    stack_push(stack, v2);
+    return;
+  }
+  value_t *v1 = stack_pop(stack);
+  if (value_stack(v1)[0]->size != 1) {
+    eval_error(U"BAD ARGUMENT TYPE", v);
+    stack_push(stack, v1);
+    stack_push(stack, v2);
+    return;
+  }
+  value_t *w1 = value_stack(v1)[0]->items[0];
+  if (w1->type != VWORD) {
+    eval_error(U"BAD ARGUMENT TYPE", v);
+    stack_push(stack, v1);
+    stack_push(stack, v2);
+    return;
+  }
+  if (word_truth(w1) || word_truth(w2)) {
+    w1->str_word->length = 0;
+    string_append(w1->str_word, 't');
+  } else {
+    w1->str_word->length = 0;
+  }
+  value_free_safe(v2);
+  stack_push(stack, v1);
+}
+
 void add_funcs_math(ht_t *flit) {
   add_func(flit, cog_equals, U"=");
   add_func(flit, cog_neq, U"!=");
@@ -572,4 +830,10 @@ void add_funcs_math(ht_t *flit) {
   add_func(flit, cog_fp, U"fp");
   add_func(flit, cog_real, U"real");
   add_func(flit, cog_imaginary, U"imag");
+  add_func(flit, cog_geq, U">=");
+  add_func(flit, cog_leq, U"<=");
+  add_func(flit, cog_gthan, U">");
+  add_func(flit, cog_lthan, U"<");
+  add_func(flit, cog_and, U"&&");
+  add_func(flit, cog_or, U"||");
 }

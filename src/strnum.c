@@ -832,34 +832,35 @@ string_t *str_floor(string_t *m) {
   return double_to_string(floor(mf), sf, (mf == creal(mf)));
 }
 
-string_t *geq(string_t *m, string_t *n) {
+bool geq(string_t *m, string_t *n) {
   double mf = string_to_double(m);
   double nf = string_to_double(n);
   if (mf >= nf)
-    return init_string(U"t");
-  return init_string(U"");
+    return true;
+  return false;
 }
 
-string_t *leq(string_t *m, string_t *n) {
+bool leq(string_t *m, string_t *n) {
   double mf = string_to_double(m);
   double nf = string_to_double(n);
   if (mf <= nf)
-    return init_string(U"t");
-  return init_string(U"");
+    return true;
+  return false;
 }
 
-string_t *gthan(string_t *m, string_t *n) {
+bool gthan(string_t *m, string_t *n) {
   double mf = string_to_double(m);
   double nf = string_to_double(n);
   if (mf > nf)
-    return init_string(U"t");
-  return init_string(U"");
+    return true;
+  return false;
 }
 
-string_t *lthan(string_t *m, string_t *n) {
+bool lthan(string_t *m, string_t *n) {
   double mf = string_to_double(m);
   double nf = string_to_double(n);
+  printf("%f, %f", mf, nf);
   if (mf < nf)
-    return init_string(U"t");
-  return init_string(U"");
+    return true;
+  return false;
 }
