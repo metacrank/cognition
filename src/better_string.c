@@ -140,6 +140,10 @@ string_t *init_string(char32_t *a) {
 string_t *string_copy(string_t *s) {
   if (s == NULL)
     return NULL;
+  if (s->length > s->bufsize) {
+    printf("catastrophic string management failure");
+    return NULL;
+  }
   // fetch from pool
   string_t *cp = malloc(sizeof(string_t));
   cp->bufsize = s->bufsize;
