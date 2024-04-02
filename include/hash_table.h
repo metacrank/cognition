@@ -1,7 +1,7 @@
 #ifndef HASH_TABLE_H
 #define HASH_TABLE_H
-#include <stdlib.h>
 #include <better_string.h>
+#include <stdlib.h>
 /*! @brief This structure is to be used in singly linked lists that hold
  * key-value pairs for a hash table. */
 typedef struct NODE_STRUCT {
@@ -30,8 +30,11 @@ typedef struct BST_STRUCT {
   struct BST_STRUCT *left;
   /*! @brief stores the right node */
   struct BST_STRUCT *right;
-  /*! @brief stores the hash table key */
-  string_t *key;
+  union {
+    /*! @brief stores the hash table key */
+    string_t *key;
+    int ikey;
+  };
   /*! @brief stores the hash table value */
   void *value;
 } bst_t;

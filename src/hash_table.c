@@ -245,12 +245,25 @@ void *bst_get(bst_t *bst, string_t *key) {
     return bst->value;
 }
 
+void *bst_geti(bst_t *bst, int i) {
+  if (!bst)
+    return NULL;
+  long l = i - bst->ikey;
+  if (l < 0)
+    return bst_geti(bst->left, i);
+  else if (l > 0)
+    return bst_geti(bst->right, i);
+  else
+    return bst->value;
+}
+
 bst_t *bst_copy(bst_t *bst, void *(*copyfunc)(void *)) {
   if (!bst)
     return NULL;
   bst_t *b = init_bst();
   b->key = string_copy(bst->key);
   b->value = copyfunc(b->value);
+  b->ikey = bst->ikey;
   if (bst->left)
     b->left = bst_copy(bst->left, copyfunc);
   if (bst->right)

@@ -77,7 +77,7 @@ string_t *file_read(FILE *FP);
 void file_print(FILE *FP, string_t *s);
 
 /*! Frees space for string */
-void string_free(string_t *s);
+void string_free(void *s);
 
 /* returns allocated space to pool */
 void string_pool_add(string_t *s);

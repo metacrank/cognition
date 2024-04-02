@@ -107,6 +107,25 @@ struct CONTAINER_STRUCT {
   bool sflag;
 };
 
+typedef struct {
+  bst_t *strstack;
+  bst_t *containstack;
+  bst_t *stackstack;
+  bst_t *valuestack;
+
+  stack_t *htstack;
+  stack_t *errstack;
+} pool_t;
+
+enum {
+  POOL_STACK,
+  POOL_CONTAIN,
+  POOL_STRING,
+  POOL_VALUE,
+  POOL_HT,
+  POOL_ERR,
+};
+
 /*! Useless function that is only used in order to be passed into a hash table.
  */
 void func_free(void *f);
@@ -118,6 +137,18 @@ void print_crank(char prefix[]);
 
 /* push error to error stack */
 void eval_error(char32_t *s, value_t *w);
+
+/*! trims all bottom nodes of all data structures once */
+void pool_gc(pool_t *pool);
+
+/*! pool-aware allocation -- collects garbage if fails */
+void *paw_alloc(size_t nmemb, size_t size);
+
+/*! adds value to pool */
+void pool_add(pool_t *pool, byte_t type, void *value);
+
+/*! frees pool */
+void pool_free(pool_t *pool);
 
 /*! Allocates memory for new stack */
 stack_t *init_stack(size_t size);

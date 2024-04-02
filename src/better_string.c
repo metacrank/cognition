@@ -267,8 +267,9 @@ void file_print(FILE *FP, string_t *s) {
   }
 }
 
-void string_free(string_t *s) {
+void string_free(void *s) {
   if (s == NULL) return;
-  free(s->value);
-  free(s);
+  string_t *str = s;
+  free(str->value);
+  free(str);
 }

@@ -24,6 +24,7 @@ ht_t *OBJ_TABLE;
 parser_t *PARSER;
 string_t *EXIT_CODE;
 bool *EXITED;
+pool_t *OBJ_POOL;
 
 // for debugging
 void print_crank(char prefix[]) {
@@ -57,6 +58,195 @@ void eval_error(char32_t *s, value_t *w) {
   stack_push(cur->err_stack, v);
 }
 
+pool_t *init_pool() {
+  pool_t *pool = calloc(1, sizeof(pool_t));
+  return pool;
+}
+
+void *paw_alloc(size_t nmemb, size_t size) {
+  void *c;
+  c = calloc(nmemb, size);
+  while (c == NULL) {
+    if (!(OBJ_POOL->containstack || OBJ_POOL->errstack->size != 0 || OBJ_POOL->htstack != 0 || OBJ_POOL->stackstack || OBJ_POOL->strstack || OBJ_POOL->valuestack))
+      die("paw_alloc out of memory"); 
+    pool_gc(OBJ_POOL);
+    c = calloc(nmemb, size);
+  }
+  return c;
+}
+void free_bottom(bst_t *node, void (*freefunc)(void *)) {
+  if (node->left)
+    free_bottom(node->left, freefunc);
+  if (node->right)
+    free_bottom(node->right, freefunc);
+  if (node) {
+    if (node->left == NULL && node->right == NULL) {
+      freefunc(node->value);
+      if (node->key)
+        string_free(node->key);
+      free(node);
+      return;
+    }
+  }
+}
+
+void bst_stack_add(bst_t *bst, int i, void *value) {
+  bst_t *parent = NULL;
+  bst_t *cur = bst;
+  bool isleft = true;
+  long l;
+  while (cur) {
+    l = i - bst->ikey;
+    if (l < 0) {
+      parent = cur;
+      cur = cur->left;
+      isleft = true;
+    } else if (l > 0) {
+      parent = cur;
+      cur = cur->right;
+      isleft = false;
+    } else {
+      stack_push(cur->value, value);
+      return;
+    }
+  }
+  if (parent) {
+    if (isleft) {
+      parent->left = init_bst();
+      parent->left->ikey = i;
+      parent->left->value = init_stack(DEFAULT_STACK_SIZE);
+      stack_push(parent->left->value, value);
+    } else {
+      parent->right = init_bst();
+      parent->right->ikey = i;
+      parent->right->value = init_stack(DEFAULT_STACK_SIZE);
+      stack_push(parent->right->value, value);
+    }
+  } else {
+    bst = init_bst();
+    bst->ikey = i;
+    bst->value = init_stack(DEFAULT_STACK_SIZE);
+    stack_push(bst->value, value);
+  }
+}
+
+void bst_stack_free(bst_t *bst, void (*freefunc)(void *)) {
+  if (!bst)
+    return;
+  if (bst->left)
+    bst_free(bst->left, freefunc);
+  if (bst->right)
+    bst_free(bst->right, freefunc);
+  if (bst) {
+    string_free(bst->key);
+    if (bst->value) {
+      stack_t *s = bst->value;
+      for (int i = 0; i < s->size; i ++) {
+	freefunc(s->items[i]);
+      }
+      free(s);
+    }
+    free(bst);
+  }
+}
+
+void pool_gc(pool_t *pool) {
+  free_bottom(pool->containstack, contain_free);
+  free_bottom(pool->stackstack, value_stack_free);
+  free_bottom(pool->strstack, string_free);
+  free_bottom(pool->valuestack, value_free);
+}
+
+void pool_gcall(pool_t *pool) {
+  bst_stack_free(pool->containstack, contain_free);
+  bst_stack_free(pool->stackstack, value_stack_free);
+  bst_stack_free(pool->valuestack, value_free);
+  bst_stack_free(pool->strstack, string_free);
+}
+
+void pool_add(pool_t *pool, byte_t type, void *value) {
+  switch (type) {
+  case POOL_STACK:;
+    stack_t *s = value;
+    bst_stack_add(pool->stackstack, s->capacity, s);
+    break;
+  case POOL_VALUE:;
+    value_t *v = value;
+    /* TODO: switch */
+    switch (v->type) {
+    case VMACRO:
+      break;
+    case VSTACK:
+      break;
+    case VWORD:
+      break;
+    }
+
+    if (v->container && v->container->stack)
+      bst_stack_add(pool->valuestack, v->container->stack->size, v);
+    break;
+  case POOL_STRING:;
+    string_t *str = value;
+    bst_stack_add(pool->strstack, str->bufsize, str);
+    break;
+  case POOL_CONTAIN:;
+    contain_t *c = value;
+    if (c->err_stack) {
+      for (int i = 0; i < c->err_stack->size; i ++) {
+	pool_add(pool, POOL_ERR, c->err_stack->items[i]);
+	c->err_stack->items[i] = NULL;
+      }
+      c->err_stack->size = 0;
+    }
+    if (c->delims) {
+      pool_add(pool, POOL_STRING, c->delims);
+      c->delims = NULL;
+    }
+    if (c->ignored) {
+      pool_add(pool, POOL_STRING, c->ignored);
+      c->ignored = NULL;
+    }
+    if (c->singlets) {
+      pool_add(pool, POOL_STRING, c->singlets);
+      c->singlets = NULL;
+    }
+    if (c->flit) {
+      pool_add(pool, POOL_HT, c->flit);
+      c->flit = NULL;
+    }
+    if (c->word_table) {
+      pool_add(pool, POOL_HT, c->word_table);
+      c->word_table = NULL;
+    }
+    if (c->cranks) {
+      for (int i = 0; i < c->cranks->size; i ++) {
+	c->cranks->items[i] = NULL;
+      }
+      c->cranks->size = 0;
+    }
+    if (c->stack)
+      bst_stack_add(pool->containstack, c->stack->size, v);
+    break;
+  case POOL_HT:;
+    ht_t *ht = value;
+    for (int i = 0; i < ht->size; i ++) {
+      /* TODO: reclaim everything from all buckets; leaks memory right now */
+      ht->buckets[i]->size = 0;
+      ht->buckets[i]->head = NULL;
+    }
+    stack_push(pool->htstack, ht);
+    break;
+  case POOL_ERR:;
+    error_t *err = value;
+    pool_add(pool, POOL_STRING, err->error);
+    pool_add(pool, POOL_STRING, err->str_word);
+    stack_push(pool->errstack, err);
+    break;
+  }
+}
+
+/* TODO */
+void *pool_get(pool_t *pool, int bufsize, byte_t type) {}
 stack_t *init_stack(size_t size) {
   stack_t *a = calloc(1, sizeof(stack_t));
   if (!a)
