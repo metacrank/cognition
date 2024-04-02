@@ -58,9 +58,13 @@ void print_value(value_t *v, void *e) {
   custom_t *c;
   switch (v->type) {
   case VWORD:
-    printf("'");
-    print_str_formatted(v->str_word);
-    printf("'");
+    if (v->str_word) {
+      printf("'");
+      print_str_formatted(v->str_word);
+      printf("'");
+    } else {
+      printf("(null)");
+    }
     break;
   case VSTACK:
     printf("[ ");

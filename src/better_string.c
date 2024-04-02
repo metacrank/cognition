@@ -104,8 +104,11 @@ void realloc_string(string_t *s, size_t size) {
   newstr->value = malloc(size * sizeof(char32_t));
 
   char32_t *val = newstr->value;
+  size_t bs = newstr->bufsize;
   newstr->value = s->value;
+  newstr->bufsize = s->bufsize;
   s->value = val;
+  s->bufsize = bs;
 
   memcpy(s->value, newstr->value, s->length * sizeof(char32_t));
   //add to pool
