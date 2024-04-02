@@ -90,7 +90,10 @@ void fprint_value(FILE *f, value_t *v, void *e) {
     break;
   case VERR:
     fprintf(f, "'");
-    fprint(f, v->error->str_word);
+    if (v->error->str_word)
+      fprint(f, v->error->str_word);
+    else
+      fprintf(f, "(none)");
     fprintf(f, "':%s", RED);
     fprint(f, v->error->error);
     fprintf(f, "%s", COLOR_RESET);

@@ -30,18 +30,36 @@ f eval d f i endl s unglue
 # this is a comment
 #demonstration of singlets in action!
 
-# [ === ( meta-crank-stuff ) [ ] ( meta-crank-stuff ) halt 1 1 metacrank
-# meta-crank-stuff === dup ']' = ( drop swap drop halt 1 crank ) ( compose ( dup ) dip swap ) if
-2 crank [ nop
-dup unglue ] push = addon
-drop unglue swap addon drop addon halt addon 1 push crank addon
+# [ === 1 metacrankbase crankbase ( meta-crank-stuff ) [ ] ( meta-crank-stuff ) 0 crank 1 1 metacrank
+# meta-crank-stuff === dup ']' = ( drop swap drop swap crank swap 1 swap metacrank ) ( compose ( dup ) dip swap ) if
+2 crank { nop
+1 quote metacrankbase addon crankbase addon
+dup unglue } push = addon
+drop unglue swap addon drop addon swap addon crank addon swap addon 1 push swap addon metacrank addon
 compose unglue dup unglue push eval dip addon swap addon
 1 crank quote swap quote swap compose compose
 2 crank if addon
 1 crank quote dup stack push prepose
-2 crank halt addon 1 push 1 push metacrank addon
-VMACRO cast
-1 crank def
+2 crank 0 push crank addon 1 push 1 push metacrank addon
+1 crank compose
+VMACRO cast def
+
+{ hello world! }
+
+# meta-crank-stuff === dup ']' = ( drop swap drop swap crank swap 1 swap metacrank quote compose ( normal-metacrank-stuff ) )
+# ( compose ( dup ) dip swap ) if
+2 crank -[ nop
+1 quote metacrankbase addon crankbase addon
+dup unglue ] push = addon
+drop unglue swap addon drop addon swap addon crank addon swap addon 1 push swap addon metacrank addon quote addon compose addon
+1 crank #normal meta-crank-stuff
+2 crank
+compose unglue dup unglue push eval dip addon swap addon
+1 crank quote swap quote swap compose compose
+
+# [ === 1 metacrankbase crankbase ( meta-crank-stuff ) [ ] ( meta-crank-stuff ) 0 crank 1 1 metacrank
+# meta-crank-stuff === dup ']' = ( drop swap drop swap crank swap 1 swap metacrank )
+# ( dup '[' = ( drop -[ ) ( compose ( dup ) dip swap ) if ) if
 
 [ hello world! ]
 
