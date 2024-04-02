@@ -302,8 +302,9 @@ long order(string_t *s) {
 
 void get_precision(string_t *s, int *a, int *b) {
   int i;
+  *a = 0;
+  *b = 0;
   if (s->length == 0) {
-    *a = 0;
     *b = 0;
     return;
   }
@@ -323,7 +324,6 @@ void get_precision(string_t *s, int *a, int *b) {
       break;
     }
   }
-  *b = 0;
   while (i < s->length) {
     if (s->value[i] == '.')
       *b = s->length - i - 1;
@@ -381,6 +381,11 @@ double complex string_to_double(string_t *s) {
 }
 
 string_t *int_to_string(long d) {
+  if (d == 0) {
+    string_t *s = init_string(U"");
+    string_append(s, digits[0]);
+    return s;
+  }
   // get from pool;
   string_t *s = init_string(U"");
   int offset = (1 - (d < 0) * 2) * 0.001;
@@ -783,7 +788,10 @@ string_t *str_ln(string_t *m) {
 string_t *str_pow(string_t *m, string_t *n) {
   string_t *mln = str_ln(m);
   string_t *pr = product(mln, n);
-  return str_exp(pr);
+  string_free(mln);
+  string_t *exps = str_exp(pr);
+  string_free(pr);
+  return exps;
 }
 
 string_t *str_sin(string_t *m) {
