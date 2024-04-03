@@ -47,6 +47,7 @@ int utf8cmp(byte_t *b1, byte_t *b2) {
 
 // assumes little endian
 size_t utf32_to_utf8(byte_t *const buf, const char32_t utf32) {
+  //printf("utf32=%d\n", utf32);
   if (utf32 < 0x80) {
     buf[0] = utf32;
     return 1;
@@ -205,8 +206,8 @@ void print_utf32(int num, ...) {
   va_start(args, num);
   for (int i = 0; i < num; i++) {
     char32_t utf32 = va_arg(args, char32_t);
-    utf32_to_utf8(print_buffer, utf32);
-    printf("%s", print_buffer);
+    int len = utf32_to_utf8(print_buffer, utf32);
+    printf("%.*s", len, print_buffer);
   }
 }
 
@@ -215,8 +216,8 @@ void fprint_utf32(FILE *f, int num, ...) {
   va_start(args, num);
   for (int i = 0; i < num; i++) {
     char32_t utf32 = va_arg(args, char32_t);
-    utf32_to_utf8(print_buffer, utf32);
-    fprintf(f, "%s", print_buffer);
+    int len = utf32_to_utf8(print_buffer, utf32);
+    fprintf(f, "%.*s", len, print_buffer);
   }
 }
 
@@ -267,9 +268,8 @@ void file_print(FILE *FP, string_t *s) {
   }
 }
 
-void string_free(void *s) {
+void string_free(string_t *s) {
   if (s == NULL) return;
-  string_t *str = s;
-  free(str->value);
-  free(str);
+  free(s->value);
+  free(s);
 }

@@ -12,6 +12,8 @@
 #define RADIUS (BASE / 2 + 1)
 #define MODULO 13
 
+extern byte_t print_buffer[5];
+
 // in the future, do not use pointer arrays for utf32
 char32_t digits[N_O_D];
 int digit_values[MODULO];
@@ -536,6 +538,7 @@ string_t *sum_real(string_t *m, string_t *n, char32_t *m_radix, char32_t *n_radi
   char32_t *m_rad, *n_rad;
   char32_t *m_end = m->value + m->length;
   char32_t *n_end = n->value + n->length;
+
   if (m_radix) {
     m_rad = m_radix;
     if (n_radix) {
@@ -562,14 +565,26 @@ string_t *sum_real(string_t *m, string_t *n, char32_t *m_radix, char32_t *n_radi
       m_rad = m->value;
       n_rad = n->value;
       while (true) {
-        if (*m_rad == '.' || m_rad == m_end) {
+        if (m_rad == m_end) {
+          while (n_rad < n_end) {
+            if (*n_rad == '.') break;
+            n_rad++;
+          }
+          break;
+        } else if (*m_rad == '.') {
           while (n_rad < n_end) {
             if (*n_rad == '.') break;
             n_rad++;
           }
           break;
         }
-        if (*n_rad == '.' || n_rad == n_end) {
+        if (n_rad == n_end) {
+          while (m_rad < m_end) {
+            if (*m_rad == '.') break;
+            m_rad++;
+          }
+          break;
+        } else if (*n_rad == '.') {
           while (m_rad < m_end) {
             if (*m_rad == '.') break;
             m_rad++;
@@ -612,10 +627,9 @@ string_t *sum_real(string_t *m, string_t *n, char32_t *m_radix, char32_t *n_radi
       // includes radix point
       while(pm > m_rad) {
         sum = addition_sum_table[di(*pm)][di(*pn)];
+        char32_t tmp = addition_carry_table[di(carry)][di(sum)];
         sum = addition_sum_table[di(carry)][di(sum)];
-        carry = addition_sum_table
-          [di(addition_carry_table[di(carry)][di(sum)])]
-          [di(addition_carry_table[di(*pm)][di(*pn)])];
+        carry = addition_sum_table[di(tmp)][di(addition_carry_table[di(*pm)][di(*pn)])];
         string_append(s, sum);
         pm--;
         pn--;
@@ -665,10 +679,9 @@ string_t *sum_real(string_t *m, string_t *n, char32_t *m_radix, char32_t *n_radi
       // pm and pn are right before radix points
       while (pm >= m->value && pn >= n->value) {
         sum = addition_sum_table[di(*pm)][di(*pn)];
+        char32_t tmp = addition_carry_table[di(carry)][di(sum)];
         sum = addition_sum_table[di(carry)][di(sum)];
-        carry = addition_sum_table
-          [di(addition_carry_table[di(carry)][di(sum)])]
-          [di(addition_carry_table[di(*pm)][di(*pn)])];
+        carry = addition_sum_table[di(tmp)][di(addition_carry_table[di(*pm)][di(*pn)])];
         string_append(s, sum);
         pm--;
         pn--;
