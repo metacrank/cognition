@@ -23,8 +23,9 @@ stack_t *MACROS;
 ht_t *OBJ_TABLE;
 parser_t *PARSER;
 string_t *EXIT_CODE;
-bool *EXITED;
+bool EXITED;
 pool_t *OBJ_POOL;
+bool RETURNED;
 
 // for debugging
 void print_crank(char prefix[]) {
@@ -821,6 +822,9 @@ void evalstack(contain_t *c, value_t *callword) {
       return;
     int(*cr)[2];
     for (int i = 1; i < c->stack->size; i++) {
+      if (RETURNED) {
+        return;
+      }
       inc_crank(cur);
       cur = stack_peek(STACK);
       FAMILY->items[0] = cur;
@@ -898,6 +902,8 @@ void evalmacro(stack_t *macro, value_t *word) {
       break;
     }
     if (return_function(macro, true))
+      return;
+    if (RETURNED)
       return;
   }
 }
@@ -1034,4 +1040,6 @@ void eval(value_t *v) {
   }
   push_quoted(cur, v);
   crank();
+  if (RETURNED)
+    RETURNED = false;
 }

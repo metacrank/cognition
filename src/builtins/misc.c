@@ -7,6 +7,7 @@
 #include <string.h>
 
 extern stack_t *STACK;
+extern bool RETURNED;
 extern byte_t print_buffer[5];
 
 void cog_reset(value_t *v) {
@@ -92,7 +93,12 @@ void cog_clib(value_t *v) {
   value_free_safe(v1);
 }
 
+void cog_return(value_t *v) {
+  RETURNED = true;
+}
+
 void add_funcs_misc(ht_t *flit) {
   add_func(flit, cog_reset, U"reset");
   add_func(flit, cog_clib, U"clib");
+  add_func(flit, cog_return, U"return");
 }

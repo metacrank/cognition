@@ -6,6 +6,7 @@ extern stack_t *STACK;
 extern stack_t *CONTAIN_DEF_STACK;
 extern string_t *EXIT_CODE;
 extern bool EXITED;
+
 void cog_cd(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   value_t *child = stack_peek(cur->stack);

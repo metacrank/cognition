@@ -24,6 +24,7 @@ extern ht_t *OBJ_TABLE;
 extern string_t *EXIT_CODE;
 extern bool EXITED;
 extern string_t **CAST_ARGS;
+extern bool RETURNED;
 
 /*! prints usage then exits */
 void usage(int e) {
@@ -207,6 +208,7 @@ int main(int argc, char **argv) {
   MACROS = init_stack(DEFAULT_STACK_SIZE);
   OBJ_TABLE = init_ht(DEFAULT_STACK_SIZE);
   EXIT_CODE = NULL;
+  RETURNED = false;
   CAST_ARGS = malloc(4 * sizeof(string_t*));
   CAST_ARGS[0] = init_string(U"VSTACK");
   CAST_ARGS[1] = init_string(U"0");
