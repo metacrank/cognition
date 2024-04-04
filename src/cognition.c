@@ -3,13 +3,13 @@
 #include <builtinslib.h>
 #include <cognition.h>
 #include <ctype.h>
+#include <hash_table.h>
 #include <macros.h>
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <hash_table.h>
 
 /* Global variables defined */
 stack_t *STACK;
@@ -67,13 +67,16 @@ void *paw_alloc(size_t nmemb, size_t size) {
   void *c;
   c = calloc(nmemb, size);
   while (c == NULL) {
-    if (!(OBJ_POOL->containstack || OBJ_POOL->errstack->size != 0 || OBJ_POOL->htstack != 0 || OBJ_POOL->stackstack || OBJ_POOL->strstack || OBJ_POOL->valuestack))
-      die("paw_alloc out of memory"); 
+    if (!(OBJ_POOL->containstack || OBJ_POOL->errstack->size != 0 ||
+          OBJ_POOL->htstack != 0 || OBJ_POOL->stackstack ||
+          OBJ_POOL->strstack || OBJ_POOL->valuestack))
+      die("paw_alloc out of memory");
     pool_gc(OBJ_POOL);
     c = calloc(nmemb, size);
   }
   return c;
 }
+
 void free_bottom(bst_t *node, void (*freefunc)(void *)) {
   if (node->left)
     free_bottom(node->left, freefunc);
@@ -141,8 +144,8 @@ void bst_stack_free(bst_t *bst, void (*freefunc)(void *)) {
     string_free(bst->key);
     if (bst->value) {
       stack_t *s = bst->value;
-      for (int i = 0; i < s->size; i ++) {
-	freefunc(s->items[i]);
+      for (int i = 0; i < s->size; i++) {
+        freefunc(s->items[i]);
       }
       free(s);
     }
@@ -175,15 +178,27 @@ void pool_add(pool_t *pool, byte_t type, void *value) {
     /* TODO: switch */
     switch (v->type) {
     case VMACRO:
+      if (v->macro)
+        bst_stack_add(pool->macrostack, v->macro->size, v);
+      else
+	die("debug error pool value req");
       break;
     case VSTACK:
+      if (v->container && v->container->stack)
+        bst_stack_add(pool->valuestack, v->container->stack->size, v);
+      else
+	die("debug error pool stack req");
       break;
     case VWORD:
+      if (v->str_word)
+	bst_stack_add(pool->wordstack, v->str_word->bufsize, v);
+      else
+	die("L");
+      break;
+    case VERR:
+      stack_push(pool->errstack, v);
       break;
     }
-
-    if (v->container && v->container->stack)
-      bst_stack_add(pool->valuestack, v->container->stack->size, v);
     break;
   case POOL_STRING:;
     string_t *str = value;
@@ -192,9 +207,9 @@ void pool_add(pool_t *pool, byte_t type, void *value) {
   case POOL_CONTAIN:;
     contain_t *c = value;
     if (c->err_stack) {
-      for (int i = 0; i < c->err_stack->size; i ++) {
-	pool_add(pool, POOL_ERR, c->err_stack->items[i]);
-	c->err_stack->items[i] = NULL;
+      for (int i = 0; i < c->err_stack->size; i++) {
+        pool_add(pool, POOL_ERR, c->err_stack->items[i]);
+        c->err_stack->items[i] = NULL;
       }
       c->err_stack->size = 0;
     }
@@ -219,8 +234,8 @@ void pool_add(pool_t *pool, byte_t type, void *value) {
       c->word_table = NULL;
     }
     if (c->cranks) {
-      for (int i = 0; i < c->cranks->size; i ++) {
-	c->cranks->items[i] = NULL;
+      for (int i = 0; i < c->cranks->size; i++) {
+        c->cranks->items[i] = NULL;
       }
       c->cranks->size = 0;
     }
@@ -229,24 +244,63 @@ void pool_add(pool_t *pool, byte_t type, void *value) {
     break;
   case POOL_HT:;
     ht_t *ht = value;
-    for (int i = 0; i < ht->size; i ++) {
+    for (int i = 0; i < ht->size; i++) {
       /* TODO: reclaim everything from all buckets; leaks memory right now */
       ht->buckets[i]->size = 0;
       ht->buckets[i]->head = NULL;
     }
     stack_push(pool->htstack, ht);
     break;
-  case POOL_ERR:;
-    error_t *err = value;
-    pool_add(pool, POOL_STRING, err->error);
-    pool_add(pool, POOL_STRING, err->str_word);
-    stack_push(pool->errstack, err);
-    break;
   }
 }
 
 /* TODO */
-void *pool_get(pool_t *pool, int bufsize, byte_t type) {}
+void *pool_get(pool_t *pool, int bufsize, byte_t type) {
+  switch (type) {
+  case POOL_ERR:;
+    return stack_pop(pool->errstack);
+  case POOL_HT:
+    return stack_pop(pool->htstack);
+  case POOL_STACK:;
+    break;
+  case POOL_VMACRO:;
+  case POOL_VWORD:;
+  case POOL_VSTACK:;
+  case POOL_VCLIB:;
+  case POOL_CONTAIN:;
+    break;
+  case POOL_STRING:
+    break;
+  }
+  return NULL;
+}
+
+void *pool_req(int bufsize, byte_t type) {
+  void *v = pool_get(OBJ_POOL, bufsize, type);
+  if (!v) {
+    switch (type) {
+    case POOL_STACK:
+      return init_stack(DEFAULT_STACK_SIZE);
+    case POOL_VALUE:
+      return init_value(VWORD);
+    case POOL_STRING:
+      return init_string(NULL);
+    case POOL_ERR:
+      return calloc(1, sizeof(error_t));
+    case POOL_HT:
+      return init_ht(DEFAULT_HT_SIZE);
+    default:
+      return NULL;
+    }
+  }
+  return v;
+}
+
+void pool_free(pool_t *pool) {
+  pool_gcall(pool);
+  free(pool);
+}
+
 stack_t *init_stack(size_t size) {
   stack_t *a = calloc(1, sizeof(stack_t));
   if (!a)
@@ -446,8 +500,8 @@ void error_free(void *err) {
   free(e);
 }
 
-custom_t *init_custom(void (*printfunc)(FILE *, void *), void (*freefunc)(void *),
-                      void *(*copyfunc)(void *)) {
+custom_t *init_custom(void (*printfunc)(FILE *, void *),
+                      void (*freefunc)(void *), void *(*copyfunc)(void *)) {
   custom_t *c = calloc(1, sizeof(custom_t));
   if (!c)
     die("calloc on custom");

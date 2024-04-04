@@ -112,6 +112,8 @@ typedef struct {
   bst_t *containstack;
   bst_t *stackstack;
   bst_t *valuestack;
+  bst_t *macrostack;
+  bst_t *wordstack;
 
   stack_t *htstack;
   stack_t *errstack;
@@ -124,6 +126,10 @@ enum {
   POOL_VALUE,
   POOL_HT,
   POOL_ERR,
+  POOL_VWORD,
+  POOL_VSTACK,
+  POOL_VMACRO,
+  POOL_VCLIB,
 };
 
 /*! Useless function that is only used in order to be passed into a hash table.

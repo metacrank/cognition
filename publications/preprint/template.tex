@@ -169,7 +169,8 @@ about a zero metacrank base otherwise). In this state, the only way one can exec
 However, one can quickly set a crank and get into a comfortable environment without having to use faliases.
 \subsection{Metastack Design}
 The metastack is a system by which the current working stack can be set. Each current working stack has a hash table associated
-and an error stack associated,
+and an error stack associated, which keeps track of the errors that occur in the environment. The metastack, or stack stack,
+is a global object that keeps track of the current directory in the same way one might have a current 
 \subsection{Error Stack Design}
 
 \subsection{Builtins and the FLIT}
