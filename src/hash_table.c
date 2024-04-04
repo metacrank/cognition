@@ -360,6 +360,10 @@ void ht_free(ht_t *h, void (*func)(void *)) {
   free(h);
 }
 
+void ht_free_free(void *h) {
+  ht_free(h, free);
+}
+
 /* DJB2 HASH FUNCTION */
 unsigned long hash(ht_t *h, string_t *key) {
   unsigned long hash = 5381;

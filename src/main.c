@@ -2,6 +2,7 @@
 #include <builtins.h>
 #include <builtinslib.h>
 #include <cognition.h>
+#include <hash_table.h>
 #include <strnum.h>
 #include <dlfcn.h>
 #include <locale.h>
@@ -12,6 +13,8 @@
 #include <unistd.h>
 
 extern stack_t *STACK;
+extern stack_t *EVAL_CONTAINERS;
+extern contain_t *ROOT;
 extern parser_t *PARSER;
 extern stack_t *EVAL_STACK;
 extern stack_t *CONTAIN_DEF_STACK;
@@ -20,6 +23,8 @@ extern stack_t *FAMILY;
 extern stack_t *FAMILY_IDX;
 extern stack_t *CONTAINERS;
 extern stack_t *MACROS;
+extern stack_t *OBJ_TABLE_STACK;
+extern stack_t *OBJ_TABLE_REF_STACK;
 extern ht_t *OBJ_TABLE;
 extern string_t *EXIT_CODE;
 extern bool EXITED;
@@ -108,7 +113,8 @@ void print_end() {
 /*! frees all global variables */
 void global_free() {
   string_free(PARSER->source);
-  ht_free(OBJ_TABLE, free);
+  stack_free(OBJ_TABLE_STACK, ht_free_free);
+  stack_free(OBJ_TABLE_REF_STACK, nop);
   if (!EXITED) {
     contain_free(STACK->items[0]);
   }
@@ -116,6 +122,7 @@ void global_free() {
   free(STACK);
   free(PARSER);
   stack_free(EVAL_STACK, value_free);
+  stack_free(EVAL_CONTAINERS, nop);
   stack_free(CONTAIN_DEF_STACK, contain_free);
   stack_free(MACRO_DEF_STACK, value_stack_free);
   stack_free(FAMILY, nop);
@@ -206,8 +213,12 @@ int main(int argc, char **argv) {
   FAMILY_IDX = init_stack(DEFAULT_STACK_SIZE);
   CONTAINERS = init_stack(DEFAULT_STACK_SIZE);
   MACROS = init_stack(DEFAULT_STACK_SIZE);
-  OBJ_TABLE = init_ht(DEFAULT_STACK_SIZE);
+  OBJ_TABLE_REF_STACK = init_stack(DEFAULT_STACK_SIZE);
+  OBJ_TABLE_STACK = init_stack(DEFAULT_STACK_SIZE);
+  OBJ_TABLE = init_ht(DEFAULT_HT_SIZE);
+  stack_push(OBJ_TABLE_STACK, OBJ_TABLE);
   EXIT_CODE = NULL;
+  EVAL_CONTAINERS = init_stack(DEFAULT_STACK_SIZE);
   RETURNED = false;
   CAST_ARGS = malloc(4 * sizeof(string_t*));
   CAST_ARGS[0] = init_string(U"VSTACK");
@@ -223,6 +234,8 @@ int main(int argc, char **argv) {
   stack_push(stack->faliases, init_string(U"ing"));
   add_funcs(stack->flit);
   stack_push(STACK, stack);
+  ROOT = stack;
+  stack_push(OBJ_TABLE_REF_STACK, ROOT);
 
   init_math();
 

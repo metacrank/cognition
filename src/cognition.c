@@ -13,6 +13,7 @@
 
 /* Global variables defined */
 stack_t *STACK;
+stack_t *EVAL_CONTAINERS;
 stack_t *EVAL_STACK;
 stack_t *CONTAIN_DEF_STACK;
 stack_t *MACRO_DEF_STACK;
@@ -20,12 +21,15 @@ stack_t *FAMILY;
 stack_t *FAMILY_IDX;
 stack_t *CONTAINERS;
 stack_t *MACROS;
+stack_t *OBJ_TABLE_STACK;
+stack_t *OBJ_TABLE_REF_STACK;
 ht_t *OBJ_TABLE;
 parser_t *PARSER;
 string_t *EXIT_CODE;
 bool EXITED;
 pool_t *OBJ_POOL;
 bool RETURNED;
+contain_t *ROOT;
 
 // for debugging
 void print_crank(char prefix[]) {
@@ -733,6 +737,7 @@ void evalf() {
     eval_error(U"EMPTY STACK", NULL);
     return;
   }
+  stack_push(EVAL_CONTAINERS, cur);
   stack_push(EVAL_STACK, v);
   if (v->type == VSTACK) {
     stack_push(FAMILY, v->container);
@@ -743,11 +748,12 @@ void evalf() {
   } else
     die("BAD VALUE TYPE ON STACK");
   inc_crank(cur);
+  stack_pop(EVAL_CONTAINERS);
   value_t *vf = stack_pop(EVAL_STACK);
   if (vf) {
     value_free_safe(vf);
   }
-  return_function(NULL, false);
+  return_function(cur, false);
 }
 
 void *func_copy(void *funcs) { return NULL; }
@@ -804,6 +810,11 @@ bool return_function(void *stack, bool macro) {
   for (int i = 0; i < MACRO_DEF_STACK->size; i++) {
     if (stack_exists(MACROS, MACRO_DEF_STACK->items[i])) {
       return true;
+    }
+  }
+  for (int i = 0; i < CONTAIN_DEF_STACK->size; i++) {
+    if (stack_exists(EVAL_CONTAINERS, CONTAIN_DEF_STACK->items[i])) {
+      return false;
     }
   }
   stack_empty(CONTAIN_DEF_STACK, contain_free);
@@ -998,6 +1009,7 @@ void crank() {
       inc_crank(cur);
       return;
     }
+    stack_push(EVAL_CONTAINERS, cur);
     stack_push(EVAL_STACK, needseval);
     if (needseval->type == VSTACK) {
       stack_push(FAMILY, needseval->container);
@@ -1008,11 +1020,12 @@ void crank() {
     } else
       die("BAD VALUE ON STACK");
     inc_crank(cur);
+    stack_pop(EVAL_CONTAINERS);
     value_t *vf = stack_pop(EVAL_STACK);
     if (vf) {
       value_free_safe(vf);
     }
-    return_function(NULL, false);
+    return_function(cur, false);
   } else {
     inc_crank(cur);
   }
