@@ -4,10 +4,9 @@
 
 extern stack_t *STACK;
 extern stack_t *CONTAIN_DEF_STACK;
-extern contain_t *ROOT;
+extern string_t *ROOT;
 extern stack_t *OBJ_TABLE_STACK;
 extern stack_t *OBJ_TABLE_REF_STACK;
-extern ht_t *OBJ_TABLE;
 extern string_t *EXIT_CODE;
 extern bool EXITED;
 
@@ -50,6 +49,8 @@ void cog_ccd(value_t *v) {
     return;
   }
   stack_push(CONTAIN_DEF_STACK, cur);
+  if (cur == CURRENT_ROOT)
+    CURRENT_ROOT = child->container;
   cur = child->container;
   stack_push(STACK, cur);
   child->container = NULL;
@@ -66,7 +67,7 @@ void cog_ccd(value_t *v) {
 
 void cog_uncd(value_t *v) {
   contain_t *old = stack_pop(STACK);
-  if (old == ROOT) {
+  if (old == CURRENT_ROOT) {
     contain_t *root = calloc(1, sizeof(contain_t));
     contain_copy_attributes(old, root);
     root->stack = init_stack(DEFAULT_STACK_SIZE);
@@ -74,7 +75,7 @@ void cog_uncd(value_t *v) {
     oldroot->container = old;
     stack_push(root->stack, oldroot);
     stack_push(STACK, root);
-    ROOT = root;
+    CURRENT_ROOT = root;
   }
 }
 
@@ -88,8 +89,11 @@ void cog_uncdf(value_t *v) {
     oldroot->container = old;
     stack_push(root->stack, oldroot);
     stack_push(STACK, root);
-    ROOT = root;
+    CURRENT_ROOT = root;
+    return;
   }
+  if (CURRENT_ROOT == old)
+    ROOT->length--;
 }
 
 void cog_pop(value_t *v) {
@@ -100,7 +104,7 @@ void cog_pop(value_t *v) {
     stack_push(old->stack, popval);
     stack_push(STACK, old);
   }
-  if (old == ROOT) {
+  if (old == CURRENT_ROOT) {
     contain_t *root = calloc(1, sizeof(contain_t));
     contain_copy_attributes(old, root);
     root->stack = init_stack(DEFAULT_STACK_SIZE);
@@ -108,7 +112,7 @@ void cog_pop(value_t *v) {
     oldroot->container = old;
     stack_push(root->stack, oldroot);
     stack_push(STACK, root);
-    ROOT = root;
+    CURRENT_ROOT = root;
   }
   contain_t *newc = stack_peek(STACK);
   stack_push(newc->stack, popval);
@@ -130,8 +134,12 @@ void cog_popf(value_t *v) {
     oldroot->container = old;
     stack_push(root->stack, oldroot);
     stack_push(STACK, root);
-    ROOT = root;
+    CURRENT_ROOT = root;
+    stack_push(root->stack, popval);
+    return;
   }
+  if (CURRENT_ROOT == old)
+    ROOT->length--;
   contain_t *newc = stack_peek(STACK);
   stack_push(newc->stack, popval);
 }
@@ -143,35 +151,40 @@ void cog_qstack(value_t *v) {
   new->stack = init_stack(DEFAULT_STACK_SIZE);
   value_t *oldval = init_value(VSTACK);
   oldval->container = old;
+  if (CURRENT_ROOT == old)
+    CURRENT_ROOT = new;
   stack_push(new->stack, oldval);
   stack_push(STACK, new);
 }
 
 void cog_root(value_t *v) {
-  while (stack_peek(STACK) != ROOT) {
+  while (stack_peek(STACK) != CURRENT_ROOT) {
     stack_pop(STACK);
   }
 }
 
 void cog_su(value_t *v) {
-  while (STACK->size > 1) {
-    stack_pop(STACK);
+  while (ROOT->length > 1) {
+    ROOT->length--;
   }
-  ROOT = stack_peek(STACK);
+  cog_root(v);
 }
 
 void cog_chroot(value_t *v) {
+  contain_t *old = stack_peek(STACK);
   cog_cd(v);
-  ROOT = stack_peek(STACK);
-  for (int i = 0; i < OBJ_TABLE_REF_STACK->size; i++) {
-    if (OBJ_TABLE_REF_STACK->items[i] == ROOT) {
-      OBJ_TABLE = OBJ_TABLE_STACK->items[i];
+  contain_t *cur = stack_peek(STACK);
+  if (cur == old) return;
+  for (char32_t i = 0; i < OBJ_TABLE_REF_STACK->size; i++) {
+    if (OBJ_TABLE_REF_STACK->items[i] == cur) {
+      string_append(ROOT, i);
       return;
     }
   }
-  stack_push(OBJ_TABLE_REF_STACK, ROOT);
-  OBJ_TABLE = init_ht(DEFAULT_HT_SIZE);
-  stack_push(OBJ_TABLE_STACK, OBJ_TABLE);
+  stack_push(OBJ_TABLE_REF_STACK, cur);
+  stack_push(OBJ_TABLE_STACK, init_ht(DEFAULT_HT_SIZE));
+  char32_t index = OBJ_TABLE_REF_STACK->size - 1;
+  string_append(ROOT, index);
 }
 
 void cog_exit(value_t *v) {

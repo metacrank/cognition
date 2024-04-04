@@ -23,13 +23,12 @@ stack_t *CONTAINERS;
 stack_t *MACROS;
 stack_t *OBJ_TABLE_STACK;
 stack_t *OBJ_TABLE_REF_STACK;
-ht_t *OBJ_TABLE;
 parser_t *PARSER;
 string_t *EXIT_CODE;
 bool EXITED;
 pool_t *OBJ_POOL;
 bool RETURNED;
-contain_t *ROOT;
+string_t *ROOT;
 
 // for debugging
 void print_crank(char prefix[]) {

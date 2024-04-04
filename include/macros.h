@@ -79,6 +79,9 @@
 #define DEFAULT_STACK_SIZE 10
 #define DEFAULT_NUMBER_BASE 10
 
+#define CURRENT_ROOT OBJ_TABLE_REF_STACK->items[ROOT->value[ROOT->length - 1]]
+#define OBJ_TABLE OBJ_TABLE_STACK->items[ROOT->value[ROOT->length - 1]]
+
 /* basic debug levels */
 #define DEBUG 0
 

@@ -14,7 +14,7 @@
 
 extern stack_t *STACK;
 extern stack_t *EVAL_CONTAINERS;
-extern contain_t *ROOT;
+extern string_t *ROOT;
 extern parser_t *PARSER;
 extern stack_t *EVAL_STACK;
 extern stack_t *CONTAIN_DEF_STACK;
@@ -25,7 +25,6 @@ extern stack_t *CONTAINERS;
 extern stack_t *MACROS;
 extern stack_t *OBJ_TABLE_STACK;
 extern stack_t *OBJ_TABLE_REF_STACK;
-extern ht_t *OBJ_TABLE;
 extern string_t *EXIT_CODE;
 extern bool EXITED;
 extern string_t **CAST_ARGS;
@@ -115,6 +114,7 @@ void global_free() {
   string_free(PARSER->source);
   stack_free(OBJ_TABLE_STACK, ht_free_free);
   stack_free(OBJ_TABLE_REF_STACK, nop);
+  string_free(ROOT);
   if (!EXITED) {
     contain_free(STACK->items[0]);
   }
@@ -215,8 +215,8 @@ int main(int argc, char **argv) {
   MACROS = init_stack(DEFAULT_STACK_SIZE);
   OBJ_TABLE_REF_STACK = init_stack(DEFAULT_STACK_SIZE);
   OBJ_TABLE_STACK = init_stack(DEFAULT_STACK_SIZE);
-  OBJ_TABLE = init_ht(DEFAULT_HT_SIZE);
-  stack_push(OBJ_TABLE_STACK, OBJ_TABLE);
+  stack_push(OBJ_TABLE_STACK, init_ht(DEFAULT_HT_SIZE));
+  ROOT = init_string(U"");
   EXIT_CODE = NULL;
   EVAL_CONTAINERS = init_stack(DEFAULT_STACK_SIZE);
   RETURNED = false;
@@ -234,8 +234,8 @@ int main(int argc, char **argv) {
   stack_push(stack->faliases, init_string(U"ing"));
   add_funcs(stack->flit);
   stack_push(STACK, stack);
-  ROOT = stack;
-  stack_push(OBJ_TABLE_REF_STACK, ROOT);
+  stack_push(OBJ_TABLE_REF_STACK, stack);
+  string_append(ROOT, 0);
 
   init_math();
 
