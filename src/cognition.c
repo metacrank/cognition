@@ -761,7 +761,7 @@ void evalf() {
   inc_crank(cur);
   stack_pop(EVAL_CONTAINERS);
   for (int i = 0; i < EVAL_CONTAIN_TRASH->size; i++) {
-    if (!stack_exists(EVAL_CONTAINERS, cur)) {
+    if (!stack_exists(EVAL_CONTAINERS, EVAL_CONTAIN_TRASH->items[i])) {
       contain_free(stack_popdeep(EVAL_CONTAIN_TRASH, i));
     }
   }
@@ -1039,7 +1039,7 @@ void crank() {
     inc_crank(cur);
     stack_pop(EVAL_CONTAINERS);
     for (int i = 0; i < EVAL_CONTAIN_TRASH->size; i++) {
-      if (!stack_exists(EVAL_CONTAINERS, cur)) {
+      if (!stack_exists(EVAL_CONTAINERS, EVAL_CONTAIN_TRASH->items[i])) {
         contain_free(stack_popdeep(EVAL_CONTAIN_TRASH, i));
       }
     }
