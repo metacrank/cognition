@@ -75,6 +75,9 @@ ht_t *ht_copy(ht_t *h, void *(*copyfunc)(void *));
 /*! Frees hash table */
 void ht_free(ht_t *h, void (*freefunc)(void *));
 
+/* frees with 'free' */
+void ht_free_free(void *h);
+
 /*! hashes key into integer for hash table */
 unsigned long hash(ht_t *h, string_t *key);
 

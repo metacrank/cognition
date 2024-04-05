@@ -4,7 +4,8 @@
 #include <stdio.h>
 #include <string.h>
 
-extern ht_t *OBJ_TABLE;
+extern stack_t *OBJ_TABLE_STACK;
+extern string_t *ROOT;
 extern stack_t *CONTAIN_DEF_STACK;
 extern stack_t *MACRO_DEF_STACK;
 

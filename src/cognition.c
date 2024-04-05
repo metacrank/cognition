@@ -13,6 +13,7 @@
 
 /* Global variables defined */
 stack_t *STACK;
+stack_t *EVAL_CONTAINERS;
 stack_t *EVAL_STACK;
 stack_t *CONTAIN_DEF_STACK;
 stack_t *MACRO_DEF_STACK;
@@ -20,11 +21,14 @@ stack_t *FAMILY;
 stack_t *FAMILY_IDX;
 stack_t *CONTAINERS;
 stack_t *MACROS;
-ht_t *OBJ_TABLE;
+stack_t *OBJ_TABLE_STACK;
+stack_t *OBJ_TABLE_REF_STACK;
 parser_t *PARSER;
 string_t *EXIT_CODE;
-bool *EXITED;
+bool EXITED;
 pool_t *OBJ_POOL;
+bool RETURNED;
+string_t *ROOT;
 
 // for debugging
 void print_crank(char prefix[]) {
@@ -786,6 +790,7 @@ void evalf() {
     eval_error(U"EMPTY STACK", NULL);
     return;
   }
+  stack_push(EVAL_CONTAINERS, cur);
   stack_push(EVAL_STACK, v);
   if (v->type == VSTACK) {
     stack_push(FAMILY, v->container);
@@ -796,11 +801,12 @@ void evalf() {
   } else
     die("BAD VALUE TYPE ON STACK");
   inc_crank(cur);
+  stack_pop(EVAL_CONTAINERS);
   value_t *vf = stack_pop(EVAL_STACK);
   if (vf) {
     value_free_safe(vf);
   }
-  return_function(NULL, false);
+  return_function(cur, false);
 }
 
 void *func_copy(void *funcs) { return NULL; }
@@ -859,6 +865,11 @@ bool return_function(void *stack, bool macro) {
       return true;
     }
   }
+  for (int i = 0; i < CONTAIN_DEF_STACK->size; i++) {
+    if (stack_exists(EVAL_CONTAINERS, CONTAIN_DEF_STACK->items[i])) {
+      return false;
+    }
+  }
   stack_empty(CONTAIN_DEF_STACK, contain_free);
   stack_empty(MACRO_DEF_STACK, value_stack_free);
   return false;
@@ -875,6 +886,9 @@ void evalstack(contain_t *c, value_t *callword) {
       return;
     int(*cr)[2];
     for (int i = 1; i < c->stack->size; i++) {
+      if (RETURNED) {
+        return;
+      }
       inc_crank(cur);
       cur = stack_peek(STACK);
       FAMILY->items[0] = cur;
@@ -952,6 +966,8 @@ void evalmacro(stack_t *macro, value_t *word) {
       break;
     }
     if (return_function(macro, true))
+      return;
+    if (RETURNED)
       return;
   }
 }
@@ -1046,6 +1062,7 @@ void crank() {
       inc_crank(cur);
       return;
     }
+    stack_push(EVAL_CONTAINERS, cur);
     stack_push(EVAL_STACK, needseval);
     if (needseval->type == VSTACK) {
       stack_push(FAMILY, needseval->container);
@@ -1056,11 +1073,12 @@ void crank() {
     } else
       die("BAD VALUE ON STACK");
     inc_crank(cur);
+    stack_pop(EVAL_CONTAINERS);
     value_t *vf = stack_pop(EVAL_STACK);
     if (vf) {
       value_free_safe(vf);
     }
-    return_function(NULL, false);
+    return_function(cur, false);
   } else {
     inc_crank(cur);
   }
@@ -1088,4 +1106,6 @@ void eval(value_t *v) {
   }
   push_quoted(cur, v);
   crank();
+  if (RETURNED)
+    RETURNED = false;
 }
