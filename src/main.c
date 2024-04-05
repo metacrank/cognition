@@ -14,6 +14,7 @@
 
 extern stack_t *STACK;
 extern stack_t *EVAL_CONTAINERS;
+extern stack_t *EVAL_CONTAIN_TRASH;
 extern string_t *ROOT;
 extern parser_t *PARSER;
 extern stack_t *EVAL_STACK;
@@ -124,6 +125,7 @@ void global_free() {
   stack_free(EVAL_STACK, value_free);
   stack_free(EVAL_CONTAINERS, nop);
   stack_free(CONTAIN_DEF_STACK, contain_free);
+  stack_free(EVAL_CONTAIN_TRASH, contain_free);
   stack_free(MACRO_DEF_STACK, value_stack_free);
   stack_free(FAMILY, nop);
   stack_free(FAMILY_IDX, nop);
@@ -208,6 +210,7 @@ int main(int argc, char **argv) {
   EVAL_STACK = init_stack(DEFAULT_STACK_SIZE);
   CONTAIN_DEF_STACK = init_stack(DEFAULT_STACK_SIZE);
   MACRO_DEF_STACK = init_stack(DEFAULT_STACK_SIZE);
+  EVAL_CONTAIN_TRASH = init_stack(DEFAULT_STACK_SIZE);
   FAMILY = init_stack(DEFAULT_STACK_SIZE);
   stack_push(FAMILY, NULL);
   FAMILY_IDX = init_stack(DEFAULT_STACK_SIZE);

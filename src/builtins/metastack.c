@@ -74,6 +74,12 @@ void cog_uncd(value_t *v) {
     value_t *oldroot = init_value(VSTACK);
     oldroot->container = old;
     stack_push(root->stack, oldroot);
+    if (STACK->size != 0) {
+      contain_t *cur = stack_peek(STACK);
+      value_t *rootv = init_value(VSTACK);
+      rootv->container = root;
+      stack_push(cur->stack, rootv);
+    }
     stack_push(STACK, root);
     CURRENT_ROOT = root;
   }
