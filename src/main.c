@@ -125,7 +125,7 @@ void global_free() {
   stack_free(EVAL_STACK, value_free);
   stack_free(EVAL_CONTAINERS, nop);
   stack_free(CONTAIN_DEF_STACK, contain_free);
-  stack_free(EVAL_CONTAIN_TRASH, contain_free);
+  stack_free(EVAL_CONTAIN_TRASH, nop);
   stack_free(MACRO_DEF_STACK, value_stack_free);
   stack_free(FAMILY, nop);
   stack_free(FAMILY_IDX, nop);

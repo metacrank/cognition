@@ -396,17 +396,18 @@ value_t *init_value(int type) {
 void *value_copy(void *v) {
   if (v == NULL)
     return NULL;
-  value_t *a = init_value(VWORD);
   value_t *v1 = v;
   contain_t *container = stack_peek(STACK);
-  a->type = v1->type;
-  if (v1->type == VWORD || v1->type == VERR) {
+  value_t *a = init_value(v1->type);
+  if (v1->type == VWORD) {
     a->str_word = string_copy(v1->str_word);
   } else if (v1->type == VSTACK) {
     a->container = contain_copy(v1->container, value_copy);
   } else if (v1->type == VMACRO) {
     a->macro = value_stack_copy(v1->macro);
-  } else if (v1->type == VCLIB) {
+  } else if (v1->type == VERR) {
+    a->error = error_copy(v1->error);
+  }else if (v1->type == VCLIB) {
     a->str_word = string_copy(v1->str_word);
     a->custom = v1->custom;
   } else if (v1->type == VCUSTOM) {
@@ -449,6 +450,16 @@ void error_free(void *err) {
   string_free(e->error);
   string_free(e->str_word);
   free(e);
+}
+
+error_t *error_copy(void *err) {
+  if (err == NULL)
+    return NULL;
+  error_t *e = err;
+  error_t *en = calloc(1, sizeof(error_t));
+  en->str_word = string_copy(e->str_word);
+  en->error = string_copy(e->error);
+  return en;
 }
 
 custom_t *init_custom(void (*printfunc)(FILE *, void *), void (*freefunc)(void *),
@@ -750,7 +761,7 @@ void evalf() {
   inc_crank(cur);
   stack_pop(EVAL_CONTAINERS);
   for (int i = 0; i < EVAL_CONTAIN_TRASH->size; i++) {
-    if (EVAL_CONTAIN_TRASH->items[i] == cur) {
+    if (!stack_exists(EVAL_CONTAINERS, cur)) {
       contain_free(stack_popdeep(EVAL_CONTAIN_TRASH, i));
     }
   }
@@ -800,6 +811,11 @@ void eval_value(contain_t *c, contain_t *cur, value_t *val, value_t *callword) {
 bool return_function(void *stack, bool macro) {
   if (EXITED)
     return true;
+  for (int i = 0; i < CONTAIN_DEF_STACK->size; i++) {
+    if (stack_exists(EVAL_CONTAINERS, CONTAIN_DEF_STACK->items[i])) {
+      stack_push(EVAL_CONTAIN_TRASH, stack_popdeep(CONTAIN_DEF_STACK, i));
+    }
+  }
   if (macro) {
     if (stack_exists(MACRO_DEF_STACK, stack)) {
       return true;
@@ -815,11 +831,6 @@ bool return_function(void *stack, bool macro) {
   for (int i = 0; i < MACRO_DEF_STACK->size; i++) {
     if (stack_exists(MACROS, MACRO_DEF_STACK->items[i])) {
       return true;
-    }
-  }
-  for (int i = 0; i < CONTAIN_DEF_STACK->size; i++) {
-    if (stack_exists(EVAL_CONTAINERS, CONTAIN_DEF_STACK->items[i])) {
-      stack_push(EVAL_CONTAIN_TRASH, stack_popdeep(CONTAIN_DEF_STACK, i));
     }
   }
   stack_empty(CONTAIN_DEF_STACK, contain_free);
@@ -1028,7 +1039,7 @@ void crank() {
     inc_crank(cur);
     stack_pop(EVAL_CONTAINERS);
     for (int i = 0; i < EVAL_CONTAIN_TRASH->size; i++) {
-      if (EVAL_CONTAIN_TRASH->items[i] == cur) {
+      if (!stack_exists(EVAL_CONTAINERS, cur)) {
         contain_free(stack_popdeep(EVAL_CONTAIN_TRASH, i));
       }
     }

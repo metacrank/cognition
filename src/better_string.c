@@ -145,7 +145,7 @@ string_t *string_copy(string_t *s) {
   if (s == NULL)
     return NULL;
   if (s->length > s->bufsize) {
-    printf("catastrophic string management failure");
+    printf("catastrophic string management failure\n");
     return NULL;
   }
   // fetch from pool
