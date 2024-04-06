@@ -6,7 +6,7 @@
 
 extern stack_t *STACK;
 extern stack_t *FAMILY;
-extern stack_t *FAMILY_IDX;
+extern string_t *FAMILY_IDX;
 extern bool EXITED;
 
 void cog_getf(value_t *v) {
@@ -510,11 +510,11 @@ void cog_evalstr(value_t *v) {
     eval_error(U"TOO FEW ARGUMENTS", v);
     return;
   }
-  stack_push(FAMILY_IDX, &FAMILY->items[0]);
+  string_append(FAMILY_IDX, 0);
   if (strc->type == VSTACK)
     stack_push(FAMILY, strc->container);
   else stack_push(FAMILY, NULL);
-  stack_push(FAMILY_IDX, &FAMILY->items[FAMILY->size - 1]);
+  string_append(FAMILY_IDX, FAMILY->size - 1);
   stack_t *strst = *value_stack(strc);
   for (int i = 0; i < strst->size; i++) {
     value_t *str = strst->items[i];
@@ -531,8 +531,7 @@ void cog_evalstr(value_t *v) {
     if (EXITED) break;
   }
   stack_pop(FAMILY);
-  stack_pop(FAMILY_IDX);
-  stack_pop(FAMILY_IDX);
+  FAMILY_IDX->length -= 2;
   value_free_safe(strc);
 }
 

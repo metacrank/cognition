@@ -19,7 +19,7 @@ stack_t *EVAL_STACK;
 stack_t *CONTAIN_DEF_STACK;
 stack_t *MACRO_DEF_STACK;
 stack_t *FAMILY;
-stack_t *FAMILY_IDX;
+string_t *FAMILY_IDX;
 stack_t *CONTAINERS;
 stack_t *MACROS;
 stack_t *OBJ_TABLE_STACK;
@@ -875,14 +875,12 @@ void evalstack(contain_t *c, value_t *callword) {
         continue;
       }
       bool evald = false;
-      int family_idx = FAMILY_IDX->size - 1;
+      int family_idx = FAMILY_IDX->length - 1;
       for (int i = 0; i < FAMILY->size; i++) {
         contain_t *parent = FAMILY->items[i];
         if (family_idx >= 0) {
-          contain_t **idx_ptr = FAMILY_IDX->items[family_idx];
-          if (parent == *idx_ptr) {
-            contain_t **new_ptr = FAMILY_IDX->items[family_idx - 1];
-            i += new_ptr - idx_ptr + 1;
+          if (i == FAMILY_IDX->value[family_idx]) {
+            i = FAMILY_IDX->value[family_idx - 1] + 1;
             family_idx -= 2;
           }
         }
@@ -943,14 +941,12 @@ void evalword(value_t *v) {
   contain_t *expand;
   stack_t *macro;
   bool evald = false;
-  int family_idx = FAMILY_IDX->size - 1;
+  int family_idx = FAMILY_IDX->length - 1;
   for (int i = FAMILY->size - 1; i >= 0; i--) {
     contain_t *parent = FAMILY->items[i];
     if (family_idx >= 0) {
-      contain_t **idx_ptr = FAMILY_IDX->items[family_idx];
-      if (parent == *idx_ptr) {
-        contain_t **new_ptr = FAMILY_IDX->items[family_idx - 1];
-        i += new_ptr - idx_ptr + 1;
+      if (i == FAMILY_IDX->value[family_idx]) {
+        i = FAMILY_IDX->value[family_idx - 1] + 1;
         family_idx -= 2;
       }
     }
@@ -968,9 +964,9 @@ void evalword(value_t *v) {
       evald = true;
       break;
     } else if ((expand = ht_get(parent->word_table, v->str_word))) {
-      stack_push(FAMILY_IDX, &FAMILY->items[i]);
+      string_append(FAMILY_IDX, i);
       stack_push(FAMILY, expand);
-      stack_push(FAMILY_IDX, &FAMILY->items[FAMILY->size - 1]);
+      string_append(FAMILY_IDX, FAMILY->size - 1);
       stack_push(CONTAINERS, expand);
       if (i == 0) {
         stack_push(CONTAINERS, parent);
@@ -981,8 +977,7 @@ void evalword(value_t *v) {
       }
       stack_pop(CONTAINERS);
       stack_pop(FAMILY);
-      stack_pop(FAMILY_IDX);
-      stack_pop(FAMILY_IDX);
+      FAMILY_IDX->length -= 2;
       evald = true;
       break;
     } else if (isfaliasin(parent, v)) {
