@@ -16,7 +16,9 @@ stack quote prepose compose
 2 crank if addon repl compose
 1 crank VMACRO cast repl swap def
 
-stack 2 crank repl bequeath ccd bequeath repl compose repl undef 1 crank
+2 crank addon undef
+1 crank stack
+2 crank repl bequeath ccd bequeath repl compose repl undef 1 crank
 
 2 crank 1 quote crank unglue eval unglue
 1 crank compose compose VMACRO cast

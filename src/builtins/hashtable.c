@@ -170,18 +170,22 @@ void cog_wordlist(value_t *v) {
   for (int i = 0; i < h->size; i++) {
     sll_t *l = h->buckets[i];
     for (node_t *n = l->head; n != NULL; n = n->next) {
-      value_t *word = init_value(VWORD);
-      word->str_word = string_copy(n->key);
-      stack_push(list, word);
+      if (n->value) {
+        value_t *word = init_value(VWORD);
+        word->str_word = string_copy(n->key);
+        stack_push(list, word);
+      }
     }
   }
   h = cur->flit;
   for (int i = 0; i < h->size; i++) {
     sll_t *l = h->buckets[i];
     for (node_t *n = l->head; n != NULL; n = n->next) {
-      value_t *word = init_value(VWORD);
-      word->str_word = string_copy(n->key);
-      stack_push(list, word);
+      if (n->value) {
+        value_t *word = init_value(VWORD);
+        word->str_word = string_copy(n->key);
+        stack_push(list, word);
+      }
     }
   }
   value_t *listval = init_value(VSTACK);
