@@ -14,11 +14,12 @@
 /* Global variables defined */
 stack_t *STACK;
 stack_t *EVAL_CONTAINERS;
+stack_t *EVAL_CONTAIN_TRASH;
 stack_t *EVAL_STACK;
 stack_t *CONTAIN_DEF_STACK;
 stack_t *MACRO_DEF_STACK;
 stack_t *FAMILY;
-stack_t *FAMILY_IDX;
+string_t *FAMILY_IDX;
 stack_t *CONTAINERS;
 stack_t *MACROS;
 stack_t *OBJ_TABLE_STACK;
@@ -449,17 +450,18 @@ value_t *init_value(int type) {
 void *value_copy(void *v) {
   if (v == NULL)
     return NULL;
-  value_t *a = init_value(VWORD);
   value_t *v1 = v;
   contain_t *container = stack_peek(STACK);
-  a->type = v1->type;
-  if (v1->type == VWORD || v1->type == VERR) {
+  value_t *a = init_value(v1->type);
+  if (v1->type == VWORD) {
     a->str_word = string_copy(v1->str_word);
   } else if (v1->type == VSTACK) {
     a->container = contain_copy(v1->container, value_copy);
   } else if (v1->type == VMACRO) {
     a->macro = value_stack_copy(v1->macro);
-  } else if (v1->type == VCLIB) {
+  } else if (v1->type == VERR) {
+    a->error = error_copy(v1->error);
+  }else if (v1->type == VCLIB) {
     a->str_word = string_copy(v1->str_word);
     a->custom = v1->custom;
   } else if (v1->type == VCUSTOM) {
@@ -504,8 +506,23 @@ void error_free(void *err) {
   free(e);
 }
 
+<<<<<<< HEAD
 custom_t *init_custom(void (*printfunc)(FILE *, void *),
                       void (*freefunc)(void *), void *(*copyfunc)(void *)) {
+=======
+error_t *error_copy(void *err) {
+  if (err == NULL)
+    return NULL;
+  error_t *e = err;
+  error_t *en = calloc(1, sizeof(error_t));
+  en->str_word = string_copy(e->str_word);
+  en->error = string_copy(e->error);
+  return en;
+}
+
+custom_t *init_custom(void (*printfunc)(FILE *, void *), void (*freefunc)(void *),
+                      void *(*copyfunc)(void *)) {
+>>>>>>> 34c82b73030da5473262c0e54a3676a1045fb87b
   custom_t *c = calloc(1, sizeof(custom_t));
   if (!c)
     die("calloc on custom");
@@ -802,6 +819,12 @@ void evalf() {
     die("BAD VALUE TYPE ON STACK");
   inc_crank(cur);
   stack_pop(EVAL_CONTAINERS);
+  for (int i = 0; i < EVAL_CONTAIN_TRASH->size; i++) {
+    if (!stack_exists(EVAL_CONTAINERS, EVAL_CONTAIN_TRASH->items[i])) {
+      contain_free(stack_popdeep(EVAL_CONTAIN_TRASH, i));
+      i--;
+    }
+  }
   value_t *vf = stack_pop(EVAL_STACK);
   if (vf) {
     value_free_safe(vf);
@@ -848,6 +871,12 @@ void eval_value(contain_t *c, contain_t *cur, value_t *val, value_t *callword) {
 bool return_function(void *stack, bool macro) {
   if (EXITED)
     return true;
+  for (int i = 0; i < CONTAIN_DEF_STACK->size; i++) {
+    if (stack_exists(EVAL_CONTAINERS, CONTAIN_DEF_STACK->items[i])) {
+      stack_push(EVAL_CONTAIN_TRASH, stack_popdeep(CONTAIN_DEF_STACK, i));
+      i--;
+    }
+  }
   if (macro) {
     if (stack_exists(MACRO_DEF_STACK, stack)) {
       return true;
@@ -863,11 +892,6 @@ bool return_function(void *stack, bool macro) {
   for (int i = 0; i < MACRO_DEF_STACK->size; i++) {
     if (stack_exists(MACROS, MACRO_DEF_STACK->items[i])) {
       return true;
-    }
-  }
-  for (int i = 0; i < CONTAIN_DEF_STACK->size; i++) {
-    if (stack_exists(EVAL_CONTAINERS, CONTAIN_DEF_STACK->items[i])) {
-      return false;
     }
   }
   stack_empty(CONTAIN_DEF_STACK, contain_free);
@@ -910,17 +934,16 @@ void evalstack(contain_t *c, value_t *callword) {
         continue;
       }
       bool evald = false;
-      int family_idx = FAMILY_IDX->size - 1;
+      int family_idx = FAMILY_IDX->length - 1;
       for (int i = 0; i < FAMILY->size; i++) {
         contain_t *parent = FAMILY->items[i];
         if (family_idx >= 0) {
-          contain_t **idx_ptr = FAMILY_IDX->items[family_idx];
-          if (parent == *idx_ptr) {
-            contain_t **new_ptr = FAMILY_IDX->items[family_idx - 1];
-            i += new_ptr - idx_ptr + 1;
+          if (i == FAMILY_IDX->value[family_idx]) {
+            i = FAMILY_IDX->value[family_idx - 1] + 1;
             family_idx -= 2;
           }
         }
+        if (parent == NULL) continue;
         if (isfaliasin(parent, newval)) {
           evalf();
           evald = true;
@@ -977,18 +1000,16 @@ void evalword(value_t *v) {
   contain_t *expand;
   stack_t *macro;
   bool evald = false;
-  int family_idx = FAMILY_IDX->size - 1;
+  int family_idx = FAMILY_IDX->length - 1;
   for (int i = FAMILY->size - 1; i >= 0; i--) {
     contain_t *parent = FAMILY->items[i];
     if (family_idx >= 0) {
-      contain_t **idx_ptr = FAMILY_IDX->items[family_idx];
-      if (parent == *idx_ptr) {
-        contain_t **new_ptr = FAMILY_IDX->items[family_idx - 1];
-        i += new_ptr - idx_ptr + 1;
+      if (i == FAMILY_IDX->value[family_idx]) {
+        i = FAMILY_IDX->value[family_idx - 1] + 1;
         family_idx -= 2;
       }
     }
-
+    if (parent == NULL) continue;
     if ((macro = ht_get(parent->flit, v->str_word))) {
       stack_push(MACROS, macro);
       if (i == 0) {
@@ -1002,9 +1023,9 @@ void evalword(value_t *v) {
       evald = true;
       break;
     } else if ((expand = ht_get(parent->word_table, v->str_word))) {
-      stack_push(FAMILY_IDX, &FAMILY->items[i]);
+      string_append(FAMILY_IDX, i);
       stack_push(FAMILY, expand);
-      stack_push(FAMILY_IDX, &FAMILY->items[FAMILY->size - 1]);
+      string_append(FAMILY_IDX, FAMILY->size - 1);
       stack_push(CONTAINERS, expand);
       if (i == 0) {
         stack_push(CONTAINERS, parent);
@@ -1015,8 +1036,7 @@ void evalword(value_t *v) {
       }
       stack_pop(CONTAINERS);
       stack_pop(FAMILY);
-      stack_pop(FAMILY_IDX);
-      stack_pop(FAMILY_IDX);
+      FAMILY_IDX->length -= 2;
       evald = true;
       break;
     } else if (isfaliasin(parent, v)) {
@@ -1074,6 +1094,12 @@ void crank() {
       die("BAD VALUE ON STACK");
     inc_crank(cur);
     stack_pop(EVAL_CONTAINERS);
+    for (int i = 0; i < EVAL_CONTAIN_TRASH->size; i++) {
+      if (!stack_exists(EVAL_CONTAINERS, EVAL_CONTAIN_TRASH->items[i])) {
+        contain_free(stack_popdeep(EVAL_CONTAIN_TRASH, i));
+        i--;
+      }
+    }
     value_t *vf = stack_pop(EVAL_STACK);
     if (vf) {
       value_free_safe(vf);

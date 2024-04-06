@@ -37,23 +37,37 @@ void cog_cd(value_t *v) {
 
 void cog_ccd(value_t *v) {
   contain_t *cur = stack_pop(STACK);
-  value_t *child = stack_peek(cur->stack);
+  value_t *child = stack_pop(cur->stack);
   if (child == NULL) {
     stack_push(STACK, cur);
     eval_error(U"TOO FEW ARGUMENTS", v);
     return;
   }
   if (child->type != VSTACK) {
-    eval_error(U"BAD ARGUMENT TYPE", v);
+    stack_push(cur->stack, cur);
     stack_push(STACK, cur);
+    eval_error(U"BAD ARGUMENT TYPE", v);
     return;
   }
   stack_push(CONTAIN_DEF_STACK, cur);
-  if (cur == CURRENT_ROOT)
+  contain_t *newcur = stack_peek(STACK);
+  if (newcur) {
+    for (long i = newcur->stack->size - 1; i >= 0; i--) {
+      value_t *val = newcur->stack->items[i];
+      if (val->type == VSTACK) {
+        if (val->container == cur) {
+          val->container = child->container;
+          break;
+        }
+      }
+    }
+  }
+  if (CURRENT_ROOT == cur)
     CURRENT_ROOT = child->container;
   cur = child->container;
-  stack_push(STACK, cur);
   child->container = NULL;
+  value_free_safe(child);
+  stack_push(STACK, cur);
   for (int i = 0; i < cur->stack->size; i++) {
     value_t *val = cur->stack->items[i];
     if (val->type != VSTACK && val->type != VMACRO) {
@@ -68,32 +82,19 @@ void cog_ccd(value_t *v) {
 void cog_uncd(value_t *v) {
   contain_t *old = stack_pop(STACK);
   if (old == CURRENT_ROOT) {
-    contain_t *root = calloc(1, sizeof(contain_t));
-    contain_copy_attributes(old, root);
-    root->stack = init_stack(DEFAULT_STACK_SIZE);
-    value_t *oldroot = init_value(VSTACK);
-    oldroot->container = old;
-    stack_push(root->stack, oldroot);
-    stack_push(STACK, root);
-    CURRENT_ROOT = root;
+    stack_push(STACK, old);
+    cog_qstack(v);
   }
 }
 
 void cog_uncdf(value_t *v) {
   contain_t *old = stack_pop(STACK);
   if (STACK->size == 0) {
-    contain_t *root = calloc(1, sizeof(contain_t));
-    contain_copy_attributes(old, root);
-    root->stack = init_stack(DEFAULT_STACK_SIZE);
-    value_t *oldroot = init_value(VSTACK);
-    oldroot->container = old;
-    stack_push(root->stack, oldroot);
-    stack_push(STACK, root);
-    CURRENT_ROOT = root;
-    return;
-  }
-  if (CURRENT_ROOT == old)
+    stack_push(STACK, old);
+    cog_qstack(v);
+  } else if (CURRENT_ROOT == old) {
     ROOT->length--;
+  }
 }
 
 void cog_pop(value_t *v) {
@@ -105,14 +106,7 @@ void cog_pop(value_t *v) {
     stack_push(STACK, old);
   }
   if (old == CURRENT_ROOT) {
-    contain_t *root = calloc(1, sizeof(contain_t));
-    contain_copy_attributes(old, root);
-    root->stack = init_stack(DEFAULT_STACK_SIZE);
-    value_t *oldroot = init_value(VSTACK);
-    oldroot->container = old;
-    stack_push(root->stack, oldroot);
-    stack_push(STACK, root);
-    CURRENT_ROOT = root;
+    cog_qstack(v);
   }
   contain_t *newc = stack_peek(STACK);
   stack_push(newc->stack, popval);
@@ -127,34 +121,38 @@ void cog_popf(value_t *v) {
     stack_push(STACK, old);
   }
   if (STACK->size == 0) {
-    contain_t *root = calloc(1, sizeof(contain_t));
-    contain_copy_attributes(old, root);
-    root->stack = init_stack(DEFAULT_STACK_SIZE);
-    value_t *oldroot = init_value(VSTACK);
-    oldroot->container = old;
-    stack_push(root->stack, oldroot);
-    stack_push(STACK, root);
-    CURRENT_ROOT = root;
-    stack_push(root->stack, popval);
-    return;
-  }
-  if (CURRENT_ROOT == old)
+    cog_qstack(v);
+  } else if (CURRENT_ROOT == old) {
     ROOT->length--;
+  }
   contain_t *newc = stack_peek(STACK);
   stack_push(newc->stack, popval);
 }
 
 void cog_qstack(value_t *v) {
-  contain_t *old = stack_pop(STACK);
-  contain_t *new = calloc(1, sizeof(contain_t));
-  contain_copy_attributes(old, new);
-  new->stack = init_stack(DEFAULT_STACK_SIZE);
-  value_t *oldval = init_value(VSTACK);
-  oldval->container = old;
-  if (CURRENT_ROOT == old)
+  contain_t *oldc = stack_pop(STACK);
+  contain_t *cur = stack_peek(STACK);
+  if (!cur) {
+    value_t *oldval = init_value(VSTACK);
+    oldval->container = oldc;
+    contain_t *new = calloc(1, sizeof(contain_t));
+    contain_copy_attributes(oldc, new);
+    new->stack = init_stack(DEFAULT_STACK_SIZE);
+    stack_push(new->stack, oldval);
+    stack_push(STACK, new);
     CURRENT_ROOT = new;
-  stack_push(new->stack, oldval);
-  stack_push(STACK, new);
+    return;
+  }
+  value_t *oldval = stack_pop(cur->stack);
+  value_t *new = init_value(VSTACK);
+  new->container = calloc(1, sizeof(contain_t));
+  contain_copy_attributes(oldval->container, new->container);
+  new->container->stack = init_stack(DEFAULT_STACK_SIZE);
+  stack_push(new->container->stack, oldval);
+  stack_push(cur->stack, new);
+  if (CURRENT_ROOT == oldc)
+    CURRENT_ROOT = new->container;
+  stack_push(STACK, new->container);
 }
 
 void cog_root(value_t *v) {

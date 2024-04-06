@@ -14,13 +14,14 @@
 
 extern stack_t *STACK;
 extern stack_t *EVAL_CONTAINERS;
+extern stack_t *EVAL_CONTAIN_TRASH;
 extern string_t *ROOT;
 extern parser_t *PARSER;
 extern stack_t *EVAL_STACK;
 extern stack_t *CONTAIN_DEF_STACK;
 extern stack_t *MACRO_DEF_STACK;
 extern stack_t *FAMILY;
-extern stack_t *FAMILY_IDX;
+extern string_t *FAMILY_IDX;
 extern stack_t *CONTAINERS;
 extern stack_t *MACROS;
 extern stack_t *OBJ_TABLE_STACK;
@@ -124,9 +125,10 @@ void global_free() {
   stack_free(EVAL_STACK, value_free);
   stack_free(EVAL_CONTAINERS, nop);
   stack_free(CONTAIN_DEF_STACK, contain_free);
+  stack_free(EVAL_CONTAIN_TRASH, nop);
   stack_free(MACRO_DEF_STACK, value_stack_free);
   stack_free(FAMILY, nop);
-  stack_free(FAMILY_IDX, nop);
+  string_free(FAMILY_IDX);
   stack_free(CONTAINERS, nop);
   stack_free(MACROS, nop);
   string_free(EXIT_CODE);
@@ -208,9 +210,10 @@ int main(int argc, char **argv) {
   EVAL_STACK = init_stack(DEFAULT_STACK_SIZE);
   CONTAIN_DEF_STACK = init_stack(DEFAULT_STACK_SIZE);
   MACRO_DEF_STACK = init_stack(DEFAULT_STACK_SIZE);
+  EVAL_CONTAIN_TRASH = init_stack(DEFAULT_STACK_SIZE);
   FAMILY = init_stack(DEFAULT_STACK_SIZE);
   stack_push(FAMILY, NULL);
-  FAMILY_IDX = init_stack(DEFAULT_STACK_SIZE);
+  FAMILY_IDX = init_string(U"");
   CONTAINERS = init_stack(DEFAULT_STACK_SIZE);
   MACROS = init_stack(DEFAULT_STACK_SIZE);
   OBJ_TABLE_REF_STACK = init_stack(DEFAULT_STACK_SIZE);

@@ -207,6 +207,9 @@ void value_free(void *v);
 /* Frees an error type */
 void error_free(void *v);
 
+/* copies an error type */
+error_t *error_copy(void *e);
+
 /* Gets the custom object table referencing the current root stack */
 ht_t *ot_get();
 

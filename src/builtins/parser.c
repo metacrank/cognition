@@ -5,6 +5,8 @@
 #include <string.h>
 
 extern stack_t *STACK;
+extern stack_t *FAMILY;
+extern string_t *FAMILY_IDX;
 extern bool EXITED;
 
 void cog_getf(value_t *v) {
@@ -508,8 +510,14 @@ void cog_evalstr(value_t *v) {
     eval_error(U"TOO FEW ARGUMENTS", v);
     return;
   }
-  for (int i = 0; i < value_stack(strc)[0]->size; i++) {
-    value_t *str = value_stack(strc)[0]->items[i];
+  string_append(FAMILY_IDX, 0);
+  if (strc->type == VSTACK)
+    stack_push(FAMILY, strc->container);
+  else stack_push(FAMILY, NULL);
+  string_append(FAMILY_IDX, FAMILY->size - 1);
+  stack_t *strst = *value_stack(strc);
+  for (int i = 0; i < strst->size; i++) {
+    value_t *str = strst->items[i];
     parser_t *parser = init_parser(str->str_word);
     while(1) {
       value_t *w = parser_get_next(parser);
@@ -522,6 +530,8 @@ void cog_evalstr(value_t *v) {
     free(parser);
     if (EXITED) break;
   }
+  stack_pop(FAMILY);
+  FAMILY_IDX->length -= 2;
   value_free_safe(strc);
 }
 

@@ -21,37 +21,32 @@
 %----------------------------------------------------------------------------------------
 
 \documentclass[
-	a4paper, % Paper size, use either a4paper or letterpaper
-	10pt, % Default font size, can also use 11pt or 12pt, although this is not recommended
-	%unnumberedsections, % Comment to enable section numbering
-	twoside, % Two side traditional mode where headers and footers change between odd and even pages, comment this option to make them fixed
+	a4paper,
+	10pt,
+	twoside,
 ]{LTJournalArticle}
 
-\addbibresource{sample.bib} % BibLaTeX bibliography file
+\addbibresource{sample.bib}
 
-\runninghead{} % A shortened article title to appear in the running head, leave this command empty for no running head
+\runninghead{}
 
-\footertext{} % Text to appear in the footer, leave this command empty for no footer text
+\footertext{}
 
-\setcounter{page}{1} % The page number of the first page, set this to a higher number if the article is to be part of an issue or larger work
+\setcounter{page}{1}
 
 %----------------------------------------------------------------------------------------
 %	TITLE SECTION
 %----------------------------------------------------------------------------------------
 
-\title{Modelling Cognition} % Article title, use manual lines breaks (\\) to beautify the layout
+\title{Modelling Cognition}
 
-% Authors are listed in a comma-separated list with superscript numbers indicating affiliations
-% \thanks{} is used for any text that should be placed in a footnote on the first page, such as the corresponding author's email, journal acceptance dates, a copyright/license notice, keywords, etc
 \author{%
 	Matthew Hinton\textsuperscript{1}\thanks{Corresponding author: \href{mailto:matthewhinton@uvic.ca}{matthewhinton@uvic.ca}} and Preston Pan\textsuperscript{2}\thanks{Corresponding author: \href{mailto:preston@nullring.xyz}{preston@nullring.xyz}}\\ March, 2024
 	% {Corresponding author: \href{mailto:preston@nullring.xyz}{preston@nullring.xyz}\\ \textbf{Date:} March, 2024}
 }
 
-% Affiliations are output in the \date{} command
 \date{\footnotesize\textsuperscript{\textbf{1}}University of Victoria}
 
-% Full-width abstract
 \renewcommand{\maketitlehookd}{%
 	\begin{abstract}
           \noindent
@@ -69,7 +64,7 @@
 
 \begin{document}
 
-\maketitle % Output the title section
+\maketitle
 
 %----------------------------------------------------------------------------------------
 %	ARTICLE CONTENTS
@@ -94,9 +89,6 @@ uses a unique metacrank system which allows it to modify the execution order of 
 \emph{modify the syntax for changing the execution order itself} due to the metacrank system's postfix syntax, and allow
 for metaprogramming; third, it uses what we call an \emph{falias} system which we believe to be equivalent to metacrank, but makes
 for easier bootstrapping to an environment that is more desirable to program in.
-
-
-%------------------------------------------------
 
 \section{Language Design}
 As of the release of this paper, the language design is incomplete yet still covers many general cases. Tradeoffs
@@ -155,7 +147,7 @@ Force aliases, or faliases for short, are a list of special tokens that evaluate
 when tokenized. One can change the list of faliases and one can even make the list empty, effectively removing the falias
 functionality.
 
-By default, \emph{f} is the only falias.
+By default, \emph{f} and \emph{ing} are the only faliases. The ing falias is a pun on english verbs.
 \subsection{Metacrank Design}
 The metacranker is a cyclic automatic word evaluation system, where \emph{cranking} refers to metacranking the first
 element on the stack, meaning that the top element of the stack executes once every \emph{n} words executed. \emph{Metacranking}
@@ -163,150 +155,63 @@ refers to the mth element down the current stack executing once every \emph{n} w
 executed every crank, although all metacrank positions are incremented every cycle. Therefore, the top of the stack executes
 first, and the highest metacrank has the lowest priority, executing only if every other crank above doesn't execute.
 
-There are two kinds of words that can be evaluated: macros, and definitions. Macros
+There are two kinds of words that can be evaluated: macros, and definitions. Macros evaluate non-recursively, whereas definitions
+evaluate recursively. Expansion of these structures in order to alter the execution order can be done easily, because words
+such as unglue allow for the public access of word definitions as data.
+
 The metacrank default is set to zero, which you can take to represent an infinite crank cycle (it doesn't make sense to talk
 about a zero metacrank base otherwise). In this state, the only way one can execute words is using the \emph{falias} system.
 However, one can quickly set a crank and get into a comfortable environment without having to use faliases.
 \subsection{Metastack Design}
 The metastack is a system by which the current working stack can be set. Each current working stack has a hash table associated
 and an error stack associated, which keeps track of the errors that occur in the environment. The metastack, or stack stack,
-is a global object that keeps track of the current directory in the same way one might have a current 
+is a global object that keeps track of the current directory in the same way one might have a present working directory on
+unix-like operating systems. This allows for easy containerization of elements, easy object-oriented programming, and
+namespace collision avoidance.
 \subsection{Error Stack Design}
-
+The error stack is a stack that stores errors emitted by the current running program. Each container contains an error stack,
+meaning one can source the error of a word to a particular running metastack. The error stack can be manipulated and read
+into the regular stack of a given container, but it is not programmable in the sense that the regular stack is.
 \subsection{Builtins and the FLIT}
+Builtins are created to make all of these components transparent and modifiable to the present working container. The ability
+to access, delete, and check for stored data in all these structures and functionalities, and a complete computational basis
+for metacranking as well as conventional stack operations, as well as capabilities for control flow and other general
+combinators are needed. Each of these builtins are C functions, and can be loaded in during runtime dynamically using the word
+clib, which alters the foreign language interface table, or FLIT, to contain symbols and objects from other C shared libraries.
+This allows for the dynamic introduction of low-level features.
+\subsection{Chroots}
+Chroots are much like Unix chroots in the sense that they can be given full priviledges and still be containerized by another
+real root. These differ from containers in the sense that they can be given words that are dangerous, or words that can break
+the system, without breaking the real root. Words are supplied that deal with the creation and entering of chroots.
 
-This line shows how to use a footnote to further explain or cite text\footnote{Example footnote text.}.
+\section{Future Improvements}
+In Cognition 1.0, we implement a wide variety of the infrastructure required to run a completely general system. However,
+such a system is not complete without the introduction of general aliases. In its current state, the falias system can
+evaluate a word in a \emph{fast manner}, which is equivalent to calling the eval word fast. General aliases would implement
+this functionality in a more general way, allowing for the execution of any macro in a fast way, not just the eval word. This
+system potentially introduces a more general syntax span, and makes the implementation of many common syntax features trivial,
+instead of challenging.
 
-This is a bullet point list:
+Another such optimization that can be made is in some backend implementations of various features, including the removal
+of the FLIT and introduction of bulitins into the word table.
 
-\begin{itemize}
-	\item Arcu eros accumsan lorem, at posuere mi diam sit amet tortor
-	\item Fusce fermentum, mi sit amet euismod rutrum
-	\item Sem lorem molestie diam, iaculis aliquet sapien tortor non nisi
-	\item Pellentesque bibendum pretium aliquet
-\end{itemize}
+\subsection{The Cognition Compiler}
+An implementation of a cognition compiler has yet to be implemented. This would optimize much of the
+overhead cognition currently has, and would enable cognition to bootstrap its own cognition machine, which would be a virtual
+machine environment in which cognition is ran as a system capable of managing users and permissions concurrently within
+containers. Another possibility would be a baremetal cognition based operating system wherein cognition is used as a shell
+environment and the container structure of cognition is used in order to tightly control the permissions of certain containers.
+Such a system would allow for a compatibility layer between all running programs to be established, and would integrate fully
+with the cognition programming language, enabling kernel programming to be done in Cognition.
 
-Mauris interdum porttitor fringilla. Proin tincidunt sodales leo at ornare. Donec tempus magna non mauris gravida luctus. Cras vitae arcu vitae mauris eleifend scelerisque. Nam sem sapien, vulputate nec felis eu, blandit convallis risus. Pellentesque sollicitudin venenatis tincidunt. In et ipsum libero. Nullam tempor ligula a massa convallis pellentesque.
+\section{Conclusion}
+In this paper we propose a general programming system that we argue has yet unseen capabilities to augment its own syntax
+during runtime, including the introduction of a metaprogramming system capable of altering metaprogramming syntax, and a
+robust system for making the process of delimiting tokens public. This system has applications in furthering the research
+of different syntaxes as it allows for easy prototyping of syntax, and it has applications in both creating DSLs and
+being a variety of DSLs due to its generalized syntax. Further, it can be used in cases where many DSLs need to be able
+to communicate information about each others' states in a seamless manner.
 
-This is a numbered list:
-
-\begin{enumerate}
-	\item Donec dolor arcu, rutrum id molestie in, viverra sed diam
-	\item Curabitur feugiat
-	\item Turpis sed auctor facilisis
-\end{enumerate}
-
-\subsection{Species Identification}
-
-Proin lobortis efficitur dictum. Pellentesque vitae pharetra eros, quis dignissim magna. Sed tellus leo, semper non vestibulum vel, tincidunt eu mi. Aenean pretium ut velit sed facilisis. Ut placerat urna facilisis dolor suscipit vehicula. Ut ut auctor nunc. Nulla non massa eros. Proin rhoncus arcu odio, eu lobortis metus sollicitudin eu. Duis maximus ex dui, id bibendum diam dignissim id. Aliquam quis lorem lorem. Phasellus sagittis aliquet dolor, vulputate cursus dolor convallis vel. Suspendisse eu tellus feugiat, bibendum lectus quis, fermentum nunc. Nunc euismod condimentum magna nec bibendum. Curabitur elementum nibh eu sem cursus, eu aliquam leo rutrum. Sed bibendum augue sit amet pharetra ullamcorper. Aenean congue sit amet tortor vitae feugiat.
-
-Mauris interdum porttitor fringilla. Proin tincidunt sodales leo at ornare. Donec tempus magna non mauris gravida luctus. Cras vitae arcu vitae mauris eleifend scelerisque. Nam sem sapien, vulputate nec felis eu, blandit convallis risus. Pellentesque sollicitudin venenatis tincidunt. In et ipsum libero. Nullam tempor ligula a massa convallis pellentesque.
-
-\subsection{Data Analysis}
-
-Vestibulum sodales orci a nisi interdum tristique. In dictum vehicula dui, eget bibendum purus elementum eu. Pellentesque lobortis mattis mauris, non feugiat dolor vulputate a. Cras porttitor dapibus lacus at pulvinar. Praesent eu nunc et libero porttitor malesuada tempus quis massa. Aenean cursus ipsum a velit ultricies sagittis. Sed non leo ullamcorper, suscipit massa ut, pulvinar erat. Aliquam erat volutpat. Nulla non lacus vitae mi placerat tincidunt et ac diam. Aliquam tincidunt augue sem, ut vestibulum est volutpat eget. Suspendisse potenti. Integer condimentum, risus nec maximus elementum, lacus purus porta arcu, at ultrices diam nisl eget urna. Curabitur sollicitudin diam quis sollicitudin varius. Ut porta erat ornare laoreet euismod. In tincidunt purus dui, nec egestas dui convallis non. In vestibulum ipsum in dictum scelerisque.
-
-Mauris interdum porttitor fringilla. Proin tincidunt sodales leo at ornare. Donec tempus magna non mauris gravida luctus. Cras vitae arcu vitae mauris eleifend scelerisque. Nam sem sapien, vulputate nec felis eu, blandit convallis risus. Pellentesque sollicitudin venenatis tincidunt. In et ipsum libero. Nullam tempor ligula a massa convallis pellentesque. Mauris interdum porttitor fringilla. Proin tincidunt sodales leo at ornare. Donec tempus magna non mauris gravida luctus. Cras vitae arcu vitae mauris eleifend scelerisque. Nam sem sapien, vulputate nec felis eu, blandit convallis risus. Pellentesque sollicitudin venenatis tincidunt. In et ipsum libero. Nullam tempor ligula a massa convallis pellentesque.
-
-%------------------------------------------------
-
-\section{Results}
-
-\begin{table} % Single column table
-	\caption{Example single column table.}
-	\centering
-	\begin{tabular}{l l r}
-		\toprule
-		\multicolumn{2}{c}{Location} \\
-		\cmidrule(r){1-2}
-		East Distance & West Distance & Count \\
-		\midrule
-		100km & 200km & 422 \\
-		350km & 1000km & 1833 \\
-		600km & 1200km & 890 \\
-		\bottomrule
-	\end{tabular}
-	\label{tab:distcounts}
-\end{table}
-
-Referencing a table using its label: Table \ref{tab:distcounts}.
-
-\begin{table*} % Full width table (notice the starred environment)
-	\caption{Example two column table with fixed-width columns.}
-	\centering % Horizontally center the table
-	\begin{tabular}{L{0.2\linewidth} L{0.2\linewidth} R{0.15\linewidth}} % Manually specify column alignments with L{}, R{} or C{} and widths as a fixed amount, usually as a proportion of \linewidth
-		\toprule
-		\multicolumn{2}{c}{Location} \\
-		\cmidrule(r){1-2}
-		East Distance & West Distance & Count \\
-		\midrule
-		100km & 200km & 422 \\
-		350km & 1000km & 1833 \\
-		600km & 1200km & 890 \\
-		\bottomrule
-	\end{tabular}
-\end{table*}
-
-Aenean feugiat pellentesque venenatis. Sed faucibus tristique tortor vel ultrices. Donec consequat tellus sapien. Nam bibendum urna mauris, eget sagittis justo gravida vel. Mauris nisi lacus, malesuada sit amet neque ut, venenatis tempor orci. Curabitur feugiat sagittis molestie. Duis euismod arcu vitae quam scelerisque facilisis. Praesent volutpat eleifend tortor, in malesuada dui egestas id. Donec finibus ac risus sed pellentesque. Donec malesuada non magna nec feugiat. Mauris eget nibh nec orci congue porttitor vitae eu erat. Sed commodo ipsum ipsum, in elementum neque gravida euismod. Cras mi lacus, pulvinar ut sapien ut, rutrum sagittis dui. Donec non est a metus varius finibus. Pellentesque rutrum pellentesque ligula, vitae accumsan nulla hendrerit ut.
-
-\begin{figure} % Single column figure
-	\includegraphics[width=\linewidth]{Tolmukapea.jpg}
-	\caption{Anther of thale cress (Arabidopsis thaliana), fluorescence micrograph. Source: Heiti Paves, \href{https://commons.wikimedia.org/wiki/File:Tolmukapea.jpg}{https://commons.wiki-\\media.org/wiki/File:Tolmukapea.jpg}.}
-	\label{fig:tcanther}
-\end{figure}
-
-Referencing a figure using its label: Figure \ref{fig:tcanther}.
-
-Aenean porttitor eros non pharetra congue. Proin in odio in dolor luctus auctor ac et mi. Etiam euismod mi sed lectus fringilla pretium. Phasellus tristique maximus lectus et sodales. Mauris feugiat ligula quis semper luctus. Nam sit amet felis sed leo fermentum aliquet. Mauris arcu dui, posuere id sem eget, cursus pulvinar mi. Donec nec lacus non lectus fermentum scelerisque et at nibh. Sed tristique, metus ac vestibulum porta, tortor lectus placerat lorem, et convallis tellus dolor eget ante. Pellentesque dui ligula, hendrerit a purus et, volutpat tempor lectus. Mauris nec purus nec mauris rhoncus pellentesque. Quisque quis diam sed est lacinia congue. Donec magna est, hendrerit sed metus vel, accumsan rutrum nibh.
-
-\begin{figure*} % Two column figure (notice the starred environment)
-	\includegraphics[width=\linewidth]{Fibroblastid.jpg}
-	\caption{Bovine pulmonary artery endothelial cells in culture. Blue: nuclei; red: mitochondria; green: microfilaments. Computer generated image from a 3D model based on a confocal laser scanning microscopy using fluorescent marker dyes. Source: Heiti Paves, \href{https://commons.wikimedia.org/wiki/File:Fibroblastid.jpg}{https://commons.wikimedia.org/wiki/File:Fibroblastid.jpg}.}
-	\label{fig:bpartery}
-\end{figure*}
-
-Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Etiam cursus lectus purus, tempus iaculis quam dictum tristique. Nam interdum sapien nec tempor mattis. Quisque id sapien nisi. Mauris vehicula ornare eros vel efficitur. Nulla consectetur, turpis quis fringilla tincidunt, mi neque iaculis lectus, vel commodo elit odio non ex. Duis facilisis, purus ac viverra iaculis, turpis lectus ultrices ante, ac vestibulum ligula magna in libero. Etiam tristique maximus lacinia. Vestibulum hendrerit, lacus malesuada laoreet blandit, sapien velit sollicitudin nunc, eu porttitor urna ligula at lorem. Aliquam faucibus eros in fermentum venenatis. Fusce consectetur congue pellentesque. Suspendisse at nisi sit amet est porttitor cursus. Cras placerat faucibus nunc, a laoreet justo dignissim sit amet.
-
-\subsection{International Support}
-
-\noindent àáâäãåèéêëìíîïòóôöõøùúûüÿýñçčšž
-
-\noindent ÀÁÂÄÃÅÈÉÊËÌÍÎÏÒÓÔÖÕØÙÚÛÜŸÝÑ
-
-\noindent ßÇŒÆČŠŽ
-
-\subsection{Links}
-
-This is a clickable URL link: \href{https://www.latextemplates.com}{LaTeX Templates}. This is a clickable email link: \href{mailto:vel@latextemplates.com}{vel@latextemplates.com}. This is a clickable monospaced URL link: \url{https://www.LaTeXTemplates.com}.
-
-%------------------------------------------------
-
-\section{Discussion}
-
-This statement requires citation \autocite{Smith:2023qr}. This statement requires multiple citations \autocite{Smith:2023qr, Smith:2024jd}. This statement contains an in-text citation, for directly referring to a citation like so: \textcite{Smith:2024jd}.
-
-\subsection{Subsection One}
-
-Suspendisse potenti. Vivamus suscipit dapibus metus. Proin auctor iaculis ex, id fermentum lectus dapibus tristique. Nullam maximus eros eget leo pretium dapibus. Nunc in auctor erat, id interdum risus. Suspendisse aliquet vehicula accumsan. In vestibulum efficitur dictum. Sed ultrices, libero nec fringilla feugiat, elit massa auctor ligula, vehicula tempor ligula felis in lectus. Suspendisse sem dui, pharetra ut sodales eu, suscipit sit amet felis. Donec pretium viverra ante, ac pulvinar eros. Suspendisse gravida consectetur urna. Pellentesque vitae leo porta, imperdiet eros eget, posuere sem. Praesent eget leo efficitur odio bibendum condimentum sit amet vel ex. Nunc maximus quam orci, quis pulvinar nibh eleifend ac. Quisque consequat lacus magna, eu posuere tellus iaculis ac. Sed vitae tortor tincidunt ante sagittis iaculis.
-
-\subsection{Subsection Two}
-
-Nullam mollis tellus lorem, sed congue ipsum euismod a. Donec pulvinar neque sed ligula ornare sodales. Nulla sagittis vel lectus nec laoreet. Nulla volutpat malesuada turpis at ultricies. Ut luctus velit odio, sagittis volutpat erat aliquet vel. Donec ac neque eget neque volutpat mollis. Vestibulum viverra ligula et sapien bibendum, vel vulputate ex euismod. Curabitur nec velit velit. Aliquam vulputate lorem elit, id tempus nisl finibus sit amet. Curabitur ex turpis, consequat at lectus id, imperdiet molestie augue. Curabitur eu eros molestie purus commodo hendrerit. Quisque auctor ipsum nec mauris malesuada, non fringilla nibh viverra. Quisque gravida, metus quis semper pulvinar, dolor nisl suscipit leo, vestibulum volutpat ante justo ultrices diam. Sed id facilisis turpis, et aliquet eros.
-
-\subsubsection{Subsubsection Example}
-
-Duis venenatis eget lectus a aliquet. Integer vulputate ante suscipit felis feugiat rutrum. Aliquam eget dolor eu augue elementum ornare. Nulla fringilla interdum volutpat. Sed tincidunt, neque quis imperdiet hendrerit, turpis sapien ornare justo, ac blandit felis sem quis diam. Proin luctus urna sit amet felis tincidunt, sed congue nunc pellentesque. Ut faucibus a magna faucibus finibus. Etiam id mi euismod, auctor nisi eget, pretium metus. Proin tincidunt interdum mi non interdum. Donec semper luctus dolor at elementum. Aenean eu congue tortor, sed hendrerit magna. Quisque a dolor ante. Mauris semper id urna id gravida. Vestibulum mi tortor, finibus eu felis in, vehicula aliquam mi.
-
-Aliquam arcu turpis, ultrices sed luctus ac, vehicula id metus. Morbi eu feugiat velit, et tempus augue. Proin ac mattis tortor. Donec tincidunt, ante rhoncus luctus semper, arcu lorem lobortis justo, nec convallis ante quam quis lectus. Aenean tincidunt sodales massa, et hendrerit tellus mattis ac. Sed non pretium nibh. 
-
-Donec cursus maximus luctus. Vivamus lobortis eros et massa porta porttitor. Nam vitae suscipit mi. Pellentesque ex tellus, iaculis vel libero at, cursus pretium sapien. Curabitur accumsan velit sit amet nulla lobortis, ut pretium ex aliquam. Proin eget volutpat orci. Morbi eu aliquet turpis. Vivamus molestie urna quis tempor tristique. Proin hendrerit sem nec tempor sollicitudin.
-
-%----------------------------------------------------------------------------------------
-%	 REFERENCES
-%----------------------------------------------------------------------------------------
-
-\printbibliography % Output the bibliography
-
-%----------------------------------------------------------------------------------------
+\printbibliography
 
 \end{document}
