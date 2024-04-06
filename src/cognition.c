@@ -506,10 +506,6 @@ void error_free(void *err) {
   free(e);
 }
 
-<<<<<<< HEAD
-custom_t *init_custom(void (*printfunc)(FILE *, void *),
-                      void (*freefunc)(void *), void *(*copyfunc)(void *)) {
-=======
 error_t *error_copy(void *err) {
   if (err == NULL)
     return NULL;
@@ -522,7 +518,6 @@ error_t *error_copy(void *err) {
 
 custom_t *init_custom(void (*printfunc)(FILE *, void *), void (*freefunc)(void *),
                       void *(*copyfunc)(void *)) {
->>>>>>> 34c82b73030da5473262c0e54a3676a1045fb87b
   custom_t *c = calloc(1, sizeof(custom_t));
   if (!c)
     die("calloc on custom");
@@ -945,7 +940,16 @@ void evalstack(contain_t *c, value_t *callword) {
         }
         if (parent == NULL) continue;
         if (isfaliasin(parent, newval)) {
-          evalf();
+          if (cur->cranks) {
+            if (cur->cranks->size) {
+              int(*cr)[2] = cur->cranks->items[0];
+              if ((cr[0][0] != 1 || cr[0][1] == 0) && cr[0][1] != 1) {
+                evalf();
+              }
+            } else
+              evalf();
+          } else
+            evalf();
           evald = true;
           break;
         }
@@ -1043,7 +1047,7 @@ void evalword(value_t *v) {
       if (old->cranks) {
         if (old->cranks->size) {
           int(*cr)[2] = old->cranks->items[0];
-          if (cr[0][0] != 1 || cr[0][1] == 0) {
+          if ((cr[0][0] != 1 || cr[0][1] == 0) && cr[0][1] != 1) {
             evalf();
           }
         } else
@@ -1125,7 +1129,7 @@ void eval(value_t *v) {
       return;
     }
     int(*crank)[2] = cur->cranks->items[0];
-    if (crank[0][0] != 1 || crank[0][1] == 0) {
+    if ((crank[0][0] != 1 || crank[0][1] == 0) && crank[0][1] != 1) {
       evalf();
       return;
     }

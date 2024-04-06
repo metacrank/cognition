@@ -38,58 +38,61 @@ drop nop 1 push VMACRO cast
 push eval if compose
 1 crank VMACRO cast def
 
-16 factorial
+18 factorial .
 
 # [ === 1 metacrankbase crankbase ( meta-crank-stuff ) [ ] ( meta-crank-stuff ) 0 crank 1 1 metacrank
-# meta-crank-stuff === dup ']' = ( drop swap drop swap crank swap 1 swap metacrank ) ( compose ( dup ) dip swap ) if
-2 crank { nop
-1 quote metacrankbase addon crankbase addon
-dup unglue } push = addon
-drop unglue swap addon drop addon swap addon crank addon swap addon 1 push swap addon metacrank addon
-compose unglue dup unglue push eval dip addon swap addon
-1 crank quote swap quote swap compose compose
-2 crank if addon
-1 crank quote dup stack push prepose
-2 crank 0 push crank addon 1 push 1 push metacrank addon
-1 crank compose
-VMACRO cast def
-
-{ hello world! }
 
 # meta-crank-stuff === dup ']' = ( drop swap drop swap crank swap 1 swap metacrank quote compose ( dup ) dip swap )
 # ( compose ( dup ) dip swap ) if
-2 crank ( nop
+2 crank [ nop ( nop
 1 quote metacrankbase addon crankbase addon
-dup unglue ) push = addon
+dup unglue ] push = addon
+
 drop unglue swap addon drop addon swap addon crank addon swap addon 1 push swap addon metacrank addon quote addon compose addon
 dup unglue push eval dip addon swap addon
-2 crank
+dup unglue [ push = addon
+drop unglue ( compose push eval
 compose unglue dup unglue push eval dip addon swap addon
-1 crank quote swap quote swap compose compose
+push eval if addon
+1 crank swap quote swap quote compose compose
 2 crank if addon
+
 1 crank quote dup stack push prepose
 2 crank 0 push crank addon 1 push 1 push metacrank addon
+
 1 crank compose
 VMACRO cast def
+stack 2 crank ( bequeath 1 crank
+
+# [ === 1 metacrankbase crankbase ( meta-crank-stuff ) [ ] ( meta-crank-stuff ) 0 crank 1 1 metacrank
+# meta-crank-stuff === dup ']' = ( drop swap drop swap crank swap 1 swap metacrank )
+# ( dup '[' = ( drop -[ ) ( compose ( dup ) dip swap ) if ) if
 
 # executes (
 2 crank [ nop
 1 quote metacrankbase addon crankbase addon
 dup unglue ] push = addon
 drop unglue swap addon drop addon swap addon crank addon swap addon 1 push swap addon metacrank addon
-dup unglue ( push = addon
-eval unglue push eval
+dup unglue [ push = addon
+drop unglue ( compose push eval
 compose unglue dup unglue push eval dip addon swap addon
-1 crank push 0 exit quote swap quote swap compose compose
+push eval if addon
+1 crank swap quote swap quote compose compose
 2 crank if addon
+
 1 crank quote dup stack push prepose
 2 crank 0 push crank addon 1 push 1 push metacrank addon
+
 1 crank compose
-VMACRO cast def
+VMACRO cast
+#push ing' 3 cut drop compose
+#def
+def swap drop
+2 crank [ bequeath [ undef [ compose
+1 crank dup def
+#2 crank ( undef 1 crank
+
+[ hell o [ oh nesting [ inside ] [ more [ nesting ] ] ] ] .
 
 
-
-# [ === 1 metacrankbase crankbase ( meta-crank-stuff ) [ ] ( meta-crank-stuff ) 0 crank 1 1 metacrank
-# meta-crank-stuff === dup ']' = ( drop swap drop swap crank swap 1 swap metacrank )
-# ( dup '[' = ( drop -[ ) ( compose ( dup ) dip swap ) if ) if
-
+[ nop ] VMACRO cast quote [ nop ] bequeath
