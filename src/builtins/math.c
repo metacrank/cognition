@@ -237,6 +237,31 @@ void cog_imaginary(value_t *v) {
   stack_push(stack, v1);
 }
 
+void cog_sqrt(value_t *v) {
+  contain_t *cur = stack_peek(STACK);
+  stack_t *stack = cur->stack;
+  if (stack->size < 1) {
+    eval_error(U"TOO FEW ARGUMENTS", v);
+    return;
+  }
+  value_t *v1 = stack_pop(stack);
+  if (value_stack(v1)[0]->size != 1) {
+    eval_error(U"BAD ARGUMENT TYPE", v);
+    stack_push(stack, v1);
+    return;
+  }
+  value_t *w1 = value_stack(v1)[0]->items[0];
+  if (w1->type != VWORD) {
+    eval_error(U"BAD ARGUMENT TYPE", v);
+    stack_push(stack, v1);
+    return;
+  }
+  string_t *stmp = str_sqrt(w1->str_word);
+  string_free(w1->str_word);
+  w1->str_word = stmp;
+  stack_push(stack, v1);
+}
+
 void cog_pow(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   stack_t *stack = cur->stack;
@@ -819,6 +844,7 @@ void add_funcs_math(ht_t *flit) {
   add_func(flit, cog_multiply, U"*");
   add_func(flit, cog_divide, U"/");
   add_func(flit, cog_neg, U"neg");
+  add_func(flit, cog_sqrt, U"sqrt");
   add_func(flit, cog_pow, U"pow");
   add_func(flit, cog_floor, U"floor");
   add_func(flit, cog_ceil, U"ceil");

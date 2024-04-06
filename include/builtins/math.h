@@ -27,6 +27,8 @@ void cog_divide(value_t *v);
 void cog_real(value_t *v);
 void cog_imaginary(value_t *v);
 
+void cog_sqrt(value_t *v);
+
 /*! @brief takes first number to the power of the second, pushes result on the
  * stack */
 void cog_pow(value_t *v);
