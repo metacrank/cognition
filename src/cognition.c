@@ -763,6 +763,7 @@ void evalf() {
   for (int i = 0; i < EVAL_CONTAIN_TRASH->size; i++) {
     if (!stack_exists(EVAL_CONTAINERS, EVAL_CONTAIN_TRASH->items[i])) {
       contain_free(stack_popdeep(EVAL_CONTAIN_TRASH, i));
+      i--;
     }
   }
   value_t *vf = stack_pop(EVAL_STACK);
@@ -814,6 +815,7 @@ bool return_function(void *stack, bool macro) {
   for (int i = 0; i < CONTAIN_DEF_STACK->size; i++) {
     if (stack_exists(EVAL_CONTAINERS, CONTAIN_DEF_STACK->items[i])) {
       stack_push(EVAL_CONTAIN_TRASH, stack_popdeep(CONTAIN_DEF_STACK, i));
+      i--;
     }
   }
   if (macro) {
@@ -1041,6 +1043,7 @@ void crank() {
     for (int i = 0; i < EVAL_CONTAIN_TRASH->size; i++) {
       if (!stack_exists(EVAL_CONTAINERS, EVAL_CONTAIN_TRASH->items[i])) {
         contain_free(stack_popdeep(EVAL_CONTAIN_TRASH, i));
+        i--;
       }
     }
     value_t *vf = stack_pop(EVAL_STACK);

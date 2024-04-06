@@ -515,8 +515,9 @@ void cog_evalstr(value_t *v) {
     stack_push(FAMILY, strc->container);
   else stack_push(FAMILY, NULL);
   stack_push(FAMILY_IDX, &FAMILY->items[FAMILY->size - 1]);
-  for (int i = 0; i < value_stack(strc)[0]->size; i++) {
-    value_t *str = value_stack(strc)[0]->items[i];
+  stack_t *strst = *value_stack(strc);
+  for (int i = 0; i < strst->size; i++) {
+    value_t *str = strst->items[i];
     parser_t *parser = init_parser(str->str_word);
     while(1) {
       value_t *w = parser_get_next(parser);

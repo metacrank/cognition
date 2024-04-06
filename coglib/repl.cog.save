@@ -1,0 +1,21 @@
+ldfgldftgldfdtgl
+df 
+ 
+dfiff1 crank ing
+
+addon 2 crank unglue unglue compose unglue 1 crank compose def
+
+getd _ getd _ concat d i_cognition> _concat_swap_dup_i d quote
+2 crank print addon read addon evalstr addon
+ssize addon 0 quote compose eval = addon
+1 crank getd _ getd _ concat d i_
+_concat_swap_dup_i d quote
+2 crank print addon ? addon
+1 crank VMACRO cast quote
+stack quote prepose compose
+2 crank if addon repl compose
+1 crank VMACRO cast repl swap def
+
+stack 2 crank repl bequeath ccd bequeath repl compose repl undef 1 crank
+
+2 crank eval unglue 1 crank ing\

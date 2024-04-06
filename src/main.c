@@ -112,9 +112,6 @@ void print_end() {
 
 /*! frees all global variables */
 void global_free() {
-  printf("%lu\n", CONTAIN_DEF_STACK->size);
-  stack_free(CONTAIN_DEF_STACK, contain_free);
-  return;
   string_free(PARSER->source);
   stack_free(OBJ_TABLE_STACK, ht_free_free);
   stack_free(OBJ_TABLE_REF_STACK, nop);
@@ -128,7 +125,6 @@ void global_free() {
   stack_free(EVAL_STACK, value_free);
   stack_free(EVAL_CONTAINERS, nop);
   stack_free(CONTAIN_DEF_STACK, contain_free);
-  return;
   stack_free(EVAL_CONTAIN_TRASH, nop);
   stack_free(MACRO_DEF_STACK, value_stack_free);
   stack_free(FAMILY, nop);
