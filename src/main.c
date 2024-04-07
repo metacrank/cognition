@@ -103,7 +103,7 @@ void print_end() {
     printf("null crank\n");
   if (EXIT_CODE) {
     printf("\nExit code: '");
-    print(EXIT_CODE);
+    print_str_formatted(EXIT_CODE);
     printf("'\n");
   }
   else

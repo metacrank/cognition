@@ -14,25 +14,25 @@ void cog_concat(value_t *v) {
   }
   value_t *c2 = stack_pop(stack);
   if (value_stack(c2)[0]->size != 1) {
-    eval_error(U"TYPE ERROR", v);
+    eval_error(U"BAD ARGUMENT TYPE", v);
     stack_push(stack, c2);
     return;
   }
   value_t *w2 = value_stack(c2)[0]->items[0];
   if (w2->type != VWORD) {
-    eval_error(U"TYPE ERROR", v);
+    eval_error(U"BAD ARGUMENT TYPE", v);
     stack_push(stack, c2);
     return;
   }
   value_t *c1 = stack_peek(stack);
   if (value_stack(c1)[0]->size != 1) {
-    eval_error(U"TYPE ERROR", v);
+    eval_error(U"BAD ARGUMENT TYPE", v);
     stack_push(stack, c2);
     return;
   }
   value_t *w1 = value_stack(c1)[0]->items[0];
   if (w1->type != VWORD) {
-    eval_error(U"TYPE ERROR", v);
+    eval_error(U"BAD ARGUMENT TYPE", v);
     stack_push(stack, c2);
     return;
   }
@@ -75,19 +75,17 @@ void cog_cut(value_t *v) {
   }
   string_t *str = wq->str_word;
   size_t n = string_to_int(w1->str_word);
-  if (n < 0 || n >= str->length) {
+  if (n < 0 || n > str->length) {
     eval_error(U"INDEX OUT OF RANGE", v);
     stack_push(stack, quot);
     stack_push(stack, v1);
     return;
   }
   w1->str_word->length = 0;
-  w1->str_word->value[0] = '\n';
   for (int i = n; i < wq->str_word->length; i++) {
     string_append(w1->str_word, wq->str_word->value[i]);
   }
   wq->str_word->length = n;
-  wq->str_word->value[n] = '\0';
   stack_push(stack, quot);
   stack_push(stack, v1);
 }
