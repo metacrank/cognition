@@ -510,6 +510,11 @@ void cog_evalstr(value_t *v) {
     eval_error(U"TOO FEW ARGUMENTS", v);
     return;
   }
+  if (FAMILY_IDX->length >= 1152) {
+    stack_push(cur->stack, strc);
+    eval_error(U"MAXIMUM RECURSION DEPTH REACHED", v);
+    return;
+  }
   string_append(FAMILY_IDX, 0);
   if (strc->type == VSTACK)
     stack_push(FAMILY, strc->container);

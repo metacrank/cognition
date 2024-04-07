@@ -1027,6 +1027,10 @@ void evalword(value_t *v) {
       evald = true;
       break;
     } else if ((expand = ht_get(parent->word_table, v->str_word))) {
+      if (FAMILY_IDX->length > 1152) {
+        eval_error(U"MAXIMUM RECURSION DEPTH REACHED", v);
+        return;
+      }
       string_append(FAMILY_IDX, i);
       stack_push(FAMILY, expand);
       string_append(FAMILY_IDX, FAMILY->size - 1);
