@@ -34,12 +34,14 @@ extern stack_t *ARGS;
 
 /*! prints usage then exits */
 void usage(int e) {
-  printf("Usage: crank [-hqsv] [files] [args]\n");
+  math_free();
+  printf("Usage: crank [-hqsv] [file...] [arg...]\n");
   exit(e);
 }
 
 void help() {
-  printf("Usage: crank [-hqsv] [files] [args]\n\n");
+  math_free();
+  printf("Usage: crank [-hqsv] [file...] [arg...]\n\n");
   printf(" -h    --help            print this help message\n");
   printf(" -q    --quiet           don't show stack information at program end\n");
   printf(" -s N  --sources N       specify N source files to be composed (default is N=1)\n");
@@ -168,7 +170,7 @@ int main(int argc, char **argv) {
     bool q;
     int s;
     bool v;
-  } args = {false, false, 0, false};
+  } args = {false, false, -1, false};
 
   int fileidx = 0;
 
@@ -194,7 +196,7 @@ int main(int argc, char **argv) {
       args.v = true;
     } else if (strcmp(argv[i], "-s") == 0 ||
                strcmp(argv[i], "--sources") == 0) {
-      if (args.s != 0 || i + 1 == argc) {
+      if (args.s >= 0 || i + 1 == argc) {
         usage(1);
         break;
       }
@@ -222,6 +224,10 @@ int main(int argc, char **argv) {
   }
 
   if (args.s == 0) {
+    math_free();
+    return 0;
+  }
+  if (args.s < 0) {
     args.s = 1;
   }
   if (args.h) {
