@@ -616,7 +616,9 @@ parser_t *init_parser(string_t *source) {
     die("calloc on parser");
   p->i = 0;
   p->source = source;
-  p->c = source->value[0];
+  if (source)
+    if (source->length)
+      p->c = source->value[0];
   return p;
 }
 

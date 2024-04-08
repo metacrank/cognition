@@ -126,7 +126,6 @@ void print_end() {
 /*! frees all global variables */
 void global_free() {
   value_stack_free(ARGS);
-  string_free(PARSER->source);
   stack_free(OBJ_TABLE_STACK, ht_free_free);
   stack_free(OBJ_TABLE_REF_STACK, nop);
   string_free(ROOT);
@@ -223,10 +222,6 @@ int main(int argc, char **argv) {
     }
   }
 
-  if (args.s == 0) {
-    math_free();
-    return 0;
-  }
   if (args.s < 0) {
     args.s = 1;
   }
@@ -236,20 +231,9 @@ int main(int argc, char **argv) {
   if (args.v) {
     version();
   }
-  if (!fileidx) {
+  if (!fileidx && args.s) {
     usage(1);
   }
-
-  /* Read code from file */
-  FILE *FP = fopen(argv[fileidx], "rb");
-  if (!FP) {
-    printf("Could not open file for reading: %s\n", argv[fileidx]);
-    math_free();
-    return 4;
-  }
-
-  string_t *buffer = file_read(FP);
-  fclose(FP);
 
   /* Set up global variables */
   ARGS = init_stack(DEFAULT_STACK_SIZE);
@@ -261,7 +245,7 @@ int main(int argc, char **argv) {
     }
     stack_push(ARGS, argword);
   }
-  PARSER = init_parser(buffer);
+  PARSER = init_parser(NULL);
   STACK = init_stack(DEFAULT_STACK_SIZE);
   EVAL_STACK = init_stack(DEFAULT_STACK_SIZE);
   CONTAIN_DEF_STACK = init_stack(DEFAULT_STACK_SIZE);
@@ -296,17 +280,7 @@ int main(int argc, char **argv) {
   stack_push(OBJ_TABLE_REF_STACK, stack);
   string_append(ROOT, 0);
 
-  /* parse and eval loop */
-  while (1) {
-    v = parser_get_next(PARSER);
-    if (v == NULL)
-      break;
-    eval(v);
-    if (EXITED)
-      break;
-  }
-
-  for (int i = 1; i < args.s; i++) {
+  for (int i = 0; i < args.s; i++) {
     if (EXITED) break;
     /* Read code from file */
     FILE *FP = fopen(argv[fileidx + i], "rb");
@@ -315,8 +289,7 @@ int main(int argc, char **argv) {
       global_free();
       return 4;
     }
-    string_free(PARSER->source);
-    buffer = file_read(FP);
+    string_t *buffer = file_read(FP);
     fclose(FP);
 
     parser_reset(PARSER, buffer);
@@ -330,6 +303,7 @@ int main(int argc, char **argv) {
       if (EXITED)
         break;
     }
+    string_free(PARSER->source);
   }
 
 
