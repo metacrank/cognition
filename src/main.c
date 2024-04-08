@@ -34,8 +34,17 @@ extern stack_t *ARGS;
 
 /*! prints usage then exits */
 void usage(int e) {
-  printf("Usage: crank [-hqv] [file]\n");
+  printf("Usage: crank [-hqsv] [files] [args]\n");
   exit(e);
+}
+
+void help() {
+  printf("Usage: crank [-hqsv] [files] [args]\n\n");
+  printf(" -h    --help            print this help message\n");
+  printf(" -q    --quiet           don't show stack information at program end\n");
+  printf(" -s N  --sources N       specify N source files to be composed (default is N=1)\n");
+  printf(" -v    --version         print version information\n");
+  exit(0);
 }
 
 /*! prints version and exits */
@@ -216,7 +225,7 @@ int main(int argc, char **argv) {
     args.s = 1;
   }
   if (args.h) {
-    usage(0);
+    help();
   }
   if (args.v) {
     version();
