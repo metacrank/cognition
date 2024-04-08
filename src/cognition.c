@@ -30,6 +30,7 @@ bool EXITED;
 pool_t *OBJ_POOL;
 bool RETURNED;
 string_t *ROOT;
+stack_t *ARGS;
 
 // for debugging
 void print_crank(char prefix[]) {

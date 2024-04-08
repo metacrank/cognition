@@ -30,6 +30,7 @@ extern string_t *EXIT_CODE;
 extern bool EXITED;
 extern string_t **CAST_ARGS;
 extern bool RETURNED;
+extern stack_t *ARGS;
 
 /*! prints usage then exits */
 void usage(int e) {
@@ -112,6 +113,7 @@ void print_end() {
 
 /*! frees all global variables */
 void global_free() {
+  value_stack_free(ARGS);
   string_free(PARSER->source);
   stack_free(OBJ_TABLE_STACK, ht_free_free);
   stack_free(OBJ_TABLE_REF_STACK, nop);
@@ -155,7 +157,6 @@ int main(int argc, char **argv) {
   } args = {};
 
   int fileidx = 0;
-  bool filefound = false;
 
   for (int i = 1; i < argc; i++) {
     if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0) {
@@ -177,11 +178,9 @@ int main(int argc, char **argv) {
         break;
       }
       args.v = true;
-    } else if (filefound) {
-      usage(1);
     } else {
       fileidx = i;
-      filefound = true;
+      break;
     }
   }
 
@@ -191,7 +190,7 @@ int main(int argc, char **argv) {
   if (args.v) {
     version();
   }
-  if (!filefound) {
+  if (!fileidx) {
     usage(1);
   }
 
@@ -205,6 +204,15 @@ int main(int argc, char **argv) {
   fclose(FP);
 
   /* Set up global variables */
+  ARGS = init_stack(DEFAULT_STACK_SIZE);
+  for (int i = fileidx + 1; i < argc; i++) {
+    value_t *argword = init_value(VWORD);
+    argword->str_word = init_string(U"");
+    for (int c = 0; argv[i][c] != '\0'; c++) {
+      string_append(argword->str_word, argv[i][c]);
+    }
+    stack_push(ARGS, argword);
+  }
   PARSER = init_parser(buffer);
   STACK = init_stack(DEFAULT_STACK_SIZE);
   EVAL_STACK = init_stack(DEFAULT_STACK_SIZE);

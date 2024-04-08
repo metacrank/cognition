@@ -8,6 +8,7 @@
 
 extern stack_t *STACK;
 extern bool RETURNED;
+extern stack_t *ARGS;
 extern byte_t print_buffer[5];
 
 void cog_reset(value_t *v) {
@@ -97,8 +98,20 @@ void cog_return(value_t *v) {
   RETURNED = true;
 }
 
+void cog_getargs(value_t *v) {
+  contain_t *cur = stack_peek(STACK);
+  contain_t *argc = calloc(1, sizeof(contain_t));
+  argc->stack = value_stack_copy(ARGS);
+  argc->iflag = true;
+  argc->sflag = true;
+  value_t *argv = init_value(VSTACK);
+  argv->container = argc;
+  stack_push(cur->stack, argv);
+}
+
 void add_funcs_misc(ht_t *flit) {
   add_func(flit, cog_reset, U"reset");
   add_func(flit, cog_clib, U"clib");
   add_func(flit, cog_return, U"return");
+  add_func(flit, cog_getargs, U"getargs");
 }

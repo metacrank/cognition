@@ -2,3 +2,24 @@ ldfgldftgldfdtgl
 df 
  
 dfiff1 crank ing
+
+getd dup _ concat _ swap d i 
+_quote_swap_quote_compose_swap_dup_d_i eval
+spc swap quote def
+endl swap quote def
+
+getargs 1 split drop
+
+epop drop
+INDEX spc OUT spc OF spc RANGE
+concat concat concat concat concat concat =
+
+missing spc filename concat concat dup endl concat
+swap quote swap quote compose
+2 crank print compose exit compose
+
+fread nop evalstr compose
+
+spc undef endl undef
+
+1 crank if
