@@ -40,6 +40,7 @@ void usage(int e) {
 
 /*! prints version and exits */
 void version() {
+  math_free();
   printf("Authors: Preston Pan, Matthew Hinton, MIT License 2024\n");
   printf("cognition, version 1.0 alpha\n");
   exit(0);
@@ -145,6 +146,9 @@ int main(int argc, char **argv) {
   value_t *v;
   size_t len = 0;
   char *locale = setlocale(LC_ALL, "");
+
+  init_math();
+
   /* Parsing arguments */
   if (argc < 2) {
     usage(1);
@@ -152,9 +156,10 @@ int main(int argc, char **argv) {
 
   struct {
     bool h;
-    bool v;
     bool q;
-  } args = {};
+    int s;
+    bool v;
+  } args = {false, false, 0, false};
 
   int fileidx = 0;
 
@@ -178,12 +183,38 @@ int main(int argc, char **argv) {
         break;
       }
       args.v = true;
+    } else if (strcmp(argv[i], "-s") == 0 ||
+               strcmp(argv[i], "--sources") == 0) {
+      if (args.s != 0 || i + 1 == argc) {
+        usage(1);
+        break;
+      }
+      i++;
+      string_t *str = init_string(U"");
+      for (int c = 0; argv[i][c] != '\0'; c++) {
+        string_append(str, argv[i][c]);
+      }
+      if (!isint(str)) {
+        usage(2);
+        break;
+      }
+      args.s = string_to_int(str);
+      string_free(str);
     } else {
       fileidx = i;
+      if (fileidx + args.s > argc) {
+        printf("Missing filename\n");
+        math_free();
+        return 3;
+        break;
+      }
       break;
     }
   }
 
+  if (args.s == 0) {
+    args.s = 1;
+  }
   if (args.h) {
     usage(0);
   }
@@ -197,7 +228,9 @@ int main(int argc, char **argv) {
   /* Read code from file */
   FILE *FP = fopen(argv[fileidx], "rb");
   if (!FP) {
-    usage(1);
+    printf("Could not open file for reading: %s\n", argv[fileidx]);
+    math_free();
+    return 4;
   }
 
   string_t *buffer = file_read(FP);
@@ -205,7 +238,7 @@ int main(int argc, char **argv) {
 
   /* Set up global variables */
   ARGS = init_stack(DEFAULT_STACK_SIZE);
-  for (int i = fileidx + 1; i < argc; i++) {
+  for (int i = fileidx + args.s; i < argc; i++) {
     value_t *argword = init_value(VWORD);
     argword->str_word = init_string(U"");
     for (int c = 0; argv[i][c] != '\0'; c++) {
@@ -248,8 +281,6 @@ int main(int argc, char **argv) {
   stack_push(OBJ_TABLE_REF_STACK, stack);
   string_append(ROOT, 0);
 
-  init_math();
-
   /* parse and eval loop */
   while (1) {
     v = parser_get_next(PARSER);
@@ -259,6 +290,34 @@ int main(int argc, char **argv) {
     if (EXITED)
       break;
   }
+
+  for (int i = 1; i < args.s; i++) {
+    if (EXITED) break;
+    /* Read code from file */
+    FILE *FP = fopen(argv[fileidx + i], "rb");
+    if (!FP) {
+      printf("Could not open file for reading: %s\n", argv[fileidx + i]);
+      global_free();
+      return 4;
+    }
+    string_free(PARSER->source);
+    buffer = file_read(FP);
+    fclose(FP);
+
+    parser_reset(PARSER, buffer);
+
+    /* parse and eval loop */
+    while (1) {
+      v = parser_get_next(PARSER);
+      if (v == NULL)
+        break;
+      eval(v);
+      if (EXITED)
+        break;
+    }
+  }
+
+
   if (!args.q) {
     print_end();
   }
