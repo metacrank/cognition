@@ -4,7 +4,8 @@
 2 crank ing 1 crank # if dup stack swap
 2 crank ing 1 crank # 0 crank 1 1 metacrank
 2 crank ing 1 crank
-2 crank ing 1 crank # meta-crank-stuff0 === dup ']' = ( drop swap drop swap [ 1 ] swap metacrank swap crank quote compose ( dup ) dip swap )
+2 crank ing 1 crank # meta-crank-stuff0 === dup ']' = ( drop swap drop swap [ 1 ] swap metacrank swap crank
+                    # quote compose ( dup ) dip swap )
 2 crank ing 1 crank # ( dup '[' = ( drop '[' ) ( compose ( dup ) dip swap ) if ) if
 2 crank ing 1 crank
 2 crank ing 1 crank # meta-crank-stuff1 === dup ']' = ( drop swap drop swap [ 1 ] swap metacrank swap crank )

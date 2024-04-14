@@ -23,7 +23,7 @@ void cog_quote(value_t *v) {
 
 void cog_eval(value_t *v) {
   contain_t *old = stack_peek(STACK);
-  evalf();
+  evalf(v);
   old = stack_peek(STACK);
   if (!old) return;
   dec_crank(old);
@@ -216,7 +216,7 @@ void cog_dip(value_t *v) {
   value_t *quot = stack_pop(stack);
   value_t *v1 = stack_pop(stack);
   stack_push(stack, quot);
-  evalf();
+  evalf(v);
   if (!cur) return; // this will never work
   stack_push(stack, v1);
   dec_crank(cur);
@@ -256,11 +256,11 @@ void cog_if(value_t *v) {
   if (v1_fixed) {
     stack_push(stack, v2);
     value_free_safe(v3);
-    evalf();
+    evalf(v);
   } else {
     stack_push(stack, v3);
     value_free_safe(v2);
-    evalf();
+    evalf(v);
   }
   if (!cur) return;
   dec_crank(cur);

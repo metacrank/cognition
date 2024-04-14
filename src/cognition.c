@@ -798,11 +798,11 @@ bool isfalias(value_t *v) {
   return isfaliasin(c, v);
 }
 
-void evalf() {
+void evalf(value_t *alias) {
   contain_t *cur = stack_peek(STACK);
   value_t *v = stack_pop(cur->stack);
   if (v == NULL) {
-    eval_error(U"EMPTY STACK", NULL);
+    eval_error(U"EMPTY STACK", alias);
     return;
   }
   stack_push(EVAL_CONTAINERS, cur);
@@ -847,10 +847,10 @@ void push_quoted(contain_t *cur, value_t *v) {
   stack_push(cur->stack, q);
 }
 
-void eval_value(contain_t *c, contain_t *cur, value_t *val, value_t *callword) {
+void eval_value(contain_t *c, contain_t *cur, value_t *val, value_t *callword, bool always_evalf) {
   switch (val->type) {
   case VWORD:
-    evalword(val);
+    evalword(val, always_evalf);
     break;
   case VSTACK:
     stack_push(cur->stack, value_copy(val));
@@ -899,11 +899,13 @@ bool return_function(void *stack, bool macro) {
 
 void evalstack(contain_t *c, value_t *callword) {
   contain_t *cur = stack_peek(STACK);
+  value_t *newval;
+  bool evald = false;
   if (!cur)
     return;
   if (c->stack->size) {
     FAMILY->items[0] = cur;
-    eval_value(c, cur, c->stack->items[0], callword);
+    eval_value(c, cur, c->stack->items[0], callword, true);
     if (return_function(c, false))
       return;
     int(*cr)[2];
@@ -914,11 +916,11 @@ void evalstack(contain_t *c, value_t *callword) {
       inc_crank(cur);
       cur = stack_peek(STACK);
       FAMILY->items[0] = cur;
-      value_t *newval = c->stack->items[i];
+      newval = c->stack->items[i];
       if (cur->cranks) {
         cr = cur->cranks->items[0];
         if (cr[0][0] == 0 && cr[0][1]) {
-          eval_value(c, cur, newval, callword);
+          eval_value(c, cur, newval, callword, false);
           if (return_function(c, false))
             return;
           continue;
@@ -931,9 +933,10 @@ void evalstack(contain_t *c, value_t *callword) {
           return;
         continue;
       }
-      bool evald = false;
+      evald = false;
+      stack_push(FAMILY, c);
       int family_idx = FAMILY_IDX->length - 1;
-      for (int i = 0; i < FAMILY->size; i++) {
+      for (int i = FAMILY->size - 1; i >= 0; i--) {
         contain_t *parent = FAMILY->items[i];
         if (family_idx >= 0) {
           if (i == FAMILY_IDX->value[family_idx]) {
@@ -947,24 +950,19 @@ void evalstack(contain_t *c, value_t *callword) {
             if (cur->cranks->size) {
               int(*cr)[2] = cur->cranks->items[0];
               if ((cr[0][0] != 1 || cr[0][1] == 0) && cr[0][1] != 1) {
-                evalf();
+                evalf(newval);
               }
             } else
-              evalf();
+              evalf(newval);
           } else
-            evalf();
+            evalf(newval);
           evald = true;
           break;
         }
       }
-      if (evald) {
-        if (return_function(c, false))
-          return;
-        continue;
-      }
-      if (isfaliasin(c, newval)) {
-        evalf();
-      }
+      stack_pop(FAMILY);
+      if (!evald)
+        push_quoted(cur, value_copy(newval));
       if (return_function(c, false))
         return;
     }
@@ -989,7 +987,8 @@ void evalmacro(stack_t *macro, value_t *word) {
       stack_push(cur->stack, value_copy(v));
       break;
     case VWORD:
-      evalword(v);
+      //evalword(v, i == 0);
+      evalword(v, true);
       break;
     default:
       push_quoted(cur, value_copy(v));
@@ -1002,7 +1001,7 @@ void evalmacro(stack_t *macro, value_t *word) {
   }
 }
 
-void evalword(value_t *v) {
+void evalword(value_t *v, bool always_evalf) {
   contain_t *old = FAMILY->items[0];
   contain_t *expand;
   stack_t *macro;
@@ -1051,16 +1050,20 @@ void evalword(value_t *v) {
       evald = true;
       break;
     } else if (isfaliasin(parent, v)) {
-      if (old->cranks) {
-        if (old->cranks->size) {
-          int(*cr)[2] = old->cranks->items[0];
-          if ((cr[0][0] != 1 || cr[0][1] == 0) && cr[0][1] != 1) {
-            evalf();
-          }
+      if (always_evalf)
+        evalf(v);
+      else {
+        if (old->cranks) {
+          if (old->cranks->size) {
+            int(*cr)[2] = old->cranks->items[0];
+            if ((cr[0][0] != 1 || cr[0][1] == 0) && cr[0][1] != 1) {
+              evalf(v);
+            }
+          } else
+            evalf(v);
         } else
-          evalf();
-      } else
-        evalf();
+          evalf(v);
+      }
       evald = true;
       break;
     }
@@ -1126,20 +1129,24 @@ void eval(value_t *v) {
   if (!cur)
     return;
   if (isfalias(v)) {
-    value_free(v);
     if (!cur->cranks) {
-      evalf();
+      evalf(v);
+      value_free(v);
       return;
     }
     if (cur->cranks->size == 0) {
-      evalf();
+      evalf(v);
+      value_free(v);
       return;
     }
     int(*crank)[2] = cur->cranks->items[0];
     if ((crank[0][0] != 1 || crank[0][1] == 0) && crank[0][1] != 1) {
-      evalf();
+      evalf(v);
+      value_free(v);
       return;
     }
+    value_free(v);
+    return;
   }
   push_quoted(cur, v);
   crank();

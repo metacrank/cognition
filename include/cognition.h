@@ -290,7 +290,7 @@ bool isfalias(value_t *v);
 /* bool expandword(value_t *v, stack_t *new, stack_t *family); */
 
 /* crankless evaluation on the stack */
-void evalf();
+void evalf(value_t *alias);
 
 /* increments and decrements crank stack */
 void inc_crank(contain_t *cur);
@@ -305,7 +305,7 @@ void contain_push(contain_t *c, value_t *v);
 void push_quoted(contain_t *cur, value_t *v);
 
 /* eval's a value in a stack being evalstack'd */
-void eval_value(contain_t *c, contain_t *cur, value_t *val, value_t *callword);
+void eval_value(contain_t *c, contain_t *cur, value_t *val, value_t *callword, bool always_evalf);
 
 bool return_function(void *stack, bool macro);
 
@@ -317,7 +317,7 @@ void evalstack(contain_t *c, value_t *callword);
 void evalmacro(stack_t *macro, value_t *word);
 
 /* expands and recursively evaluates a word value, with cranking */
-void evalword(value_t *v);
+void evalword(value_t *v, bool always_evalf);
 
 /* performs one crank */
 void crank();
