@@ -12,6 +12,11 @@ addon 2 crank unglue unglue compose unglue 1 crank compose def
 push 2 crank quote unglue compose addon 1 crank def
 curry 2 crank swap unglue quote addon prepose addon 1 crank def
 
+4 crank crank* cranking
+1 crank quote VMACRO cast
+2 crank 5 push cut addon
+1 crank def
+
 # dup gets concat s dup getd concat d
 2 crank geti unglue getd addon gets addon crankbase addon
 f eval d f i endl s unglue
