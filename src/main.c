@@ -237,6 +237,7 @@ int main(int argc, char **argv) {
 
   /* Set up global variables */
   ARGS = init_stack(DEFAULT_STACK_SIZE);
+  stack_push(ARGS, init_value(VWORD));
   for (int i = fileidx + args.s; i < argc; i++) {
     value_t *argword = init_value(VWORD);
     argword->str_word = init_string(U"");
@@ -289,6 +290,12 @@ int main(int argc, char **argv) {
       global_free();
       return 4;
     }
+    value_t *argword = ARGS->items[0];
+    argword->str_word = init_string(U"");
+    for (int c = 0; argv[fileidx + i][c] != '\0'; c++) {
+      string_append(argword->str_word, argv[fileidx + i][c]);
+    }
+
     string_t *buffer = file_read(FP);
     fclose(FP);
 
@@ -304,6 +311,8 @@ int main(int argc, char **argv) {
         break;
     }
     string_free(PARSER->source);
+    string_free(argword->str_word);
+    argword->str_word = NULL;
   }
 
 

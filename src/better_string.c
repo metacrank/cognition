@@ -268,8 +268,8 @@ void file_print(FILE *FP, string_t *s) {
   }
 }
 
-void string_free(string_t *s) {
+void string_free(void *s) {
   if (s == NULL) return;
-  free(s->value);
+  free(((string_t *)s)->value);
   free(s);
 }
