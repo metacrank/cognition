@@ -1,76 +1,76 @@
-2 crank ing 1 crank # [ === crankbase [ 1 ] metacrankbase dup 1 =
-2 crank ing 1 crank # ( ( meta-crank-stuff0 ) )
-2 crank ing 1 crank # ( ( meta-crank-stuff1 ) )
-2 crank ing 1 crank # if dup stack swap
-2 crank ing 1 crank # 0 crank 1 1 metacrank
-2 crank ing 1 crank
-2 crank ing 1 crank # meta-crank-stuff0 === dup ']' = ( drop swap drop swap [ 1 ] swap metacrank swap crank
+2crank ing 1 crank # [ === crankbase [ 1 ] metacrankbase dup 1 =
+2crank ing 1 crank # ( ( meta-crank-stuff0 ) )
+2crank ing 1 crank # ( ( meta-crank-stuff1 ) )
+2crank ing 1 crank # if dup stack swap
+2crank ing 1 crank # 0 crank 1 1 metacrank
+2crank ing 1 crank
+2crank ing 1 crank # meta-crank-stuff0 === dup ']' = ( drop swap drop swap [ 1 ] swap metacrank swap crank
                     # quote compose ( dup ) dip swap )
-2 crank ing 1 crank # ( dup '[' = ( drop '[' ) ( compose ( dup ) dip swap ) if ) if
-2 crank ing 1 crank
-2 crank ing 1 crank # meta-crank-stuff1 === dup ']' = ( drop swap drop swap [ 1 ] swap metacrank swap crank )
-2 crank ing 1 crank # ( dup '[' = ( drop '[' ) ( compose ( dup ) dip swap ) if ) if
-2 crank ing 1 crank
-2 crank ing 1 crank # declaration
-2 crank ing 3 crank [
-2 crank ing 1 crank
-2 crank ing 1 crank # init
-2 crank ing 2 crank crankbase unglue 1 push metacrankbase addon dup addon 1 push = addon
-2 crank ing 1 crank
-2 crank ing 1 crank # meta-crank-stuff0
-2 crank ing 2 crank dup unglue ] push = addon
-2 crank ing 1 crank
-2 crank ing 2 crank drop unglue swap addon drop addon swap addon 1 push swap addon
+2crank ing 1 crank # ( dup '[' = ( drop '[' ) ( compose ( dup ) dip swap ) if ) if
+2crank ing 1 crank
+2crank ing 1 crank # meta-crank-stuff1 === dup ']' = ( drop swap drop swap [ 1 ] swap metacrank swap crank )
+2crank ing 1 crank # ( dup '[' = ( drop '[' ) ( compose ( dup ) dip swap ) if ) if
+2crank ing 1 crank
+2crank ing 1 crank # declaration
+2crank ing 3 crank [
+2crank ing 1 crank
+2crank ing 1 crank # init
+2crank ing 2 crank crankbase unglue 1 push metacrankbase addon dup addon 1 push = addon
+2crank ing 1 crank
+2crank ing 1 crank # meta-crank-stuff0
+2crank ing 2 crank dup unglue ] push = addon
+2crank ing 1 crank
+2crank ing 2 crank drop unglue swap addon drop addon swap addon 1 push swap addon
                     metacrank addon swap addon crank addon quote addon compose addon
-2 crank ing 3 crank dup
-2 crank ing 1 crank unglue quote compose
-2 crank ing 2 crank dip addon swap addon
-2 crank ing 1 crank quote compose
-2 crank ing 1 crank
-2 crank ing 2 crank dup unglue [ push = addon
-2 crank ing 2 crank drop unglue [ compose
-2 crank ing 1 crank push
-2 crank ing 2 crank compose unglue
-2 crank ing 3 crank dup
-2 crank ing 1 crank unglue quote compose
-2 crank ing 2 crank dip addon swap addon
-2 crank ing 1 crank push
-2 crank ing 2 crank if addon
-2 crank ing 1 crank quote compose
-2 crank ing 1 crank
-2 crank ing 2 crank if addon
-2 crank ing 1 crank quote VMACRO cast
-2 crank ing 1 crank quote compose
-2 crank ing 1 crank
-2 crank ing 1 crank # meta-crank-stuff1
-2 crank ing 2 crank dup unglue ] push = addon
-2 crank ing 2 crank drop unglue swap addon drop addon swap addon 1 push swap addon
+2crank ing 3 crank dup
+2crank ing 1 crank unglue quote compose
+2crank ing 2 crank dip addon swap addon
+2crank ing 1 crank quote compose
+2crank ing 1 crank
+2crank ing 2 crank dup unglue [ push = addon
+2crank ing 2 crank drop unglue [ compose
+2crank ing 1 crank push
+2crank ing 2 crank compose unglue
+2crank ing 3 crank dup
+2crank ing 1 crank unglue quote compose
+2crank ing 2 crank dip addon swap addon
+2crank ing 1 crank push
+2crank ing 2 crank if addon
+2crank ing 1 crank quote compose
+2crank ing 1 crank
+2crank ing 2 crank if addon
+2crank ing 1 crank quote VMACRO cast
+2crank ing 1 crank quote compose
+2crank ing 1 crank
+2crank ing 1 crank # meta-crank-stuff1
+2crank ing 2 crank dup unglue ] push = addon
+2crank ing 2 crank drop unglue swap addon drop addon swap addon 1 push swap addon
                     metacrank addon swap addon crank addon
-2 crank ing 1 crank quote compose
-2 crank ing 1 crank
-2 crank ing 2 crank dup unglue [ push = addon
-2 crank ing 2 crank drop unglue [ compose
-2 crank ing 1 crank push
-2 crank ing 2 crank compose unglue
-2 crank ing 3 crank dup
-2 crank ing 1 crank unglue quote compose
-2 crank ing 2 crank dip addon swap addon
-2 crank ing 1 crank push
-2 crank ing 2 crank if addon
-2 crank ing 1 crank quote compose
-2 crank ing 1 crank
-2 crank ing 2 crank if addon
-2 crank ing 1 crank quote VMACRO cast
-2 crank ing 1 crank quote compose
-2 crank ing 1 crank
-2 crank ing 1 crank # rest of the definition
-2 crank ing 2 crank if addon dup addon stack addon swap addon
-2 crank ing 2 crank 0 push crank addon 1 push 1 push metacrank addon
-2 crank ing 1 crank
-2 crank ing 1 crank def
-2 crank ing 1 crank
-2 crank ing 1 crank [ hello world [ helloooo ] (haha!_nested) ] .
-2 crank ing 16 crank [ eval eval eval eval eval hello worlds (eval) ] six crank in still
-2 crank ing 1 crank print space print space print space print newline .
-2 crank ing 16 crank [ ing hello worlds (ing) ] way: this works also
-2 crank ing 1 crank print space print space print space print newline .
+2crank ing 1 crank quote compose
+2crank ing 1 crank
+2crank ing 2 crank dup unglue [ push = addon
+2crank ing 2 crank drop unglue [ compose
+2crank ing 1 crank push
+2crank ing 2 crank compose unglue
+2crank ing 3 crank dup
+2crank ing 1 crank unglue quote compose
+2crank ing 2 crank dip addon swap addon
+2crank ing 1 crank push
+2crank ing 2 crank if addon
+2crank ing 1 crank quote compose
+2crank ing 1 crank
+2crank ing 2 crank if addon
+2crank ing 1 crank quote VMACRO cast
+2crank ing 1 crank quote compose
+2crank ing 1 crank
+2crank ing 1 crank # rest of the definition
+2crank ing 2 crank if addon dup addon stack addon swap addon
+2crank ing 2 crank 0 push crank addon 1 push 1 push metacrank addon
+2crank ing 1 crank
+2crank ing 1 crank def
+2crank ing 1 crank
+2crank ing 1 crank [ hello world [ helloooo ] (haha!_nested) ] .
+2crank ing 16 crank [ eval eval eval eval eval hello worlds (eval) ] six crank in still
+2crank ing 1 crank print space print space print space print newline .
+2crank ing 16 crank [ ing hello worlds (ing) ] way: this works also
+2crank ing 1 crank print space print space print space print newline .
