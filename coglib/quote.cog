@@ -12,7 +12,7 @@
 
 
 # declaration
-2 crank [ nop
+3 crank [
 
 1 crank # init
 2 crank crankbase unglue 1 push metacrankbase addon dup addon 1 push = addon
