@@ -104,7 +104,7 @@ void fprint_value(FILE *f, value_t *v, void *e) {
     c->printfunc(f, v->custom);
     break;
   case VCLIB:
-    fprintf(f, "CLIB_FUNC");
+    fprintf(f, "CLIB");
   }
   fprintf(f, "%s", end);
 }

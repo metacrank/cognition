@@ -34,18 +34,24 @@ void cog_print(value_t *v) {
     eval_error(U"TOO FEW ARGUMENTS", v);
     return;
   }
-  if (value_stack(v1)[0]->size == 0) {
+  stack_t *v1stack = *value_stack(v1);
+  if (v1stack->size == 0) {
     stack_push(cur->stack, v1);
     eval_error(U"BAD ARGUMENT TYPE", v);
     return;
   }
-  value_t *word = value_stack(v1)[0]->items[0];
-  if (word->type != VWORD) {
-    stack_push(cur->stack, v1);
-    eval_error(U"BAD ARGUMENT TYPE", v);
-    return;
+  for (long i = 0; i < v1stack->size; i++) {
+    value_t *word = v1stack->items[i];
+    if (word->type != VWORD) {
+      stack_push(cur->stack, v1);
+      eval_error(U"BAD ARGUMENT TYPE", v);
+      return;
+    }
   }
-  print(word->str_word);
+  for (long i = 0; i < v1stack->size; i++) {
+    value_t *word = v1stack->items[i];
+    print(word->str_word);
+  }
   value_free_safe(v1);
 }
 
