@@ -113,5 +113,27 @@
                                  print . newline ] [ drop ] if
 2crank ing 1 crank
 2crank ing 1 crank
-2crank ing 1 crank # TODO: make child quotes { }
+2crank ing 1 crank # child quotes { } inherit attributes from parent stack # copy '['
+2crank ing 0 crank {
+2crank ing 1 crank
+2crank ing 1 crank # copy '['
+2crank ing 2 crank [ unglue
+2crank ing 1 crank [ 11 ] split swap [ 10 ] split drop
+2crank ing 2 crank child addon
+2crank ing 1 crank [ 18 ] split
+2crank ing 1 crank [ prepose ] curry dip
+2crank ing 1 crank [ 17 ] split eval eval
+2crank ing 1 crank [ 1 ] del [ [ } ] ] [ 1 ] put
+2crank ing 1 crank quote quote
+2crank ing 1 crank [ prepose ] curry dip
+2crank ing 1 crank [ 16 ] split eval eval
+2crank ing 1 crank [ 1 ] del [ [ } ] ] [ 1 ] put
+2crank ing 1 crank quote quote
+2crank ing 1 crank [ prepose ] curry dip
+2crank ing 1 crank prepose
+2crank ing 1 crank
+2crank ing 1 crank def
+2crank ing 1 crank
+2crank ing 1 crank
+2crank ing 1 crank
 2crank ing 1 crank
