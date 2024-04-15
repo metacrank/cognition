@@ -1,0 +1,78 @@
+2crank ing 0 crank newline endl print space spc print
+2crank ing 1 crank unglue swap unglue prepose def
+2crank ing 1 crank unglue swap unglue prepose def
+2crank ing 1 crank
+2crank ing 1 crank ff 1 cut unaliasf 0 cut swap quote def
+2crank ing 1 crank
+2crank ing 0 crank addon
+2crank ing 2 crank unglue unglue compose unglue
+2crank ing 1 crank compose def
+2crank ing 0 crank push
+2crank ing 2 crank quote unglue compose addon
+2crank ing 1 crank def
+2crank ing 0 crank curry
+2crank ing 2 crank swap unglue quote addon prepose addon
+2crank ing 1 crank def
+2crank ing 1 crank
+2crank ing 0 crank # # #
+2crank ing 1 crank gets concat s
+2crank ing 1 crank getd concat d
+2crank ing 2 crank geti unglue getd addon gets addon crankbase addon
+2crank ing 2 crank f eval d f i endl s unglue
+2crank ing 1 crank curry swap unglue prepose curry swap unglue prepose curry compose
+2crank ing 2 crank drop unglue crank addon 1 push 0 push metacrank addon s addon d addon i addon
+2crank ing 1 crank push
+2crank ing 2 crank halt addon 1 push 1 push metacrank addon
+2crank ing 1 crank def
+2crank ing 1 crank
+2crank ing 1 crank # this is a comment
+2crank ing 1 crank #demonstration of singlets in action!
+2crank ing 1 crank
+2crank ing 1 crank # recursive baremetal factorial program:
+2crank ing 1 crank #( dup [ 0 ] > ( dup [ 9 ] + factorial * ) ( drop [ 1 ] ) if )
+2crank ing 0 crank factorial dup
+2crank ing 2 crank 0 push > compose
+2crank ing 2 crank dup nop 9 push + compose factorial compose * compose
+2crank ing 1 crank VMACRO cast push
+2crank ing 2 crank drop nop 1 push
+2crank ing 1 crank VMACRO cast push
+2crank ing 2 crank if compose
+2crank ing 1 crank VMACRO cast def
+2crank ing 1 crank
+2crank ing 1 crank # a word that checks whether 'verbose' was the first arg
+2crank ing 0 crank verbose-yes getargs
+2crank ing 2 crank size compose 2 push > compose
+2crank ing 2 crank 2 quote split compose swap compose drop compose 1 push split compose drop compose
+2crank ing 1 crank push
+2crank ing 2 crank drop nop not-verbose quote
+2crank ing 1 crank compose push
+2crank ing 2 crank if compose verbose push = compose
+2crank ing 1 crank def
+2crank ing 1 crank
+2crank ing 1 crank verbose-yes
+2crank ing 2 crank 18 quote factorial compose print compose newline compose
+2crank ing 1 crank 1 crank stack if
+2crank ing 1 crank
+2crank ing 2 crank quote.cog load
+2crank ing 1 crank
+
+# reimplementation of factorial program:
+[ factorial ]
+[ dup [ 0 ] > ]
+[ dup [ 9 ] + factorial * ] VMACRO cast push
+[ drop [ 1 ] ] VMACRO cast push
+[ if ] compose
+VMACRO cast def
+
+verbose-yes [ [ 12!= ] 12 factorial concat print newline ] [ ] if
+
+# even shorter reimplementation:
+[ factorial ] ( dup 0 > ( dup 9 + factorial * ) ( drop 1 ) if ) def
+
+verbose-yes
+[
+    [ The factorial of 13 is: ] 13 factorial compose
+    spc 1 put spc 3 put spc 5 put spc 17 put spc 19 put endl compose
+    ? print
+]
+[  ] if

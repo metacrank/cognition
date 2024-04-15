@@ -1,8 +1,8 @@
-2crank ing 1 crank # [ === crankbase [ 1 ] metacrankbase dup [ 1 ] =
+2crank ing 1 crank # [ === crankbase [ 1 ] metacrankbase dup 1 =
 2crank ing 1 crank # [ ( meta-crank-stuff0 ) ]
 2crank ing 1 crank # [ ( meta-crank-stuff1 ) ]
 2crank ing 1 crank # if dup stack swap
-2crank ing 1 crank # [ 0 ] crank [ 1 ] [ 1 ] metacrank
+2crank ing 1 crank # 0 crank 1 1 metacrank
 2crank ing 1 crank
 2crank ing 1 crank # meta-crank-stuff0 === dup ']' = ( drop swap drop swap [ 1 ] swap metacrank swap crank
                     # quote compose ( dup ) dip swap )
@@ -110,7 +110,7 @@
 2crank ing 1 crank # general testing
 2crank ing 1 crank ( [ ( , ) ] ( . ) ( (hello) [ (world) ] ) )
 2crank ing 1 crank verbose-yes [ [ general testing: ] spc 1 put endl compose endl prepose
-                                 print . newline ] [ drop ] if
+                                   print . newline ] [ drop ] if
 2crank ing 1 crank
 2crank ing 1 crank
 2crank ing 1 crank # TODO: make child quotes { }
