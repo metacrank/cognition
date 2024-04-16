@@ -56,6 +56,9 @@ void cog_len(value_t *v);
 /* inserts a string into another string */
 void cog_insert(value_t *v);
 
+/* checks if a value is a string */
+void cog_isstring(value_t *v);
+
 /*! @brief checks if string is a number. */
 void cog_isnum(value_t *v);
 

@@ -89,3 +89,18 @@ f push [ d ] addon swap push [ s ] addon f push [ i ] addon
 [ halt ] addon [ 1 ] push [ 1 ] push [ metacrank ] addon
 def
 \ " dup delim singlet
+
+
+# expand === size 0 > ( ) ( return )
+# 0 split
+# ( 1 split ( isstring ( dup isdef ( unglue ) ( ) if ) ( ) if compose ) dip ex )  def
+# ex uncd eval
+# note: works, but hashtable copying is slow
+\ expand
+[ child ] unglue [ curry ] addon [ cd ] addon
+[ 0 ] push [ split ] addon [ ex ] push
+[ size ] unglue [ 0 ] push [ > ] addon
+( [ 1 ] ) [ split ] addon [ unglue ] unglue [ compose ] addon push [ dip ] addon [ ex ] compose push
+[ drop ] unglue push [ if ] addon push
+[ def ] addon [ ex ] compose [ uncd ] addon [ eval ] addon
+def

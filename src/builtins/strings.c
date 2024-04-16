@@ -156,10 +156,32 @@ void cog_nth(value_t *v) {
   str->length = 1;
 }
 
+void cog_isstring(value_t *v) {
+  contain_t *cur = stack_peek(STACK);
+  value_t *strval = stack_peek(cur->stack);
+  if (!strval) {
+    eval_error(U"TOO FEW ARGUMENTS", v);
+    return;
+  }
+  stack_t *strstack = *value_stack(strval);
+  if (strstack->size != 1) {
+    eval_error(U"BAD ARGUMENT TYPE", v);
+    return;
+  }
+  value_t *val = strstack->items[0];
+  value_t *ret = init_value(VWORD);
+  if (val->type == VWORD) {
+    ret->str_word = init_string(U"t");
+  } else {
+    ret->str_word = init_string(U"");
+  }
+  push_quoted(cur, ret);
+}
 
 void add_funcs_strings(ht_t *flit) {
   add_func(flit, cog_concat, U"concat");
   add_func(flit, cog_len, U"len");
   add_func(flit, cog_cut, U"cut");
   add_func(flit, cog_nth, U"nth");
+  add_func(flit, cog_isstring, U"isstring");
 }
