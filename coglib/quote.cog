@@ -138,11 +138,11 @@
 2crank ing 1 crank
 2crank ing 1 crank # singular quote '\' quotes the next token
 2crank ing 1 crank # useful for putting '[', '(', or '{' on the stack
+2crank ing 1 crank # \ === ( halt [ 1 ] crank ) halt [ 1 ] [ 1 ] metacrank
 2crank ing 0 crank \
 2crank ing 1 crank
 2crank ing 2 crank halt unglue 1 push crank addon
-2crank ing 1 crank ( [ 0 ] ) curry
-2crank ing 2 crank crank addon
+2crank ing 1 crank [ halt ] unglue curry
 2crank ing 1 crank ( [ 1 ] [ 1 ] ) compose
 2crank ing 2 crank metacrank addon
 2crank ing 1 crank

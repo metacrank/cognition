@@ -76,3 +76,16 @@ verbose-yes
     ? print
 ]
 [  ] if
+
+
+# basic string (without escape characters)
+# " === getd gets [ '"' ] d [ '"' ] s ( s d halt [ 1 ] crank ) halt [ 2 ] [ 1 ] metacrank
+
+\ " dup dup
+[ getd ] unglue [ gets ] unglue compose
+
+# swap push [ d ] unglue compose swap push [ s ] unglue compose
+
+
+
+# \ " dup getd concat d gets concat s

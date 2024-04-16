@@ -52,12 +52,12 @@ void init_digits() {
   if (!B_ODD) {
     digits[RADIUS] = d_negative_zero;
   }
-  for (int i = RADIUS + (1 - B_ODD); i < RADIUS + (1 - B_ODD) + 4; i++) {
+  for (int i = RADIUS + (1 - B_ODD); i < N_O_D && i < 11; i++) {
     digits[i] = *ptr;
     ptr--;
   }
-  if (RADIUS + (1 - B_ODD) + 4 < N_O_D) {
-    digits[RADIUS + (1 - B_ODD) + 4] = d_negative_five;
+  if (N_O_D > 11) {
+    digits[11] = d_negative_five;
   }
   if (DEBUG) {
     printf("init digits: ");
