@@ -203,16 +203,16 @@ void cog_metacrankbase(value_t *v) {
     return;
   }
   size_t idx = string_to_int(idxval->str_word);
+  if (idx < 0) {
+    eval_error(U"INDEX OUT OF RANGE", v);
+    return;
+  }
   size_t cranksize = 1;
   if (cur->cranks)
     if (cur->cranks->size)
       cranksize = cur->cranks->size;
-  if (idx >= cranksize) {
-    eval_error(U"INDEX OUT OF RANGE", v);
-    return;
-  }
   int base = 0;
-  if (cur->cranks) {
+  if (idx < cranksize && cur->cranks) {
     if (cur->cranks->size) {
       int(*cr)[2] = cur->cranks->items[idx];
       base = cr[0][1];
@@ -239,16 +239,16 @@ void cog_metamodcrank(value_t *v) {
     return;
   }
   size_t idx = string_to_int(idxval->str_word);
+  if (idx < 0) {
+    eval_error(U"INDEX OUT OF RANGE", v);
+    return;
+  }
   size_t cranksize = 1;
   if (cur->cranks)
     if (cur->cranks->size)
       cranksize = cur->cranks->size;
-  if (idx >= cranksize) {
-    eval_error(U"INDEX OUT OF RANGE", v);
-    return;
-  }
   int mod = 0;
-  if (cur->cranks) {
+  if (idx < cranksize && cur->cranks) {
     if (cur->cranks->size) {
       int(*cr)[2] = cur->cranks->items[idx];
       mod = cr[0][0];

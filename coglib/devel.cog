@@ -79,13 +79,13 @@ verbose-yes
 
 
 # basic string (without escape characters)
-# " === getd gets [ '"' ] d [ '"' ] s ( s d halt [ 1 ] crank ) halt [ 2 ] [ 1 ] metacrank
+# " === getd gets geti [ '' ] d [ '"' ] s [ '' ] i ( len 1 - cut drop swap i swap s swap d halt [ 1 ] crank ) halt [ 1 ] [ 1 ] metacrank
 
-\ " dup dup
-[ getd ] unglue [ gets ] unglue compose
-
-# swap push [ d ] unglue compose swap push [ s ] unglue compose
-
-
-
-# \ " dup getd concat d gets concat s
+\ " dup
+[ getd ] unglue [ gets ] addon [ geti ] addon
+f push [ d ] addon swap push [ s ] addon f push [ i ] addon
+[ len ] unglue [ 1 ] push [ - ] addon [ cut ] addon [ drop ] addon [ swap ] addon [ i ] addon
+[ swap ] addon [ s ] addon [ swap ] addon [ d ] addon [ halt ] addon [ 1 ] push [ crank ] addon push
+[ halt ] addon [ 1 ] push [ 1 ] push [ metacrank ] addon
+def
+\ " dup delim singlet
