@@ -81,4 +81,7 @@ verbose-yes [
   # strings and comments work inside quotes!
   "The factorial of 13 is: " print
   13 factorial print newline
+  "Auto-expanding quotes can be manipulated with strings:" print newline
+  ( this is a macro "macro" ) .
+  {{ expanded child "child" [[ "quote" ]] }} .
 ] [ ] if
