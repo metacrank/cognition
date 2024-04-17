@@ -961,8 +961,10 @@ void evalstack(contain_t *c, value_t *callword) {
         }
       }
       stack_pop(FAMILY);
-      if (!evald)
+      if (!evald) {
         push_quoted(cur, value_copy(newval));
+        crank();
+      }
       if (return_function(c, false))
         return;
     }

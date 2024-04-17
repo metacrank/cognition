@@ -1,3 +1,12 @@
+2crank ing 1 crank # preliminary escape character \
+2crank ing 1 crank \
+2crank ing 0 crank halt 1 quote ing crank
+2crank ing 1 crank compose compose VMACRO cast quote
+2crank ing 0 crank halt 1 quote ing 1 quote ing metacrank
+2crank ing 1 crank compose compose compose compose VMACRO cast
+2crank ing 1 crank def
+2crank ing 1 crank
+2crank ing 1 crank
 2crank ing 1 crank # [ === crankbase [ 1 ] metacrankbase dup [ 1 ] =
 2crank ing 1 crank # [ ( meta-crank-stuff0 ) ]
 2crank ing 1 crank # [ ( meta-crank-stuff1 ) ]
@@ -5,146 +14,262 @@
 2crank ing 1 crank # [ 0 ] crank [ 1 ] [ 1 ] metacrank
 2crank ing 1 crank
 2crank ing 1 crank # meta-crank-stuff0 === dup ']' = ( drop swap drop swap [ 1 ] swap metacrank swap crank
-                    # quote compose ( dup ) dip swap )
-2crank ing 1 crank # ( dup '[' = ( drop '[' ) ( dup '(' = ( drop '(' ) ( compose ( dup ) dip swap ) if ) if ) if
+2crank ing 1 crank # quote compose [ dup ] dip swap ) ( compose ( dup ) dip swap ) if
 2crank ing 1 crank
 2crank ing 1 crank # meta-crank-stuff1 === dup ']' = ( drop swap drop swap [ 1 ] swap metacrank swap crank )
-2crank ing 1 crank # ( dup '[' = ( drop '[' ) ( dup '(' = ( drop '(' ) ( compose ( dup ) dip swap ) if ) if ) if
+2crank ing 1 crank # ( compose [ dup ] dip swap ) if
 2crank ing 1 crank
 2crank ing 1 crank # declaration
-2crank ing 3 crank [
+2crank ing 0 crank [
 2crank ing 1 crank
 2crank ing 1 crank # init
-2crank ing 2 crank crankbase unglue 1 push metacrankbase addon dup addon 1 push = addon
+2crank ing 0 crank crankbase 1 quote ing metacrankbase dup 1 quote ing =
+2crank ing 1 crank compose compose compose compose compose
 2crank ing 1 crank
 2crank ing 1 crank # meta-crank-stuff0
-2crank ing 2 crank dup unglue ] push = addon
-2crank ing 1 crank
-2crank ing 2 crank drop unglue swap addon drop addon swap addon 1 push swap addon
-                   metacrank addon swap addon crank addon quote addon compose addon
-2crank ing 3 crank dup
-2crank ing 1 crank unglue quote compose
-2crank ing 2 crank dip addon swap addon
-2crank ing 1 crank quote compose
-2crank ing 2 crank dup unglue [ push = addon
-2crank ing 2 crank drop unglue [ compose
-2crank ing 1 crank push
-2crank ing 2 crank dup unglue ( push = addon
-2crank ing 2 crank drop unglue ( compose
-2crank ing 1 crank push
-2crank ing 2 crank compose unglue
-2crank ing 3 crank dup
-2crank ing 1 crank unglue quote compose
-2crank ing 2 crank dip addon swap addon
-2crank ing 1 crank push
-2crank ing 2 crank if addon
-2crank ing 1 crank push
-2crank ing 2 crank if addon
-2crank ing 1 crank quote compose
-2crank ing 2 crank if addon
-2crank ing 1 crank quote
-2crank ing 1 crank quote compose
+2crank ing 3 crank dup ] quote =
+2crank ing 1 crank compose compose
+2crank ing 16 crank drop swap drop swap 1 quote swap metacrank swap crank quote
+2crank ing 3 crank compose dup quote dip swap
+2crank ing 1 crank compose compose compose compose compose compose compose compose
+2crank ing 1 crank compose compose compose compose compose \ VMACRO cast quote compose
+2crank ing 3 crank compose dup quote dip swap
+2crank ing 1 crank compose compose compose \ VMACRO cast quote compose \ if compose
+2crank ing 1 crank \ VMACRO cast quote quote compose
 2crank ing 1 crank
 2crank ing 1 crank # meta-crank-stuff1
-2crank ing 2 crank dup unglue ] push = addon
-2crank ing 2 crank drop unglue swap addon drop addon swap addon 1 push swap addon
-                   metacrank addon swap addon crank addon
-2crank ing 1 crank quote compose
-2crank ing 1 crank
-2crank ing 2 crank dup unglue [ push = addon
-2crank ing 2 crank drop unglue [ compose
-2crank ing 1 crank push
-2crank ing 2 crank dup unglue ( push = addon
-2crank ing 2 crank drop unglue ( compose
-2crank ing 1 crank push
-2crank ing 2 crank compose unglue
-2crank ing 3 crank dup
-2crank ing 1 crank unglue quote compose
-2crank ing 2 crank dip addon swap addon
-2crank ing 1 crank push
-2crank ing 2 crank if addon
-2crank ing 1 crank push
-2crank ing 2 crank if addon
-2crank ing 1 crank quote compose
-2crank ing 1 crank
-2crank ing 2 crank if addon
-2crank ing 1 crank quote
-2crank ing 1 crank quote compose
+2crank ing 3 crank dup ] quote =
+2crank ing 1 crank compose compose
+2crank ing 16 crank drop swap drop swap 1 quote swap metacrank swap crank
+2crank ing 1 crank compose compose compose compose compose compose compose compose \ VMACRO cast quote compose
+2crank ing 3 crank compose dup quote dip swap
+2crank ing 1 crank compose compose compose \ VMACRO cast quote compose \ if compose
+2crank ing 1 crank \ VMACRO cast quote quote compose
 2crank ing 1 crank
 2crank ing 1 crank # rest of the definition
-2crank ing 2 crank if addon dup addon stack addon swap addon
-2crank ing 2 crank 0 push crank addon 1 push 1 push metacrank addon
+2crank ing 16 crank if dup stack swap 0 quote crank
+2crank ing 2 crank 1 quote 1 quote metacrank
+2crank ing 1 crank compose compose compose compose compose compose compose compose
+2crank ing 1 crank compose \ VMACRO cast
 2crank ing 1 crank
 2crank ing 1 crank def
 2crank ing 1 crank
-2crank ing 1 crank # testing [
-2crank ing 1 crank [ hello world [ hello! ] (successfully_nested) ]
-2crank ing 1 crank verbose-yes [ . ] [ drop ] if
-2crank ing 16 crank [ eval eval eval eval eval hello worlds (eval) ] six crank in still
-2crank ing 1 crank verbose-yes [ print space print space print space print newline . ] [ drop drop drop drop drop ] if
-2crank ing 16 crank [ ing hello worlds (ing) ] way: this works also
-2crank ing 1 crank verbose-yes [ print space print space print space print newline . ] [ drop drop drop drop drop ] if
-2crank ing 1 crank
-2crank ing 1 crank
-2crank ing 1 crank # macro quote declaration
-2crank ing 0 crank (
-2crank ing 1 crank
-2crank ing 1 crank # copy '['
-2crank ing 2 crank [ unglue
-2crank ing 1 crank [ 11 ] split swap [ 10 ] split drop
-2crank ing 2 crank macro addon
-2crank ing 1 crank [ 18 ] split
-2crank ing 1 crank [ prepose ] curry dip
-2crank ing 1 crank [ 17 ] split eval eval
-2crank ing 1 crank [ 1 ] del [ [ ) ] ] [ 1 ] put
-2crank ing 1 crank quote quote
-2crank ing 1 crank [ prepose ] curry dip
-2crank ing 1 crank [ 16 ] split eval eval
-2crank ing 1 crank [ 1 ] del [ [ ) ] ] [ 1 ] put
-2crank ing 1 crank quote quote
-2crank ing 1 crank [ prepose ] curry dip
-2crank ing 1 crank prepose
-2crank ing 1 crank
-2crank ing 1 crank def
-2crank ing 1 crank
-2crank ing 1 crank # general testing
-2crank ing 1 crank ( [ ( , ) ] ( . ) ( (hello) [ (world) ] ) )
-2crank ing 1 crank verbose-yes [ [ general testing: ] spc 1 put endl compose endl prepose
-                                 print . newline ] [ drop ] if
-2crank ing 1 crank
-2crank ing 1 crank
-2crank ing 1 crank # child quotes { } inherit attributes from parent stack # copy '['
-2crank ing 0 crank {
-2crank ing 1 crank
-2crank ing 1 crank # copy '['
-2crank ing 2 crank [ unglue
-2crank ing 1 crank [ 11 ] split swap [ 10 ] split drop
-2crank ing 2 crank child addon
-2crank ing 1 crank [ 18 ] split
-2crank ing 1 crank [ prepose ] curry dip
-2crank ing 1 crank [ 17 ] split eval eval
-2crank ing 1 crank [ 1 ] del [ [ } ] ] [ 1 ] put
-2crank ing 1 crank quote quote
-2crank ing 1 crank [ prepose ] curry dip
-2crank ing 1 crank [ 16 ] split eval eval
-2crank ing 1 crank [ 1 ] del [ [ } ] ] [ 1 ] put
-2crank ing 1 crank quote quote
-2crank ing 1 crank [ prepose ] curry dip
-2crank ing 1 crank prepose
-2crank ing 1 crank
-2crank ing 1 crank def
-2crank ing 1 crank
-2crank ing 1 crank
-2crank ing 1 crank
-2crank ing 1 crank # singular quote '\' quotes the next token
-2crank ing 1 crank # useful for putting '[', '(', or '{' on the stack
-2crank ing 1 crank # \ === ( halt [ 1 ] crank ) halt [ 1 ] [ 1 ] metacrank
-2crank ing 0 crank \
-2crank ing 1 crank
-2crank ing 2 crank halt unglue 1 push crank addon
-2crank ing 1 crank [ halt ] unglue curry
-2crank ing 1 crank ( [ 1 ] [ 1 ] ) compose
-2crank ing 2 crank metacrank addon
-2crank ing 1 crank
-2crank ing 1 crank def
-2crank ing 1 crank
+
+# [ === crankbase [ 1 ] metacrankbase dup [ 1 ] =
+# [ ( meta-crank-stuff0 ) ]
+# [ ( meta-crank-stuff1 ) ]
+# if dup stack swap
+# [ 0 ] crank [ 1 ] [ 1 ] metacrank
+
+# meta-crank-stuff0 === dup ']' = ( drop swap drop swap [ 1 ] swap metacrank swap crank
+# quote compose [ dup ] dip swap )
+# ( dup dup dup '[' = swap '(' = or swap '\' = or [ eval ] ( compose [ dup ] dip swap ) if ) if
+
+# meta-crank-stuff1 === dup ']' = ( drop swap drop swap [ 1 ] swap metacrank swap crank )
+# ( dup dup dup '[' = swap '(' = swap '\' = or or [ eval ] ( compose [ dup ] dip swap ) if ) if
+
+\ [
+
+[ crankbase ] [ 1 ] quote compose [ metacrankbase dup ] compose [ 1 ] quote compose [ = ] compose
+
+[ dup ] \ ] quote compose [ = ] compose
+[ drop swap drop swap ] [ 1 ] quote compose [ swap metacrank swap crank quote compose ] compose
+[ dup ] quote compose [ dip swap ] compose \ VMACRO cast quote compose
+[ dup dup dup ] \ [ quote compose [ = swap ] compose \ ( quote compose [ = or swap ] compose \ \ quote compose [ = or ] compose
+[ eval ] quote compose
+[ compose ] [ dup ] quote compose [ dip swap ] compose \ VMACRO cast quote compose [ if ] compose \ VMACRO cast
+quote compose [ if ] compose \ VMACRO cast quote quote
+
+[ dup ] \ ] quote compose [ = ] compose
+[ drop swap drop swap ] [ 1 ] quote compose [ swap metacrank swap crank ] compose \ VMACRO cast quote compose
+[ dup dup dup ] \ [ quote compose [ = swap ] compose \ ( quote compose [ = or swap ] compose \ \ quote compose [ = or ] compose
+[ eval ] quote compose
+[ compose ] [ dup ] quote compose [ dip swap ] compose \ VMACRO cast quote compose [ if ] compose \ VMACRO cast
+quote compose [ if ] compose \ VMACRO cast quote quote
+
+compose compose [ if dup stack swap ] compose [ 0 ] quote compose [ crank ] compose
+[ 1 ] quote dup compose compose [ metacrank ] compose \ VMACRO cast
+
+def
+
+# \ === [ 1 ] metacrankbase [ 1 ] =
+# [ ( halt [ 1 ] [ 1 ] metacrank quote compose [ dup ] dip swap ) ]
+# [ ( halt [ 1 ] crank ) ]
+# if halt [ 1 ] [ 1 ] metacrank
+\ \
+[ [ 1 ] metacrankbase [ 1 ] = ]
+[ halt [ 1 ] [ 1 ] metacrank quote compose [ dup ] dip swap ] \ VMACRO cast quote quote compose
+[ halt [ 1 ] crank ] VMACRO cast quote quote compose
+[ if halt [ 1 ] [ 1 ] metacrank ] compose \ VMACRO cast
+def
+
+# macro quote declaration
+\ (
+\ [ unglue
+[ 11 ] split swap [ 10 ] split drop [ macro ] compose
+[ 18 ] split quote [ prepose ] compose dip
+[ 17 ] split eval eval
+[ 1 ] del [ \ ) ] [ 1 ] put
+quote quote quote [ prepose ] compose dip
+[ 16 ] split eval eval
+[ 1 ] del [ \ ) ] [ 1 ] put
+quote quote quote [ prepose ] compose dip
+prepose
+def
+
+# redefine macro quote to automatically expand
+\ (
+( crankbase [ 1 ] metacrankbase dup [ 1 ] =
+  [ ( dup \ ) =
+      ( drop swap drop swap [ 1 ] swap metacrank swap crank quote compose ( dup ) dip swap )
+      ( dup dup dup \ [ = swap \ ( = or swap \ \ = or
+        ( eval )
+        ( dup isdef ( unglue ) [ ] if compose ( dup ) dip swap )
+        if )
+      if ) ]
+  [ ( dup \ ) =
+      ( drop swap drop swap [ 1 ] swap metacrank swap crank )
+      ( dup dup dup \ [ = swap \ ( = or swap \ \ = or
+        ( eval )
+        ( dup isdef ( unglue ) [ ] if compose ( dup ) dip swap )
+        if )
+      if ) ]
+  if dup macro swap
+  [ 0 ] crank [ 1 ] [ 1 ] metacrank ) def
+
+# (re)define all quotes
+\ [
+( crankbase [ 1 ] metacrankbase dup [ 1 ] =
+  [ ( dup \ ] =
+      ( drop swap drop swap [ 1 ] swap metacrank swap crank quote compose ( dup ) dip swap )
+      ( dup dup dup dup dup dup dup
+        \ [ = swap \ ( = or swap \ \ = or swap \ [[ = or swap \ (( = or swap \ { = or swap \ {{ = or
+        ( eval ) ( compose ( dup ) dip swap ) if )
+      if ) ]
+  [ ( dup \ ] =
+      ( drop swap drop swap [ 1 ] swap metacrank swap crank )
+      ( dup dup dup dup dup dup dup
+        \ [ = swap \ ( = or swap \ \ = or swap \ [[ = or swap \ (( = or swap \ { = or swap \ {{ = or
+        ( eval ) ( compose ( dup ) dip swap ) if )
+      if ) ]
+  if dup stack swap
+  [ 0 ] crank [ 1 ] [ 1 ] metacrank ) def
+
+\ (
+( crankbase [ 1 ] metacrankbase dup [ 1 ] =
+  [ ( dup \ ) =
+      ( drop swap drop swap [ 1 ] swap metacrank swap crank quote compose ( dup ) dip swap )
+      ( dup dup dup dup dup dup dup
+        \ [ = swap \ ( = or swap \ \ = or swap \ [[ = or swap \ (( = or swap \ { = or swap \ {{ = or
+        ( eval )
+        ( dup isdef ( unglue ) [ ] if compose ( dup ) dip swap )
+        if )
+      if ) ]
+  [ ( dup \ ) =
+      ( drop swap drop swap [ 1 ] swap metacrank swap crank )
+      ( dup dup dup dup dup dup dup
+        \ [ = swap \ ( = or swap \ \ = or swap \ [[ = or swap \ (( = or swap \ { = or swap \ {{ = or
+        ( eval )
+        ( dup isdef ( unglue ) [ ] if compose ( dup ) dip swap )
+        if )
+      if ) ]
+  if dup macro swap
+  [ 0 ] crank [ 1 ] [ 1 ] metacrank ) def
+
+\ [[
+( crankbase [ 1 ] metacrankbase dup [ 1 ] =
+  [ ( dup \ ]] =
+      ( drop swap drop swap [ 1 ] swap metacrank swap crank quote compose ( dup ) dip swap )
+      ( dup dup dup dup dup dup dup
+        \ [ = swap \ ( = or swap \ \ = or swap \ [[ = or swap \ (( = or swap \ { = or swap \ {{ = or
+        ( eval )
+        ( dup isdef ( unglue ) [ ] if compose ( dup ) dip swap )
+        if )
+      if ) ]
+  [ ( dup \ ]] =
+      ( drop swap drop swap [ 1 ] swap metacrank swap crank )
+      ( dup dup dup dup dup dup dup
+        \ [ = swap \ ( = or swap \ \ = or swap \ [[ = or swap \ (( = or swap \ { = or swap \ {{ = or
+        ( eval )
+        ( dup isdef ( unglue ) [ ] if compose ( dup ) dip swap )
+        if )
+      if ) ]
+  if dup stack swap
+  [ 0 ] crank [ 1 ] [ 1 ] metacrank ) def
+
+\ ((
+( crankbase [ 1 ] metacrankbase dup [ 1 ] =
+  [ ( dup \ )) =
+      ( drop swap drop swap [ 1 ] swap metacrank swap crank quote compose ( dup ) dip swap )
+      ( dup dup dup dup dup dup dup
+        \ [ = swap \ ( = or swap \ \ = or swap \ [[ = or swap \ (( = or swap \ { = or swap \ {{ = or
+        ( eval ) ( compose ( dup ) dip swap ) if )
+      if ) ]
+  [ ( dup \ )) =
+      ( drop swap drop swap [ 1 ] swap metacrank swap crank )
+      ( dup dup dup dup dup dup dup
+        \ [ = swap \ ( = or swap \ \ = or swap \ [[ = or swap \ (( = or swap \ { = or swap \ {{ = or
+        ( eval ) ( compose ( dup ) dip swap ) if )
+      if ) ]
+  if dup macro swap
+  [ 0 ] crank [ 1 ] [ 1 ] metacrank ) def
+
+\ {
+( crankbase [ 1 ] metacrankbase dup [ 1 ] =
+  [ ( dup \ } =
+      ( drop swap drop swap [ 1 ] swap metacrank swap crank quote compose ( dup ) dip swap )
+      ( dup dup dup dup dup dup dup
+        \ [ = swap \ ( = or swap \ \ = or swap \ [[ = or swap \ (( = or swap \ { = or swap \ {{ = or
+        ( eval ) ( compose ( dup ) dip swap ) if )
+      if ) ]
+  [ ( dup \ } =
+      ( drop swap drop swap [ 1 ] swap metacrank swap crank )
+      ( dup dup dup dup dup dup dup
+        \ [ = swap \ ( = or swap \ \ = or swap \ [[ = or swap \ (( = or swap \ { = or swap \ {{ = or
+        ( eval ) ( compose ( dup ) dip swap ) if )
+      if ) ]
+  if dup child swap
+  [ 0 ] crank [ 1 ] [ 1 ] metacrank ) def
+
+\ {{
+( crankbase [ 1 ] metacrankbase dup [ 1 ] =
+  [ ( dup \ }} =
+      ( drop swap drop swap [ 1 ] swap metacrank swap crank quote compose ( dup ) dip swap )
+      ( dup dup dup dup dup dup dup
+        \ [ = swap \ ( = or swap \ \ = or swap \ [[ = or swap \ (( = or swap \ { = or swap \ {{ = or
+        ( eval )
+        ( dup isdef ( unglue ) [ ] if compose ( dup ) dip swap )
+        if )
+      if ) ]
+  [ ( dup \ }} =
+      ( drop swap drop swap [ 1 ] swap metacrank swap crank )
+      ( dup dup dup dup dup dup dup
+        \ [ = swap \ ( = or swap \ \ = or swap \ [[ = or swap \ (( = or swap \ { = or swap \ {{ = or
+        ( eval )
+        ( dup isdef ( unglue ) [ ] if compose ( dup ) dip swap )
+        if )
+      if ) ]
+  if dup child swap
+  [ 0 ] crank [ 1 ] [ 1 ] metacrank ) def
+
+# better escape character
+\ \
+( [ 1 ] metacrankbase [ 1 ] =
+  [ ( halt [ 1 ] [ 1 ] metacrank quote compose ( dup ) dip swap ) ]
+  [ ( halt [ 1 ] crank ) ]
+  if halt [ 1 ] [ 1 ] metacrank ) def
+
+# define basic expand ( doesn't check for definitions within quotes themselves )
+[ expand ]
+( size [ 0 ] = ( return ) ( ) if [ 0 ] split
+  ( [ 1 ] split
+    ( isstring ( dup isdef ( unglue ) [ ] if ) [ ] if compose ) dip
+    size [ 0 ] > ( ( ( dup ) dip swap ) dip swap eval ) [ ] if )
+  dup ( swap ( swap ) dip ) dip eval drop swap drop ) def
+
+# test quote functionality
+verbose-yes [
+  [ [[ help nop ]] nop (( nop ( nop ) )) {{ nop { child } }} ] .
+  { child [[ nop ]] {{ nop }} (( nop )) { nop } } .
+  {{ hello nop [ world ] }} .
+] [ ] if

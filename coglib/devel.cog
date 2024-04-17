@@ -1,106 +1,77 @@
-2crank ing 0 crank newline endl print space spc print
-2crank ing 1 crank unglue swap unglue prepose def
-2crank ing 1 crank unglue swap unglue prepose def
+2crank ing 0 crank ff 1
+2crank ing 1 crank cut unaliasf
+2crank ing 0 crank 0
+2crank ing 1 crank cut swap quote def
 2crank ing 1 crank
-2crank ing 1 crank ff 1 cut unaliasf 0 cut swap quote def
-2crank ing 1 crank
-2crank ing 0 crank addon
-2crank ing 2 crank unglue unglue compose unglue
-2crank ing 1 crank compose def
-2crank ing 0 crank push
-2crank ing 2 crank quote unglue compose addon
+2crank ing 1 crank #
+2crank ing 0 crank geti getd gets crankbase f d f i endl s
+2crank ing 1 crank compose compose compose compose compose compose compose compose compose
+2crank ing 0 crank drop halt crank s d i
+2crank ing 1 crank compose compose compose compose compose VMACRO cast quote compose
+2crank ing 0 crank halt 1 quote ing 1 quote ing metacrank
+2crank ing 1 crank compose compose compose compose VMACRO cast
 2crank ing 1 crank def
-2crank ing 0 crank curry
-2crank ing 2 crank swap unglue quote addon prepose addon
-2crank ing 1 crank def
-2crank ing 1 crank
-2crank ing 0 crank # # #
-2crank ing 1 crank gets concat s
-2crank ing 1 crank getd concat d
-2crank ing 2 crank geti unglue getd addon gets addon crankbase addon
-2crank ing 2 crank f eval d f i endl s unglue
-2crank ing 1 crank curry swap unglue prepose curry swap unglue prepose curry compose
-2crank ing 2 crank drop unglue crank addon 1 push 0 push metacrank addon s addon d addon i addon
-2crank ing 1 crank push
-2crank ing 2 crank halt addon 1 push 1 push metacrank addon
-2crank ing 1 crank def
-2crank ing 1 crank
-2crank ing 1 crank # this is a comment
-2crank ing 1 crank #demonstration of singlets in action!
-2crank ing 1 crank
+2crank ing 2 crank # singlet # delim
+2crank ing 1 crank #comment: geti getd gets crankbase '' d '' i '\n' s ( drop halt crank s d i ) halt 1 1 metacrank
+
+# example of more (unnecessary) baremetal code
 2crank ing 1 crank # recursive baremetal factorial program:
 2crank ing 1 crank #( dup [ 0 ] > ( dup [ 9 ] + factorial * ) ( drop [ 1 ] ) if )
 2crank ing 0 crank factorial dup
-2crank ing 2 crank 0 push > compose
-2crank ing 2 crank dup nop 9 push + compose factorial compose * compose
-2crank ing 1 crank VMACRO cast push
-2crank ing 2 crank drop nop 1 push
-2crank ing 1 crank VMACRO cast push
+2crank ing 2 crank 0 quote compose eval > compose
+2crank ing 2 crank dup nop 9 quote compose eval + compose factorial compose * compose
+2crank ing 1 crank VMACRO cast quote compose
+2crank ing 2 crank drop nop 1 quote
+2crank ing 1 crank compose VMACRO cast quote compose
 2crank ing 2 crank if compose
 2crank ing 1 crank VMACRO cast def
 2crank ing 1 crank
 2crank ing 1 crank # a word that checks whether 'verbose' was the first arg
 2crank ing 0 crank verbose-yes getargs
-2crank ing 2 crank size compose 2 push > compose
-2crank ing 2 crank 2 quote split compose swap compose drop compose 1 push split compose drop compose
-2crank ing 1 crank push
+2crank ing 2 crank size compose 2 quote compose eval > compose
+2crank ing 2 crank 2 quote split compose swap compose drop compose 1 quote compose eval split compose drop compose
+2crank ing 1 crank quote compose
 2crank ing 2 crank drop nop not-verbose quote
-2crank ing 1 crank compose push
-2crank ing 2 crank if compose verbose push = compose
+2crank ing 1 crank compose quote compose
+2crank ing 2 crank if compose verbose quote compose eval = compose
 2crank ing 1 crank def
 2crank ing 1 crank
-2crank ing 1 crank verbose-yes
-2crank ing 2 crank 18 quote factorial compose print compose newline compose
+2crank ing 1 crank # prints 18 factorial if "verbose" was passed
+2crank ing 1 crank verbose-yes "18!=" quote
+2crank ing 2 crank 18 quote compose eval factorial compose compose compose print compose endl compose print compose
 2crank ing 1 crank 1 crank stack if
-2crank ing 1 crank
-2crank ing 2 crank quote.cog load
-2crank ing 1 crank
 
-# reimplementation of factorial program:
-[ factorial ]
-[ dup [ 0 ] > ]
-[ dup [ 9 ] + factorial * ] VMACRO cast push
-[ drop [ 1 ] ] VMACRO cast push
-[ if ] compose
-VMACRO cast def
-
-verbose-yes [ [ 12!= ] 12 factorial concat print newline ] [ ] if
-
-# even shorter reimplementation:
-[ factorial ] ( dup 0 > ( dup 9 + factorial * ) ( drop 1 ) if ) def
-
-verbose-yes
-[
-    [ The factorial of 13 is: ] 13 factorial compose
-    spc 1 put spc 3 put spc 5 put spc 17 put spc 19 put endl compose
-    ? print
-]
-[  ] if
-
+quote.cog load
 
 # basic string (without escape characters)
-# " === getd gets geti [ '' ] d [ '"' ] s [ '' ] i ( len 1 - cut drop swap i swap s swap d halt [ 1 ] crank ) halt [ 1 ] [ 1 ] metacrank
+[ " ]
+( getd gets geti f d \ " s f i
+  ( len [ 1 ] - cut drop swap i swap s swap d halt [ 1 ] crank )
+  halt [ 1 ] [ 1 ] metacrank ) def
+[ " ] singlet
 
-\ " dup
-[ getd ] unglue [ gets ] addon [ geti ] addon
-f push [ d ] addon swap push [ s ] addon f push [ i ] addon
-[ len ] unglue [ 1 ] push [ - ] addon [ cut ] addon [ drop ] addon [ swap ] addon [ i ] addon
-[ swap ] addon [ s ] addon [ swap ] addon [ d ] addon [ halt ] addon [ 1 ] push [ crank ] addon push
-[ halt ] addon [ 1 ] push [ 1 ] push [ metacrank ] addon
+# for the sake of syntax highlighting: "
+
+# reimplement comment:
+[ # ]
+( geti getd gets crankbase f d f i endl s
+  ( drop halt crank s d i )
+  halt [ 1 ] [ 1 ] metacrank )
 def
-\ " dup delim singlet
 
+# reimplementation using quotes
+[ factorial ] ( dup 0 > ( dup 9 + factorial * ) ( drop 1 ) if ) def
+[ verbose-yes ] [ getargs size [ 2 ] >
+                  [ [ 2 ] split swap drop [ 1 ] split drop ]
+                  [ drop [ not-verbose ] ]
+                  if
+                  [ verbose ] = ] def
 
-# expand === size 0 > ( ) ( return )
-# 0 split
-# ( 1 split ( isstring ( dup isdef ( unglue ) ( ) if ) ( ) if compose ) dip ex )  def
-# ex uncd eval
-# note: works, but hashtable copying is slow
-\ expand
-[ child ] unglue [ curry ] addon [ cd ] addon
-[ 0 ] push [ split ] addon [ ex ] push
-[ size ] unglue [ 0 ] push [ > ] addon
-( [ 1 ] ) [ split ] addon [ unglue ] unglue [ compose ] addon push [ dip ] addon [ ex ] compose push
-[ drop ] unglue push [ if ] addon push
-[ def ] addon [ ex ] compose [ uncd ] addon [ eval ] addon
-def
+[ space ] ( spc print ) def
+[ newline ] [ endl print ] def
+
+# strings sometimes work inside quotes!
+verbose-yes [
+  "The_factorial_of_13_is:_" print
+  13 factorial print
+] [  ] if
