@@ -37,7 +37,7 @@
 2crank ing 1 crank def
 2crank ing 1 crank
 2crank ing 1 crank # prints 18 factorial if "verbose" was passed
-2crank ing 1 crank verbose-yes "18!=" quote
+2crank ing 1 crank verbose-yes 18!= quote
 2crank ing 2 crank 18 quote compose eval factorial compose compose compose print compose endl compose print compose
 2crank ing 1 crank 1 crank stack if
 

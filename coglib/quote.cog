@@ -263,9 +263,20 @@ def
 [ expand ]
 ( size [ 0 ] = ( return ) ( ) if [ 0 ] split
   ( [ 1 ] split
-    ( isstring ( dup isdef ( unglue ) [ ] if ) [ ] if compose ) dip
-    size [ 0 ] > ( ( ( dup ) dip swap ) dip swap eval ) [ ] if )
+    ( isstring ( dup isdef ( unglue ) ( ) if ) ( ) if compose ) dip
+    size [ 0 ] > ( ( ( dup ) dip swap ) dip swap eval ) ( ) if )
   dup ( swap ( swap ) dip ) dip eval drop swap drop ) def
+
+# better expand (still slightly unoptimal because in theory it copies more hashtables than it needs to)
+[ expand ]
+( type [ VSTACK ] =
+  ( size [ 0 ] = ( return ) ( ) if [ 0 ] split
+    ( [ 1 ] split
+      ( isstring ( dup ( ( size split ) dip compose cd isdef pop ) dip swap ( compose cd unglue uncd eval ) ( swap drop dup isdef ( unglue ) ( ) if ) if ) ( ) if compose ) dip
+      size [ 0 ] > ( ( ( dup ) dip swap ) dip swap eval ) ( ) if )
+    dup ( swap ( swap ) dip ) dip eval drop swap drop )
+  ( expand )
+  if ) def
 
 # test quote functionality
 verbose-yes [
