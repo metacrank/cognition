@@ -85,5 +85,3 @@ verbose-yes [
   ( this is a macro "macro" ) .
   {{ expanded child "child" [[ "quote" ]] }} .
 ] [ ] if
-
-"./clib-test.so" clib

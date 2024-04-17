@@ -1,0 +1,85 @@
+# Author: Preston Pan
+
+# andrei's times function -- deprecated in favor of matthew's times
+#times [
+#  swap dup 0 > [
+#    swap
+#    dup eval
+#    swap 1 - swap times
+#  ] [ drop drop ] if
+#] def
+[ curry ] [ swap quote prepose ] def
+[ swapd ] [ [ swap ] dip ] def
+[ swapt ] [ [ [ swap ] dip ] dip ] def
+[ swapq ] [ [ [ [ swap ] dip ] dip ] dip ] def
+
+
+[ swap2 ] [ swapd swap ] def
+[ swap3 ] [ swapt swapd swap ] def
+[ swap4 ] [ swapq swapt swapd swap ] def
+
+[ dropd ] [ swap drop ] def
+[ dropt ] [ swapd swap drop ] def
+[ dropq ] [ swapt swapd swap drop ] def
+
+[ drop2 ] [ drop drop ] def
+[ drop3 ] [ drop drop drop ] def
+
+[ dupd ] [ [ dup ] dip ] def
+[ dupt ] [ [ [ dup ] dip ] dip ] def
+[ dupq ] [ [ [ [ dup ] dip ] dip ] dip ] def
+
+[ over ] [ dupd swap ] def
+[ over2 ] [ dupt swapd swap ] def
+[ over3 ] [ dupq swapt swapd swap ] def
+
+[ dup2 ] [ over over ] def
+[ dup3 ] [ over2 over2 over2 ] def
+[ dup4 ] [ over3 over3 over3 over3 ] def
+
+[ dip2 ] [ swap [ dip ] dip ] def
+[ dip3 ] [ swap [ dip ] dip ] def
+
+[ keep ] [ over [ eval ] dip ] def
+
+[ when ] [ [ ] if ] def
+
+[ times ] [ dup2 [ [ 0 ] > swap when ] dip2 dup [ 1 - times ] [ drop2 ] if ] def
+
+[ dipn ] [ [ [ dip ] curry ] swap times eval ] def
+[ swapn ] [ [ swap ] swap dipn ] def
+[ dupn ] [ [ dup ] swap dipn ] def
+# d>base [ [ pow * "" swap ] keep2
+
+# [ [ over ] [ [ dup2 / floor * swap over - ] keep [ [ "0" "1" "2" "3" "4" "5" "6" "7" "8" "9" "↊" "↋" ] vat swap + ] with dip2 ] while drop2 dup len(str-len) ] dip
+# - dup2 tail [ head "." ] dip + + ] def
+
+[ factorial ] [ dup 0 <= [ 1 + ] [ dup 1 - factorial * ] if ] def
+[ abs ] [ dup 0 < [ neg ] when ] def
+
+# TODO: Change to reverse
+[ PI ] [ 3.1415926 ] def
+[ E ] [ 2.718281828 ] def
+
+[ map ] [ [ ] over2 over2 len 0 swap
+[ dup4 swap vat over2 eval dropd dropd quote compose swap 1 + dropt dropt dropt over3 swap over3 swap ]
+swap times drop3 dropd dropd ] def
+
+[ filter ] [ [ ] over2 over2 len 0 swap
+[ dup4 swap vat dup over3 eval dropt dropt [ quote compose ] [ drop ] if swap 1 + dropt dropt dropt over3 swap over3 swap ]
+swap times drop3 dropd dropd ] def
+
+# range: [starting value] [non-inclusive ending value] => [quote]
+[ range ] [ [ ] over2 over2 - abs [ [ drop ] dip ] dip [ over quote compose [ 1 + ] dip ] swap times dropd ] def
+
+# reduce: [accumulator] [quote] => value
+[ reduce ] [ 0 swap vat [ len ] dip swap swapd 1 swap 1 -
+[ dup4 swap vat dropd swap2 eval dropq swap swapd 1 + ]
+swap times drop2 dropd ] def
+
+# merge [ comparator ] [ list A ] [ list B ] => sorted list
+# [ b a ] [ compar ] A B
+# merge [ [ ] swap swapd swapt
+#      [ len swapd [ len ] dip 0 > swap 0 > and ]
+#      [ uncurry swapd [ uncurry ] dip 4 dupn swap4 eval [ swap ] when 4 swapn 3 swapn swap3 curry curry swap swapd swapt ]
+#      while drop3 ] def
