@@ -21,7 +21,7 @@
 2crank ing 2 crank 0 quote compose eval > compose
 2crank ing 2 crank dup nop 9 quote compose eval + compose factorial compose * compose
 2crank ing 1 crank VMACRO cast quote compose
-2crank ing 2 crank drop nop 1 quote
+2crank ing 3 crank drop 1 quote
 2crank ing 1 crank compose VMACRO cast quote compose
 2crank ing 2 crank if compose
 2crank ing 1 crank VMACRO cast def
@@ -43,15 +43,6 @@
 
 quote.cog load
 
-# basic string (without escape characters)
-[ " ]
-( getd gets geti f d \ " s f i
-  ( len [ 1 ] - cut drop swap i swap s swap d halt [ 1 ] crank )
-  halt [ 1 ] [ 1 ] metacrank ) def
-[ " ] singlet
-
-# for the sake of syntax highlighting: "
-
 # reimplement comment:
 [ # ]
 ( geti getd gets crankbase f d f i endl s
@@ -59,8 +50,17 @@ quote.cog load
   halt [ 1 ] [ 1 ] metacrank )
 def
 
+# basic string (without escape characters)
+[ \ " ]
+( getd gets geti f d [ \ " ] s f i
+  ( len [ 1 ] - cut drop swap i swap s swap d halt [ 1 ] crank )
+  halt [ 1 ] [ 1 ] metacrank ) def
+[ \ " ] singlet
+
+# for the sake of syntax highlighting: "
+
 # reimplementation using quotes
-[ factorial ] ( dup 0 > ( dup 9 + factorial * ) ( drop 1 ) if ) def
+[ factorial ] ( dup 0 > ( dup 9 + factorial * ) ( drop [ 1 ] ) if ) def
 [ verbose-yes ] [ getargs size [ 2 ] >
                   [ [ 2 ] split swap drop [ 1 ] split drop ]
                   [ drop [ not-verbose ] ]
@@ -72,6 +72,6 @@ def
 
 # strings sometimes work inside quotes!
 verbose-yes [
-  "The_factorial_of_13_is:_" print
+  "The_factorial_of_13_is: " print
   13 factorial print
 ] [  ] if

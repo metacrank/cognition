@@ -252,29 +252,39 @@ def
   if dup child swap
   [ 0 ] crank [ 1 ] [ 1 ] metacrank ) def
 
-# better escape character
+# better escape character (note: different behaviour inside quotes than before)
 \ \
 ( [ 1 ] metacrankbase [ 1 ] =
-  [ ( halt [ 1 ] [ 1 ] metacrank quote compose ( dup ) dip swap ) ]
+  [ ( halt [ 1 ] [ 1 ] metacrank compose ( dup ) dip swap ) ]
   [ ( halt [ 1 ] crank ) ]
   if halt [ 1 ] [ 1 ] metacrank ) def
 
-# define basic expand ( doesn't check for definitions within quotes themselves )
+# define basic expand (works on nonempty macros only)
 [ expand ]
-( size [ 0 ] = ( return ) ( ) if [ 0 ] split
+( macro swap
   ( [ 1 ] split
     ( isstring ( dup isdef ( unglue ) ( ) if ) ( ) if compose ) dip
     size [ 0 ] > ( ( ( dup ) dip swap ) dip swap eval ) ( ) if )
   dup ( swap ( swap ) dip ) dip eval drop swap drop ) def
 
-# better expand (still slightly unoptimal because in theory it copies more hashtables than it needs to)
+# complete expand (checks for definitions within child first without copying hashtables)
 [ expand ]
-( type [ VSTACK ] =
-  ( size [ 0 ] = ( return ) ( ) if [ 0 ] split
-    ( [ 1 ] split
-      ( isstring ( dup ( ( size split ) dip compose cd isdef pop ) dip swap ( compose cd unglue uncd eval ) ( swap drop dup isdef ( unglue ) ( ) if ) if ) ( ) if compose ) dip
-      size [ 0 ] > ( ( ( dup ) dip swap ) dip swap eval ) ( ) if )
-    dup ( swap ( swap ) dip ) dip eval drop swap drop )
+( size [ 0 ] > ( type [ VSTACK ] = ) ( return ) if ?
+  ( macro swap
+    macro
+    ( ( ( size dup [ 0 ] > ) dip swap ) dip swap
+      ( ( ( 1 - dup ( vat ) dip swap ( del ) dip ) dip compose ) dip dup eval )
+      ( drop swap drop )
+      if ) dup eval
+    ( ( [ 1 ] split
+        ( isstring
+          ( compose cd dup isdef
+            ( unglue pop )
+              ( pop dup isdef ( unglue ) ( ) if )
+            if ) ( ) if
+          ( swap ) dip compose swap ) dip
+        size [ 0 ] > ) dip swap
+      ( dup eval ) ( drop drop swap compose ) if ) dup eval )
   ( expand )
   if ) def
 

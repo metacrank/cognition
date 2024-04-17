@@ -15,11 +15,11 @@
 stack_t *STACK;
 stack_t *EVAL_CONTAINERS;
 stack_t *EVAL_CONTAIN_TRASH;
-stack_t *EVAL_STACK;
 stack_t *CONTAIN_DEF_STACK;
 stack_t *MACRO_DEF_STACK;
 stack_t *FAMILY;
 string_t *FAMILY_IDX;
+int FAMILY_RECURSION_DEPTH;
 stack_t *CONTAINERS;
 stack_t *MACROS;
 stack_t *OBJ_TABLE_STACK;
@@ -595,7 +595,6 @@ contain_t *contain_copy(contain_t *c, void *(*copyfunc)(void *)) {
   }
   contain_t *contain = calloc(1, sizeof(contain_t));
   contain->word_table = ht_copy(c->word_table, contain_value_copy);
-  contain->word_table = NULL;
   contain->flit = ht_copy(c->flit, value_stack_copy);
   contain->cranks = stack_copy(c->cranks, cranks_copy);
   contain->err_stack = stack_copy(c->err_stack, value_copy);
@@ -806,7 +805,7 @@ void evalf(value_t *alias) {
     return;
   }
   stack_push(EVAL_CONTAINERS, cur);
-  stack_push(EVAL_STACK, v);
+  FAMILY_RECURSION_DEPTH++;
   if (v->type == VSTACK) {
     stack_push(FAMILY, v->container);
     evalstack(v->container, NULL);
@@ -816,6 +815,7 @@ void evalf(value_t *alias) {
   } else
     die("BAD VALUE TYPE ON STACK");
   inc_crank(cur);
+  FAMILY_RECURSION_DEPTH--;
   stack_pop(EVAL_CONTAINERS);
   for (int i = 0; i < EVAL_CONTAIN_TRASH->size; i++) {
     if (!stack_exists(EVAL_CONTAINERS, EVAL_CONTAIN_TRASH->items[i])) {
@@ -823,10 +823,7 @@ void evalf(value_t *alias) {
       i--;
     }
   }
-  value_t *vf = stack_pop(EVAL_STACK);
-  if (vf) {
-    value_free_safe(vf);
-  }
+  value_free_safe(v);
   return_function(cur, false);
 }
 
@@ -1019,7 +1016,12 @@ void evalword(value_t *v, bool always_evalf) {
     }
     if (parent == NULL) continue;
     if ((macro = ht_get(parent->flit, v->str_word))) {
+      if (FAMILY_RECURSION_DEPTH >= 13824) {
+        eval_error(U"MAXIMUM RECURSION DEPTH REACHED", v);
+        return;
+      }
       stack_push(MACROS, macro);
+      FAMILY_RECURSION_DEPTH++;
       if (i == 0) {
         stack_push(CONTAINERS, parent);
         evalmacro(macro, v);
@@ -1027,11 +1029,12 @@ void evalword(value_t *v, bool always_evalf) {
       } else {
         evalmacro(macro, v);
       }
+      FAMILY_RECURSION_DEPTH--;
       stack_pop(MACROS);
       evald = true;
       break;
     } else if ((expand = ht_get(parent->word_table, v->str_word))) {
-      if (FAMILY_IDX->length > 1152) {
+      if (FAMILY_RECURSION_DEPTH >= 13824) {
         eval_error(U"MAXIMUM RECURSION DEPTH REACHED", v);
         return;
       }
@@ -1039,6 +1042,7 @@ void evalword(value_t *v, bool always_evalf) {
       stack_push(FAMILY, expand);
       string_append(FAMILY_IDX, FAMILY->size - 1);
       stack_push(CONTAINERS, expand);
+      FAMILY_RECURSION_DEPTH++;
       if (i == 0) {
         stack_push(CONTAINERS, parent);
         evalstack(expand, v);
@@ -1046,6 +1050,7 @@ void evalword(value_t *v, bool always_evalf) {
       } else {
         evalstack(expand, v);
       }
+      FAMILY_RECURSION_DEPTH--;
       stack_pop(CONTAINERS);
       stack_pop(FAMILY);
       FAMILY_IDX->length -= 2;
@@ -1099,7 +1104,7 @@ void crank() {
       return;
     }
     stack_push(EVAL_CONTAINERS, cur);
-    stack_push(EVAL_STACK, needseval);
+    FAMILY_RECURSION_DEPTH++;
     if (needseval->type == VSTACK) {
       stack_push(FAMILY, needseval->container);
       evalstack(needseval->container, NULL);
@@ -1109,6 +1114,7 @@ void crank() {
     } else
       die("BAD VALUE ON STACK");
     inc_crank(cur);
+    FAMILY_RECURSION_DEPTH--;
     stack_pop(EVAL_CONTAINERS);
     for (int i = 0; i < EVAL_CONTAIN_TRASH->size; i++) {
       if (!stack_exists(EVAL_CONTAINERS, EVAL_CONTAIN_TRASH->items[i])) {
@@ -1116,10 +1122,7 @@ void crank() {
         i--;
       }
     }
-    value_t *vf = stack_pop(EVAL_STACK);
-    if (vf) {
-      value_free_safe(vf);
-    }
+    value_free_safe(needseval);
     return_function(cur, false);
   } else {
     inc_crank(cur);

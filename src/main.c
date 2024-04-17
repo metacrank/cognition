@@ -17,11 +17,11 @@ extern stack_t *EVAL_CONTAINERS;
 extern stack_t *EVAL_CONTAIN_TRASH;
 extern string_t *ROOT;
 extern parser_t *PARSER;
-extern stack_t *EVAL_STACK;
 extern stack_t *CONTAIN_DEF_STACK;
 extern stack_t *MACRO_DEF_STACK;
 extern stack_t *FAMILY;
 extern string_t *FAMILY_IDX;
+extern int FAMILY_RECURSION_DEPTH;
 extern stack_t *CONTAINERS;
 extern stack_t *MACROS;
 extern stack_t *OBJ_TABLE_STACK;
@@ -135,7 +135,6 @@ void global_free() {
   free(STACK->items);
   free(STACK);
   free(PARSER);
-  stack_free(EVAL_STACK, value_free);
   stack_free(EVAL_CONTAINERS, nop);
   stack_free(CONTAIN_DEF_STACK, contain_free);
   stack_free(EVAL_CONTAIN_TRASH, nop);
@@ -248,7 +247,6 @@ int main(int argc, char **argv) {
   }
   PARSER = init_parser(NULL);
   STACK = init_stack(DEFAULT_STACK_SIZE);
-  EVAL_STACK = init_stack(DEFAULT_STACK_SIZE);
   CONTAIN_DEF_STACK = init_stack(DEFAULT_STACK_SIZE);
   MACRO_DEF_STACK = init_stack(DEFAULT_STACK_SIZE);
   EVAL_CONTAIN_TRASH = init_stack(DEFAULT_STACK_SIZE);
@@ -262,6 +260,7 @@ int main(int argc, char **argv) {
   stack_push(OBJ_TABLE_STACK, init_ht(DEFAULT_HT_SIZE));
   ROOT = init_string(U"");
   EXIT_CODE = NULL;
+  FAMILY_RECURSION_DEPTH = 0;
   EVAL_CONTAINERS = init_stack(DEFAULT_STACK_SIZE);
   RETURNED = false;
   CAST_ARGS = malloc(4 * sizeof(string_t*));

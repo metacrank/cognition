@@ -7,6 +7,7 @@
 extern stack_t *STACK;
 extern stack_t *FAMILY;
 extern string_t *FAMILY_IDX;
+extern int FAMILY_RECURSION_DEPTH;
 extern bool EXITED;
 
 void cog_getf(value_t *v) {
@@ -510,8 +511,7 @@ void cog_evalstr(value_t *v) {
     eval_error(U"TOO FEW ARGUMENTS", v);
     return;
   }
-  if (FAMILY_IDX->length >= 1152) {
-    stack_push(cur->stack, strc);
+  if (FAMILY_RECURSION_DEPTH >= 13824) {
     eval_error(U"MAXIMUM RECURSION DEPTH REACHED", v);
     return;
   }
@@ -520,6 +520,7 @@ void cog_evalstr(value_t *v) {
     stack_push(FAMILY, strc->container);
   else stack_push(FAMILY, NULL);
   string_append(FAMILY_IDX, FAMILY->size - 1);
+  FAMILY_RECURSION_DEPTH++;
   stack_t *strst = *value_stack(strc);
   for (int i = 0; i < strst->size; i++) {
     value_t *str = strst->items[i];
@@ -535,6 +536,7 @@ void cog_evalstr(value_t *v) {
     free(parser);
     if (EXITED) break;
   }
+  FAMILY_RECURSION_DEPTH--;
   stack_pop(FAMILY);
   FAMILY_IDX->length -= 2;
   value_free_safe(strc);
