@@ -13,6 +13,9 @@
 #include <builtins/stackops.h>
 #include <builtins/strings.h>
 
+/* add objs */
+void add_objs(ht_t *obj_table);
+
 /*! @brief dds functions to flit table */
 void add_funcs(ht_t *flit);
 

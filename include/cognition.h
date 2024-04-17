@@ -210,9 +210,6 @@ void error_free(void *v);
 /* copies an error type */
 error_t *error_copy(void *e);
 
-/* Gets the custom object table referencing the current root stack */
-ht_t *ot_get();
-
 /* frees an object table */
 void obj_free(void *v);
 
@@ -228,11 +225,9 @@ void add_func(ht_t *h, void (*func)(value_t *), char32_t *key);
 /* Adds function stack to FLIT */
 void add_macro(ht_t *h, stack_t *macro, char32_t *key);
 
-/*! Adds object functions to OBJ_TABLE and adds constructor for custom type to
- * FLIT. */
-void add_obj(ht_t *h, ht_t *h2, void (*printfunc)(FILE *, void *),
-             void (*freefunc)(void *), void *(*copyfunc)(void *),
-             void (*createfunc)(void *), char32_t *key);
+/*! Adds object functions to OBJ_TABLE */
+void add_obj(ht_t *h, void (*printfunc)(FILE *, void *), void (*freefunc)(void *),
+             void *(*copyfunc)(void *), char32_t *key);
 
 /*! Allocates memory for new container */
 contain_t *init_contain(ht_t *h, ht_t *flit, stack_t *cranks);

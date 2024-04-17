@@ -466,7 +466,7 @@ void *value_copy(void *v) {
     a->str_word = string_copy(v1->str_word);
     a->custom = v1->custom;
   } else if (v1->type == VCUSTOM) {
-    custom_t *c = ht_get(OBJ_TABLE, a->str_word);
+    custom_t *c = ht_get(OBJ_TABLE, v1->str_word);
     a->custom = c->copyfunc(v1->custom);
     a->str_word = string_copy(v1->str_word);
   }
@@ -543,13 +543,11 @@ void add_macro(ht_t *h, stack_t *macro, char32_t *key) {
   ht_add(h, init_string(key), macro, value_stack_free);
 }
 
-void add_obj(ht_t *h, ht_t *h2, void (*printfunc)(FILE *, void *),
-             void (*freefunc)(void *), void *(*copyfunc)(void *),
-             void (*createfunc)(void *), char32_t *key) {
+void add_obj(ht_t *h, void (*printfunc)(FILE *, void *), void (*freefunc)(void *),
+             void *(*copyfunc)(void *), char32_t *key) {
 
   custom_t *c = init_custom(printfunc, freefunc, copyfunc);
   ht_add(h, init_string(key), c, custom_free);
-  ht_add(h2, init_string(key), createfunc, value_free);
 }
 
 contain_t *init_contain(ht_t *h, ht_t *flit, stack_t *cranks) {

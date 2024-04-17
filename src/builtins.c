@@ -1,5 +1,7 @@
 #include <builtins.h>
 
+void add_objs(ht_t *obj_table) {}
+
 void add_funcs(ht_t *flit) {
   add_funcs_combinators(flit);
   add_funcs_cranker(flit);

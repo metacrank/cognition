@@ -7,6 +7,8 @@
 #include <string.h>
 
 extern stack_t *STACK;
+extern stack_t *OBJ_TABLE_STACK;
+extern string_t *ROOT;
 extern bool RETURNED;
 extern stack_t *ARGS;
 extern byte_t print_buffer[5];
@@ -38,7 +40,7 @@ void cog_reset(value_t *v) {
 }
 
 void cog_clib(value_t *v) {
-  contain_t *cur = stack_pop(STACK);
+  contain_t *cur = stack_peek(STACK);
   value_t *v1 = stack_pop(cur->stack);
   if (!v1) {
     eval_error(U"TOO FEW ARGUMENTS", v);
@@ -69,16 +71,18 @@ void cog_clib(value_t *v) {
     strlength += sizeof_utf8(print_buffer);
   }
   buf[strlength] = '\0';
+  printf("%s\n", buf);
   void *handle = dlopen(buf, RTLD_LAZY);
   free(buf);
   if (!handle) {
+    printf("dlopen fail\n");
     stack_push(cur->stack, v1);
     eval_error(U"INVALID FILENAME", v);
     return;
   }
   dlerror();
-  void (*af)(void);
-  void (*aobjs)(void);
+  void (*af)(ht_t *);
+  void (*aobjs)(ht_t *);
   char *error;
   *(void **)(&af) = dlsym(handle, "add_funcs");
   *(void **)(&aobjs) = dlsym(handle, "add_objs");
@@ -88,8 +92,8 @@ void cog_clib(value_t *v) {
     eval_error(U"DLSYM CANNOT FIND FUNCTION", v);
     return;
   }
-  (*af)();
-  (*aobjs)();
+  (*af)(cur->flit);
+  (*aobjs)(OBJ_TABLE);
   dlclose(handle);
   value_free_safe(v1);
 }
