@@ -44,22 +44,28 @@
 quote.cog load
 
 # reimplement comment:
-[ # ]
+\ #
 ( geti getd gets crankbase f d f i endl s
-  ( drop halt crank s d i )
+  [ 1 ] metacrankbase [ 1 ] =
+  [ ( drop crank s d i ( dup ) dip swap ) ]
+  [ ( drop halt crank s d i ) ]
+  if
   halt [ 1 ] [ 1 ] metacrank )
 def
 
 # basic string (without escape characters)
-[ \ " ]
+\ "
 ( getd gets geti f d [ \ " ] s f i
-  ( len [ 1 ] - cut drop swap i swap s swap d halt [ 1 ] crank )
+  [ 1 ] metacrankbase [ 1 ] =
+  [ ( len [ 1 ] - cut drop swap i swap s swap d compose ( dup ) dip swap ) ]
+  [ ( len [ 1 ] - cut drop swap i swap s swap d halt [ 1 ] crank ) ]
+  if
   halt [ 1 ] [ 1 ] metacrank ) def
-[ \ " ] singlet
+\ " singlet
 
 # for the sake of syntax highlighting: "
 
-# reimplementation using quotes
+# reimplementations using quotes
 [ factorial ] ( dup 0 > ( dup 9 + factorial * ) ( drop [ 1 ] ) if ) def
 [ verbose-yes ] [ getargs size [ 2 ] >
                   [ [ 2 ] split swap drop [ 1 ] split drop ]
@@ -67,11 +73,12 @@ def
                   if
                   [ verbose ] = ] def
 
+# useful io words
 [ space ] ( spc print ) def
 [ newline ] [ endl print ] def
 
-# strings sometimes work inside quotes!
 verbose-yes [
-  "The_factorial_of_13_is: " print
-  13 factorial print
-] [  ] if
+  # strings and comments work inside quotes!
+  "The factorial of 13 is: " print
+  13 factorial print newline
+] [ ] if

@@ -142,14 +142,14 @@ def
 ( crankbase [ 1 ] metacrankbase dup [ 1 ] =
   [ ( dup \ ] =
       ( drop swap drop swap [ 1 ] swap metacrank swap crank quote compose ( dup ) dip swap )
-      ( dup dup dup dup dup dup dup
-        \ [ = swap \ ( = or swap \ \ = or swap \ [[ = or swap \ (( = or swap \ { = or swap \ {{ = or
+      ( dup dup dup dup dup dup dup dup dup
+        \ [ = swap \ ( = or swap \ \ = or swap \ [[ = or swap \ (( = or swap \ { = or swap \ {{ = or swap \ # = or swap \ " = or
         ( eval ) ( compose ( dup ) dip swap ) if )
       if ) ]
   [ ( dup \ ] =
       ( drop swap drop swap [ 1 ] swap metacrank swap crank )
-      ( dup dup dup dup dup dup dup
-        \ [ = swap \ ( = or swap \ \ = or swap \ [[ = or swap \ (( = or swap \ { = or swap \ {{ = or
+      ( dup dup dup dup dup dup dup dup dup
+        \ [ = swap \ ( = or swap \ \ = or swap \ [[ = or swap \ (( = or swap \ { = or swap \ {{ = or swap \ # = or swap \ " = or
         ( eval ) ( compose ( dup ) dip swap ) if )
       if ) ]
   if dup stack swap
@@ -159,16 +159,16 @@ def
 ( crankbase [ 1 ] metacrankbase dup [ 1 ] =
   [ ( dup \ ) =
       ( drop swap drop swap [ 1 ] swap metacrank swap crank quote compose ( dup ) dip swap )
-      ( dup dup dup dup dup dup dup
-        \ [ = swap \ ( = or swap \ \ = or swap \ [[ = or swap \ (( = or swap \ { = or swap \ {{ = or
+      ( dup dup dup dup dup dup dup dup dup
+        \ [ = swap \ ( = or swap \ \ = or swap \ [[ = or swap \ (( = or swap \ { = or swap \ {{ = or swap \ # = or swap \ " = or
         ( eval )
         ( dup isdef ( unglue ) [ ] if compose ( dup ) dip swap )
         if )
       if ) ]
   [ ( dup \ ) =
       ( drop swap drop swap [ 1 ] swap metacrank swap crank )
-      ( dup dup dup dup dup dup dup
-        \ [ = swap \ ( = or swap \ \ = or swap \ [[ = or swap \ (( = or swap \ { = or swap \ {{ = or
+      ( dup dup dup dup dup dup dup dup dup
+        \ [ = swap \ ( = or swap \ \ = or swap \ [[ = or swap \ (( = or swap \ { = or swap \ {{ = or swap \ # = or swap \ " = or
         ( eval )
         ( dup isdef ( unglue ) [ ] if compose ( dup ) dip swap )
         if )
@@ -180,16 +180,16 @@ def
 ( crankbase [ 1 ] metacrankbase dup [ 1 ] =
   [ ( dup \ ]] =
       ( drop swap drop swap [ 1 ] swap metacrank swap crank quote compose ( dup ) dip swap )
-      ( dup dup dup dup dup dup dup
-        \ [ = swap \ ( = or swap \ \ = or swap \ [[ = or swap \ (( = or swap \ { = or swap \ {{ = or
+      ( dup dup dup dup dup dup dup dup dup
+        \ [ = swap \ ( = or swap \ \ = or swap \ [[ = or swap \ (( = or swap \ { = or swap \ {{ = or swap \ # = or swap \ " = or
         ( eval )
         ( dup isdef ( unglue ) [ ] if compose ( dup ) dip swap )
         if )
       if ) ]
   [ ( dup \ ]] =
       ( drop swap drop swap [ 1 ] swap metacrank swap crank )
-      ( dup dup dup dup dup dup dup
-        \ [ = swap \ ( = or swap \ \ = or swap \ [[ = or swap \ (( = or swap \ { = or swap \ {{ = or
+      ( dup dup dup dup dup dup dup dup dup
+        \ [ = swap \ ( = or swap \ \ = or swap \ [[ = or swap \ (( = or swap \ { = or swap \ {{ = or swap \ # = or swap \ " = or
         ( eval )
         ( dup isdef ( unglue ) [ ] if compose ( dup ) dip swap )
         if )
@@ -201,14 +201,14 @@ def
 ( crankbase [ 1 ] metacrankbase dup [ 1 ] =
   [ ( dup \ )) =
       ( drop swap drop swap [ 1 ] swap metacrank swap crank quote compose ( dup ) dip swap )
-      ( dup dup dup dup dup dup dup
-        \ [ = swap \ ( = or swap \ \ = or swap \ [[ = or swap \ (( = or swap \ { = or swap \ {{ = or
+      ( dup dup dup dup dup dup dup dup dup
+        \ [ = swap \ ( = or swap \ \ = or swap \ [[ = or swap \ (( = or swap \ { = or swap \ {{ = or swap \ # = or swap \ " = or
         ( eval ) ( compose ( dup ) dip swap ) if )
       if ) ]
   [ ( dup \ )) =
       ( drop swap drop swap [ 1 ] swap metacrank swap crank )
-      ( dup dup dup dup dup dup dup
-        \ [ = swap \ ( = or swap \ \ = or swap \ [[ = or swap \ (( = or swap \ { = or swap \ {{ = or
+      ( dup dup dup dup dup dup dup dup dup
+        \ [ = swap \ ( = or swap \ \ = or swap \ [[ = or swap \ (( = or swap \ { = or swap \ {{ = or swap \ # = or swap \ " = or
         ( eval ) ( compose ( dup ) dip swap ) if )
       if ) ]
   if dup macro swap
@@ -218,14 +218,14 @@ def
 ( crankbase [ 1 ] metacrankbase dup [ 1 ] =
   [ ( dup \ } =
       ( drop swap drop swap [ 1 ] swap metacrank swap crank quote compose ( dup ) dip swap )
-      ( dup dup dup dup dup dup dup
-        \ [ = swap \ ( = or swap \ \ = or swap \ [[ = or swap \ (( = or swap \ { = or swap \ {{ = or
+      ( dup dup dup dup dup dup dup dup dup
+        \ [ = swap \ ( = or swap \ \ = or swap \ [[ = or swap \ (( = or swap \ { = or swap \ {{ = or swap \ # = or swap \ " = or
         ( eval ) ( compose ( dup ) dip swap ) if )
       if ) ]
   [ ( dup \ } =
       ( drop swap drop swap [ 1 ] swap metacrank swap crank )
-      ( dup dup dup dup dup dup dup
-        \ [ = swap \ ( = or swap \ \ = or swap \ [[ = or swap \ (( = or swap \ { = or swap \ {{ = or
+      ( dup dup dup dup dup dup dup dup dup
+        \ [ = swap \ ( = or swap \ \ = or swap \ [[ = or swap \ (( = or swap \ { = or swap \ {{ = or swap \ # = or swap \ " = or
         ( eval ) ( compose ( dup ) dip swap ) if )
       if ) ]
   if dup child swap
@@ -235,16 +235,16 @@ def
 ( crankbase [ 1 ] metacrankbase dup [ 1 ] =
   [ ( dup \ }} =
       ( drop swap drop swap [ 1 ] swap metacrank swap crank quote compose ( dup ) dip swap )
-      ( dup dup dup dup dup dup dup
-        \ [ = swap \ ( = or swap \ \ = or swap \ [[ = or swap \ (( = or swap \ { = or swap \ {{ = or
+      ( dup dup dup dup dup dup dup dup dup
+        \ [ = swap \ ( = or swap \ \ = or swap \ [[ = or swap \ (( = or swap \ { = or swap \ {{ = or swap \ # = or swap \ " = or
         ( eval )
         ( dup isdef ( unglue ) [ ] if compose ( dup ) dip swap )
         if )
       if ) ]
   [ ( dup \ }} =
       ( drop swap drop swap [ 1 ] swap metacrank swap crank )
-      ( dup dup dup dup dup dup dup
-        \ [ = swap \ ( = or swap \ \ = or swap \ [[ = or swap \ (( = or swap \ { = or swap \ {{ = or
+      ( dup dup dup dup dup dup dup dup dup
+        \ [ = swap \ ( = or swap \ \ = or swap \ [[ = or swap \ (( = or swap \ { = or swap \ {{ = or swap \ # = or swap \ " = or
         ( eval )
         ( dup isdef ( unglue ) [ ] if compose ( dup ) dip swap )
         if )
@@ -255,7 +255,7 @@ def
 # better escape character (note: different behaviour inside quotes than before)
 \ \
 ( [ 1 ] metacrankbase [ 1 ] =
-  [ ( halt [ 1 ] [ 1 ] metacrank compose ( dup ) dip swap ) ]
+  [ ( compose ( dup ) dip swap ) ]
   [ ( halt [ 1 ] crank ) ]
   if halt [ 1 ] [ 1 ] metacrank ) def
 
