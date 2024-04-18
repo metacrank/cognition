@@ -71,11 +71,9 @@ void cog_clib(value_t *v) {
     strlength += sizeof_utf8(print_buffer);
   }
   buf[strlength] = '\0';
-  printf("%s\n", buf);
   void *handle = dlopen(buf, RTLD_LAZY);
   free(buf);
   if (!handle) {
-    printf("dlopen fail\n");
     stack_push(cur->stack, v1);
     eval_error(U"INVALID FILENAME", v);
     return;

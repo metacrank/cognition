@@ -531,7 +531,7 @@ custom_t *init_custom(void (*printfunc)(FILE *, void *), void (*freefunc)(void *
 void custom_free(void *c) { free(c); }
 
 void add_func(ht_t *h, void (*func)(value_t *), char32_t *key) {
-  stack_t *macro = init_stack(1);
+  stack_t *macro = init_stack(DEFAULT_STACK_SIZE);
   value_t *v = init_value(VCLIB);
   v->str_word = init_string(key);
   v->custom = func;

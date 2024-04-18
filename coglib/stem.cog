@@ -8,7 +8,7 @@
 #    swap 1 - swap times
 #  ] [ drop drop ] if
 #] def
-[ curry ] [ swap quote prepose ] def
+[ curry ] ( swap quote prepose ) def
 [ swapd ] [ [ swap ] dip ] def
 [ swapt ] [ [ [ swap ] dip ] dip ] def
 [ swapq ] [ [ [ [ swap ] dip ] dip ] dip ] def
@@ -44,9 +44,21 @@
 
 [ when ] [ [ ] if ] def
 
-[ times ] [ dup2 [ [ 0 ] > swap when ] dip2 dup [ 1 - times ] [ drop2 ] if ] def
+[ times ] [ dup2 [ [ 0 ] > swap when ] dip2 dup [ 0 ] > [ [ 1 ] - times ] [ drop2 ] if ] def
 
-[ dipn ] [ [ [ dip ] curry ] swap times eval ] def
+[ dipn ] ( [ [ dip ] curry ] swap times eval ) def
+
+[ opdeepn ] (
+  dup [ "n" ] concat dup isdef # STACK: [ op ] [ opn ] [ t/f ]
+  ( drop2 return )
+  ( swap )
+  if
+  ( ...
+    ( [ [ dip ] curry ] swap ... )
+    (  )
+    if ) def
+) def
+
 [ swapn ] [ [ swap ] swap dipn ] def
 [ dupn ] [ [ dup ] swap dipn ] def
 # d>base [ [ pow * "" swap ] keep2
@@ -58,10 +70,10 @@
 [ abs ] [ dup 0 < [ neg ] when ] def
 
 # TODO: Change to reverse
-[ PI ] [ 3.1415926 ] def
+[ PI ] [ 3.1415926535 ] def
 [ E ] [ 2.718281828 ] def
 
-[ map ] [ [ ] over2 over2 len 0 swap
+[ map ] [ [ ] over2 over2 size 0 swap
 [ dup4 swap vat over2 eval dropd dropd quote compose swap 1 + dropt dropt dropt over3 swap over3 swap ]
 swap times drop3 dropd dropd ] def
 
@@ -74,7 +86,7 @@ swap times drop3 dropd dropd ] def
 
 # reduce: [accumulator] [quote] => value
 [ reduce ] [ 0 swap vat [ len ] dip swap swapd 1 swap 1 -
-[ dup4 swap vat dropd swap2 eval dropq swap swapd 1 + ]
+[ dup4 swap vat dropd 2swap eval dropq swap swapd 1 + ]
 swap times drop2 dropd ] def
 
 # merge [ comparator ] [ list A ] [ list B ] => sorted list
