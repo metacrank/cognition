@@ -103,6 +103,7 @@ sll_t *sll_copy(sll_t *l, void *(*copyfunc)(void *)) {
   while (n) {
     if (n->value) {
       list->head = node_copy(n, copyfunc);
+      n = n->next;
       break;
     }
     n = n->next;
