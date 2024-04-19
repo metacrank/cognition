@@ -200,35 +200,6 @@ def
   [ ( halt [ 1 ] crank ) ]
   if halt [ 1 ] [ 1 ] metacrank ) def
 
-# define basic expand (works on nonempty macros only)
-[ expand ]
-( macro swap
-  ( [ 1 ] split
-    ( isstring ( dup isdef ( unglue ) ( ) if ) ( ) if compose ) dip
-    size [ 0 ] > ( ( ( dup ) dip swap ) dip swap eval ) ( ) if )
-  dup ( swap ( swap ) dip ) dip eval drop swap drop ) def
-
-# complete expand (checks for definitions within child first without copying hashtables)
-[ expand ]
-( size [ 0 ] > ( type [ VSTACK ] = ) ( return ) if ?
-  ( macro swap
-    macro
-    ( ( ( size dup [ 0 ] > ) dip swap ) dip swap
-      ( ( ( 1 - dup ( vat ) dip swap ( del ) dip ) dip compose ) dip dup eval )
-      ( drop swap drop )
-      if ) dup eval
-    ( ( [ 1 ] split
-        ( isstring
-          ( compose cd dup isdef
-            ( unglue pop )
-              ( pop dup isdef ( unglue ) ( ) if )
-            if ) ( ) if
-          ( swap ) dip compose swap ) dip
-        size [ 0 ] > ) dip swap
-      ( dup eval ) ( drop drop swap compose ) if ) dup eval )
-  ( expand )
-  if ) def
-
 # test quote functionality
 verbose-yes [
   [ [[ help nop ]] nop (( nop ( nop ) )) {{ nop { child } }} ] .
