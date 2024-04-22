@@ -156,7 +156,7 @@ void cog_nth(value_t *v) {
   str->length = 1;
 }
 
-void cog_isstring(value_t *v) {
+void cog_isword(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   value_t *strval = stack_peek(cur->stack);
   if (!strval) {
@@ -183,5 +183,5 @@ void add_funcs_strings(ht_t *flit) {
   add_func(flit, cog_len, U"len");
   add_func(flit, cog_cut, U"cut");
   add_func(flit, cog_nth, U"nth");
-  add_func(flit, cog_isstring, U"isstring");
+  add_func(flit, cog_isword, U"isword");
 }

@@ -1,0 +1,95 @@
+# Cognition Standard Library
+# Apr. 2024
+
+# stackops extension
+[ nip ] ( swap drop ) def
+[ nipd ] ( ( nip ) dip ) def
+[ swapd ] ( ( swap ) dip ) def
+[ swapdd ] ( ( swapd ) dip ) def
+[ spin ] ( swap swapd swap ) def
+[ spind ] ( ( spin ) dip ) def
+[ dupd ] ( ( dup ) dip ) def
+[ dupdd ] ( ( dupd ) dip ) def
+[ over ] ( dupd swap ) def
+[ overd ] ( ( over ) dip ) def
+[ overdd ] ( ( overd ) dip ) def
+[ pick ] ( overd swap ) def
+[ pickd ] ( ( pick ) dip ) def
+[ pickdd ] ( ( pickd ) dip ) def
+[ reach ] ( pickd swap ) def
+[ reachd ] ( ( reach ) dip ) def
+[ reachdd ] ( ( reachd ) dip ) def
+[ rot ] ( swapd swap ) def
+[ -rot ] ( swap swapd ) def
+[ roll ] ( swapdd swapd swap ) def
+[ -roll ] ( swap swapd swapdd ) def
+[ rotd ] ( ( rot ) dip ) def
+[ -rotd ] ( ( -rot ) dip ) def
+[ rolld ] ( ( roll ) dip ) def
+[ -rolld ] ( ( -roll ) dip ) def
+[ weave ] drop # not ready to define weave
+
+# metastack extension
+[ meta ] ( qstack reset ) def
+
+# strings extension
+[ precat ] ( swap concat ) def
+
+# couple of useful extensions; to be replaced by generalizations
+[  ]
+
+
+
+
+
+# generalization scheme (stackops):
+# op[n] === op op op ... op
+# [n]op === (apply on nth element)
+#   4drop === ( ( ( drop ) dip ) dip ) dip === ( ( swap drop ) dip ) dip === 3nip
+#   4rot ===
+# op[n]d === ( ... ( ( op ) dip ) ... dip )
+
+
+# Basic combinator definitions
+
+# define basic expand (works on nonempty macros only)
+[ expand ]
+( macro swap
+  ( [ 1 ] split
+    ( isword ( dup isdef ( unglue ) ( ) if ) ( ) if compose ) dip
+    size [ 0 ] > ( ( ( dup ) dip swap ) dip swap eval ) ( ) if )
+  dup ( swap ( swap ) dip ) dip eval drop swap drop ) def
+
+# complete expand (checks for definitions within child first without copying hashtables)
+[ expand ]
+( size [ 0 ] > ( type [ VSTACK ] = ) ( return ) if ?
+  ( macro swap
+    macro
+    ( ( ( size dup [ 0 ] > ) dip swap ) dip swap
+      ( ( ( 1 - dup ( vat ) dip swap ( del ) dip ) dip compose ) dip dup eval )
+      ( drop swap drop )
+      if ) dup eval
+    ( ( [ 1 ] split
+        ( isword
+          ( compose cd dup isdef
+            ( unglue pop )
+              ( pop dup isdef ( unglue ) ( ) if )
+            if ) ( ) if
+          ( swap ) dip compose swap ) dip
+        size [ 0 ] > ) dip swap
+      ( dup eval ) ( drop drop swap compose ) if ) dup eval )
+  ( expand )
+  if ) def
+
+# automatic casting
+[ >macro ] ( [ VMACRO ] cast ) def
+[ >stack ] ( [ VSTACK ] cast ) def
+
+[ with ] ( swapd curry ) def
+[ push ] ( quote compose ) def
+[ take ] ( swap push ) def
+[ uncurry ] ( [ 1 ] split swap dip ) def
+[ keep ] ( dupd dip ) def
+[ when ] ( [ ] if ) def
+[ else ] ( [ ] swap if ) def
+[ curry ] ( swap quote prepose ) def

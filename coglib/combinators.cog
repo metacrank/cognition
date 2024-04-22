@@ -5,7 +5,7 @@
 [ expand ]
 ( macro swap
   ( [ 1 ] split
-    ( isstring ( dup isdef ( unglue ) ( ) if ) ( ) if compose ) dip
+    ( isword ( dup isdef ( unglue ) ( ) if ) ( ) if compose ) dip
     size [ 0 ] > ( ( ( dup ) dip swap ) dip swap eval ) ( ) if )
   dup ( swap ( swap ) dip ) dip eval drop swap drop ) def
 
@@ -19,7 +19,7 @@
       ( drop swap drop )
       if ) dup eval
     ( ( [ 1 ] split
-        ( isstring
+        ( isword
           ( compose cd dup isdef
             ( unglue pop )
               ( pop dup isdef ( unglue ) ( ) if )
@@ -58,17 +58,18 @@
 # [ op ] makeopn === [ opn ] [ opn definition ] def
 [ makeopn ] (
   dup dup dup dup
-  [ "BAD ARGUMENT TYPE" ] over ( epush return ) curry curry quote >macro
+  [ "BAD ARGUMENT TYPE" ] over ( epush return ) curry curry quote
   ( ( epeek [ "isword" ] = ( [ "TOO FEW ARGUMENTS" ] = ( return ) when ) ( drop ) if ) if
     [ 0 ] +
     dup [ 0 ] = ( drop return ) when
     dup [ 1 ] = ) compose
-  ( return ) curry ( drop ) prepose ( when ) curry compose
-  [ "INDEX OUT OF RANGE" ] swap ( epush return ) curry curry
+  swap unglue ( return ) compose ( drop ) prepose ( when ) curry compose
+  swap [ "INDEX OUT OF RANGE" ] swap ( epush return ) curry curry
   ( when ) curry ( dup [ 0 ] < ) prepose compose
   take ( over concat dup isdef ( swap drop ) ) compose
-  swap ( compose ) curry ( roll times dupd def ) curry ( macro ) prepose
-  ( if eval ) curry compose
+  swap unglue ( compose ) curry ( roll times dupd def ) curry ( macro ) prepose
+  ( if eval ) curry compose ( isword ) swap compose
+  ( [ "n" ] concat ) dip def
 )
 
 
@@ -82,7 +83,8 @@
   # error handling
   isword
   ( [ "BAD ARGUMENT TYPE" ] [ "curryn" ] epush return )
-  ( epeek [ "isword" ] = ( [ "TOO FEW ARGUMENTS" ] = ( return ) when ) ( drop ) if ) if
+  ( epeek [ "isword" ] = ( [ "TOO FEW ARGUMENTS" ] = ( return ) when ) ( drop ) if )
+  if
   # check for definition
   [ 0 ] +
   dup [ 0 ] = ( drop return ) when

@@ -1,0 +1,51 @@
+# General constructors for the standard library
+# Apr. 2024
+
+# [ op ] [ n ] [ op[n] ] opn-def === [ op[n] ] [ opn[n] ] [ op op op ... op ] def
+[ opn-def ] ( macro roll ( compose ) curry roll times dupd def ) def
+
+
+
+# [ n ] curryn-def === [ curry[n] definition ]
+
+# [ op ] opn-def === [ opn-gen ]
+[ mkopn-gen ]
+
+# example
+[ (op)n ] ( 2dup concat dup isdef ( nip2 ) ( (opn)-def ) if eval )
+
+# error checking versions:
+
+## [ op ] makeopn === [ opn ] [ opn definition ] def
+#[ makeopn ] (
+#  dup dup dup dup
+#  [ "BAD ARGUMENT TYPE" ] over ( epush return ) curry curry quote
+#  ( ( epeek [ "isword" ] = ( [ "TOO FEW ARGUMENTS" ] = ( return ) when ) ( drop ) if ) if
+#    [ 0 ] +
+#    dup [ 0 ] = ( drop return ) when
+#    dup [ 1 ] = ) compose
+#  swap unglue ( return ) compose ( drop ) prepose ( when ) curry compose
+#  swap [ "INDEX OUT OF RANGE" ] swap ( epush return ) curry curry
+#  ( when ) curry ( dup [ 0 ] < ) prepose compose
+#  take ( over concat dup isdef ( swap drop ) ) compose
+#  swap unglue ( compose ) curry ( roll times dupd def ) curry ( macro ) prepose
+#  ( if eval ) curry compose ( isword ) swap compose
+#  ( [ "n" ] concat ) dip def
+#)
+#
+#[ curryn ] (
+#  # error handling
+#  isword
+#  ( [ "BAD ARGUMENT TYPE" ] [ "curryn" ] epush return )
+#  ( epeek [ "isword" ] = ( [ "TOO FEW ARGUMENTS" ] = ( return ) when ) ( drop ) if )
+#  if
+#  # check for definition
+#  [ 0 ] +
+#  dup [ 0 ] = ( drop return ) when
+#  dup [ 1 ] = ( drop curry return ) when
+#  dup [ 0 ] < ( [ "INDEX OUT OF RANGE" ] [ "curryn" ] epush return ) when
+#  [ "curry" ] over concat dup isdef
+#  ( swap drop )
+#  ( macro ( ( curry ) compose ) roll times dupd def )
+#  if eval
+#)
