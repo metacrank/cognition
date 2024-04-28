@@ -1,0 +1,30 @@
+comment.cog load
+quote.cog load
+
+[ ] [ ] [ 0 ]
+
+[ > ] [[ swap [[ compose ]] dip size [ 0 ] = [ [ 0 ] ] [[ [ 1 ] split swap ]] if ]] def
+[ < ] [[ prepose [[ size dup [ 0 ] = [ ] [[ [ 1 ] - split ]] if ]] dip swap ]] def
+[ + ] [[ [ 1 ] + ]] def
+[ - ] [[ [ 1 ] - ]] def
+[ . ] [[ dup char print ]] def
+[ , ] [[ drop read byte ]] def
+
+[ pick ] ( ( ( dup ) dip swap ) dip swap ) def
+[ exec ] ( ( [ 1 ] * dup ) dip swap [ 0 ] = ( drop ) ( dup ( evalstr ) dip \ exec ) if ) def
+
+\ [ (
+  ( dup [ \ ] ] =
+    ( drop swap - [ 1 ] * dup [ 0 ] =
+      ( drop swap drop halt [ 1 ] crank exec )
+      ( swap [ \ ] ] concat pick )
+      if )
+    ( dup [ \ [ ] =
+      ( concat swap + swap pick )
+      ( concat pick )
+      if )
+    if )
+  dup [ 1 ] swap f swap halt [ 1 ] [ 1 ] metacrank
+) def
+
+><+-,.[] dup ( i s itgl f d ) eval

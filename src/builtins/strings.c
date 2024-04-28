@@ -250,6 +250,59 @@ void cog_isword(value_t *v) {
   push_quoted(cur, ret);
 }
 
+void cog_btoi(value_t *v) {
+  contain_t *cur = stack_peek(STACK);
+  value_t *v1 = stack_peek(cur->stack);
+  if (!v1) {
+    eval_error(U"TOO FEW ARGUMENTS", v);
+    return;
+  }
+  stack_t *v1stack = *value_stack(v1);
+  if (v1stack->size != 1) {
+    eval_error(U"BAD ARGUMENT TYPE", v);
+    return;
+  }
+  value_t *str = v1stack->items[0];
+  if (str->type != VWORD) {
+    eval_error(U"BAD ARGUMENT TYPE", v);
+    return;
+  }
+  string_t *bytestr = str->str_word;
+  if (bytestr->length != 1) {
+    eval_error(U"BAD ARGUMENT TYPE", v);
+    return;
+  }
+  int byte = bytestr->value[0];
+  string_free(bytestr);
+  str->str_word = int_to_string(byte);
+}
+
+void cog_itob(value_t *v) {
+  contain_t *cur = stack_peek(STACK);
+  value_t *v1 = stack_peek(cur->stack);
+  if (!v1) {
+    eval_error(U"TOO FEW ARGUMENTS", v);
+    return;
+  }
+  stack_t *v1stack = *value_stack(v1);
+  if (v1stack->size != 1) {
+    eval_error(U"BAD ARGUMENT TYPE", v);
+    return;
+  }
+  value_t *str = v1stack->items[0];
+  if (str->type != VWORD) {
+    eval_error(U"BAD ARGUMENT TYPE", v);
+    return;
+  }
+  int byte = string_to_int(str->str_word);
+  if (str->str_word->length == 0) {
+    string_append(str->str_word, byte);
+  } else {
+    str->str_word->value[0] = byte;
+    str->str_word->length = 1;
+  }
+}
+
 void add_funcs_strings(ht_t *flit) {
   add_func(flit, cog_concat, U"concat");
   add_func(flit, cog_len, U"len");
@@ -257,4 +310,6 @@ void add_funcs_strings(ht_t *flit) {
   add_func(flit, cog_nth, U"nth");
   add_func(flit, cog_insert, U"insert");
   add_func(flit, cog_isword, U"isword");
+  add_func(flit, cog_btoi, U"byte");
+  add_func(flit, cog_itob, U"char");
 }

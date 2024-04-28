@@ -199,10 +199,3 @@ def
   [ ( compose ( dup ) dip swap ) ]
   [ ( halt [ 1 ] crank ) ]
   if halt [ 1 ] [ 1 ] metacrank ) def
-
-# test quote functionality
-verbose-yes [
-  [ [[ help nop ]] nop (( nop ( nop ) )) {{ nop { child } }} ] .
-  { child [[ nop ]] {{ nop }} (( nop )) { nop } } .
-  {{ hello nop [ world ] }} .
-] [ ] if

@@ -1,18 +1,4 @@
-2crank ing 0 crank ff 1
-2crank ing 1 crank cut unaliasf
-2crank ing 0 crank 0
-2crank ing 1 crank cut swap quote def
-2crank ing 1 crank
-2crank ing 1 crank #
-2crank ing 0 crank geti getd gets crankbase f d f i endl s
-2crank ing 1 crank compose compose compose compose compose compose compose compose compose
-2crank ing 0 crank drop halt crank s d i
-2crank ing 1 crank compose compose compose compose compose VMACRO cast quote compose
-2crank ing 0 crank halt 1 quote ing 1 quote ing metacrank
-2crank ing 1 crank compose compose compose compose VMACRO cast
-2crank ing 1 crank def
-2crank ing 2 crank # singlet # delim
-2crank ing 1 crank #comment: geti getd gets crankbase '' d '' i '\n' s ( drop halt crank s d i ) halt 1 1 metacrank
+../coglib/comment.cog load
 
 # example of more (unnecessary) baremetal code
 2crank ing 1 crank # recursive baremetal factorial program:
@@ -42,6 +28,13 @@
 2crank ing 1 crank 1 crank stack if
 
 ../coglib/quote.cog load
+
+# test quote functionality
+verbose-yes [
+  [ [[ help nop ]] nop (( nop ( nop ) )) {{ nop { child } }} ] .
+  { child [[ nop ]] {{ nop }} (( nop )) { nop } } .
+  {{ hello nop [ world ] }} .
+] [ ] if
 
 # reimplement comment:
 \ #
