@@ -1,0 +1,47 @@
+ldfgldftgldfdtgl
+df 
+ 
+dfiff1 crank ing
+
+fing 1 cut unaliasf unaliasf
+
+# 9 gets geti getd compose compose
+2 crank d compose i compose s compose def eval
+1 cut 9 quote dup eval d nop s compose i compose
+1 crank compose compose compose def
+
+#
+$ % gets geti getd compose compose
+2 crank d compose i compose s compose def eval
+1 cut % quote dup eval d nop s compose i compose
+1 crank compose compose compose def
+
+$
+ldfgldftgldfdtgl
+df 
+ 
+dfiff1 crank ing
+
+fing 1 cut unaliasf unaliasf
+
+#  gets geti getd compose compose
+2 crank d compose i compose s compose def eval
+1 cut  quote dup eval d nop s compose i compose
+1 crank compose compose compose def
+
+%
+0 1 - 174 insert
+0 1 - 260 insert
+1 cut swap drop
+self.cog fwrite
+3 crank # self.cog fprint 1 crank eval
+
+self.cog fprint
+0 1 - self.cog fprint
+$
+
+dup evalstr
+% self.cog fprint
+9
+
+dup evalstr

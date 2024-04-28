@@ -1,0 +1,50 @@
+ldfgldftgldfdtgl
+df 
+ 
+dfiff1 crank ing
+
+fing 1 cut unaliasf unaliasf
+
+# 9 gets geti getd compose compose
+2 crank d compose i compose s compose def eval
+1 cut 9 quote dup eval d nop s compose i compose
+1 crank compose compose compose def
+
+#
+$ % gets geti getd compose compose
+2 crank d compose i compose s compose def eval
+1 cut % quote dup eval d nop s compose i compose
+1 crank compose compose compose def
+
+$
+ldfgldftgldfdtgl
+df 
+ 
+dfiff1 crank ing
+
+fing 1 cut unaliasf unaliasf
+
+#  gets geti getd compose compose
+2 crank d compose i compose s compose def eval
+1 cut  quote dup eval d nop s compose i compose
+1 crank compose compose compose def
+
+%
+
+0 1 - 174 insert
+0 1 - 260 insert
+1 cut swap drop
+print
+2 crank # print 1 crank
+
+$ This program prints itself as output! % drop
+
+print
+0 1 - print
+$
+
+dup evalstr
+% print
+9
+
+dup evalstr

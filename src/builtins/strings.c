@@ -74,7 +74,7 @@ void cog_cut(value_t *v) {
     return;
   }
   string_t *str = wq->str_word;
-  size_t n = string_to_int(w1->str_word);
+  long n = string_to_int(w1->str_word);
   if (n < 0 || n > str->length) {
     eval_error(U"INDEX OUT OF RANGE", v);
     stack_push(stack, quot);
@@ -144,7 +144,7 @@ void cog_nth(value_t *v) {
     return;
   }
   string_t *str = wq->str_word;
-  int n = string_to_int(w1->str_word);
+  long n = string_to_int(w1->str_word);
   if (n < 0 || n >= str->length) {
     eval_error(U"INDEX OUT OF RANGE", v);
     stack_push(stack, v1);
@@ -154,6 +154,78 @@ void cog_nth(value_t *v) {
   str->value[0] = str->value[n];
   str->value[1] = '\0';
   str->length = 1;
+}
+
+void cog_insert(value_t *v) {
+  contain_t *cur = stack_peek(STACK);
+  if (cur->stack->size < 3) {
+    eval_error(U"TOO FEW ARGUMENTS", v);
+    return;
+  }
+  value_t *index = stack_pop(cur->stack);
+  if (value_stack(index)[0]->size != 1) {
+    stack_push(cur->stack, index);
+    eval_error(U"BAD ARGUMENT TYPE", v);
+    return;
+  }
+  value_t *idxval = value_stack(index)[0]->items[0];
+  if (idxval->type != VWORD) {
+    stack_push(cur->stack, index);
+    eval_error(U"BAD ARGUMENT TYPE", v);
+    return;
+  }
+  value_t *v1 = stack_pop(cur->stack);
+  stack_t *v1stack = *value_stack(v1);
+  if (v1stack->size != 1) {
+    stack_push(cur->stack, v1);
+    stack_push(cur->stack, index);
+    eval_error(U"BAD ARGUMENT TYPE", v);
+    return;
+  }
+  value_t *substr = v1stack->items[0];
+  if (substr->type != VWORD) {
+    stack_push(cur->stack, v1);
+    stack_push(cur->stack, index);
+    eval_error(U"BAD ARGUMENT TYPE", v);
+    return;
+  }
+  value_t *string = stack_peek(cur->stack);
+  stack_t *stringstack = *value_stack(string);
+  if (stringstack->size != 1) {
+    stack_push(cur->stack, v1);
+    stack_push(cur->stack, index);
+    eval_error(U"BAD ARGUMENT TYPE", v);
+    return;
+  }
+  value_t *strval = stringstack->items[0];
+  if (strval->type != VWORD) {
+    stack_push(cur->stack, v1);
+    stack_push(cur->stack, index);
+    eval_error(U"BAD ARGUMENT TYPE", v);
+    return;
+  }
+  string_t *str = strval->str_word;
+  long idx = string_to_int(idxval->str_word);
+  if (idx < 0 || idx > str->length) {
+    stack_push(cur->stack, v1);
+    stack_push(cur->stack, index);
+    eval_error(U"INDEX OUT OF RANGE", v);
+    return;
+  }
+  value_free_safe(index);
+  value_free_safe(v1);
+  string_t *insert_str = substr->str_word;
+  size_t insert_length = insert_str->length;
+  size_t str_length = str->length;
+  for (size_t i = 0; i < insert_length; i++) {
+    string_append(str, 0);
+  }
+  for (long i = str_length - 1; i >= idx; i--) {
+    str->value[i + insert_length] = str->value[i];
+  }
+  for (size_t i = 0; i < insert_length; i++) {
+    str->value[i + idx] = insert_str->value[i];
+  }
 }
 
 void cog_isword(value_t *v) {
@@ -183,5 +255,6 @@ void add_funcs_strings(ht_t *flit) {
   add_func(flit, cog_len, U"len");
   add_func(flit, cog_cut, U"cut");
   add_func(flit, cog_nth, U"nth");
+  add_func(flit, cog_insert, U"insert");
   add_func(flit, cog_isword, U"isword");
 }

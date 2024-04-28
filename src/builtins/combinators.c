@@ -184,7 +184,7 @@ void cog_put(value_t *v) {
   }
   value_t *v1 = stack_pop(cur->stack);
   value_t *stack = stack_peek(cur->stack);
-  size_t idx = string_to_int(idxval->str_word);
+  long idx = string_to_int(idxval->str_word);
   stack_t *stackstack = *value_stack(stack);
   if (idx < 0 || idx > stackstack->size) {
     stack_push(cur->stack, v1);
@@ -194,13 +194,13 @@ void cog_put(value_t *v) {
   }
   value_free_safe(index);
   stack_t *v1stack = *value_stack(v1);
-  size_t v1size = v1stack->size;
-  for (size_t i = 0; i < v1size; i++)
+  long v1size = v1stack->size;
+  for (long i = 0; i < v1size; i++)
     stack_push(stackstack, NULL);
-  for (size_t i = stackstack->size - 1; i >= idx + v1size; i--) {
+  for (long i = stackstack->size - 1; i >= idx + v1size; i--) {
     stackstack->items[i] = stackstack->items[i-v1size];
   }
-  for (size_t i = 0; i < v1size; i++)
+  for (long i = 0; i < v1size; i++)
     stackstack->items[idx + i] = v1stack->items[i];
   v1stack->size = 0;
   value_free_safe(v1);

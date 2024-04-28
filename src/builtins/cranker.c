@@ -51,10 +51,16 @@ void cog_metacrank(value_t *v) {
     stack_push(stack, tmp);
     return;
   }
-  if (cur->cranks == NULL) cur->cranks = init_stack(DEFAULT_STACK_SIZE);
-  stack_t *cranks = cur->cranks;
   int v1val = string_to_int(v1->str_word);
   int v2val = string_to_int(v2->str_word);
+  if (v1val < 0 || v2val < 0) {
+    eval_error(U"INDEX OUT OF RANGE", v);
+    stack_push(stack, tmp2);
+    stack_push(stack, tmp);
+    return;
+  }
+  if (cur->cranks == NULL) cur->cranks = init_stack(DEFAULT_STACK_SIZE);
+  stack_t *cranks = cur->cranks;
   while (cranks->size <= v1val) {
     int(*arr)[2] = malloc(sizeof(int[2]));
     arr[0][0] = 0;
@@ -89,6 +95,11 @@ void cog_crank(value_t *v) {
     return;
   }
   int v1val = string_to_int(v1->str_word);
+  if (v1val < 0) {
+    eval_error(U"INDEX OUT OF RANGE", v);
+    stack_push(stack, tmp);
+    return;
+  }
   if (cur->cranks == NULL) cur->cranks = init_stack(DEFAULT_STACK_SIZE);
   stack_t *cranks = cur->cranks;
   if (cranks->size == 0) {
@@ -124,6 +135,11 @@ void cog_crankall(value_t *v) {
     return;
   }
   int v1val = string_to_int(v1->str_word);
+  if (v1val < 0) {
+    eval_error(U"INDEX OUT OF RANGE", v);
+    stack_push(stack, tmp);
+    return;
+  }
   if (cur->cranks == NULL)
     cur->cranks = init_stack(DEFAULT_STACK_SIZE);
   stack_t *cranks = cur->cranks;
@@ -261,7 +277,7 @@ void cog_metamodcrank(value_t *v) {
 void add_funcs_cranker(ht_t *flit) {
   add_func(flit, cog_metacrank, U"metacrank");
   add_func(flit, cog_crank, U"crank");
-  add_func(flit, cog_crankall, U"crankall");
+  //add_func(flit, cog_crankall, U"crankall");
   add_func(flit, cog_halt, U"halt");
   add_func(flit, cog_crankbase, U"crankbase");
   add_func(flit, cog_modcrank, U"modcrank");
