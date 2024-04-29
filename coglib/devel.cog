@@ -1,4 +1,4 @@
-../coglib/comment.cog load
+comment.cog load
 
 # example of more (unnecessary) baremetal code
 2crank ing 1 crank # recursive baremetal factorial program:
@@ -27,7 +27,7 @@
 2crank ing 2 crank 18 quote compose eval factorial compose compose compose print compose endl compose print compose
 2crank ing 1 crank 1 crank stack if
 
-../coglib/quote.cog load
+quote.cog load
 
 # test quote functionality
 verbose-yes [
@@ -35,26 +35,6 @@ verbose-yes [
   { child [[ nop ]] {{ nop }} (( nop )) { nop } } .
   {{ hello nop [ world ] }} .
 ] [ ] if
-
-# reimplement comment:
-\ #
-( geti getd gets crankbase f d f i endl s
-  [ 1 ] metacrankbase [ 1 ] =
-  [ ( drop crank s d i ( dup ) dip swap ) ]
-  [ ( drop halt crank s d i ) ]
-  if
-  halt [ 1 ] [ 1 ] metacrank )
-def
-
-# basic string (without escape characters)
-\ "
-( getd gets geti f d [ \ " ] s f i
-  [ 1 ] metacrankbase [ 1 ] =
-  [ ( len [ 1 ] - cut drop swap i swap s swap d compose ( dup ) dip swap ) ]
-  [ ( len [ 1 ] - cut drop swap i swap s swap d halt [ 1 ] crank ) ]
-  if
-  halt [ 1 ] [ 1 ] metacrank ) def
-\ " singlet
 
 # for the sake of syntax highlighting: "
 

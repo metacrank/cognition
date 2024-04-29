@@ -1,45 +1,113 @@
+quote.cog load
 # Cognition Standard Library
 # Apr. 2024
 
-# stackops extension
-[ nip ] ( swap drop ) def
+## useful example extensions; to be replaced by generalizations
+[ drop2 ] ( drop drop ) def
+[ drop3 ] ( drop2 drop ) def
+[ drop4 ] ( drop2 drop2 ) def
+
+[ dropd ] ( swap drop ) def
+[ dropd2 ] ( dropd dropd ) def
+[ dropd3 ] ( dropd2 dropd ) def
+[ dropd4 ] ( dropd3 dropd ) def
+
+[ nip2 ] ( nip nip ) def
+[ nip3 ] ( nip2 nip ) def
+[ nip4 ] ( nip3 nip ) def
+
 [ nipd ] ( ( nip ) dip ) def
-[ swapd ] ( ( swap ) dip ) def
-[ swapdd ] ( ( swapd ) dip ) def
-[ spin ] ( swap swapd swap ) def
-[ spind ] ( ( spin ) dip ) def
-[ dupd ] ( ( dup ) dip ) def
-[ dupdd ] ( ( dupd ) dip ) def
-[ over ] ( dupd swap ) def
-[ overd ] ( ( over ) dip ) def
-[ overdd ] ( ( overd ) dip ) def
-[ pick ] ( overd swap ) def
-[ pickd ] ( ( pick ) dip ) def
-[ pickdd ] ( ( pickd ) dip ) def
-[ reach ] ( pickd swap ) def
-[ reachd ] ( ( reach ) dip ) def
-[ reachdd ] ( ( reachd ) dip ) def
-[ rot ] ( swapd swap ) def
-[ -rot ] ( swap swapd ) def
-[ roll ] ( swapdd swapd swap ) def
-[ -roll ] ( swap swapd swapdd ) def
-[ rotd ] ( ( rot ) dip ) def
-[ -rotd ] ( ( -rot ) dip ) def
-[ rolld ] ( ( roll ) dip ) def
-[ -rolld ] ( ( -roll ) dip ) def
+[ nipd2 ] ( ( nip2 ) dip ) def
+[ nipd3 ] ( ( nip3 ) dip ) def
+[ nipd4 ] ( ( nip4 ) dip ) def
+
+# swap is a special case of the spin and rot classes
+[ 2spin ] ( swap ) def
+[ 2spind ] ( ( 2spin ) dip ) def
+[ 3spin ] ( swap 2spind swap ) def
+[ 3spind ] ( ( 3spin ) dip ) def
+[ spin ] ( 3spin ) def
+[ spind ] ( 3spind ) def
+[ 4spin ] ( swap 3spind swap ) def
+[ 4spind ] ( ( 4spin ) dip ) def
+
+[ 2rot ] ( swap ) def
+[ 3rot ] ( ( 2rot ) dip swap ) def
+[ rot ] ( 3rot ) def
+[ 4rot ] ( ( 3rot ) dip swap ) def
+[ 5rot ] ( 4rotd swap ) def
+[ 5rotd ] ( swap -4rotd ) def
+[ 4rotd2 ] ( 4rotd 4rotd ) def
+
+# pick is the generalization of dup
+[ 1pick ] ( dup ) def
+[ 1pickd ] ( ( 1pick ) dip ) def
+[ 2pick ] ( 1pickd swap ) def
+[ 2pickd ] ( ( 2pick ) dip ) def
+[ 3pick ] ( 2pickd swap ) def
+[ 3pickd ] ( ( 3pick ) dip ) def
+[ 4pick ] ( 3pickd swap ) def
+[ 4pickd ] ( ( 4pick ) dip ) def
+[ pick ] ( 3pick ) def
+[ reach ] ( 4pick ) def
+
+
+
+## seed stackops extension
+[ dropd ] ( swap drop ) def
+[ 2spin ] ( swap ) def
+[ 2rot ] ( swap ) def
+[ 1pick ] ( dup ) def
+
+# generalize
+[ mkop234 ] ( dup dup dup dup dup [ 2 ] concat swap unglue dup compose dup ( def ) dip
+              swap unglue compose swap [ 3 ] concat ( dup ) dip swap def swap unglue compose
+              swap [ 4 ] concat swap def )
+[ mkop234 ] ( dup [ 4 ] concat swap dup [ 3 ] concat swap dup [ 2 ] concat swap unglue
+              dup compose dup compose dup compose dup compose
+              [ 2 ] split ( def ) dip [ 3 ] split ( def ) dip [ 4 ] split drop def )
+[ drop2 ]
+[ drop3 ]
+[ drop4 ]
+
+
+#gen
+[ 2rotd ] ( ( 2rot ) dip ) def
+#...
+[ 3rot ] ( 2rotd swap ) def
+[ 3rotd ] ( ( 3rot ) dip ) def
+[ 4rot ] ( 3rotd swap ) def
+[ 4rotd ] ( ( 4rot ) dip ) def
+#...
+[ rot ] ( 3rot ) def
+[ rotd ] ( 3rotd ) def
+[ roll ] ( 4rot ) def
+[ rolld ] ( 4rotd ) def
+
+
+# aliases
+[ spin ] ( 3spin ) def
+# gen spind, spindd, spin3d/spinnd
+[ rot ] ( 3rot ) def
+# gen rotd, rotdd, rot2,3,4,n, rotnd
+[ nip ] ( dropd ) def
+# gen nipd, nipdd, nipnd, nip2,3,4,n
+[ pick ] ( 3pick ) def
+# gen pickd, pickdd, picknd, pick2,3,4,n
+[ reach ] ( 4pick ) def
+# gen reachd, reachdd, reachnd, reach2,3,4,n
+
+
+
 [ weave ] drop # not ready to define weave
+
+
 
 # metastack extension
 [ meta ] ( qstack reset ) def
 
 # strings extension
 [ precat ] ( swap concat ) def
-
-# couple of useful extensions; to be replaced by generalizations
-[  ]
-
-
-
 
 
 # generalization scheme (stackops):

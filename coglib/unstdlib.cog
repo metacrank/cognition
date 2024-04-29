@@ -1,0 +1,8 @@
+[ nip nipd swapd swapdd spin spind
+  dupd dupdd over overd overdd pick
+  pickd pickdd reach reachd reachdd
+  rot -rot roll -roll rotd -rotd
+  rolld -rolld meta precat expand
+  >macro >stack with push take uncurry
+  keep when else curry each ]
+[ unglue ] each

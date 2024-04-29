@@ -20,13 +20,13 @@ void cog_drop(value_t *v);
 /* void cog_dropn(value_t *v); */
 
 /* discarding values further down the stack */
-/* void cog_nip(value_t *v); // dscd */
+/* void cog_nip(value_t *v); // dropd */
 /* void cog_nip2(value_t *v); */
 /* void cog_nip3(value_t *v); */
 /* void cog_nip4(value_t *v); */
 /* void cog_nipn(value_t *v); */
 
-/* void cog_nipd(value_t *v); // dscdd */
+/* void cog_nipd(value_t *v); // dropdd */
 /* void cog_nipd2(value_t *v); */
 /* void cog_nipd3(value_t *v); */
 /* void cog_nipd4(value_t *v); */
