@@ -215,7 +215,7 @@ def
 \ "
 ( getd gets geti f d [ \ " ] s f i
   [ 1 ] metacrankbase [ 1 ] =
-  [ ( len [ 1 ] - cut drop swap i swap s swap d compose ( dup ) dip swap ) ]
+  [ ( len [ 1 ] - cut drop swap i swap s swap d quote compose ( dup ) dip swap ) ]
   [ ( len [ 1 ] - cut drop swap i swap s swap d halt [ 1 ] crank ) ]
   if
   halt [ 1 ] [ 1 ] metacrank ) def

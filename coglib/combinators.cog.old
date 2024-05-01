@@ -1,0 +1,98 @@
+# Combinator definitions
+# Apr. 2024
+
+# define basic expand (works on nonempty macros only)
+[ expand ]
+( macro swap
+  ( [ 1 ] split
+    ( isword ( dup isdef ( unglue ) ( ) if ) ( ) if compose ) dip
+    size [ 0 ] > ( ( ( dup ) dip swap ) dip swap eval ) ( ) if )
+  dup ( swap ( swap ) dip ) dip eval drop swap drop ) def
+
+# complete expand (checks for definitions within child first without copying hashtables)
+[ expand ]
+( size [ 0 ] > ( type [ VSTACK ] = ) ( return ) if ?
+  ( macro swap
+    macro
+    ( ( ( size dup [ 0 ] > ) dip swap ) dip swap
+      ( ( ( 1 - dup ( vat ) dip swap ( del ) dip ) dip compose ) dip dup eval )
+      ( drop swap drop )
+      if ) dup eval
+    ( ( [ 1 ] split
+        ( isword
+          ( compose cd dup isdef
+            ( unglue pop )
+              ( pop dup isdef ( unglue ) ( ) if )
+            if ) ( ) if
+          ( swap ) dip compose swap ) dip
+        size [ 0 ] > ) dip swap
+      ( dup eval ) ( drop drop swap compose ) if ) dup eval )
+  ( expand )
+  if ) def
+
+# automatic casting
+[ >macro ] ( [ VMACRO ] cast ) def
+[ >stack ] ( [ VSTACK ] cast ) def
+
+
+[ with ] ( swapd curry ) def
+
+
+[ push ] ( quote compose ) def
+
+
+[ take ] ( swap push ) def
+
+
+[ uncurry ] ( 1 split swap dip )
+
+
+[ keep ] ( dupd dip ) def
+
+[ when ] ( [ ] if ) def
+[ else ] ( [ ] swap if ) def
+
+[ curry ] ( swap quote prepose ) def
+
+
+# [ op ] makeopn === [ opn ] [ opn definition ] def
+[ makeopn ] (
+  dup dup dup dup
+  [ "BAD ARGUMENT TYPE" ] over ( epush return ) curry curry quote
+  ( ( epeek [ "isword" ] = ( [ "TOO FEW ARGUMENTS" ] = ( return ) when ) ( drop ) if ) if
+    [ 0 ] +
+    dup [ 0 ] = ( drop return ) when
+    dup [ 1 ] = ) compose
+  swap unglue ( return ) compose ( drop ) prepose ( when ) curry compose
+  swap [ "INDEX OUT OF RANGE" ] swap ( epush return ) curry curry
+  ( when ) curry ( dup [ 0 ] < ) prepose compose
+  take ( over concat dup isdef ( swap drop ) ) compose
+  swap unglue ( compose ) curry ( roll times dupd def ) curry ( macro ) prepose
+  ( if eval ) curry compose ( isword ) swap compose
+  ( [ "n" ] concat ) dip def
+)
+
+
+[ mcomposen ]
+[ composen ]
+[ mcompose ]
+
+
+
+[ curryn ] (
+  # error handling
+  isword
+  ( [ "BAD ARGUMENT TYPE" ] [ "curryn" ] epush return )
+  ( epeek [ "isword" ] = ( [ "TOO FEW ARGUMENTS" ] = ( return ) when ) ( drop ) if )
+  if
+  # check for definition
+  [ 0 ] +
+  dup [ 0 ] = ( drop return ) when
+  dup [ 1 ] = ( drop curry return ) when
+  dup [ 0 ] < ( [ "INDEX OUT OF RANGE" ] [ "curryn" ] epush return ) when
+  [ "curry" ] over concat dup isdef
+  ( swap drop )
+  ( macro ( ( curry ) compose ) roll times dupd def )
+  if eval
+)
+#[ curry ] makeopn

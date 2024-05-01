@@ -370,7 +370,7 @@ void cog_substack(value_t *v) {
   long n2 = string_to_int(idxval2->str_word);
   value_t *quot = stack_peek(stack);
   stack_t *qstack = *value_stack(quot);
-  if (n1 < 0 || n2 < 0 || n1 >= qstack->size || n2 >= qstack->size) {
+  if (n1 < 0 || n2 < 0 || n1 > qstack->size || n2 > qstack->size) {
     stack_push(stack, index1);
     stack_push(stack, index2);
     eval_error(U"INDEX OUT OF RANGE", v);
@@ -382,14 +382,14 @@ void cog_substack(value_t *v) {
     value_free_safe(qstack->items[i]);
     qstack->items[i] = NULL;
   }
-  for (long i = n2 + 1; i < qstack->size; i++) {
+  for (long i = n2; i < qstack->size; i++) {
     value_free_safe(qstack->items[i]);
     qstack->items[i] = NULL;
   }
-  for (long i = 0; i <= n2 - n1; i++) {
+  for (long i = 0; i < n2 - n1; i++) {
     qstack->items[i] = qstack->items[i + n1];
   }
-  qstack->size = n2 - n1 + 1;
+  qstack->size = n2 - n1;
   if (qstack->size < 0) {
     qstack->size = 0;
   }

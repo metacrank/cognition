@@ -52,6 +52,8 @@ void fprint_str_formatted(FILE *f, string_t *string) {
       fprintf(f, "\\n");
     } else if (string->value[i] == '\t') {
       fprintf(f, "\\t");
+    } else if (string->value[i] == '\r') {
+      fprintf(f, "\\r");
     } else {
       fprint_utf32(f, 1, string->value[i]);
     }

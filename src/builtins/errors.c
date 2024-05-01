@@ -129,6 +129,39 @@ void cog_err_show(value_t *v) {
   }
 }
 
+void cog_err_throw(value_t *v) {
+  contain_t *cur = stack_peek(STACK);
+  value_t *errc = stack_pop(cur->stack);
+  if (!errc) {
+    eval_error(U"TOO FEW ARGUMENTS", v);
+    return;
+  }
+  stack_t *errstack = *value_stack(errc);
+  if (errstack->size != 1) {
+    eval_error(U"BAD ARGUMENT TYPE", v);
+    stack_push(cur->stack, errc);
+    return;
+  }
+  value_t *errval = errstack->items[0];
+  if (errval->type != VWORD) {
+    eval_error(U"BAD ARGUMENT TYPE", v);
+    stack_push(cur->stack, errc);
+    return;
+  }
+  value_t *e = init_value(VERR);
+  e->error = calloc(1, sizeof(error_t));
+  if (v)
+    e->error->str_word = string_copy(v->str_word);
+  else
+    e->error->str_word = NULL;
+  e->error->error = errval->str_word;
+  errval->str_word = NULL;
+  value_free_safe(errc);
+  if (cur->err_stack == NULL)
+    cur->err_stack = init_stack(DEFAULT_STACK_SIZE);
+  stack_push(cur->err_stack, e);
+}
+
 void add_funcs_errors(ht_t *flit) {
   add_func(flit, cog_err_clean, U"eclean");
   add_func(flit, cog_err_peek, U"epeek");
@@ -136,4 +169,5 @@ void add_funcs_errors(ht_t *flit) {
   add_func(flit, cog_err_push, U"epush");
   add_func(flit, cog_err_print, U"eprint");
   add_func(flit, cog_err_show, U"eshow");
+  add_func(flit, cog_err_throw, U"ethrow");
 }

@@ -13,31 +13,82 @@ void cog_concat(value_t *v) {
     return;
   }
   value_t *c2 = stack_pop(stack);
-  if (value_stack(c2)[0]->size != 1) {
+  stack_t *c2stack = *value_stack(c2);
+  if (c2stack->size == 0) {
     eval_error(U"BAD ARGUMENT TYPE", v);
     stack_push(stack, c2);
     return;
   }
-  value_t *w2 = value_stack(c2)[0]->items[0];
-  if (w2->type != VWORD) {
-    eval_error(U"BAD ARGUMENT TYPE", v);
-    stack_push(stack, c2);
-    return;
+  value_t *val;
+  for (long i = 0; i < c2stack->size; i++) {
+    val = c2stack->items[i];
+    if (val->type != VWORD) {
+      eval_error(U"BAD ARGUMENT TYPE", v);
+      stack_push(stack, c2);
+      return;
+    }
   }
   value_t *c1 = stack_peek(stack);
-  if (value_stack(c1)[0]->size != 1) {
-    eval_error(U"BAD ARGUMENT TYPE", v);
+  stack_t *c1stack = *value_stack(c1);
+  if (c1stack->size == 0) {
     stack_push(stack, c2);
+    eval_error(U"BAD ARGUMENT TYPE", v);
     return;
   }
-  value_t *w1 = value_stack(c1)[0]->items[0];
-  if (w1->type != VWORD) {
-    eval_error(U"BAD ARGUMENT TYPE", v);
-    stack_push(stack, c2);
-    return;
+  for (long i = 0; i < c1stack->size; i++) {
+    val = c1stack->items[i];
+    if (val->type != VWORD) {
+      eval_error(U"BAD ARGUMENT TYPE", v);
+      stack_push(stack, c2);
+      return;
+    }
   }
-  string_concat(w1->str_word, w2->str_word);
+  value_t *w1 = c1stack->items[0];
+  for (long i = 1; i < c1stack->size; i++) {
+    val = c1stack->items[i];
+    string_concat(w1->str_word, val->str_word);
+    value_free_safe(val);
+  }
+  for (long i = 0; i < c2stack->size; i++) {
+    val = c2stack->items[i];
+    string_concat(w1->str_word, val->str_word);
+  }
+  c1stack->size = 1;
   value_free_safe(c2);
+}
+
+void cog_unconcat(value_t *v) {
+  contain_t *cur = stack_peek(STACK);
+  stack_t *stack = cur->stack;
+  value_t *strc = stack_peek(stack);
+  if (!strc) {
+    eval_error(U"TOO FEW ARGUMENTS", v);
+  }
+  stack_t **sp = value_stack(strc);
+  stack_t *strstack = *sp;
+  value_t *strval;
+  for (long i = 0; i < strstack->size; i++) {
+    strval = strstack->items[i];
+    if (strval->type != VWORD) {
+      eval_error(U"BAD ARGUMENT TYPE", v);
+      return;
+    }
+  }
+  stack_t *newstack = init_stack(DEFAULT_STACK_SIZE);
+  string_t *newstring;
+  value_t *newval;
+  for (long i = 0; i < strstack->size; i++) {
+    strval = strstack->items[i];
+    for (long i = 0; i < strval->str_word->length; i++) {
+      newstring = init_string(U"");
+      string_append(newstring, strval->str_word->value[i]);
+      newval = init_value(VWORD);
+      newval->str_word = newstring;
+      stack_push(newstack, newval);
+    }
+  }
+  macro_def_stack_push(strstack);
+  *sp = newstack;
 }
 
 void cog_cut(value_t *v) {
@@ -228,6 +279,26 @@ void cog_insert(value_t *v) {
   }
 }
 
+void cog_reverse(value_t *v) {
+  contain_t *cur = stack_peek(STACK);
+  value_t *strc = stack_peek(cur->stack);
+  if (!strc) {
+    eval_error(U"TOO FEW ARGUMENTS", v);
+    return;
+  }
+  stack_t *strstack = *value_stack(strc);
+  if (strstack->size != 1) {
+    eval_error(U"BAD ARGUMENT TYPE", v);
+    return;
+  }
+  value_t *strval = strstack->items[0];
+  if (strval->type != VWORD) {
+    eval_error(U"BAD ARGUMENT TYPE", v);
+    return;
+  }
+  string_reverse(strval->str_word);
+}
+
 void cog_isword(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   value_t *strval = stack_peek(cur->stack);
@@ -305,11 +376,13 @@ void cog_itob(value_t *v) {
 
 void add_funcs_strings(ht_t *flit) {
   add_func(flit, cog_concat, U"concat");
+  add_func(flit, cog_unconcat, U"unconcat");
   add_func(flit, cog_len, U"len");
   add_func(flit, cog_cut, U"cut");
   add_func(flit, cog_nth, U"nth");
   add_func(flit, cog_insert, U"insert");
+  add_func(flit, cog_reverse, U"reverse");
   add_func(flit, cog_isword, U"isword");
-  add_func(flit, cog_btoi, U"byte");
-  add_func(flit, cog_itob, U"char");
+  add_func(flit, cog_btoi, U"btoi");
+  add_func(flit, cog_itob, U"itob");
 }

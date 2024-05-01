@@ -1,8 +1,116 @@
-[ nip nipd swapd swapdd spin spind
-  dupd dupdd over overd overdd pick
-  pickd pickdd reach reachd reachdd
-  rot -rot roll -roll rotd -rotd
-  rolld -rolld meta precat expand
-  >macro >stack with push take uncurry
-  keep when else curry each ]
-[ unglue ] each
+[
+  ++
+  --
+  ==
+  pos?
+  neg?
+  zero?
+  non-neg?
+  non-pos?
+  one?
+  two?
+  three?
+
+  meta
+  parent
+
+  ereturn
+
+  >macro
+  >stack
+
+  nip
+  deep
+
+  2spin
+  3spin
+  4spin
+
+  2rot
+  3rot
+  4rot
+  -2rot
+  -3rot
+  -4rot
+
+  1pick
+  2pick
+  3pick
+  4pick
+
+  spin
+  rot
+  -rot
+  roll
+  -roll
+  pick
+  reach
+
+  2dup
+  3dup
+  4dup
+
+  over
+  2over
+  3over
+  4over
+
+  factorial
+  abs
+  factor?
+  even?
+  odd?
+
+] ( undef ) each [
+
+  drop
+  swap
+  dup
+  eval
+
+  nip
+  deep
+
+  2rot
+  3rot
+  4rot
+  -2rot
+  -3rot
+  -4rot
+
+  1pick
+  2pick
+  3pick
+  4pick
+
+  rot
+  -rot
+  roll
+  -roll
+  pick
+  reach
+
+  2dup
+  3dup
+  4dup
+
+
+] [ undefn ] each [
+
+  2spin
+  3spin
+  4spin
+
+  spin
+
+  over
+  2over
+  3over
+  4over
+
+] [ undefd ] each
+
+"unstring.cog" load
+"uncombinators.cog" load
+"ungenlib.cog" load
+"unquote.cog" load

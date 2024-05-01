@@ -23,12 +23,6 @@ void cog_macro(value_t *v);
 /* casts the type of the stack item. accepts VSTACK/VMACRO and 0/1 as arguments */
 void cog_cast(value_t *v);
 
-/* /\* expands macro or stack based on word definitions *\/ */
-/* void cog_expand(value_t *v); */
-
-// >macro or 2macro: macro swap compose
-// >stack or 2stack: stack swap compose
-
 /* creates a child stack with the default cognition environment */
 void cog_sub(value_t *v);
 
@@ -84,72 +78,18 @@ void cog_put(value_t *v);
 
 /* needs to use eval stack in case exit or similar metastack operations are called by dip! */
 void cog_dip(value_t *v);
-/* void cog_dip2(value_t *v); */
-/* void cog_dip3(value_t *v); */
-/* void cog_dip4(value_t *v); */
-/* void cog_dipn(value_t *v); */
-
-/*! @brief keeps value on the stack after evaluating the value */
-/* keep can be written as 'dupd dip' */
-/* void cog_keep(value_t *v); */
-/* void cog_keep2(value_t *v); */
-/* void cog_keep3(value_t *v); */
-/* void cog_keep4(value_t *v); */
-/* void cog_keepn(value_t *v); */
-
 
 /*! @brief [cond] [if true] [if false] if; evaluates 2nd term if cond is true;
  * otherwise evaluates the other one. */
 void cog_if(value_t *v);
 
-/* void cog_when(value_t *v); */
-
-/* executes child, then looks at element at top of stack and if true executes the same child again, in a loop */
-/* void cog_loop(value_t *v); */
-/* loop === [ eval ] keep [ loop ] curry when */
-
-/* [cond] [body] while; executes [body] while [cond] returns true, pops [cond] return value */
-/* void cog_while(value_t *v); */
-
-/* void cog_until(value_t *v); */
-
-/* void cog_times(value_t *v); */
-
 /* splits child in two */
 void cog_split(value_t *v);
-/* void cog_split0(value_t *v); */
-/* void cog_split1(value_t *v); */
-/* void cog_split2(value_t *v); */
-/* void cog_split3(value_t *v); */
-
-/* void cog_splitst(value_t *v); */
-/* void cog_splitst0(value_t *v); */
-/* void cog_splitst1(value_t *v); */
-/* void cog_splitst2(value_t *v); */
-/* void cog_splitst3(value_t *v); */
-
-
-/* gets nth values */
-/* void cog_first(value_t *v); */
-/* void cog_second(value_t *v); */
-/* void cog_third(value_t *v); */
-/* void cog_fourth(value_t *v); */
-/* void cog_last(value_t *v); */
-/* void cog_second_last(value_t *v); */
-/* void cog_third_last(value_t *v); */
-/* void cog_fourth_last(value_t *v); */
 
 void cog_vat(value_t *v);
 
 /* subsequence from m to n */
 void cog_substack(value_t *v);
-
-/* but-last */
-/* rest */
-/* head */
-/* tail */
-/* derivatives... */
-
 
 /*! @brief deletes value at index from child */
 void cog_del(value_t *v);

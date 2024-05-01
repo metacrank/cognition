@@ -836,6 +836,82 @@ void cog_or(value_t *v) {
   stack_push(stack, v1);
 }
 
+void cog_not(value_t *v) {
+  contain_t *cur = stack_peek(STACK);
+  value_t *v1 = stack_peek(cur->stack);
+  if (!v1) {
+    eval_error(U"TOO FEW ARGUMENTS", v);
+    return;
+  }
+  stack_t *v1stack = *value_stack(v1);
+  if (v1stack->size != 1) {
+    eval_error(U"BAD ARGUMENT TYPE", v);
+    return;
+  }
+  value_t *str = v1stack->items[0];
+  if (str->type != VWORD) {
+    eval_error(U"BAD ARGUMENT TYPE", v);
+    return;
+  }
+  if (word_truth(str)) {
+    str->str_word->length = 0;
+  } else {
+    string_append(str->str_word, U't');
+  }
+}
+
+void cog_isfloat(value_t *v) {
+  contain_t *cur = stack_peek(STACK);
+  value_t *v1 = stack_peek(cur->stack);
+  if (!v1) {
+    eval_error(U"TOO FEW ARGUMENTS", v);
+    return;
+  }
+  stack_t *v1stack = *value_stack(v1);
+  if (v1stack->size != 1) {
+    eval_error(U"BAD ARGUMENT TYPE", v);
+    return;
+  }
+  value_t *str = v1stack->items[0];
+  if (str->type != VWORD) {
+    eval_error(U"BAD ARGUMENT TYPE", v);
+    return;
+  }
+  if (isfloat(str->str_word)) {
+    if (str->str_word->length == 0) {
+      string_append(str->str_word, U't');
+    }
+    return;
+  }
+  str->str_word->length = 0;
+}
+
+void cog_isint(value_t *v) {
+  contain_t *cur = stack_peek(STACK);
+  value_t *v1 = stack_peek(cur->stack);
+  if (!v1) {
+    eval_error(U"TOO FEW ARGUMENTS", v);
+    return;
+  }
+  stack_t *v1stack = *value_stack(v1);
+  if (v1stack->size != 1) {
+    eval_error(U"BAD ARGUMENT TYPE", v);
+    return;
+  }
+  value_t *str = v1stack->items[0];
+  if (str->type != VWORD) {
+    eval_error(U"BAD ARGUMENT TYPE", v);
+    return;
+  }
+  if (isint(str->str_word)) {
+    if (str->str_word->length == 0) {
+      string_append(str->str_word, U't');
+    }
+    return;
+  }
+  str->str_word->length = 0;
+}
+
 void add_funcs_math(ht_t *flit) {
   add_func(flit, cog_equals, U"=");
   add_func(flit, cog_neq, U"!=");
@@ -862,4 +938,7 @@ void add_funcs_math(ht_t *flit) {
   add_func(flit, cog_lthan, U"<");
   add_func(flit, cog_and, U"and");
   add_func(flit, cog_or, U"or");
+  add_func(flit, cog_not, U"not");
+  add_func(flit, cog_isfloat, U"isfloat");
+  add_func(flit, cog_isint, U"isint");
 }

@@ -79,6 +79,12 @@ void cog_and(value_t *v);
 
 void cog_or(value_t *v);
 
+void cog_not(value_t *v);
+
+void cog_isfloat(value_t *v);
+
+void cog_isint(value_t *v);
+
 /* takes a function giving the coefficient of a taylor series
  * and computes the series to arbitrary precision */
 void cog_taylor(value_t *v);

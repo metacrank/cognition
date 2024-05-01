@@ -924,6 +924,7 @@ void evalstack(contain_t *c, value_t *callword) {
       if (newval->type != VWORD) {
         push_quoted(cur, value_copy(newval));
         crank();
+        dec_crank(cur);
         if (return_function(c, false))
           return;
         continue;
@@ -959,6 +960,7 @@ void evalstack(contain_t *c, value_t *callword) {
       if (!evald) {
         push_quoted(cur, value_copy(newval));
         crank();
+        dec_crank(cur);
       }
       if (return_function(c, false))
         return;
@@ -1030,6 +1032,8 @@ void evalword(value_t *v, bool always_evalf) {
       FAMILY_RECURSION_DEPTH--;
       stack_pop(MACROS);
       evald = true;
+      if (RETURNED)
+        RETURNED = false;
       break;
     } else if ((expand = ht_get(parent->word_table, v->str_word))) {
       if (FAMILY_RECURSION_DEPTH >= 13824) {
@@ -1053,6 +1057,8 @@ void evalword(value_t *v, bool always_evalf) {
       stack_pop(FAMILY);
       FAMILY_IDX->length -= 2;
       evald = true;
+      if (RETURNED)
+        RETURNED = false;
       break;
     } else if (isfaliasin(parent, v)) {
       if (always_evalf)
@@ -1153,6 +1159,4 @@ void eval(value_t *v) {
   }
   push_quoted(cur, v);
   crank();
-  if (RETURNED)
-    RETURNED = false;
 }

@@ -114,59 +114,59 @@ void cog_crank(value_t *v) {
   value_free_safe(tmp);
 }
 
-/* sets all crank values to specified period */
-void cog_crankall(value_t *v) {
-  contain_t *cur = stack_peek(STACK);
-  stack_t *stack = cur->stack;
-  value_t *tmp = stack_pop(stack);
-  if (!tmp) {
-    eval_error(U"TOO FEW ARGUMENTS", v);
-    return;
-  }
-  if (value_stack(tmp)[0]->size != 1) {
-    eval_error(U"BAD ARGUMENT TYPE", v);
-    stack_push(stack, tmp);
-    return;
-  }
-  value_t *v1 = value_stack(tmp)[0]->items[0];
-  if (v1->type != VWORD) {
-    eval_error(U"BAD ARGUMENT TYPE", v);
-    stack_push(stack, tmp);
-    return;
-  }
-  int v1val = string_to_int(v1->str_word);
-  if (v1val < 0) {
-    eval_error(U"INDEX OUT OF RANGE", v);
-    stack_push(stack, tmp);
-    return;
-  }
-  if (cur->cranks == NULL)
-    cur->cranks = init_stack(DEFAULT_STACK_SIZE);
-  stack_t *cranks = cur->cranks;
-  if (cranks->size <= stack->size) {
-    for (int i = 0; i < cranks->size; i++) {
-      int(*arr)[2] = cranks->items[i];
-      arr[0][0] = 0;
-      arr[0][1] = v1val;
-    }
-    for (int i = cranks->size; i < stack->size; i++) {
-      int(*arr)[2] = malloc(sizeof(int[2]));
-      arr[0][0] = 0;
-      arr[0][1] = v1val;
-      stack_push(cranks, arr);
-    }
-  } else {
-    for (int i = 0; i < stack->size; i++) {
-      int(*arr)[2] = cranks->items[i];
-      arr[0][0] = 0;
-      arr[0][1] = v1val;
-    }
-    for (int i = stack->size; i < cranks->size; i++) {
-      free(stack_pop(cranks));
-    }
-  }
-  value_free_safe(tmp);
-}
+/* /\* sets all crank values to specified base *\/ */
+/* void cog_crankall(value_t *v) { */
+/*   contain_t *cur = stack_peek(STACK); */
+/*   stack_t *stack = cur->stack; */
+/*   value_t *tmp = stack_pop(stack); */
+/*   if (!tmp) { */
+/*     eval_error(U"TOO FEW ARGUMENTS", v); */
+/*     return; */
+/*   } */
+/*   if (value_stack(tmp)[0]->size != 1) { */
+/*     eval_error(U"BAD ARGUMENT TYPE", v); */
+/*     stack_push(stack, tmp); */
+/*     return; */
+/*   } */
+/*   value_t *v1 = value_stack(tmp)[0]->items[0]; */
+/*   if (v1->type != VWORD) { */
+/*     eval_error(U"BAD ARGUMENT TYPE", v); */
+/*     stack_push(stack, tmp); */
+/*     return; */
+/*   } */
+/*   int v1val = string_to_int(v1->str_word); */
+/*   if (v1val < 0) { */
+/*     eval_error(U"INDEX OUT OF RANGE", v); */
+/*     stack_push(stack, tmp); */
+/*     return; */
+/*   } */
+/*   if (cur->cranks == NULL) */
+/*     cur->cranks = init_stack(DEFAULT_STACK_SIZE); */
+/*   stack_t *cranks = cur->cranks; */
+/*   if (cranks->size <= stack->size) { */
+/*     for (int i = 0; i < cranks->size; i++) { */
+/*       int(*arr)[2] = cranks->items[i]; */
+/*       arr[0][0] = 0; */
+/*       arr[0][1] = v1val; */
+/*     } */
+/*     for (int i = cranks->size; i < stack->size; i++) { */
+/*       int(*arr)[2] = malloc(sizeof(int[2])); */
+/*       arr[0][0] = 0; */
+/*       arr[0][1] = v1val; */
+/*       stack_push(cranks, arr); */
+/*     } */
+/*   } else { */
+/*     for (int i = 0; i < stack->size; i++) { */
+/*       int(*arr)[2] = cranks->items[i]; */
+/*       arr[0][0] = 0; */
+/*       arr[0][1] = v1val; */
+/*     } */
+/*     for (int i = stack->size; i < cranks->size; i++) { */
+/*       free(stack_pop(cranks)); */
+/*     } */
+/*   } */
+/*   value_free_safe(tmp); */
+/* } */
 
 void cog_halt(value_t *v) {
   contain_t *cur = stack_peek(STACK);
@@ -277,7 +277,6 @@ void cog_metamodcrank(value_t *v) {
 void add_funcs_cranker(ht_t *flit) {
   add_func(flit, cog_metacrank, U"metacrank");
   add_func(flit, cog_crank, U"crank");
-  //add_func(flit, cog_crankall, U"crankall");
   add_func(flit, cog_halt, U"halt");
   add_func(flit, cog_crankbase, U"crankbase");
   add_func(flit, cog_modcrank, U"modcrank");

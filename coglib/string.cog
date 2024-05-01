@@ -1,0 +1,82 @@
+[ concat ] mkopn
+[ precat ] dup ( swap concat ) def mkopn
+[ unconcat ] mkopd
+
+[ substr ] ( ( swap ) dip cut drop swap cut swap drop ) def
+[ byte ] ( btoi ) def
+[ char ] ( itob ) def
+[ b+ ] ( swap byte + char ) def
+[ b- ] ( swap byte swap - char ) def
+[ b++ ] ( byte ++ char ) def
+[ b-- ] ( byte -- char ) def
+
+[ 0cut ] ( f swap ) def
+[ 1cut ] ( [ 1 ] cut ) def
+[ 2cut ] ( [ 2 ] cut ) def
+[ 3cut ] ( [ 3 ] cut ) def
+[ 4cut ] ( [ 4 ] cut ) def
+[ cut* ] ( ( len ) dip - cut ) def
+[ 1cut* ] ( len [ 1 ] - cut ) def
+[ 2cut* ] ( len [ 2 ] - cut ) def
+[ 3cut* ] ( len [ 3 ] - cut ) def
+[ 4cut* ] ( len [ 4 ] - cut ) def
+
+[ cfirst ] ( [ 1 ] nth ) def
+[ csecond ] ( [ 2 ] nth ) def
+[ cthird ] ( [ 3 ] nth ) def
+[ cfourth ] ( [ 4 ] nth ) def
+[ clast ] ( len [ 1 ] - nth ) def
+[ csecond-last ] ( len [ 2 ] - nth ) def
+[ cthird-last ] ( len [ 3 ] - nth ) def
+[ cfourth-last ] ( len [ 4 ] - nth ) def
+
+[ shead ] ( cut drop ) def
+[ strim ] ( cut* drop ) def
+[ stail ] ( cut nip ) def
+[ sleave ] ( cut* nip ) def
+[ sbut-last ] ( [ 1 ] strim ) def
+[ srest ] ( [ 1 ] shead ) def
+
+[ cpull ] ( cut 1cut swap concatd ) def
+[ set-nth ] ( swapd cut srest swapd concat2 ) def
+[ change-nth ] ( swapd cut 1cut ( swap ( swap eval ) dip swap ) dip concat2 ) def
+
+[ rejoin ] ( f concat ) def
+[ combine ] ( join rejoin ) def
+
+[ smap ] ( swap unconcat swap map rejoin ) def
+[ sfilter ] ( swap unconcat swap filter rejoin ) def
+[ sreduce ] ( swap unconcat swap reduce rejoin ) def
+
+[ sfind-from ] ( unconcatd find-from ) def
+[ sfind-last-from ] ( unconcatd find-last-from ) def
+[ sfind ] ( unconcatd find ) def
+[ sfind-last ] ( unconcatd find-last ) def
+[ cindex-from ] ( unconcatd index-from ) def
+[ clast-index-from ] ( unconcatd last-index-from ) def
+[ cindex ] ( unconcatd index ) def
+[ clast-index ] ( unconcatd last-index ) def
+
+# better string prefix character
+[ strquote-escape ] ( (
+    [
+      [ "n" ] ( endl ) ]
+      [ "t" ] ( tab ) ]
+      [ [ \ " ] ( [ \ " ] ) ]
+      [ [ \ \ ] ( [ \ \ ] ) ]
+      [ "r" ( cret ) ]
+      [ "INVALID STRING ESCAPE" ereturn ]
+    ] case concat over
+  )
+) def
+[ strquote-end0 ] ( drop nip swap [ 1 ] swap metacrank swap crank swap s swap d swap i ) def
+[ strquote-end1 ] ( strquote-end push over ) def
+[ \ " ] [ \ " ] (
+  geti getd gets f d f i f s stgl
+  crankbase [ 1 ] metacrankbase dup [ 1 ] =
+  [ ( dup [ \ \ ] = ( strquote-escape ) ( dup [ \ " ] = ( strquote-end0 ) ( concat over ) if ) if ) ]
+  [ ( dup [ \ \ ] = ( strquote-escape ) ( dup [ \ " ] = ( strquote-end1 ) ( concat over ) if ) if ) ]
+  if dup f swap halt [ 1 ] [ 1 ] metacrank
+) def singlet
+
+[ strquote-escape strquote-end0 strquote-end1 ] ( undef ) each

@@ -1,163 +1,99 @@
-quote.cog load
+2 crank quote.cog load
 # Cognition Standard Library
 # Apr. 2024
 
-## useful example extensions; to be replaced by generalizations
-[ drop2 ] ( drop drop ) def
-[ drop3 ] ( drop2 drop ) def
-[ drop4 ] ( drop2 drop2 ) def
-
-[ dropd ] ( swap drop ) def
-[ dropd2 ] ( dropd dropd ) def
-[ dropd3 ] ( dropd2 dropd ) def
-[ dropd4 ] ( dropd3 dropd ) def
-
-[ nip2 ] ( nip nip ) def
-[ nip3 ] ( nip2 nip ) def
-[ nip4 ] ( nip3 nip ) def
-
-[ nipd ] ( ( nip ) dip ) def
-[ nipd2 ] ( ( nip2 ) dip ) def
-[ nipd3 ] ( ( nip3 ) dip ) def
-[ nipd4 ] ( ( nip4 ) dip ) def
-
-# swap is a special case of the spin and rot classes
-[ 2spin ] ( swap ) def
-[ 2spind ] ( ( 2spin ) dip ) def
-[ 3spin ] ( swap 2spind swap ) def
-[ 3spind ] ( ( 3spin ) dip ) def
-[ spin ] ( 3spin ) def
-[ spind ] ( 3spind ) def
-[ 4spin ] ( swap 3spind swap ) def
-[ 4spind ] ( ( 4spin ) dip ) def
-
-[ 2rot ] ( swap ) def
-[ 3rot ] ( ( 2rot ) dip swap ) def
-[ rot ] ( 3rot ) def
-[ 4rot ] ( ( 3rot ) dip swap ) def
-[ 5rot ] ( 4rotd swap ) def
-[ 5rotd ] ( swap -4rotd ) def
-[ 4rotd2 ] ( 4rotd 4rotd ) def
-
-# pick is the generalization of dup
-[ 1pick ] ( dup ) def
-[ 1pickd ] ( ( 1pick ) dip ) def
-[ 2pick ] ( 1pickd swap ) def
-[ 2pickd ] ( ( 2pick ) dip ) def
-[ 3pick ] ( 2pickd swap ) def
-[ 3pickd ] ( ( 3pick ) dip ) def
-[ 4pick ] ( 3pickd swap ) def
-[ 4pickd ] ( ( 4pick ) dip ) def
-[ pick ] ( 3pick ) def
-[ reach ] ( 4pick ) def
-
-
-
-## seed stackops extension
-[ dropd ] ( swap drop ) def
-[ 2spin ] ( swap ) def
-[ 2rot ] ( swap ) def
-[ 1pick ] ( dup ) def
-
-# generalize
-[ mkop234 ] ( dup dup dup dup dup [ 2 ] concat swap unglue dup compose dup ( def ) dip
-              swap unglue compose swap [ 3 ] concat ( dup ) dip swap def swap unglue compose
-              swap [ 4 ] concat swap def )
-[ mkop234 ] ( dup [ 4 ] concat swap dup [ 3 ] concat swap dup [ 2 ] concat swap unglue
-              dup compose dup compose dup compose dup compose
-              [ 2 ] split ( def ) dip [ 3 ] split ( def ) dip [ 4 ] split drop def )
-[ drop2 ]
-[ drop3 ]
-[ drop4 ]
-
-
-#gen
-[ 2rotd ] ( ( 2rot ) dip ) def
-#...
-[ 3rot ] ( 2rotd swap ) def
-[ 3rotd ] ( ( 3rot ) dip ) def
-[ 4rot ] ( 3rotd swap ) def
-[ 4rotd ] ( ( 4rot ) dip ) def
-#...
-[ rot ] ( 3rot ) def
-[ rotd ] ( 3rotd ) def
-[ roll ] ( 4rot ) def
-[ rolld ] ( 4rotd ) def
-
-
-# aliases
-[ spin ] ( 3spin ) def
-# gen spind, spindd, spin3d/spinnd
-[ rot ] ( 3rot ) def
-# gen rotd, rotdd, rot2,3,4,n, rotnd
-[ nip ] ( dropd ) def
-# gen nipd, nipdd, nipnd, nip2,3,4,n
-[ pick ] ( 3pick ) def
-# gen pickd, pickdd, picknd, pick2,3,4,n
-[ reach ] ( 4pick ) def
-# gen reachd, reachdd, reachnd, reach2,3,4,n
-
-
-
-[ weave ] drop # not ready to define weave
-
-
+# math extension
+[ ++ ] ( [ 1 ] + ) def
+[ -- ] ( [ 1 ] - ) def
+[ == ] ( dup ( swap dup ( <= ) dip ) dip <= and ) def
+[ pos? ] ( [ 0 ] > ) def
+[ neg? ] ( [ 0 ] < ) def
+[ zero? ] ( [ 0 ] == ) def
+[ non-neg? ] ( [ 0 ] >= ) def
+[ non-pos? ] ( [ 0 ] <= ) def
+[ one? ] ( [ 1 ] == ) def
+[ two? ] ( [ 2 ] == ) def
+[ three? ] ( [ 3 ] == ) def
 
 # metastack extension
-[ meta ] ( qstack reset ) def
+[ meta ] ( uncd quote cd reset ) def # ( qstack reset ) is less efficient but preserves root in chroots
+[ parent ] ( qstack [ 1 ] crank ) def # qstack halt in baremetal environments
 
-# strings extension
-[ precat ] ( swap concat ) def
+# error extension
+[ ereturn ] ( ethrow return ) def
 
-
-# generalization scheme (stackops):
-# op[n] === op op op ... op
-# [n]op === (apply on nth element)
-#   4drop === ( ( ( drop ) dip ) dip ) dip === ( ( swap drop ) dip ) dip === 3nip
-#   4rot ===
-# op[n]d === ( ... ( ( op ) dip ) ... dip )
-
-
-# Basic combinator definitions
-
-# define basic expand (works on nonempty macros only)
-[ expand ]
-( macro swap
-  ( [ 1 ] split
-    ( isword ( dup isdef ( unglue ) ( ) if ) ( ) if compose ) dip
-    size [ 0 ] > ( ( ( dup ) dip swap ) dip swap eval ) ( ) if )
-  dup ( swap ( swap ) dip ) dip eval drop swap drop ) def
-
-# complete expand (checks for definitions within child first without copying hashtables)
-[ expand ]
-( size [ 0 ] > ( type [ VSTACK ] = ) ( return ) if ?
-  ( macro swap
-    macro
-    ( ( ( size dup [ 0 ] > ) dip swap ) dip swap
-      ( ( ( 1 - dup ( vat ) dip swap ( del ) dip ) dip compose ) dip dup eval )
-      ( drop swap drop )
-      if ) dup eval
-    ( ( [ 1 ] split
-        ( isword
-          ( compose cd dup isdef
-            ( unglue pop )
-              ( pop dup isdef ( unglue ) ( ) if )
-            if ) ( ) if
-          ( swap ) dip compose swap ) dip
-        size [ 0 ] > ) dip swap
-      ( dup eval ) ( drop drop swap compose ) if ) dup eval )
-  ( expand )
-  if ) def
-
-# automatic casting
+# crank-agnostic casting
 [ >macro ] ( [ VMACRO ] cast ) def
 [ >stack ] ( [ VSTACK ] cast ) def
 
-[ with ] ( swapd curry ) def
-[ push ] ( quote compose ) def
-[ take ] ( swap push ) def
-[ uncurry ] ( [ 1 ] split swap dip ) def
-[ keep ] ( dupd dip ) def
-[ when ] ( [ ] if ) def
-[ else ] ( [ ] swap if ) def
-[ curry ] ( swap quote prepose ) def
+# generating words
+"genlib.cog" load
+
+# stackops extension
+[ drop ] mkopn
+[ swap ] mkopn
+[ dup ] mkopn
+[ eval ] mkopn
+
+[ nip ] dup ( swap drop ) def mkopn
+[ deep ] dup ( swap dip ) def mkopn
+
+[ 2spin ] dup ( swap ) def mkopd
+[ 3spin ] dup ( swap 2spind swap ) def mkopd
+[ 4spin ] dup ( swap 3spind swap ) def mkopd
+
+[ 2rot ] dup ( swap ) def mkopn
+[ 3rot ] dup ( 2rotd swap ) def mkopn
+[ 4rot ] dup ( 3rotd swap ) def mkopn
+[ -2rot ] dup ( swap ) def mkopn
+[ -3rot ] dup ( swap -2rotd ) def mkopn
+[ -4rot ] dup ( swap ) def mkopn
+
+[ 1pick ] dup ( dup ) def mkopn
+[ 2pick ] dup ( 1pickd swap ) def mkopn
+[ 3pick ] dup ( 2pickd swap ) def mkopn
+[ 4pick ] dup ( 3pickd swap ) def mkopn
+
+# alias stackops
+[ dropd ] [ nip ] aliasn
+[ dropt ] [ nipd ] aliasn
+[ dropq ] [ nipt ] aliasn
+
+[ evald ] [ deep ] aliasn
+[ evalt ] [ deepd ] aliasn
+[ evalq ] [ deept ] aliasn
+
+[ spin ] dup ( 3spin ) def mkopd
+[ rot ] dup ( 3rot ) def mkopn
+[ -rot ] dup ( -3rot ) def mkopn
+[ roll ] dup ( 4rot ) def mkopn
+[ -roll ] dup ( -4rot ) def mkopn
+[ pick ] dup ( 3pick ) def mkopn
+[ reach ] dup ( 4pick ) def mkopn
+
+# combinators extension
+"combinators.cog" load
+
+# dup variants
+[ 2dup ] dup ( 2quote do eval ) [ 4 ] ( ( 2quote ) dip don eval ) bindopn mkopdn
+[ 2dup ] dup ( swap dup ( swap dup ) dip swap ) def mkopd
+[ 3dup ] dup ( 3quote do eval ) [ 17 ] ( ( 3quote ) dip don eval ) bindopn mkopdn
+[ 4dup ] dup ( 4quote do eval ) [ 10 ] ( ( 4quote ) dip don eval ) bindopn mkopdn
+
+[ over ] dup ( dupd swap ) def mkopd
+[ 2over ] dup ( ( ( swap dup ) dip swap ) do dip swap ) def mkopd
+[ 3over ] dup ( ( quote curry2 do ) dip swap eval ) def mkopd
+[ 4over ] dup ( ( quote curry3 do ) dip swap eval ) def mkopd
+
+# strings extension
+"string.cog" load
+
+# math extension
+[ factorial ] dup
+( dup non-pos? ( [ 1 ] + ) ( dup [ 1 ] - factorial * ) if ) def
+( [ 2 ] swap ++ interval [ 1 ] ( * ) reduce ) def
+
+[ abs ] ( dup neg? [ neg ] when ) def
+[ factor? ] ( / isint ) def
+[ even? ] ( 2.0 factor? ) def
+[ odd? ] ( even? not ) def

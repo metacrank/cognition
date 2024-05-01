@@ -7,8 +7,8 @@ quote.cog load
 [ < ] [[ prepose [[ size dup [ 0 ] = [ ] [[ [ 1 ] - split ]] if ]] dip swap ]] def
 [ + ] [[ [ 1 ] + ]] def
 [ - ] [[ [ 1 ] - ]] def
-[ . ] [[ dup char print ]] def
-[ , ] [[ drop read byte ]] def
+[ . ] [[ dup itob print ]] def
+[ , ] [[ drop read btoi ]] def
 
 [ pick ] ( ( ( dup ) dip swap ) dip swap ) def
 [ exec ] ( ( [ 1 ] * dup ) dip swap [ 0 ] = ( drop ) ( dup ( evalstr ) dip \ exec ) if ) def

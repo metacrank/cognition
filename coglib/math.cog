@@ -1,0 +1,8 @@
+# statistics:
+
+[ mean ] ( size swap sum swap / ) def
+[ mean* ] ( ( size ) dip * swap sum swap / ) def # [ set ] [ 1.00 ] mean*
+
+
+[ median ]
+[ mode ]

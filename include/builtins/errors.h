@@ -21,6 +21,9 @@ void cog_err_print(value_t *v);
 /* prints all errors on error stack */
 void cog_err_show(value_t *v);
 
+/* puts an error on the error stack with the current word's value */
+void cog_err_throw(value_t *v);
+
 void add_funcs_errors(ht_t *flit);
 
 #endif // ERRORS_H_

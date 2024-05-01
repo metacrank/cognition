@@ -1,98 +1,254 @@
-# Combinator definitions
-# Apr. 2024
+[ compose ] mkopn
+[ prepose ] mkopn
+[ def ] mkopn
 
-# define basic expand (works on nonempty macros only)
-[ expand ]
-( macro swap
-  ( [ 1 ] split
-    ( isword ( dup isdef ( unglue ) ( ) if ) ( ) if compose ) dip
-    size [ 0 ] > ( ( ( dup ) dip swap ) dip swap eval ) ( ) if )
-  dup ( swap ( swap ) dip ) dip eval drop swap drop ) def
+[ dip ] dup ( compose dip ) [ 0 ] ( -- composen dip ) bindopn-1 mkopdn
+[ 2dip ] dup ( compose swap dipd ) [ 0 ] ( -- composen swap dipd ) bindopn-1 mkopdn
+[ 3dip ] dup ( compose swap 2dipd ) [ 0 ] ( -- composen swap 2dipd ) bindopn-1 mkopdn
+[ 4dip ] dup ( compose swap 3dipd ) [ 0 ] ( -- composen swap 3dipd ) bindopn-1 mkopdn
+
+[ curry ] dup ( swap quote prepose ) def mkopn
+
+[ quote ] mkopn
+[ 2quote ] dup ( quote curry ) def mkopn
+[ 3quote ] dup ( quote curry2 ) def mkopn
+[ 4quote ] dup ( quote curry3 ) def mkopn
+
+[ do ] dup ( dup dip ) def mkopn
+[ 2do ] dup ( dup dipd ) def mkopn
+[ 3do ] dup ( dup 2dipd ) def mkopn
+[ 4do ] dup ( dup 3dipd ) def mkopn
+
+
+[ push ] dup ( quote compose ) def mkopn
+
+[ with ] dup ( swapd curry ) def mkopd
+[ with2 ] dup ( swap curryd2 swap ) def mkopd
+[ with3 ] dup ( swap curryd3 swap ) def mkopd
+[ with4 ] dup ( swap curryd4 swap ) def mkopd
+
+[ 2with ] dup ( swap withd )
+[ 2with2 ] dup ( swap withd2 )
+[ 2with3 ] dup ( swap withd3 )
+
+
+[ take ] dup ( swap push ) def mkop23
+
+[ uncurry ] ( [ 1 ] split swap dip ) def
+[ uncurry2 ] ( [ 2 ] split swap dip ) def
+[ uncurry3 ] ( [ 3 ] split swap dip ) def
+[ uncurry4 ] ( [ 4 ] split swap dip ) def
+[ uncurryn ] ( split swap dip ) def
+
+[ unpush ] dup ( size [ 1 ] - split eval ) def mkopn
+
+[ unwith ] ( [ 1 ] split ( dip ) dip ) def
+[ unwith2 ] ( [ 2 ] split ( dip ) dip ) def
+[ unwith3 ] ( [ 3 ] split ( dip ) dip ) def
+[ unwith4 ] ( [ 4 ] split ( dip ) dip ) def
+[ unwithn ] ( split ( dip ) dip ) def
+
+[ untake ] dup ( size [ 1 ] - split dip ) def mkop234
+
+
+[ keep ] dup ( dupd dip ) def mkopd
+[ 2keep ] dup ( ( 2quote dup ) dip compose dip eval ) def mkopd
+[ 3keep ] dup ( ( 3quote dup ) dip compose dip eval ) def mkopd
+[ 4keep ] dup ( ( 4quote dup ) dip compose dip eval ) def mkopd
+
+
+[ negate ] ( ( not ) compose ) def
+[ when ] ( [ ] if ) def
+[ else ] ( swap not swap when ) def
+
+[ loop ] ( \ do (( loop )) curry when ) def         # [ body pred ] loop
+[ while ] ( dod prepose (( loop )) curry when ) def # [ pred ] [ body ] while
+[ until ] ( swap negate swap while ) def            # [ !pred ] [ body ] until
+[ for ] ( ( dip ) curry prepose evalt while ) def  # [ init ] [ pred ] [ cont ] [ body ] for
+[ times ] ( quote swap ( ( dup [ 0 ] > ) ( [ 1 ] - ) ) dip for drop ) def
+[ break ] ( f return ) def
+[ continue ] ( t return ) def
+
+
+
+[ 0split ] ( [ 0 ] split ) def
+[ 1split ] ( [ 1 ] split ) def
+[ 2split ] ( [ 2 ] split ) def
+[ 3split ] ( [ 3 ] split ) def
+[ 4split ] ( [ 4 ] split ) def
+
+[ 0split* ] ( size split ) def
+[ 1split* ] ( size [ 1 ] - split ) def
+[ 2split* ] ( size [ 2 ] - split ) def
+[ 3split* ] ( size [ 3 ] - split ) def
+[ 4split* ] ( size [ 4 ] - split ) def
+
+[ first ] ( [ 1 ] vat ) def
+[ second ] ( [ 2 ] vat ) def
+[ third ] ( [ 3 ] vat ) def
+[ fourth ] ( [ 4 ] vat ) def
+[ last ] ( size [ 1 ] - vat ) def
+[ second-last ] ( size [ 2 ] - vat ) def
+[ third-last ] ( size [ 3 ] - vat ) def
+[ fourth-last ] ( size [ 4 ] - vat ) def
+
+[ head ] ( [ 0 ] swap substack ) def
+[ trim ] ( ( size ) dip - head ) def # head*
+[ tail ] ( ( size ) dip swap substack ) def
+[ leave ] ( ( size ) dip - tail ) def # tail*
+[ but-last ] ( size [ 1 ] - head ) def
+[ rest ] ( size [ 1 ] swap substack ) def
+
+[ pull ] ( split 1split swap composed ) def
+[ set-vat ] ( swapd split rest swapd compose2 ) def
+[ change-vat ] ( swapd split 1split ( swap ( swap eval ) dip swap ) dip compose2 ) def
+
+
+[ (emk-quote) ] ( take ( dip ) compose ) def
+[ (each-split-2) ] ( ( 1split ) dip swap ) def
+[ (each-split-3) ] ( ( (each-split-2) ) dip swap ) def
+[ (each-split-4) ] ( ( (each-split-3) ) dip swap ) def
+[ (einc-idx) ] ( ( dip [ 1 ] + ) compose ) def
+
+[ each ] ( ( 1split ) (emk-quote) ( size ) dip swap times drop ) def
+[ 2each ] ( (each-split-2) (emk-quote) each drop ) def
+[ 3each ] ( (each-split-3) (emk-quote) 2each drop ) def
+[ 4each ] ( (each-split-4) (emk-quote) 3each drop ) def
+
+#[ each-index ] (
+#  ( [ 0 ] swap size ( < ) curry [ 0 ] swap ) dip
+#  ( swap dup ) take ( dip [ 1 ] + dup ) compose
+#  ( 1split ) take ( dip swap ) compose
+#  while drop2
+#) def
+
+[ each-index ] ( [ 0 ] -rot ( swap dup ) take (einc-idx) each drop ) def
+[ 2each-index ] ( [ 0 ] -roll ( rot dup ) take (einc-idx) 2each drop ) def
+[ 3each-index ] ( [ 0 ] swap -rolld ( roll dup ) take (einc-idx) 3each drop ) def
+[ 4each-index ] ( [ 0 ] -rot -rollt ( rolld swap dup ) take (einc-idx) 4each drop ) def
+
+[ (madd-dp) ] ( ( dip prepose ) compose ) def
+[ (map-quote-1) ] ( ( swap ) take (madd-dp) ) def
+[ (map-quote-2) ] ( ( rot ) take (madd-dp) ) def
+[ (map-quote-3) ] ( ( roll ) take (madd-dp) ) def
+[ (map-quote-4) ] ( ( rolld swap ) take (madd-dp) ) def
+[ (map-quote-5) ] ( ( ( rolld swap ) dip swap ) take (madd-dp) ) def
+
+[ map ] dup ( ( 0split ) dip (map-quote-1) each ) def mkopd
+[ 2map ] dup ( ( 0split ) 2dip (map-quote-2) 2each ) def mkopd
+[ 3map ] dup ( ( 0split ) 3dip (map-quote-3) 3each ) def mkopd
+[ 4map ] dup ( ( 0split ) 4dip (map-quote-4) 4each ) def mkopd
+
+[ map-index ] ( ( 0split ) dip (map-quote-2) each-index ) def
+[ 2map-index ] ( ( 0split ) 2dip (map-quote-3) 2each-index ) def
+[ 3map-index ] ( ( 0split ) 3dip (map-quote-4) 3each-index ) def
+[ 4map-index ] ( ( 0split ) 4dip (map-quote-5) 4each-index ) def
+
+[ (emk-quote) (each-split-2) (each-split-3) (each-split-4) (einc-idx)
+  (madd-dp) (map-quote-1) ( map-quote-2 ) (map-quote-3) (map-quote-4) (map-quote-5)
+] ( undef ) map
+
+
+[ filter ] dup ( ( dup ) take ( dip quote [ [ ] ] if ) compose map ) def mkopd
+[ filter-index ] ( ( swap dup swapd ) take ( dip quote [ [ ] ] if ) compose map-index ) def
+
+[ reduce ] ( swapd each ) def
+[ 2reduce ] ( -rotd 2each ) def
+[ 3reduce ] ( -rolld 3each ) def
+[ 4reduce ] ( ( swap -rolld ) dip 4each ) def
+
+[ all? ] ( t swap ( swap ) take ( dip and ) compose reduce ) [ 17 ] bind234op
+[ any? ] ( f swap ( swap ) take ( dip or ) compose reduce ) [ 17 ] bind234op
+[ none? ] ( any? not ) [ 0 ] bind234op
+[ empty? ] dup ( size zero? ) def mkopd
+
+# used to be 'range'
+[ interval ] (
+  ( stack swap dup ) dip
+  [ 1 ] - ( < ) curry
+  ( dup ( compose ) dip [ 1 ] + dup )
+  while compose
+) def
+
+[ cartesian-map ] ( ( with map ) curry2 map ) def
+[ cartesian-each ] ( ( with each ) curry2 each ) def
+[ cartesian-find ] (  )
+[ cartesian-product ]
+
+[ find-from ]
+[ find-last-from ]
+
+[ find ] ( [ 0 ] -rot find-from ) def
+[ find-last ] ( ( size -- swap ) dip find-last-from ) def
+
+[ index-from ] ( rot ( = ) curry find-from drop ) def
+[ last-index-from ] ( rot ( = ) curry find-last-from drop ) def
+[ index ] ( ( = ) with find drop ) def
+[ last-index ] ( ( = ) with find-last drop ) def
+
+[ sep ] ( size ( uncompose ) dip [ 1 ] - nquote ) def
+[ join ]
+[ follow ]
+
+[ interleave ] (
+  empty?t rot
+  ( drop3 ) (
+    swap dup ( compose ( 1split* ) dip swap mapd ) dip eval
+  ) if
+) def
+
+[ case ] (
+  unpush ( swap dup ) dip
+  ( ( ( eval drop ) take ( = ) compose find swap ) dip swap ) dip swap
+  ( drop2 last nip eval2 ) (
+    size [ 1 ] =
+    ( nip dip drop ) (
+      nipd dip swapd =
+      ( eval ) ( drop2 [ "NO CASE" ] ethrow ) if
+    ) if
+  ) if
+) def
+
+[ sum ] ( [ 0 ] ( + ) reduce ) def
+[ product ] ( [ 1 ] ( * ) reduce ) def
+
+[ flip ] ( macro swap (  ) )
+[ transpose ]
+
+
+
+
+[ weave ] drop # not ready to define weave
+
+
+
 
 # complete expand (checks for definitions within child first without copying hashtables)
-[ expand ]
-( size [ 0 ] > ( type [ VSTACK ] = ) ( return ) if ?
-  ( macro swap
-    macro
-    ( ( ( size dup [ 0 ] > ) dip swap ) dip swap
-      ( ( ( 1 - dup ( vat ) dip swap ( del ) dip ) dip compose ) dip dup eval )
-      ( drop swap drop )
-      if ) dup eval
-    ( ( [ 1 ] split
-        ( isword
-          ( compose cd dup isdef
+[ expand ] (
+  size pos? ( type [ VSTACK ] = ) ( return ) if
+  macro swap (
+    macro (
+      ( ( size dup pos? ) dip swap ) dip swap
+      ( ( ( [ 1 ] - dup ( vat ) dip swap ( del ) dip ) dip compose ) dip dup eval )
+      ( drop dropd )
+      if
+    ) dup eval ( (
+        [ 1 ] split (
+          isword (
+            compose cd dup isdef
             ( unglue pop )
-              ( pop dup isdef ( unglue ) ( ) if )
-            if ) ( ) if
-          ( swap ) dip compose swap ) dip
-        size [ 0 ] > ) dip swap
-      ( dup eval ) ( drop drop swap compose ) if ) dup eval )
-  ( expand )
-  if ) def
-
-# automatic casting
-[ >macro ] ( [ VMACRO ] cast ) def
-[ >stack ] ( [ VSTACK ] cast ) def
-
-
-[ with ] ( swapd curry ) def
-
-
-[ push ] ( quote compose ) def
-
-
-[ take ] ( swap push ) def
-
-
-[ uncurry ] ( 1 split swap dip )
-
-
-[ keep ] ( dupd dip ) def
-
-[ when ] ( [ ] if ) def
-[ else ] ( [ ] swap if ) def
-
-[ curry ] ( swap quote prepose ) def
-
-
-# [ op ] makeopn === [ opn ] [ opn definition ] def
-[ makeopn ] (
-  dup dup dup dup
-  [ "BAD ARGUMENT TYPE" ] over ( epush return ) curry curry quote
-  ( ( epeek [ "isword" ] = ( [ "TOO FEW ARGUMENTS" ] = ( return ) when ) ( drop ) if ) if
-    [ 0 ] +
-    dup [ 0 ] = ( drop return ) when
-    dup [ 1 ] = ) compose
-  swap unglue ( return ) compose ( drop ) prepose ( when ) curry compose
-  swap [ "INDEX OUT OF RANGE" ] swap ( epush return ) curry curry
-  ( when ) curry ( dup [ 0 ] < ) prepose compose
-  take ( over concat dup isdef ( swap drop ) ) compose
-  swap unglue ( compose ) curry ( roll times dupd def ) curry ( macro ) prepose
-  ( if eval ) curry compose ( isword ) swap compose
-  ( [ "n" ] concat ) dip def
-)
-
-
-[ mcomposen ]
-[ composen ]
-[ mcompose ]
-
-
-
-[ curryn ] (
-  # error handling
-  isword
-  ( [ "BAD ARGUMENT TYPE" ] [ "curryn" ] epush return )
-  ( epeek [ "isword" ] = ( [ "TOO FEW ARGUMENTS" ] = ( return ) when ) ( drop ) if )
-  if
-  # check for definition
-  [ 0 ] +
-  dup [ 0 ] = ( drop return ) when
-  dup [ 1 ] = ( drop curry return ) when
-  dup [ 0 ] < ( [ "INDEX OUT OF RANGE" ] [ "curryn" ] epush return ) when
-  [ "curry" ] over concat dup isdef
-  ( swap drop )
-  ( macro ( ( curry ) compose ) roll times dupd def )
-  if eval
-)
-#[ curry ] makeopn
+            ( pop dup isdef ( unglue ) ( ) if )
+            if
+          ) ( ) if
+          swapd compose swap
+        ) dip
+        size pos? ) dip swap
+      ( dup eval ) ( drop2 swap compose ) if
+    ) dup eval
+  ) ( (
+      [ 1 ] split
+      ( isword ( dup isdef ( unglue ) ( ) if ) ( ) if compose ) dip
+      size pos? ( 4pick eval ) ( ) if
+    ) dup -rotd eval drop dropd
+  ) if
+) def

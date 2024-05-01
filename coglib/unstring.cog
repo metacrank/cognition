@@ -1,0 +1,65 @@
+[ concat ] undefn
+[ precat ] undefn
+[ unconcat ] undefd
+
+[
+
+  substr
+  byte
+  char
+  b+
+  b-
+  b++
+  b--
+
+  0cut
+  1cut
+  2cut
+  3cut
+  4cut
+  cut*
+  1cut*
+  2cut*
+  3cut*
+  4cut*
+
+  cfirst
+  csecond
+  cthird
+  cfourth
+  clast
+  csecond-last
+  cthird-last
+  cfourth-last
+
+  shead
+  strim
+  sleave
+  sbut-last
+  srest
+
+  cpull
+  set-nth
+  change-nth
+
+  rejoin
+  combine
+
+  smap
+  sfilter
+  sreduce
+
+  sfind-from
+  sfind-last-from
+  sfind
+  sfind-last
+  cindex-from
+  clast-index-from
+  cindex
+  clast-index
+
+  \ "
+
+] ( undef ) each
+
+"quote.cog" load
