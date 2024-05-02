@@ -21,20 +21,17 @@ something like the AST without having to explicitly program a rigid syntax.
 - Better-than-metaprogramming (see the paper)
 
 * Install
-On unix-likes:
+On Unix-likes:
 #+begin_src bash
   git clone --recursive-submodules https://github.com/ret2pop/cognition
   cd cognition/
   make
   sudo make install
 #+end_src
-And on NixOS:
+
+With Nix:
 #+begin_src bash
   git clone --recursive-submodules https://github.com/ret2pop/cognition
   cd cognition/
-  nix develop
-  make
-  sudo make install
+  nix-build # or nix-shell if you want to hack on it
 #+end_src
-Note that if you're not on NixOS, you will have to install the dependency `doxygen`
-if you want to compile the documentation.
