@@ -1,36 +1,62 @@
 [ compose ] mkopn
-[ prepose ] mkopn
-[ def ] mkopn
+[ 2compose ] dup ( swap composed ) defopd ( ) "compose" ( 2compose ) ( -- composen 2compose ) mkbindopn-1
+[ 3compose ] dup ( swap 2composed ) defopd ( ) "compose" ( 3compose ) ( -- composen 3compose ) mkbindopn-1
+[ 4compose ] dup ( swap 3composed ) defopd ( ) "compose" ( 4compose ) ( -- composen 4compose ) mkbindopn-1
+#[ mcompose ]
 
-[ dip ] dup ( compose dip ) [ 0 ] ( -- composen dip ) bindopn-1 mkopdn
-[ 2dip ] dup ( compose swap dipd ) [ 0 ] ( -- composen swap dipd ) bindopn-1 mkopdn
-[ 3dip ] dup ( compose swap 2dipd ) [ 0 ] ( -- composen swap 2dipd ) bindopn-1 mkopdn
-[ 4dip ] dup ( compose swap 3dipd ) [ 0 ] ( -- composen swap 3dipd ) bindopn-1 mkopdn
+[ prepose ] mkopn
+[ 2prepose ] dup ( swap preposed ) defopd ( ) "prepose" ( 2prepose ) ( -- preposen 2prepose ) mkbindopn-1
+[ 3prepose ] dup ( swap 2preposed ) defopd ( ) "prepose" ( 3compose ) ( -- preposen 3prepose ) mkbindopn-1
+[ 4prepose ] dup ( swap 3preposed ) defopd ( ) "prepose" ( 4compose ) ( -- preposen 4prepose ) mkbindopn-1
+#[ mprepose ]
+
+[ dip ] ( ) "compose" ( dip ) ( -- composen dip ) mkbindopn-1
+[ 2dip ] ( ) "compose" ( swap dipd ) ( -- composen swap dipd ) mkbindopn-1
+[ 3dip ] ( ) "compose" ( swap 2dipd ) ( -- composen swap 2dipd ) mkbindopn-1
+[ 4dip ] ( ) "compose" ( swap 3dipd ) ( -- composen swap 3dipd ) mkbindopn-1
+#[ mdip ]
+
+[ dig ] ( ) "compose" ( dip swap ) ( -- composen dip swap ) mkbindopn-1
+[ 2dig ] ( ) "compose" ( swap digd swap ) ( -- composen swap digd swap ) mkbindopn-1
+[ 3dig ] ( ) "compose" ( swap 2digd swap ) ( -- composen swap 2digd swap ) mkbindopn-1
+[ 4dig ] ( ) "compose" ( swap 3digd swap ) ( -- composen swap 3digd swap ) mkbindopn-1
+#[ mdig ]
+
+[ drill ] ( ) "curry" ( dig ) ( curryn dig ) mkbindopn
+[ 2drill ] ( ) "curry" ( 2dig ) ( curryn 2dig ) mkbindopn
+[ 3drill ] ( ) "curry" ( 3dig ) ( curryn 3dig ) mkbindopn
+[ 4drill ] ( ) "curry" ( 4dig ) ( curryn 4dig ) mkbindopn
+#[ mdrill ]
 
 [ curry ] dup ( swap quote prepose ) def mkopn
 
+[ with ] ( swap ) "curryd" ( swap ) ( swapd currydn swap ) mkbindopn
+[ 2with ] ( swap ) "withd" ( swap ) ( swapd withdn swap ) mkbindopn
+[ 3with ] ( swap ) "2withd" ( swap ) ( swapd 2withn swap ) mkbindopn
+[ 4with ] ( swap ) "3withd" ( swap ) ( swapd 3withn swap ) mkbindopn
+#[ mwith ]
+
 [ quote ] mkopn
-[ 2quote ] dup ( quote curry ) def mkopn
-[ 3quote ] dup ( quote curry2 ) def mkopn
-[ 4quote ] dup ( quote curry3 ) def mkopn
+[ 2quote ] dup ( quote curry ) defopd ( 2quote ) "quote" ( ) ( 2quoted -- quoten ) mkbindopn-1
+[ 3quote ] dup ( quote curry2 ) defopd ( 3quote ) "quote" ( ) ( 3quoted -- quoten ) mkbindopn-1
+[ 4quote ] dup ( quote curry3 ) defopd ( 3quote ) "quote" ( ) ( 4quoted -- quoten ) mkbindopn-1
+[ mquote ] dup ( swap quote swap -- curryn ) defopd ( mquote ) "quote" ( ) ( ( mquote ) dip -- quoten ) mkbindopn-1
 
-[ do ] dup ( dup dip ) def mkopn
-[ 2do ] dup ( dup dipd ) def mkopn
-[ 3do ] dup ( dup 2dipd ) def mkopn
-[ 4do ] dup ( dup 3dipd ) def mkopn
+[ push ] ( ) "quote" ( compose ) ( mquote compose ) mkbindnop
+[ 2push ] ( ) "quote" ( swap composed ) ( mquote swap composed ) mkbindnop
+[ 3push ] ( ) "quote" ( swap 2pushd ) ( mquote swap 2pushd ) mkbindnop
+[ 4push ] ( ) "quote" ( swap 3pushd ) ( mquote swap 3pushd ) mkbindnop
+#[ mpush ] ( (  ) mdip )...
 
 
-[ push ] dup ( quote compose ) def mkopn
 
-[ with ] dup ( swapd curry ) def mkopd
-[ with2 ] dup ( swap curryd2 swap ) def mkopd
-[ with3 ] dup ( swap curryd3 swap ) def mkopd
-[ with4 ] dup ( swap curryd4 swap ) def mkopd
 
-[ 2with ] dup ( swap withd )
-[ 2with2 ] dup ( swap withd2 )
-[ 2with3 ] dup ( swap withd3 )
-
+# don needs optimization
+[ do ] ( dup dip ) defopn
+[ 2do ] ( dup dipd ) defopn
+[ 3do ] ( dup 2dipd ) defopn
+[ 4do ] ( dup 3dipd ) defopn
+#[ mdo ] ( dupd -- mdip ) def
 
 [ take ] dup ( swap push ) def mkop23
 
@@ -55,7 +81,7 @@
 [ 2keep ] dup ( ( 2quote dup ) dip compose dip eval ) def mkopd
 [ 3keep ] dup ( ( 3quote dup ) dip compose dip eval ) def mkopd
 [ 4keep ] dup ( ( 4quote dup ) dip compose dip eval ) def mkopd
-
+[ mkeep ] dup ( swap ( swap ( mquote dup ) dip ) dip compose eval ) def mkopd
 
 [ negate ] ( ( not ) compose ) def
 [ when ] ( [ ] if ) def
@@ -157,9 +183,9 @@
 [ 3reduce ] ( -rolld 3each ) def
 [ 4reduce ] ( ( swap -rolld ) dip 4each ) def
 
-[ all? ] ( t swap ( swap ) take ( dip and ) compose reduce ) [ 17 ] bind234op
-[ any? ] ( f swap ( swap ) take ( dip or ) compose reduce ) [ 17 ] bind234op
-[ none? ] ( any? not ) [ 0 ] bind234op
+[ all? ] ( t swap ( swap ) take ( dip and ) \ compose reduce ) [ 17 ] bind234op
+[ any? ] ( f swap ( swap ) take ( dip or ) \ compose reduce ) [ 17 ] bind234op
+[ none? ] ( \ any? not ) [ 0 ] bind234op
 [ empty? ] dup ( size zero? ) def mkopd
 
 # used to be 'range'
@@ -172,8 +198,8 @@
 
 [ cartesian-map ] ( ( with map ) curry2 map ) def
 [ cartesian-each ] ( ( with each ) curry2 each ) def
-[ cartesian-find ] (  )
-[ cartesian-product ]
+[ cartesian-find ] ( ( f ) 3dip ( with find swap ) curry2 ( nip ) prepose find nip swap ) # taken from factor
+[ cartesian-product ] ( dup [ compose ] curry cartesian-map ) def # ( dup [ 2quote ] curry cartesian-map )
 
 [ find-from ]
 [ find-last-from ]
@@ -209,6 +235,7 @@
   ) if
 ) def
 
+# for math.cog?
 [ sum ] ( [ 0 ] ( + ) reduce ) def
 [ product ] ( [ 1 ] ( * ) reduce ) def
 
@@ -217,15 +244,15 @@
 
 
 
-
 [ weave ] drop # not ready to define weave
 
-
+[ stack-wordlist ] ( wordlist ( unglue stack? nip ) filter ) def
+[ macro-wordlist ] ( wordlist ( unglue macro? nip ) filter ) def
 
 
 # complete expand (checks for definitions within child first without copying hashtables)
 [ expand ] (
-  size pos? ( type [ VSTACK ] = ) ( return ) if
+  size pos? ( stack? ) ( return ) if
   macro swap (
     macro (
       ( ( size dup pos? ) dip swap ) dip swap

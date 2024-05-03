@@ -23,8 +23,11 @@
 [ ereturn ] ( ethrow return ) def
 
 # crank-agnostic casting
-[ >macro ] ( [ VMACRO ] cast ) def
-[ >stack ] ( [ VSTACK ] cast ) def
+[ >macro ] ( "VMACRO" cast ) def
+[ >stack ] ( "VSTACK" cast ) def
+
+[ macro? ] ( type "VMACRO" = ) def
+[ stack? ] ( type "VSTACK" = ) def
 
 # generating words
 "genlib.cog" load
@@ -35,24 +38,28 @@
 [ dup ] mkopn
 [ eval ] mkopn
 
-[ nip ] dup ( swap drop ) def mkopn
-[ deep ] dup ( swap dip ) def mkopn
+[ nip ] dup ( swap drop ) defopn
+[ deep ] dup ( swap dip ) defopn
 
-[ 2spin ] dup ( swap ) def mkopd
-[ 3spin ] dup ( swap 2spind swap ) def mkopd
-[ 4spin ] dup ( swap 3spind swap ) def mkopd
+[ 2spin ] ( swap ) defopd
+[ 3spin ] ( swap 2spind swap ) defopd
+[ 4spin ] ( swap 3spind swap ) defopd
+#[ mspin ]
 
-[ 2rot ] dup ( swap ) def mkopn
-[ 3rot ] dup ( 2rotd swap ) def mkopn
-[ 4rot ] dup ( 3rotd swap ) def mkopn
-[ -2rot ] dup ( swap ) def mkopn
-[ -3rot ] dup ( swap -2rotd ) def mkopn
-[ -4rot ] dup ( swap ) def mkopn
+[ 2rot ] ( swap ) defopn
+[ 3rot ] ( 2rotd swap ) defopn
+[ 4rot ] ( 3rotd swap ) defopn
+#[ mrot ]
+[ -2rot ] ( swap ) defopn
+[ -3rot ] ( swap -2rotd ) defopn
+[ -4rot ] ( swap ) defopn
+#[ -mrot ]
 
-[ 1pick ] dup ( dup ) def mkopn
-[ 2pick ] dup ( 1pickd swap ) def mkopn
-[ 3pick ] dup ( 2pickd swap ) def mkopn
-[ 4pick ] dup ( 3pickd swap ) def mkopn
+[ 1pick ] ( dup ) defopn
+[ 2pick ] ( 1pickd swap ) defopn
+[ 3pick ] ( 2pickd swap ) defopn
+[ 4pick ] ( 3pickd swap ) defopn
+#[ mpick ]
 
 # alias stackops
 [ dropd ] [ nip ] aliasn
@@ -63,27 +70,32 @@
 [ evalt ] [ deepd ] aliasn
 [ evalq ] [ deept ] aliasn
 
-[ spin ] dup ( 3spin ) def mkopd
-[ rot ] dup ( 3rot ) def mkopn
-[ -rot ] dup ( -3rot ) def mkopn
-[ roll ] dup ( 4rot ) def mkopn
-[ -roll ] dup ( -4rot ) def mkopn
-[ pick ] dup ( 3pick ) def mkopn
-[ reach ] dup ( 4pick ) def mkopn
+[ spin ] ( 3spin ) defopd
+[ rot ] ( 3rot ) defopn
+[ -rot ] ( -3rot ) defopn
+[ roll ] ( 4rot ) defopn
+[ -roll ] ( -4rot ) defopn
+[ pick ] ( 3pick ) defopn
+[ reach ] ( 4pick ) defopn
+
+# hashtable extension
+[ def ] mkopn
+[ undef ] mkopn
+[ unglue ] mkopn
 
 # combinators extension
 "combinators.cog" load
 
 # dup variants
-[ 2dup ] dup ( 2quote do eval ) [ 4 ] ( ( 2quote ) dip don eval ) bindopn mkopdn
-[ 2dup ] dup ( swap dup ( swap dup ) dip swap ) def mkopd
-[ 3dup ] dup ( 3quote do eval ) [ 17 ] ( ( 3quote ) dip don eval ) bindopn mkopdn
-[ 4dup ] dup ( 4quote do eval ) [ 10 ] ( ( 4quote ) dip don eval ) bindopn mkopdn
+[ 2dup ] ( 2quote ) [ do ] ( eval ) ( ( 2quote ) dip don eval ) mkbindopn
+[ 2dup ] ( swap dup ( swap dup ) dip swap ) def mkopd # optimization
+[ 3dup ] ( 3quote ) [ do ] ( eval ) [ 17 ] ( ( 3quote ) dip don eval ) mkbindopn
+[ 4dup ] ( 4quote ) [ do ] ( eval ) [ 10 ] ( ( 4quote ) dip don eval ) mkbindopn
 
-[ over ] dup ( dupd swap ) def mkopd
-[ 2over ] dup ( ( ( swap dup ) dip swap ) do dip swap ) def mkopd
-[ 3over ] dup ( ( quote curry2 do ) dip swap eval ) def mkopd
-[ 4over ] dup ( ( quote curry3 do ) dip swap eval ) def mkopd
+[ over ] ( dupd swap ) defopd
+[ 2over ] ( ( ( swap dup ) dip swap ) do dip swap ) defopd
+[ 3over ] ( ( quote curry2 do ) dip swap eval ) defopd
+[ 4over ] ( ( quote curry3 do ) dip swap eval ) defopd
 
 # strings extension
 "string.cog" load

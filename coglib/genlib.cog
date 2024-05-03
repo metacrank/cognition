@@ -10,7 +10,7 @@
 #) def (
 #  len [ 1 ] - cut dup isint
 #  ( [ d-end ] swap quote def )
-#  ( [ d-end ] ( f ) def concat )
+#  ( [ d-end ] ( "" ) def concat )
 #  if mkopd
 #) def
 
@@ -24,7 +24,7 @@
 ) def (
   len [ 1 ] - cut dup isint
   ( [ d-end ] swap quote def )
-  ( [ d-end ] ( f ) def concat )
+  ( [ d-end ] ( "" ) def concat )
   if mkopd
 ) def
 
@@ -115,61 +115,66 @@
 #      if
 #    ) dup eval eval
 
+[ (mkopdn-case) ] ( concat swap ( swap dip ) swap [ 1 ] put dup quote ( def ) dip ) def
+
 [ mkopdn ] (
   dup mkopd
   dup "2" concat mkopd
   dup "3" concat mkopd
   dup "4" concat mkopd
-  dup dup dup "n" concat >macro quote
-  ( quote compose ) swap "1" put dup
-  ( swap "dn" concat swap ( dip ) compose def ) dip dup
-  ( swap "tn" concat swap ( swap ( dip ) dip ) compose def ) dip
-  swap "qn" concat swap
-  ( swap ( swap ( dip ) dip ) dip ) compose def
+  dup dup dup "n" concat unglue quote
+  swap "dn" (mkopdn-case)
+  swap "tn" (mkopdn-case)
+  swap "qn" (mkopdn-case)
+  drop
 ) def
 
-[ (bindop-init) ] (
-  split [ 1 ] split ( swap ) dip quote ( compose ) compose
+[ bindop-init ] (
+  ( swap ) dip quote ( compose ) compose
   ( ( concat swap ) dip concat unglue ) swap compose
   swap compose ( swap compose def ) compose
 ) def
 
 [ bindopn ] ( (
-    (bindop-init)
-    ( swap compose dup dup dup dup uncompose f f ) dip dup dip
+    bindop-init
+    ( swap compose dup dup dup dup uncompose "" "" ) dip dup dip
     ( uncompose "2" "2" ) dip dup dip
     ( uncompose "3" "3" ) dip dup dip
     ( uncompose "4" "4" ) dip eval
-    uncompose swap drop [ n ] concat
+    uncompose swap drop "n" concat
   ) dip def
 ) def
 
 [ bindopn-1 ] ( (
-    compose dup (
-      size -- split split [ 1 ] split swap drop compose
-      ( dup ) dip def
-    ) dip size -- split bindop-init (
-      swap compose dup dup dup uncompose [ 2 ] f
-    ) dip dup dip
+    3quote dup dip ( swap drop compose ( dup ) dip def ) dip eval
+    bindop-init
+    ( swap compose dup dup dup uncompose "2" "" ) dip dup dip
     ( uncompose "3" "2" ) dip dup dip
     ( uncompose "4" "3" ) dip dup dip
-    uncompose swap drop [ n ] concat
+    uncompose swap drop "n" concat
   ) dip def
 ) def
 
 [ bind234op ] (
-  split [ 1 ] split ( swap ) dip quote ( compose ) compose
+  ( swap ) dip quote ( compose ) compose
   ( ( swap concat swap ) dip swap concat unglue ) swap compose
   swap compose ( swap compose def ) compose
-  ( swap compose dup dup dup uncompose f f ) dip dup dip
+  ( swap compose dup dup dup uncompose "" "" ) dip dup dip
   ( uncompose "2" "2" ) dip dup dip
   ( uncompose "3" "3" ) dip dup dip
   ( uncompose "4" "4" ) dip eval
 ) def
 
+[ defopd ] ( ( dup ) dip def mkopd ) def
+[ defopn ] ( ( dup ) dip def mkopn ) def
+[ mkbindopn ] ( ( ( ( ( dup ) dip ) dip ) dip ) dip bindopn mkopdn ) def
+[ mkbindopn-1 ] ( ( ( ( ( dup ) dip ) dip ) dip ) dip bindopn-1 mkopdn ) def
+[ mkbindnop ] ( ( ( ( ( dup ) dip ) dip ) dip bind234op dup "n" concat ) dip def mkopdn ) def
+
 [ aliasn ] ( dup "n" concat [ 0 ] swap bindopn ) def
 
-[ (bindop-init) ] undef
+[ (mkopdn-case) ] undef
+[ bindop-init ] undef
 
 [ undef234n ] (
   dup "2" concat undef

@@ -41,7 +41,7 @@
 [ set-nth ] ( swapd cut srest swapd concat2 ) def
 [ change-nth ] ( swapd cut 1cut ( swap ( swap eval ) dip swap ) dip concat2 ) def
 
-[ rejoin ] ( f concat ) def
+[ rejoin ] ( "" concat ) def
 [ combine ] ( join rejoin ) def
 
 [ smap ] ( swap unconcat swap map rejoin ) def
@@ -72,11 +72,11 @@
 [ strquote-end0 ] ( drop nip swap [ 1 ] swap metacrank swap crank swap s swap d swap i ) def
 [ strquote-end1 ] ( strquote-end push over ) def
 [ \ " ] [ \ " ] (
-  geti getd gets f d f i f s stgl
+  geti getd gets "" d "" i "" s stgl
   crankbase [ 1 ] metacrankbase dup [ 1 ] =
   [ ( dup [ \ \ ] = ( strquote-escape ) ( dup [ \ " ] = ( strquote-end0 ) ( concat over ) if ) if ) ]
   [ ( dup [ \ \ ] = ( strquote-escape ) ( dup [ \ " ] = ( strquote-end1 ) ( concat over ) if ) if ) ]
-  if dup f swap halt [ 1 ] [ 1 ] metacrank
+  if dup "" swap halt [ 1 ] [ 1 ] metacrank
 ) def singlet
 
 [ strquote-escape strquote-end0 strquote-end1 ] ( undef ) each

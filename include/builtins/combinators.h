@@ -28,33 +28,9 @@ void cog_sub(value_t *v);
 
 /* keeps first stack's attributes */
 void cog_compose(value_t *v);
-/* void cog_compose2(value_t *v); */
-/* void cog_compose3(value_t *v); */
-/* void cog_compose4(value_t *v); */
-/* void cog_composen(value_t *v); */
 
 /* keeps attributes of the stack being preposed to */
 void cog_prepose(value_t *v);
-/* void cog_prepose2(value_t *v); */
-/* void cog_prepose3(value_t *v); */
-/* void cog_prepose4(value_t *v); */
-/* void cog_preposen(value_t *v); */
-
-/* @brief [value] [quote] curry  */
-/* curry can be written as 'swap quote prepose' */
-/* void cog_curry(value_t *v); */
-/* void cog_curry2(value_t *v); */
-/* void cog_curry3(value_t *v); */
-/* void cog_curry4(value_t *v); */
-/* void cog_curryn(value_t *v); */
-
-/* @brief [quote] [value] push */
-/* push can be written as 'quote compose' */
-/* void cog_push(value_t *v); */
-/* void cog_push2(value_t *v); */
-/* void cog_push3(value_t *v); */
-/* void cog_push4(value_t *v); */
-/* void cog_pushn(value_t *v); */
 
 /* curries elements further down */
 /* void cog_with(value_t *v); */

@@ -1,5 +1,4 @@
-comment.cog load
-quote.cog load
+2 crank quote.cog load
 
 [ ] [ ] [ 0 ]
 
@@ -28,3 +27,10 @@ quote.cog load
 ) def
 
 ><+-,.[] dup ( i s itgl f d ) eval
+
+
+> hello this is a comment
+<
+.
+>>>
++++
