@@ -32,22 +32,6 @@ void cog_compose(value_t *v);
 /* keeps attributes of the stack being preposed to */
 void cog_prepose(value_t *v);
 
-/* curries elements further down */
-/* void cog_with(value_t *v); */
-/* void cog_2with(value_t *v); */
-/* void cog_3with(value_t *v); */
-/* void cog_4with(value_t *v); */
-/* void cog_mwith(value_t *v); */
-/* void cog_mwithn(value_t *v) */
-
-/* uncurries elements from stack */
-/* uncurryn can be written as 'split swap dip' */
-/* void cog_uncurry(value_t *v); */
-/* void cog_uncurry2(value_t *v); */
-/* void cog_uncurry3(value_t *v); */
-/* void cog_uncurry4(value_t *v); */
-/* void cog_uncurryn(value_t *v); */
-
 /* @brief Inserts a value into a quote. */
 /* call with `[quote] value index put*/
 void cog_put(value_t *v);

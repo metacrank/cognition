@@ -306,17 +306,17 @@ void cog_isword(value_t *v) {
     eval_error(U"TOO FEW ARGUMENTS", v);
     return;
   }
+  value_t *ret = init_value(VWORD);
   stack_t *strstack = *value_stack(strval);
   if (strstack->size != 1) {
-    eval_error(U"BAD ARGUMENT TYPE", v);
-    return;
-  }
-  value_t *val = strstack->items[0];
-  value_t *ret = init_value(VWORD);
-  if (val->type == VWORD) {
-    ret->str_word = init_string(U"t");
-  } else {
     ret->str_word = init_string(U"");
+  } else {
+    value_t *val = strstack->items[0];
+    if (val->type == VWORD) {
+      ret->str_word = init_string(U"t");
+    } else {
+      ret->str_word = init_string(U"");
+    }
   }
   push_quoted(cur, ret);
 }

@@ -6,14 +6,20 @@
 [ ++ ] ( [ 1 ] + ) def
 [ -- ] ( [ 1 ] - ) def
 [ == ] ( dup ( swap dup ( <= ) dip ) dip <= and ) def
-[ pos? ] ( [ 0 ] > ) def
-[ neg? ] ( [ 0 ] < ) def
-[ zero? ] ( [ 0 ] == ) def
-[ non-neg? ] ( [ 0 ] >= ) def
-[ non-pos? ] ( [ 0 ] <= ) def
-[ one? ] ( [ 1 ] == ) def
-[ two? ] ( [ 2 ] == ) def
-[ three? ] ( [ 3 ] == ) def
+[ zero ] ( [ 0 ] ) def
+[ one ] ( [ 1 ] ) def
+[ two ] ( [ 2 ] ) def
+[ three ] ( [ 3 ] ) def
+[ four ] ( [ 4 ] ) def
+[ pos? ] ( zero > ) def
+[ neg? ] ( zero < ) def
+[ zero? ] ( zero == ) def
+[ non-neg? ] ( zero >= ) def
+[ non-pos? ] ( zero <= ) def
+[ one? ] ( one == ) def
+[ two? ] ( two == ) def
+[ three? ] ( three == ) def
+[ four? ] ( four == ) def
 
 # metastack extension
 [ meta ] ( uncd quote cd reset ) def # ( qstack reset ) is less efficient but preserves root in chroots
@@ -36,7 +42,6 @@
 [ drop ] mkopn
 [ swap ] mkopn
 [ dup ] mkopn
-[ eval ] mkopn
 
 [ nip ] dup ( swap drop ) defopn
 [ deep ] dup ( swap dip ) defopn
@@ -60,6 +65,23 @@
 [ 3pick ] ( 2pickd swap ) defopn
 [ 4pick ] ( 3pickd swap ) defopn
 #[ mpick ]
+
+# still needs some work
+[ eval2 ] ( deep eval ) def
+[ eval3 ] ( eval2d eval ) def
+[ eval4 ] ( eval3d eval ) def
+#[ evaln ]
+[ 2eval ] ( 2rot eval ) def
+[ 2eval2 ] ( 3rot2 eval2 ) def
+[ 2eval3 ] ( 4rot3 eval2 ) def
+#...
+[ 3eval ] ( 3rot eval ) def
+[ 3eval2 ] ( 4rot2 eval2 ) def
+#...
+[ 4eval ] ( 4rot eval ) def
+#...
+#[ -eval2 ] ( dip eval ) ?
+#[ -eval3 ] ( 2dip -eval2 ) ...
 
 # alias stackops
 [ dropd ] [ nip ] aliasn
@@ -96,6 +118,10 @@
 [ 2over ] ( ( ( swap dup ) dip swap ) do dip swap ) defopd
 [ 3over ] ( ( quote curry2 do ) dip swap eval ) defopd
 [ 4over ] ( ( quote curry3 do ) dip swap eval ) defopd
+
+# type-specific wordlists
+[ stack-wordlist ] ( wordlist ( unglue stack? nip ) filter ) def
+[ macro-wordlist ] ( wordlist ( unglue macro? nip ) filter ) def
 
 # strings extension
 "string.cog" load

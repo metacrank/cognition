@@ -11,31 +11,31 @@
 [ b-- ] ( byte -- char ) def
 
 [ 0cut ] ( f swap ) def
-[ 1cut ] ( [ 1 ] cut ) def
-[ 2cut ] ( [ 2 ] cut ) def
-[ 3cut ] ( [ 3 ] cut ) def
-[ 4cut ] ( [ 4 ] cut ) def
+[ 1cut ] ( one cut ) def
+[ 2cut ] ( two cut ) def
+[ 3cut ] ( three cut ) def
+[ 4cut ] ( four cut ) def
 [ cut* ] ( ( len ) dip - cut ) def
-[ 1cut* ] ( len [ 1 ] - cut ) def
-[ 2cut* ] ( len [ 2 ] - cut ) def
-[ 3cut* ] ( len [ 3 ] - cut ) def
-[ 4cut* ] ( len [ 4 ] - cut ) def
+[ 1cut* ] ( len -- cut ) def
+[ 2cut* ] ( len two - cut ) def
+[ 3cut* ] ( len three - cut ) def
+[ 4cut* ] ( len four - cut ) def
 
-[ cfirst ] ( [ 1 ] nth ) def
-[ csecond ] ( [ 2 ] nth ) def
-[ cthird ] ( [ 3 ] nth ) def
-[ cfourth ] ( [ 4 ] nth ) def
-[ clast ] ( len [ 1 ] - nth ) def
-[ csecond-last ] ( len [ 2 ] - nth ) def
-[ cthird-last ] ( len [ 3 ] - nth ) def
-[ cfourth-last ] ( len [ 4 ] - nth ) def
+[ cfirst ] ( one nth ) def
+[ csecond ] ( two nth ) def
+[ cthird ] ( three nth ) def
+[ cfourth ] ( four nth ) def
+[ clast ] ( len -- nth ) def
+[ csecond-last ] ( len two - nth ) def
+[ cthird-last ] ( len three - nth ) def
+[ cfourth-last ] ( len four - nth ) def
 
 [ shead ] ( cut drop ) def
 [ strim ] ( cut* drop ) def
 [ stail ] ( cut nip ) def
 [ sleave ] ( cut* nip ) def
-[ sbut-last ] ( [ 1 ] strim ) def
-[ srest ] ( [ 1 ] shead ) def
+[ sbut-last ] ( one strim ) def
+[ srest ] ( one shead ) def
 
 [ cpull ] ( cut 1cut swap concatd ) def
 [ set-nth ] ( swapd cut srest swapd concat2 ) def
@@ -69,14 +69,14 @@
     ] case concat over
   )
 ) def
-[ strquote-end0 ] ( drop nip swap [ 1 ] swap metacrank swap crank swap s swap d swap i ) def
+[ strquote-end0 ] ( drop nip swap one swap metacrank swap crank swap s swap d swap i ) def
 [ strquote-end1 ] ( strquote-end push over ) def
 [ \ " ] [ \ " ] (
   geti getd gets "" d "" i "" s stgl
-  crankbase [ 1 ] metacrankbase dup [ 1 ] =
+  crankbase one metacrankbase dup one?
   [ ( dup [ \ \ ] = ( strquote-escape ) ( dup [ \ " ] = ( strquote-end0 ) ( concat over ) if ) if ) ]
   [ ( dup [ \ \ ] = ( strquote-escape ) ( dup [ \ " ] = ( strquote-end1 ) ( concat over ) if ) if ) ]
-  if dup "" swap halt [ 1 ] [ 1 ] metacrank
+  if dup "" swap halt one one metacrank
 ) def singlet
 
 [ strquote-escape strquote-end0 strquote-end1 ] ( undef ) each
