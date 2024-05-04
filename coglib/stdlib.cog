@@ -2,6 +2,11 @@
 # Cognition Standard Library
 # Apr. 2024
 
+# parsing aliases
+[ setd ] ( d ) def
+[ seti ] ( i ) def
+[ sets ] ( s ) def
+
 # math extension
 [ ++ ] ( [ 1 ] + ) def
 [ -- ] ( [ 1 ] - ) def
@@ -11,6 +16,7 @@
 [ two ] ( [ 2 ] ) def
 [ three ] ( [ 3 ] ) def
 [ four ] ( [ 4 ] ) def
+[ i ] ( [ 0,1 ] ) def
 [ pos? ] ( zero > ) def
 [ neg? ] ( zero < ) def
 [ zero? ] ( zero == ) def
@@ -20,6 +26,7 @@
 [ two? ] ( two == ) def
 [ three? ] ( three == ) def
 [ four? ] ( four == ) def
+[ i? ] ( i == ) def
 
 # metastack extension
 [ meta ] ( uncd quote cd reset ) def # ( qstack reset ) is less efficient but preserves root in chroots
