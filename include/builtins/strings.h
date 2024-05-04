@@ -12,9 +12,8 @@ void cog_concat(value_t *v);
 /* decompose string */
 void cog_unconcat(value_t *v);
 
-void cog_nth(value_t *v);
-//or
-//void cog_cat(value_t *v); // cat may be useful for [ fread print ] word?
+/* previously cog_nth */
+void cog_cat(value_t *v);
 
 /* length of a string */
 void cog_len(value_t *v);

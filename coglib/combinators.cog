@@ -96,6 +96,7 @@
 [ negate ] ( ( not ) compose ) def
 [ when ] ( [ ] if ) def
 [ else ] ( swap not swap when ) def
+[ which ] ( quoted quote if ) def
 
 [ loop ] ( \ do (( loop )) curry when ) def         # [ body pred ] loop
 [ while ] ( dod prepose (( loop )) curry when ) def # [ pred ] [ body ] while
@@ -118,6 +119,7 @@
 [ 3split* ] ( size three - split ) def
 [ 4split* ] ( size four - split ) def
 
+[ zeroth ] ( zero vat ) def
 [ first ] ( one vat ) def
 [ second ] ( two vat ) def
 [ third ] ( three vat ) def
@@ -134,6 +136,7 @@
 [ but-last ] ( size -- head ) def
 [ rest ] ( size one swap substack ) def
 
+[ nth ] ( dup substack ) defopd
 [ pull ] ( split 1split swap composed ) def
 [ set-vat ] ( swapd split rest swapd compose2 ) def
 [ swap-vat ] ( swapd split 1split spind compose2 swap ) def
@@ -191,11 +194,13 @@
 [ 2each ] ( (each-split-2) (emk-quote) each drop ) def
 [ 3each ] ( (each-split-3) (emk-quote) 2each drop ) def
 [ 4each ] ( (each-split-4) (emk-quote) 3each drop ) def
+#[ neach ]
 
 [ each-index ] ( zero -rot ( swap dup ) take (einc-idx) each drop ) def
 [ 2each-index ] ( zero -roll ( rot dup ) take (einc-idx) 2each drop ) def
 [ 3each-index ] ( zero swap -rolld ( roll dup ) take (einc-idx) 3each drop ) def
 [ 4each-index ] ( zero -rot -rollt ( rolld swap dup ) take (einc-idx) 4each drop ) def
+#[ neach-index ]
 
 # factors of map
 [ (map-addon) ] ( ( dip prepose ) compose ) def
@@ -209,11 +214,13 @@
 [ 2map ] dup ( ( 0split ) 2dip (map-quote-2) 2each ) def mkopd
 [ 3map ] dup ( ( 0split ) 3dip (map-quote-3) 3each ) def mkopd
 [ 4map ] dup ( ( 0split ) 4dip (map-quote-4) 4each ) def mkopd
+#[ nmap ]
 
 [ map-index ] ( ( 0split ) dip (map-quote-2) each-index ) def
 [ 2map-index ] ( ( 0split ) 2dip (map-quote-3) 2each-index ) def
 [ 3map-index ] ( ( 0split ) 3dip (map-quote-4) 3each-index ) def
 [ 4map-index ] ( ( 0split ) 4dip (map-quote-5) 4each-index ) def
+#[ nmap-index ]
 
 [ (emk-quote) (each-split-2) (each-split-3) (each-split-4) (einc-idx)
   (map-add-dp) (map-quote-1) ( map-quote-2 ) (map-quote-3) (map-quote-4) (map-quote-5)
@@ -237,7 +244,23 @@
 [ cartesian-find ] ( ( f ) 3dip ( with find swap ) curry2 ( nip ) prepose find nip swap ) def # taken from factor
 [ cartesian-product ] ( dup ( compose ) curry cartesian-map ) def # ( dup [ 2quote ] curry cartesian-map )
 
+# [ quot ] [ n ] bounds-check? --> [ quot ] [ n ] [ t/f ]
+[ bounds-check? ] ( dup non-neg? ( dup ( size ) digd > ) ( f ) if ) def
+[ bounds-check-eval ] ( ( bounds-check? ) dip ( f ) if ) def
+
+[ vat-operator ] ( ( vat ) take ( curry dip ) compose ) def
+[ vat-destruct-operator ] ( ( split f swap 1split swap composed2 ) take ( curry dip ) compose ) def
+[ vat-drill-operator ] ( vat-operator ( swap ) compose ) def
+[ vat-drill-destruct-operator ] ( vat-destruct-operator ( swap ) compose ) def
+
+[ idx/elt ] ( dup2 ( nthd ) ( nipd ) if ) def
+
 # from factor math
+[ each-integer-from ] (
+  2over <
+  ( ( nip eval ) keep3 ( ++ ) 2dip each-integer-from )
+  ( drop3 ) if
+) def
 [ find-integer-from ] (
   ( fp ) 3dip
   2over < (
@@ -254,28 +277,24 @@
 ) def
 [ find-integer ] ( zero -rot find-integer-from ) def
 
-# [ quot ] [ n ] bounds-check? --> [ quot ] [ n ] [ t/f ]
-[ bounds-check? ] ( dup non-neg? ( dup ( size ) digd > ) ( f ) if ) def
-[ bounds-check-eval ] ( ( bounds-check? ) dip ( f ) if ) def
-
-[ (match-find) ] (
-  ( split f swap 1split swap composed2 dup ) take
-  ( 2drill ( t ) ( drop f ) if ) compose
-) def
-[ run-find-with-match ] ( bounds-check-eval dup ( nipd swap ) ( nip f ) if ) def
+[ each-from ] ( -2rotd vat-destruct-operator each-integer-from drop ) def
+[ 2each-from ] ( -3rotd 2vat-destruct-operator each-integer-from drop ) def
+[ 3each-from ] ( -4rotd 3vat-destruct-operator each-integer-from drop ) def
+#[ neach-from ]
 
 # [ seq ] [ n ] [ quot ] find-from --> [ i ] [ elt ]
-[ find-from ] ( (match-find) ( size ) digd ( find-integer-from ) curry2 run-find-with-match )
-[ find-last-from ] ( (match-find) ( find-last-integer ) curry run-find-with-match ) def
+[ do-find-from ] ( vat-drill-operator find-integer-from ) def
+[ do-find-last-from ] ( vat-drill-operator find-last-integer ) def
+[ find-from ] ( ( size ) digd ( do-find-from idx/elt ) curry2 bounds-check-eval ) def
+[ find-last-from ] ( ( do-find-last-from idx/elt ) curry bounds-check-eval ) def
 [ find ] ( zero swap find-from ) def
 [ find-last ] ( zero swap find-last-from ) def
+#[ nfind ]
 
 [ index-from ] ( swap ( = ) curry find-from drop ) def
 [ last-index-from ] ( swap ( = ) curry find-last-from drop ) def
 [ index ] ( ( = ) curry find drop ) def
 [ last-index ] ( ( = ) curry find-last drop ) def
-
-[ (match-find) ] [ run-find-with-match ] undef2
 
 [ interleave ] (
   empty?t rot
@@ -292,7 +311,7 @@
     ( dot dup eval ) ( drop nip2 ) if
   ) dup eval
 ) def
-[ weaven ] ( ( quoten ) curry do dip ( join eval ) keep eval ) def
+[ nweave ] ( ( quoten ) curry do dip ( join eval ) keep eval ) def
 
 [ case ] (
   unpush ( swap dup ) dip
@@ -305,21 +324,6 @@
     ) if
   ) if
 ) def
-
-# for math.cog?
-[ sum ] ( zero ( + ) reduce ) def
-[ product ] ( one ( * ) reduce ) def
-
-# used to be 'range'
-[ interval ] (
-  ( stack swap dup ) dip
-  -- ( < ) curry
-  ( dup ( compose ) dip one + dup )
-  while compose
-) def
-
-[ flip ] ( 0split ( prepose ) each ) def
-[ transpose ] (  ) drop2
 
 # complete expand (checks for definitions within child first without copying hashtables)
 [ expand ] (
@@ -350,4 +354,42 @@
       size pos? ( 4pick eval ) ( ) if
     ) dup -rotd eval drop dropd
   ) if
+) def
+
+
+
+
+
+
+# modified from factor
+[ map-reduce ] (
+  ( ( zeroth swap ) dip 2do ) dip
+  ( ( swap ) take ( dig ) compose ) dip compose
+  one each-from
+) def
+
+# for math.cog?
+[ sum ] ( zero ( + ) reduce ) def
+[ product ] ( one ( * ) reduce ) def
+
+# used to be 'range'
+[ interval ] (
+  ( stack swap dup ) dip
+  -- ( < ) curry
+  ( dup ( compose ) dip one + dup )
+  while compose
+) def
+
+[ map-integers-from ] ( ( interval ) dip map ) def
+[ map-integers ] ( zero -rot map-integers-from ) def
+
+[ most ] ( keep2 which ) def
+[ min ] ( ( < ) most ) def
+[ max ] ( ( > ) most )
+[ avg ] ( + two / ) def
+
+[ flip ] ( 0split ( prepose ) each ) def
+[ transpose ] (
+  ( ( size ) ( min ) map-reduce ) keep
+  ( ( nth ) with map ) curry map-integers
 ) def

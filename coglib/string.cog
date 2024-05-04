@@ -21,14 +21,14 @@
 [ 3cut* ] ( len three - cut ) def
 [ 4cut* ] ( len four - cut ) def
 
-[ cfirst ] ( one nth ) def
-[ csecond ] ( two nth ) def
-[ cthird ] ( three nth ) def
-[ cfourth ] ( four nth ) def
-[ clast ] ( len -- nth ) def
-[ csecond-last ] ( len two - nth ) def
-[ cthird-last ] ( len three - nth ) def
-[ cfourth-last ] ( len four - nth ) def
+[ cfirst ] ( one cat ) def
+[ csecond ] ( two cat ) def
+[ cthird ] ( three cat ) def
+[ cfourth ] ( four cat ) def
+[ clast ] ( len -- cat ) def
+[ csecond-last ] ( len two - cat ) def
+[ cthird-last ] ( len three - cat ) def
+[ cfourth-last ] ( len four - cat ) def
 
 [ shead ] ( cut drop ) def
 [ strim ] ( cut* drop ) def
@@ -38,8 +38,8 @@
 [ srest ] ( one shead ) def
 
 [ cpull ] ( cut 1cut swap concatd ) def
-[ set-nth ] ( swapd cut srest swapd concat2 ) def
-[ change-nth ] ( swapd cut 1cut ( swap ( swap eval ) dip swap ) dip concat2 ) def
+[ set-cat ] ( swapd cut srest swapd concat2 ) def
+[ change-cat ] ( swapd cut 1cut ( swap ( swap eval ) dip swap ) dip concat2 ) def
 
 [ rejoin ] ( "" concat ) def
 [ combine ] ( join rejoin ) def

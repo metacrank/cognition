@@ -163,7 +163,7 @@ void cog_len(value_t *v) {
   push_quoted(cur, r1);
 }
 
-void cog_nth(value_t *v) {
+void cog_cat(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   stack_t *stack = cur->stack;
   if (stack->size < 2) {
@@ -379,7 +379,7 @@ void add_funcs_strings(ht_t *flit) {
   add_func(flit, cog_unconcat, U"unconcat");
   add_func(flit, cog_len, U"len");
   add_func(flit, cog_cut, U"cut");
-  add_func(flit, cog_nth, U"nth");
+  add_func(flit, cog_cat, U"cat");
   add_func(flit, cog_insert, U"insert");
   add_func(flit, cog_reverse, U"reverse");
   add_func(flit, cog_isword, U"isword");
