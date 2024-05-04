@@ -7,6 +7,10 @@
 [ seti ] ( i ) def
 [ sets ] ( s ) def
 
+[ d ] undef
+[ i ] undef
+[ s ] undef
+
 # math extension
 [ ++ ] ( [ 1 ] + ) def
 [ -- ] ( [ 1 ] - ) def
