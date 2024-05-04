@@ -1,3 +1,21 @@
+# Basic operations
+[ sum ] ( zero ( + ) reduce ) def
+[ product ] ( one ( * ) reduce ) def
+[ min ] ( ( < ) most ) def
+[ max ] ( ( > ) most )
+[ avg ] ( + two / ) def
+
+# used to be 'range'
+[ interval ] (
+  ( stack swap dup ) dip
+  -- ( < ) curry
+  ( dup ( compose ) dip one + dup )
+  while compose
+) def
+
+[ map-integers-from ] ( ( interval ) dip map ) def
+[ map-integers ] ( zero -rot map-integers-from ) def
+
 # Numerical Techniques
 [ integrate ] ( ) def # [ function ] a b integrate => definite integral value
 
@@ -16,10 +34,17 @@
 [ e- ] ( ) def # subtract 
 [ e^ ] ( ) def # power
 
-# statistics:
+# Matrix
+[ transpose ] (
+  ( ( size ) ( min ) map-reduce ) keep
+  ( ( nth ) with map ) curry map-integers
+) def
+
+# Statistics:
 [ mean ] ( size swap sum swap / ) def
 [ mean* ] ( ( size ) dip * swap sum swap / ) def # [ set ] [ 1.00 ] mean*
 
+# set needs ordering first
 [ median ] (
         size [ 2 ] % [ 0 ] = # list is even
 	( size [ 2 ] / floor dup ( [ 1 ] - vat ) dip swapd ( vat ) dip + [ 2 ] / ) # mean of two middle elements

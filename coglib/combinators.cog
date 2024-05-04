@@ -97,6 +97,27 @@
 [ when ] ( [ ] if ) def
 [ else ] ( swap not swap when ) def
 [ which ] ( quoted quote if ) def
+[ most ] ( keep2 which ) def
+
+[ mk-if-unary ] ( ( swap ) prepose ( swap ) compose ( dip if ) curry def ) def
+[ mk-when-unary ] ( ( swap ) prepose ( swap when ) compose def ) def
+[ mk-else-unary ] ( ( swap ) prepose ( not swap when ) compose def ) def
+[ mk-if-when-else ] (
+  ( ( "if-" swap concat ) keep ( "when-" swap concat ) keep "else-" swap concat ) dip
+  ( mk-else-unary ) keep ( mk-when-unary ) keep mk-if-unary
+) def
+
+[ word ] ( isword ) mk-if-when-else
+[ def ] ( isdef ) mk-if-when-else
+[ int ] ( isint ) mk-if-when-else
+[ float ] ( isint ) mk-if-when-else
+[ zero ] ( zero? ) mk-if-when-else
+[ one ] ( one? ) mk-if-when-else
+[ two ] ( two? ) mk-if-when-else
+[ three ] ( three? ) mk-if-when-else
+[ four ] ( four? ) mk-if-when-else
+[ negative-zero ] ( negative-zero? ) mk-if-when-else
+[ i ] ( i? ) mk-if-when-else
 
 [ loop ] ( \ do (( loop )) curry when ) def         # [ body pred ] loop
 [ while ] ( dod prepose (( loop )) curry when ) def # [ pred ] [ body ] while
@@ -303,6 +324,7 @@
   ) if
 ) def
 
+[ flip ] ( 0split ( prepose ) each ) def
 [ sep ] ( size ( uncompose ) dip -- quoten ) def
 [ join ] ( [ ] -rot ( compose ) curry ( compose ) interleave swap prepose ) def
 [ follow ] (
@@ -325,7 +347,27 @@
   ) if
 ) def
 
-# complete expand (checks for definitions within child first without copying hashtables)
+
+
+
+
+
+
+
+# modified from factor
+[ map-reduce ] (
+  ( ( zeroth swap ) dip 2do ) dip
+  ( ( swap ) take ( dig ) compose ) dip compose
+  one each-from
+) def
+#[ 2map-reduce ]
+#...
+#[ nmap-reduce ]
+
+# example of combinator power: complete expand
+# (checks for definitions within child first without copying hashtables)
+#
+# legacy:
 [ expand ] (
   size pos? ( stack? ) ( return ) if
   macro swap (
@@ -355,41 +397,14 @@
     ) dup -rotd eval drop dropd
   ) if
 ) def
-
-
-
-
-
-
-# modified from factor
-[ map-reduce ] (
-  ( ( zeroth swap ) dip 2do ) dip
-  ( ( swap ) take ( dig ) compose ) dip compose
-  one each-from
+#
+# with combinators:
+[ expand-unglue ] ( ( dup ( unglue ) when-def ) when-word ) def
+[ expand ] (
+  stack?
+  ( 0split ( compose cd expand-unglue pop expand-unglue ) \ map nip )
+  (( ( expand-unglue ) map )) if
 ) def
-
-# for math.cog?
-[ sum ] ( zero ( + ) reduce ) def
-[ product ] ( one ( * ) reduce ) def
-
-# used to be 'range'
-[ interval ] (
-  ( stack swap dup ) dip
-  -- ( < ) curry
-  ( dup ( compose ) dip one + dup )
-  while compose
-) def
-
-[ map-integers-from ] ( ( interval ) dip map ) def
-[ map-integers ] ( zero -rot map-integers-from ) def
-
-[ most ] ( keep2 which ) def
-[ min ] ( ( < ) most ) def
-[ max ] ( ( > ) most )
-[ avg ] ( + two / ) def
-
-[ flip ] ( 0split ( prepose ) each ) def
-[ transpose ] (
-  ( ( size ) ( min ) map-reduce ) keep
-  ( ( nth ) with map ) curry map-integers
-) def
+[ 2expand ] (( (( expand )) map )) def
+[ 3expand ] (( (( expand2 )) map )) def
+[ 4expand ] (( (( expand3 )) map )) def

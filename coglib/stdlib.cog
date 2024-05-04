@@ -24,17 +24,15 @@
 [ i ] ( [ 0,1 ] ) def
 [ pos? ] ( zero > ) def
 [ neg? ] ( zero < ) def
-[ zero? ] ( zero == ) def
 [ non-neg? ] ( zero >= ) def
 [ non-pos? ] ( zero <= ) def
+[ zero? ] ( zero == ) def
 [ one? ] ( one == ) def
 [ two? ] ( two == ) def
 [ three? ] ( three == ) def
 [ four? ] ( four == ) def
+[ negative-zero? ] ( negative-zero == ) def
 [ i? ] ( i == ) def
-[ min ] ( dup ( ( dup ) dip swap ) dip < ( drop ) (  ) )
-[ max ] (  )
-[ avg ] ( + two / ) def
 
 # metastack extension
 [ meta ] ( uncd quote cd reset ) def # ( qstack reset ) is less efficient but preserves root in chroots
