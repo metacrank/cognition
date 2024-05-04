@@ -1,8 +1,37 @@
-# statistics:
+# Numerical Techniques
+[ integrate ] ( ) def # [ function ] a b integrate => definite integral value
 
+# Polar Coordinates and cartesian
+[ quad1? ] ( dup2 0 > swap 0 > and ) def # a b quad1? => bool
+[ quad2? ] ( dup2 0 < swap 0 > and ) def
+[ quad3? ] ( dup2 0 < swap 0 < and ) def
+[ quad4? ] ( dup2 0 > swap 0 < and ) def
+
+[ atan2 ] ( ) def # two-argument arctan
+[ euler ] ( dup abs swap dup real swap imag swap atan2 swap compose ) def # z [ euler ] => [ euler notation tuple ] (r, theta)
+[ cartesian ] ( 1 pull dup sin 0,1 * swap cos + * ) def # [ r, theta ] [ cartesian ] => [ cartesian z ]
+[ e* ] ( ) def # multiply
+[ e/ ] ( ) def # divide
+[ e+ ] ( ) def # add 
+[ e- ] ( ) def # subtract 
+[ e^ ] ( ) def # power
+
+# statistics:
 [ mean ] ( size swap sum swap / ) def
 [ mean* ] ( ( size ) dip * swap sum swap / ) def # [ set ] [ 1.00 ] mean*
 
+[ median ] (
+        size [ 2 ] % [ 0 ] = # list is even
+	( size [ 2 ] / floor dup ( [ 1 ] - vat ) dip swapd ( vat ) dip + [ 2 ] / ) # mean of two middle elements
+	( size [ 2 ] / floor [ 1 ] - vat ) # middle element
+        if
+) def
 
-[ median ]
-[ mode ]
+[ mode ] ( ) def # [ list of data points ] mode => mode
+[ histogram ] ( ) def # [ list of data points ] histogram => [ tuples: [ probability, value ] ]
+[ var ] ( ) def # variance: [ list of [ p, x ] ] => Variance
+[ std ] ( var sqrt ) def # standard dev.
+[ cov ] ( ) def # [ list of [ p, x ] ] [ list of [ p, y ] ] cov => cov
+
+[ fft ] ( ) def
+[ convolve ] ( ) def # [ f ] [ kernel ] convolve => [ new list ]
