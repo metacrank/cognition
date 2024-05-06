@@ -15,6 +15,9 @@ void cog_err_pop(value_t *v);
 /* takes a word and converts it to a VERR, pushes it to the error stack */
 void cog_err_push(value_t *v);
 
+/* drops an error from the error stack */
+void cog_err_drop(value_t *v);
+
 /* prints top value on error stack */
 void cog_err_print(value_t *v);
 
@@ -23,6 +26,9 @@ void cog_err_show(value_t *v);
 
 /* puts an error on the error stack with the current word's value */
 void cog_err_throw(value_t *v);
+
+/* returns the size of the current error stack */
+void cog_err_size(value_t *v);
 
 void add_funcs_errors(ht_t *flit);
 

@@ -1,34 +1,81 @@
+# Composition
 [ compose ] mkopn
 [ 2compose ] dup ( swap composed ) defopd ( ) "compose" ( 2compose ) ( -- composen 2compose ) mkbindopn-1
 [ 3compose ] dup ( swap 2composed ) defopd ( ) "compose" ( 3compose ) ( -- composen 3compose ) mkbindopn-1
 [ 4compose ] dup ( swap 3composed ) defopd ( ) "compose" ( 4compose ) ( -- composen 4compose ) mkbindopn-1
 #[ mcompose ]
+[ compose-operator ] ( ( compose ) curry ) def
+[ composer ] ( compose-operator ) def
 
 [ prepose ] mkopn
 [ 2prepose ] dup ( swap preposed ) defopd ( ) "prepose" ( 2prepose ) ( -- preposen 2prepose ) mkbindopn-1
 [ 3prepose ] dup ( swap 2preposed ) defopd ( ) "prepose" ( 3compose ) ( -- preposen 3prepose ) mkbindopn-1
 [ 4prepose ] dup ( swap 3preposed ) defopd ( ) "prepose" ( 4compose ) ( -- preposen 4prepose ) mkbindopn-1
 #[ mprepose ]
+[ prepose-operator ] ( ( prepose ) curry ) def
+[ preposer ] ( prepose-operator ) def
 
+# Evaluation
 [ dip ] ( ) "compose" ( dip ) ( -- composen dip ) mkbindopn-1
 [ 2dip ] ( ) "compose" ( swap dipd ) ( -- composen swap dipd ) mkbindopn-1
 [ 3dip ] ( ) "compose" ( swap 2dipd ) ( -- composen swap 2dipd ) mkbindopn-1
 [ 4dip ] ( ) "compose" ( swap 3dipd ) ( -- composen swap 3dipd ) mkbindopn-1
 #[ mdip ]
+[ dip-operator ] ( ( dip ) curry ) def
+[ dipper ] ( dip-operator ) def
 
-[ dig ] ( ) "compose" ( dip swap ) ( -- composen dip swap ) mkbindopn-1
-[ 2dig ] ( ) "compose" ( swap digd swap ) ( -- composen swap digd swap ) mkbindopn-1
-[ 3dig ] ( ) "compose" ( swap 2digd swap ) ( -- composen swap 2digd swap ) mkbindopn-1
-[ 4dig ] ( ) "compose" ( swap 3digd swap ) ( -- composen swap 3digd swap ) mkbindopn-1
+[ dig ] ( dip swap ) defopd
+[ dig2 ] ( dig -2rotd ) defopd
+[ dig3 ] ( dig -3rotd ) defopd
+[ dig4 ] ( dig -4rotd ) defopd
+[ dign ] ( digd -mrotd ) defopd
+[ 2dig ] ( swap digd swap ) defopd
+[ 2dig2 ] ( swap digd2 swap -2rotd ) defopd
+[ 2dig3 ] ( swap digd3 swap -3rotd ) defopd
+[ 2dig4 ] ( swap digd4 swap -4rotd ) defopd
+[ 2dign ] ( swapd dup digtn swap -mrotd ) defopd
+[ 3dig ] ( swap 2digd swap ) defopd
+[ 3dig2 ] ( swap 2digd2 swap -2rotd ) defopd
+[ 3dig3 ] ( swap 2digd3 swap -3rotd ) defopd
+[ 3dig4 ] ( swap 2digd4 swap -4rotd ) defopd
+[ 3dign ] ( swapd dup 2digtn swap -mrotd ) defopd
+[ 4dig ] ( swap 3digd swap ) defopd
+[ 4dig2 ] ( swap 3digd2 swap -2rotd ) defopd
+[ 4dig3 ] ( swap 3digd3 swap -3rotd ) defopd
+[ 4dig4 ] ( swap 3digd4 swap -4rotd ) defopd
+[ 4dign ] ( swapd dup 3digtn swap -mrotd ) defopd
 #[ mdig ]
+[ dig-operator ] ( ( dig ) curry ) def
+[ 2dig-operator ] ( ( 2dig ) curry ) def
+#...
+[ digger ] ( dig-operator ) def
 
 [ drill ] ( ) "curry" ( dig ) ( curryn dig ) mkbindopn
 [ 2drill ] ( ) "curry" ( 2dig ) ( curryn 2dig ) mkbindopn
 [ 3drill ] ( ) "curry" ( 3dig ) ( curryn 3dig ) mkbindopn
 [ 4drill ] ( ) "curry" ( 4dig ) ( curryn 4dig ) mkbindopn
 #[ mdrill ]
+[ drill-operator ] ( ( drill ) curry ) def
+[ drill2-operator ] ( ( drill2 ) curry ) def
+[ drill3-operator ] ( ( drill3 ) curry ) def
+[ drill4-operator ] ( ( drill4 ) curry ) def
+[ 2drill-operator ] ( ( 2drill ) curry ) def
+#...
+[ driller ] ( drill-operator ) def
 
+# Composition extension
 [ curry ] dup ( swap quote prepose ) def mkopn
+[ curry-operator ] ( ( curry ) curry ) def
+[ curry2-operator ] ( ( curry2 ) curry ) def
+[ curry3-operator ] ( ( curry3 ) curry ) def
+[ curry4-operator ] ( ( curry4 ) curry ) def
+[ curryn-operator ] ( ( curryn ) curry ) def
+[ curry-dip-operator ] ( ( curry dip ) curry ) def
+[ curry2-dip-operator ] ( ( curry2 dip ) curry ) def
+[ curry3-dip-operator ] ( ( curry3 dip ) curry ) def
+[ curry4-dip-operator ] ( ( curry4 dip ) curry ) def
+[ curryn-dip-operator ] ( ( curryn dip ) curry ) def
+[ currier ] ( curry-operator ) def
 
 [ with ] ( swap ) "curryd" ( swap ) ( swapd currydn swap ) mkbindopn
 [ 2with ] ( swap ) "withd" ( swap ) ( swapd withdn swap ) mkbindopn
@@ -57,12 +104,15 @@
 [ 4take ] ( swap ) "3taked" ( swap ) ( swapd 3takedn swap ) mkbindopn
 #[ mtake ]
 
+# Evaluation extension
 # 2/3/4don needs optimization
 [ do ] ( dup dip ) defopn
 [ 2do ] ( dup dipd ) defopn
 [ 3do ] ( dup 2dipd ) defopn
 [ 4do ] ( dup 3dipd ) defopn
 #[ mdo ] ( dupd -- mdipd ) def
+[ do-operator ] ( ( do ) curry ) def
+[ doer ] ( do-operator ) def
 
 # needs optimization
 [ dog ] ( dup dig ) defopn
@@ -70,55 +120,90 @@
 [ 3dog ] ( dup 2digd swap ) defopn
 [ 4dog ] ( dup 3digd swap ) defopn
 #[ mdog ] ( dupd -- mdigd swap ) def
+[ dog-operator ] ( ( dog ) curry ) def
+[ dogger ] ( dog-operator ) def
 
 # needs genlib.cog improvements and generalizations
-[ keep ] ( dupd dip ) def
-[ keepd ] ( 2pickd dip ) def
-[ keept ] ( 3pickd dip ) def
-[ keepq ] ( 4pickd dip ) def
-[ keep2 ] ( ( quote2 do ) dip dip eval ) def
-[ keepd2 ] ( ( quote2 do ) digd dip eval ) def
-[ keept2 ] ( ( quote2 do ) 2digd dip eval ) def
-[ keepq2 ] ( ( quote2 do ) 3digd dip eval ) def
-[ keep3 ] ( ( quote3 do ) dip dip eval ) def
-[ keepd3 ] ( ( quote3 do ) digd dip eval ) def
-[ keept3 ] ( ( quote3 do ) 2digd dip eval ) def
-[ keepq3 ] ( ( quote3 do ) 3digd dip eval ) def
-[ keep4 ] ( ( quote4 do ) dip dip eval ) def
-[ keepd4 ] ( ( quote4 do ) digd dip eval ) def
-[ keept4 ] ( ( quote4 do ) 2digd dip eval ) def
-[ keepq4 ] ( ( quote4 do ) 3digd dip eval ) def
-[ keepn ] ( ( quoten do ) drill dip eval ) def
-[ keepdn ] ( ( quoten do ) 2drill dip eval ) def
-[ keeptn ] ( ( quoten do ) 3drill dip eval ) def
-[ keepqn ] ( ( quoten do ) 4drill dip eval ) def
+[ keep ] ( dupd dip ) defopd
+[ keep2 ] ( ( quote2 do ) dip dip eval ) defopd
+[ keep3 ] ( ( quote3 do ) dip dip eval ) defopd
+[ keep4 ] ( ( quote4 do ) dip dip eval ) defopd
+[ keepn ] ( ( quoten do ) drill dip eval ) defopd
+[ 2keep ] ( 2pickd dip ) defopd
+[ 2keep2 ] ( ( quote2 do ) digd dip eval ) defopd
+[ 2keep3 ] ( ( quote3 do ) digd dip eval ) defopd
+[ 2keep4 ] ( ( quote4 do ) digd dip eval ) defopd
+[ 2keepn ] ( ( quoten do ) 2drill dip eval ) defopd
+[ 3keep ] ( 3pickd dip ) defopd
+[ 3keep2 ] ( ( quote2 do ) 2digd dip eval ) defopd
+[ 3keep3 ] ( ( quote3 do ) 2digd dip eval ) defopd
+[ 3keep4 ] ( ( quote4 do ) 2digd dip eval ) defopd
+[ 3keepn ] ( ( quoten do ) 3drill dip eval ) defopd
+[ 4keep ] ( 4pickd dip ) defopd
+[ 4keep2 ] ( ( quote2 do ) 3digd dip eval ) defopd
+[ 4keep3 ] ( ( quote3 do ) 3digd dip eval ) defopd
+[ 4keep4 ] ( ( quote4 do ) 3digd dip eval ) defopd
+[ 4keepn ] ( ( quoten do ) 4drill dip eval ) defopd
 
+[ keep-operator ] ( ( keep ) curry ) def
+[ keep2-operator ] ( ( keep2 ) curry ) def
+[ keep3-operator ] ( ( keep3 ) curry ) def
+[ keep4-operator ] ( ( keep4 ) curry ) def
+[ keepn-operator ] ( ( keepn ) curry ) def
+[ keeper ] ( keep-operator ) def
+[ 2keeper ] ( keep2-operator ) def
+[ 3keeper ] ( keep3-operator ) def
+[ 4keeper ] ( keep4-operator ) def
+[ nkeeper ] ( keepn-operator ) def
+
+# Stackops dup variants
+[ 2dup ] ( 2quote ) [ do ] ( eval ) ( ( 2quote ) dip don eval ) mkbindopn
+[ 2dup ] ( swap dup ( swap dup ) dip swap ) def mkopd # optimization
+[ 3dup ] ( 3quote ) [ do ] ( eval ) [ 17 ] ( ( 3quote ) dip don eval ) mkbindopn
+[ 4dup ] ( 4quote ) [ do ] ( eval ) [ 10 ] ( ( 4quote ) dip don eval ) mkbindopn
+
+[ over ] ( dupd swap ) defopd
+[ 2over ] ( ( ( swap dup ) dip swap ) do dip swap ) defopd
+[ 3over ] ( ( quote curry2 do ) dip swap eval ) defopd
+[ 4over ] ( ( quote curry3 do ) dip swap eval ) defopd
+
+# Conditionals
 [ negate ] ( ( not ) compose ) def
 [ when ] ( [ ] if ) def
-[ else ] ( swap not swap when ) def
+[ unless ] ( swap not swap when ) def
 [ which ] ( quoted quote if ) def
 [ most ] ( keep2 which ) def
 
+[ if-operator ] ( ( if ) curry2 ) def
+[ when-operator ] ( ( when ) curry ) def
+[ unless-operator ] ( ( unless ) curry ) def
+[ which-operator ] ( quoted quote if-operator ) def
+[ most-operator ] ( ( most ) curry2 ) def
+
 [ mk-if-unary ] ( ( swap ) prepose ( swap ) compose ( dip if ) curry def ) def
 [ mk-when-unary ] ( ( swap ) prepose ( swap when ) compose def ) def
-[ mk-else-unary ] ( ( swap ) prepose ( not swap when ) compose def ) def
-[ mk-if-when-else ] (
-  ( ( "if-" swap concat ) keep ( "when-" swap concat ) keep "else-" swap concat ) dip
-  ( mk-else-unary ) keep ( mk-when-unary ) keep mk-if-unary
+[ mk-unless-unary ] ( ( swap ) prepose ( not swap when ) compose def ) def
+[ mk-if-when-unless ] (
+  ( ( "if-" swap concat ) keep ( "when-" swap concat ) keep "unless-" swap concat ) dip
+  ( mk-unless-unary ) keep ( mk-when-unary ) keep mk-if-unary
 ) def
 
-[ word ] ( isword ) mk-if-when-else
-[ def ] ( isdef ) mk-if-when-else
-[ int ] ( isint ) mk-if-when-else
-[ float ] ( isint ) mk-if-when-else
-[ zero ] ( zero? ) mk-if-when-else
-[ one ] ( one? ) mk-if-when-else
-[ two ] ( two? ) mk-if-when-else
-[ three ] ( three? ) mk-if-when-else
-[ four ] ( four? ) mk-if-when-else
-[ negative-zero ] ( negative-zero? ) mk-if-when-else
-[ i ] ( i? ) mk-if-when-else
+[ word ] ( isword ) mk-if-when-unless
+[ stack ] ( stack? ) mk-if-when-unless
+[ macro ] ( macro? ) mk-if-when-unless
+[ empty ] ( empty? ) mk-if-when-unless
+[ def ] ( isdef ) mk-if-when-unless
+[ int ] ( isint ) mk-if-when-unless
+[ float ] ( isint ) mk-if-when-unless
+[ zero ] ( zero? ) mk-if-when-unless
+[ one ] ( one? ) mk-if-when-unless
+[ two ] ( two? ) mk-if-when-unless
+[ three ] ( three? ) mk-if-when-unless
+[ four ] ( four? ) mk-if-when-unless
+[ negative-zero ] ( negative-zero? ) mk-if-when-unless
+[ i ] ( i? ) mk-if-when-unless
 
+# Loops
 [ loop ] ( \ do (( loop )) curry when ) def         # [ body pred ] loop
 [ while ] ( dod prepose (( loop )) curry when ) def # [ pred ] [ body ] while
 [ until ] ( swap negate swap while ) def            # [ !pred ] [ body ] until
@@ -127,18 +212,19 @@
 [ break ] ( f return ) def
 [ continue ] ( t return ) def
 
-[ 0split ] ( zero split ) def
-[ 1split ] ( one split ) def
-[ 2split ] ( two split ) def
-[ 3split ] ( three split ) def
-[ 4split ] ( four split ) def
+# Decomposition
+[ 0split ] ( zero split ) defopn
+[ 1split ] ( one split ) defopn
+[ 2split ] ( two split ) defopn
+[ 3split ] ( three split ) defopn
+[ 4split ] ( four split ) defopn
 
 [ split* ] ( ( size ) dip - split ) def
-[ 0split* ] ( size split ) def
-[ 1split* ] ( size -- split ) def
-[ 2split* ] ( size two - split ) def
-[ 3split* ] ( size three - split ) def
-[ 4split* ] ( size four - split ) def
+[ 0split* ] ( size split ) defopn
+[ 1split* ] ( size -- split ) defopn
+[ 2split* ] ( size two - split ) defopn
+[ 3split* ] ( size three - split ) defopn
+[ 4split* ] ( size four - split ) defopn
 
 [ zeroth ] ( zero vat ) def
 [ first ] ( one vat ) def
@@ -150,6 +236,13 @@
 [ third-last ] ( size three - vat ) def
 [ fourth-last ] ( size four - vat ) def
 
+[ first2 ] ( first swap second 2compose swap ) def
+[ first3 ] ( first swap second 2compose third 2compose swap ) def
+[ first4 ] ( first swap second 2compose third 2compose fourth 2compose swap ) def
+[ second2 ] ( second swap third 2compose swap ) def
+[ second3 ] ( second swap third 2compose fourth 2compose swap ) def
+#...
+
 [ head ] ( zero swap substack ) def
 [ trim ] ( ( size ) dip - head ) def # head*
 [ tail ] ( ( size ) dig substack ) def
@@ -157,11 +250,15 @@
 [ but-last ] ( size -- head ) def
 [ rest ] ( size one swap substack ) def
 
-[ nth ] ( dup substack ) defopd
+[ nth ] ( dup ++ substack ) defopd
 [ pull ] ( split 1split swap composed ) def
 [ set-vat ] ( swapd split rest swapd compose2 ) def
 [ swap-vat ] ( swapd split 1split spind compose2 swap ) def
-[ change-vat ] ( swapd split 1split ( swap ( swap eval ) dip swap ) dip compose2 ) def
+[ change-vat ] ( ( dup ( pull ) dip ) dip drill-operator dip put ) def
+[ vat-destruct ] ( f swap swap-vat ) def
+
+[ empty? ] ( size zero? ) def
+[ empty ] ( empty? ) mk-if-when-unless
 
 [ uncurry ] ( 1split evald ) def
 [ uncurry2 ] ( 2split evald ) def
@@ -205,76 +302,145 @@
 [ 4untake ] ( swap ) "3untaked" ( swap ) ( ( 3untaken ) 3drill2 ) bindopn
 #[ muntake ] (  )
 
-[ (emk-quote) ] ( take ( dip ) compose ) def
-[ (each-split-2) ] ( ( 1split ) dig ) def
-[ (each-split-3) ] ( ( (each-split-2) ) dig ) def
-[ (each-split-4) ] ( ( (each-split-3) ) dig ) def
-[ (einc-idx) ] ( ( dip ++ ) compose ) def
+# these next two sections greatly need improvements to genlib.cog
+#
+#current stack: x1...xn y1...yn q1 q2...qm
+#let a be the number of values in each set of x,y etc., b be the number of such sets,
+# and c be the number of quotes to apply on each set of values.
+#let p be the numerical value of (bi/tri).
+#
+#then
+#'n(bi/tri/quad)'  operates on a stack with a=n, b=1, c=p,
+#'n(bi/tri/quad)*' operates on a stack with a=n, b=p, c=1,
+#'n(bi/tri/quad)@' operates on a stack with a=n, b=p, c=1, and multiplies the set of quotes by p,
 
-[ each ] ( ( 1split ) (emk-quote) ( size ) dig times drop ) def
-[ 2each ] ( (each-split-2) (emk-quote) each drop ) def
-[ 3each ] ( (each-split-3) (emk-quote) 2each drop ) def
-[ 4each ] ( (each-split-4) (emk-quote) 3each drop ) def
-#[ neach ]
+[ bi ] ( ( keep ) dip eval ) def
+[ 2bi ] ( ( keep2 ) dip eval ) def
+[ 3bi ] ( ( keep3 ) dip eval ) def
+[ 4bi ] ( ( keep4 ) dip eval ) def
+[ nbi ] ( ( keepn ) curry dip eval ) def
+[ tri ] ( ( ( keep ) dip keep ) dip eval ) def
+[ 2tri ] ( ( ( keep2 ) dip keep2 ) dip eval ) def
+[ 3tri ] ( ( ( keep3 ) dip keep2 ) dip eval ) def
+[ ntri ] ( ( ( keepn ) curry 2do eval ) curry dip eval ) def
+[ quad ] ( ( ( ( keep ) dip keep ) dip keep ) dip eval ) def
+[ 2quad ] ( ( ( ( keep2 ) dip keep2 ) dip keep2 ) dip eval ) def
+[ 3quad ] ( ( ( ( keep3 ) dip keep3 ) dip keep3 ) dip eval ) def
+[ 4quad ] ( ( ( ( keep4 ) dip keep4 ) dip keep4 ) dip eval ) def
+[ nquad ] ( ( ( ( keepn ) curry 2do eval ) curry 2do eval ) curry dip eval ) def
 
-[ each-index ] ( zero -rot ( swap dup ) take (einc-idx) each drop ) def
-[ 2each-index ] ( zero -roll ( rot dup ) take (einc-idx) 2each drop ) def
-[ 3each-index ] ( zero swap -rolld ( roll dup ) take (einc-idx) 3each drop ) def
-[ 4each-index ] ( zero -rot -rollt ( rolld swap dup ) take (einc-idx) 4each drop ) def
-#[ neach-index ]
+[ bi* ] ( dipd eval ) def
+[ 2bi* ] ( 2dipd eval ) def
+[ 3bi* ] ( 3dipd eval ) def
+[ 4bi* ] ( 4dipd eval ) def
+[ nbi* ] ( mdipd eval ) def
+[ tri* ] ( ( 2dipd dip ) dip eval ) def
+[ 2tri* ] ( ( ( ( quote2 quoted2 ) dip 2dip deep ) dip dip eval ) dip eval ) def
+[ 3tri* ] ( ( ( ( quote3 quoted3 ) dip 2dip deep ) dip dip eval ) dip eval ) def
+[ 4tri* ] ( ( ( ( quote4 quoted4 ) dip 2dip deep ) dip dip eval ) dip eval ) def
+[ ntri* ] ( ( ( ( ( quoten ) ( quotedn ) bi ) curry dip 2dip deep ) curry dip dip eval ) curry dip eval ) def
+[ quad* ] ( ( ( 3dipd 2dip ) dip dip ) dip eval ) def
+[ 2quad* ] ( ( ( ( ( quote2 ( quote2 quoted2 ) dip ) dip 3dip deepd ) dip 2dip deep ) dip dip eval ) dip eval ) def
+[ 3quad* ] ( ( ( ( ( quote3 ( quote3 quoted3 ) dip ) dip 3dip deepd ) dip 2dip deep ) dip dip eval ) dip eval ) def
+[ 4quad* ] ( ( ( ( ( quote4 ( quote4 quoted4 ) dip ) dip 3dip deepd ) dip 2dip deep ) dip dip eval ) dip eval ) def
+[ nquad* ] ( ( ( ( ( ( quote2 ) keep ( ( quote2 ) ( quoted2 ) bi ) curry dip ) curry dip 3dip deepd ) curry dip 2dip deep ) curry dip dip eval ) curry dip eval ) def
 
-# factors of map
-[ (map-addon) ] ( ( dip prepose ) compose ) def
-[ (map-quote-1) ] ( ( swap ) take (map-addon) ) def
-[ (map-quote-2) ] ( ( rot ) take (map-addon) ) def
-[ (map-quote-3) ] ( ( roll ) take (map-addon) ) def
-[ (map-quote-4) ] ( ( rolld swap ) take (map-addon) ) def
-[ (map-quote-5) ] ( ( ( rolld swap ) dip swap ) take (map-addon) ) def
+[ bi@ ] ( dup bi* ) def
+[ 2bi@ ] ( dup 2bi* ) def
+[ 3bi@ ] ( dup 3bi* ) def
+[ 4bi@ ] ( dup 4bi* ) def
+[ nbi@ ] ( dupd nbi* ) def
+[ tri@ ] ( dup2 tri* ) def
+[ 2tri@ ] ( dup2 2tri* ) def
+[ 3tri@ ] ( dup2 3tri* ) def
+[ 4tri@ ] ( dup2 4tri* ) def
+[ ntri@ ] ( dupd2 ntri* ) def
+[ quad@ ] ( dup3 quad* ) def
+[ 2quad@ ] ( dup3 2quad* ) def
+[ 3quad@ ] ( dup3 3quad* ) def
+[ 4quad@ ] ( dup3 4quad* ) def
+[ nquad@ ] ( dupd3 nquad* ) def
 
-[ map ] dup ( ( 0split ) dip (map-quote-1) each ) def mkopd
-[ 2map ] dup ( ( 0split ) 2dip (map-quote-2) 2each ) def mkopd
-[ 3map ] dup ( ( 0split ) 3dip (map-quote-3) 3each ) def mkopd
-[ 4map ] dup ( ( 0split ) 4dip (map-quote-4) 4each ) def mkopd
-#[ nmap ]
+# derived words
+[ bi-curry ] ( ( curry-operator ) bi@ bi ) def
+[ tri-curry ] ( ( curry-operator ) tri@ tri ) def
+[ quad-curry ] ( ( curry-operator ) quad@ quad ) def
 
-[ map-index ] ( ( 0split ) dip (map-quote-2) each-index ) def
-[ 2map-index ] ( ( 0split ) 2dip (map-quote-3) 2each-index ) def
-[ 3map-index ] ( ( 0split ) 3dip (map-quote-4) 3each-index ) def
-[ 4map-index ] ( ( 0split ) 4dip (map-quote-5) 4each-index ) def
-#[ nmap-index ]
+[ bi-curry* ] ( ( curry-operator ) bi@ bi* ) def
+[ tri-curry* ] ( ( curry-operator ) tri@ tri* ) def
+[ quad-curry* ] ( ( curry-operator ) quad@ quad* ) def
 
-[ (emk-quote) (each-split-2) (each-split-3) (each-split-4) (einc-idx)
-  (map-add-dp) (map-quote-1) ( map-quote-2 ) (map-quote-3) (map-quote-4) (map-quote-5)
-] ( undef ) map
+[ bi-curry@ ] ( curry-operator bi@ ) def
+[ tri-curry@ ] ( curry-operator tri@ ) def
+[ quad-curry@ ] ( curry-operator quad@ ) def
 
-[ filter ] ( ( dup ) take ( dip quote [ [ ] ] if ) compose map ) defopd
-[ filter-index ] ( ( swap dup swapd ) take ( dip quote [ [ ] ] if ) compose map-index ) defopd
-
-[ reduce ] ( swapd each ) def
-[ 2reduce ] ( -rotd 2each ) def
-[ 3reduce ] ( -rolld 3each ) def
-[ 4reduce ] ( ( swap -rolld ) dip 4each ) def
-
-[ all? ] ( t swap ( swap ) take ( dip and ) ) "compose" ( reduce ) bind234op
-[ any? ] ( f swap ( swap ) take ( dip or ) ) "compose" ( reduce ) bind234op
-[ none? ] ( ) "any?" ( not ) bind234op
-[ empty? ] ( size zero? ) defopd
-
-[ cartesian-map ] ( ( with map ) curry2 map ) def
-[ cartesian-each ] ( ( with each ) curry2 each ) def
-[ cartesian-find ] ( ( f ) 3dip ( with find swap ) curry2 ( nip ) prepose find nip swap ) def # taken from factor
-[ cartesian-product ] ( dup ( compose ) curry cartesian-map ) def # ( dup [ 2quote ] curry cartesian-map )
-
+# Element and set/sequence operations
 # [ quot ] [ n ] bounds-check? --> [ quot ] [ n ] [ t/f ]
 [ bounds-check? ] ( dup non-neg? ( dup ( size ) digd > ) ( f ) if ) def
 [ bounds-check-eval ] ( ( bounds-check? ) dip ( f ) if ) def
+[ set-bounds ] ( ( size ) 2drill rot ) def
 
-[ vat-operator ] ( ( vat ) take ( curry dip ) compose ) def
-[ vat-destruct-operator ] ( ( split f swap 1split swap composed2 ) take ( curry dip ) compose ) def
-[ vat-drill-operator ] ( vat-operator ( swap ) compose ) def
-[ vat-drill-destruct-operator ] ( vat-destruct-operator ( swap ) compose ) def
+[ vat-operator ] ( curry-dip-operator ( vat ) prepose ) def
+[ 2vat-operator ] (
+  curry2-dip-operator dip-operator
+  ( ( vat ) curry bi@ swap ) prepose
+) def
+[ 3vat-operator ] (
+  ( curry2 swap ( curry dip ) dip ) curry
+  dip-operator ( ( vat ) curry tri@ swap ) prepose
+) def
+[ 4vat-operator ] (
+  ( curry2 swap ( curry swap ( curry dip ) dip ) dip ) curry
+  dip-operator ( ( vat ) curry quad@ swap ) prepose
+) def
+#[ mvat-operator ]
 
-[ idx/elt ] ( dup2 ( nthd ) ( nipd ) if ) def
+[ vat-destruct-operator ] ( curry-dip-operator ( vat-destruct ) prepose ) def
+[ 2vat-destruct-operator ] (
+  curry2-dip-operator dip-operator
+  ( ( vat-destruct ) curry bi@ swap ) prepose
+) def
+[ 3vat-destruct-operator ] (
+  ( curry2 swap ( curry dip ) dip ) curry
+  dip-operator ( ( vat-destruct ) curry tri@ swap ) prepose
+) def
+[ 4vat-destruct-operator ] (
+  ( curry2 swap ( curry swap ( curry dip ) dip ) dip ) curry
+  dip-operator ( ( vat-destruct ) curry quad@ swap ) prepose
+) def
+#[ mvat-destruct-operator ]
+
+[ vat-drill-operator ] ( drill-operator ( vat ) prepose ) def
+[ 2vat-drill-operator ] (
+  drill2-operator dig-operator
+  ( ( vat ) curry bi@ swap ) prepose
+) def
+[ 3vat-drill-operator ] (
+  ( curry2 ( drill ) drill ) curry
+  dig-operator ( ( vat ) curry tri@ swap ) prepose
+) def
+[ 4vat-drill-operator ] (
+  ( curry2 ( curry ( drill ) drill ) drill ) curry
+  dig-operator ( ( vat ) curry quad@ swap ) prepose
+) def
+#[ mvat-drill-operator ]
+
+[ vat-drill-destruct-operator ] ( drill-operator ( vat-destruct ) prepose ) def
+[ 2vat-drill-destruct-operator ] (
+  drill2-operator dig-operator
+  ( ( vat-destruct ) curry bi@ swap ) prepose
+) def
+[ 3vat-drill-destruct-operator ] (
+  ( curry2 ( drill ) drill ) curry
+  dig-operator ( ( vat-destruct ) curry tri@ swap ) prepose
+) def
+[ 4vat-drill-destruct-operator ] (
+  ( curry2 ( curry ( drill ) drill ) drill ) curry
+  dig-operator ( ( vat-destruct ) curry quad@ swap ) prepose
+) def
+#[ mvat-drill-destruct-operator ]
+
+[ idx/elt ] ( dup2 ( nthd ) ( nipd ) if swap ) def
 
 # from factor math
 [ each-integer-from ] (
@@ -298,15 +464,112 @@
 ) def
 [ find-integer ] ( zero -rot find-integer-from ) def
 
-[ each-from ] ( -2rotd vat-destruct-operator each-integer-from drop ) def
-[ 2each-from ] ( -3rotd 2vat-destruct-operator each-integer-from drop ) def
-[ 3each-from ] ( -4rotd 3vat-destruct-operator each-integer-from drop ) def
-#[ neach-from ]
+[ each-from ] ( set-bounds vat-destruct-operator each-integer-from drop ) def
+[ 2each-from ] ( set-bounds 2vat-destruct-operator each-integer-from drop ) def
+[ 3each-from ] ( set-bounds 3vat-destruct-operator each-integer-from drop ) def
+[ 4each-from ] ( set-bounds 4vat-destruct-operator each-integer-from drop ) def
+#[ meach-from ]
 
-# [ seq ] [ n ] [ quot ] find-from --> [ i ] [ elt ]
-[ do-find-from ] ( vat-drill-operator find-integer-from ) def
+[ each ] ( zero each-from ) def
+#[ each2 ] ( zero each2-from ) def
+#[ each3 ] ( zero each3-from ) def
+#[ each4 ] ( zero each4-from ) def
+[ 2each ] ( zero 2each-from ) def
+#[ 2each2 ] ( zero 2each2-from ) def
+#[ 2each3 ] ( zero 2each3-from ) def
+#[ 2each4 ] ( zero 2each4-from ) def
+[ 3each ] ( zero 2each-from ) def
+#[ 3each2 ] ( zero 2each2-from ) def
+#[ 3each3 ] ( zero 2each3-from ) def
+#[ 3each4 ] ( zero 2each4-from ) def
+[ 4each ] ( zero 2each-from ) def
+#[ 4each2 ] ( zero 2each2-from ) def
+#[ 4each3 ] ( zero 2each3-from ) def
+#[ 4each4 ] ( zero 2each4-from ) def
+#[ meach ]
+
+# temporary (until we have vat-index -type operators)
+[ (einc-idx) ] ( ( dip ++ ) compose ) def
+
+[ each-index ] ( zero -rot ( swap dup ) take (einc-idx) each drop ) def
+[ 2each-index ] ( zero -roll ( rot dup ) take (einc-idx) 2each drop ) def
+[ 3each-index ] ( zero swap -rolld ( roll dup ) take (einc-idx) 3each drop ) def
+[ 4each-index ] ( zero -rot -rollt ( rolld swap dup ) take (einc-idx) 4each drop ) def
+#[ meach-index ]
+
+[ (einc-idx) ] undef
+
+# factors of map
+[ (map-add-dp) ] ( ( dip prepose ) compose ) def
+[ (map-quote-1) ] ( ( swap ) take (map-add-dp) ) def
+[ (map-quote-2) ] ( ( rot ) take (map-add-dp) ) def
+[ (map-quote-3) ] ( ( roll ) take (map-add-dp) ) def
+[ (map-quote-4) ] ( ( rolld swap ) take (map-add-dp) ) def
+[ (map-quote-5) ] ( ( ( rolld swap ) dig ) take (map-add-dp) ) def
+
+[ map ] dup ( ( 0split ) dip (map-quote-1) each ) def mkopd
+[ 2map ] dup ( ( 0split ) 2dip (map-quote-2) 2each ) def mkopd
+[ 3map ] dup ( ( 0split ) 3dip (map-quote-3) 3each ) def mkopd
+[ 4map ] dup ( ( 0split ) 4dip (map-quote-4) 4each ) def mkopd
+#[ mmap ]
+
+[ map-index ] ( ( 0split ) dip (map-quote-2) each-index ) def
+[ 2map-index ] ( ( 0split ) 2dip (map-quote-3) 2each-index ) def
+[ 3map-index ] ( ( 0split ) 3dip (map-quote-4) 3each-index ) def
+[ 4map-index ] ( ( 0split ) 4dip (map-quote-5) 4each-index ) def
+#[ mmap-index ]
+
+[ (map-add-dp) (map-quote-1) ( map-quote-2 ) (map-quote-3) (map-quote-4) (map-quote-5) ]
+( undef ) each
+
+[ filter ] ( ( dup ) take ( dip [ ] which ) compose map ) def
+[ filter-index ] ( ( over ) take ( dip quote [ [ ] ] if ) compose map-index ) def
+
+[ reduce ] ( swapd each ) def
+[ 2reduce ] ( -rotd 2each ) def
+[ 3reduce ] ( -rolld 3each ) def
+[ 4reduce ] ( ( swap -rolld ) dip 4each ) def
+#[ mreduce ] (  )
+
+[ index-error-empty ] ( ( "INDEX OUT OF RANGE" ereturn ) when-empty ) def
+
+[ map-reduce ] ( (
+    ( index-error-empty 1split ) dip
+    2do ( swap ) take ( dig ) compose
+  ) dig prepose each
+) def
+[ 2map-reduce ] ( ( (
+      ( ( index-error-empty ) bi@ ) dip
+      2vat-destruct-operator eval ) ( drill2-operator ) bi
+  ) dig prepose 2each
+) def
+[ 3map-reduce ] ( ( (
+      ( ( index-error-empty ) tri@ ) dip
+      3vat-destruct-operator eval ) ( drill3-operator ) bi
+  ) dig prepose 3each
+) def
+[ 4map-reduce ] ( ( (
+      ( ( index-error-empty ) quad@ ) dip
+      4vat-destruct-operator eval ) ( drill4-operator ) bi
+  ) dig prepose 4each
+) def
+#[ mmap-reduce ] (
+#  ( ( mvat-destruct-operator eval ) ( drilln-operator ) 2bi )
+#  ( drill prepose ) 2keep meach
+#) def
+
+[ cartesian-map ] ( ( with map ) curry2 map ) def
+[ cartesian-each ] ( ( with each ) curry2 each ) def
+[ cartesian-find ] ( # definition from factor
+  ( f ) 3dip ( nip ) take2 ( with find swap ) compose
+  find nip swap
+) def
+[ cartesian-product ] ( ( quote2 ) cartesian-map ) def
+
+# [ seq ] [ n ] [ quot ] find-from --> [ seq ] [ i ] [ elt ]
+[ do-find-from ] ( ( size ) swap digd vat-drill-operator find-integer-from ) def
 [ do-find-last-from ] ( vat-drill-operator find-last-integer ) def
-[ find-from ] ( ( size ) digd ( do-find-from idx/elt ) curry2 bounds-check-eval ) def
+[ find-from ] ( ( do-find-from idx/elt ) curry bounds-check-eval ) def
 [ find-last-from ] ( ( do-find-last-from idx/elt ) curry bounds-check-eval ) def
 [ find ] ( zero swap find-from ) def
 [ find-last ] ( zero swap find-last-from ) def
@@ -317,16 +580,84 @@
 [ index ] ( ( = ) curry find drop ) def
 [ last-index ] ( ( = ) curry find-last drop ) def
 
-[ interleave ] (
-  empty?t rot
-  ( drop3 ) (
-    swap dup ( compose ( 1split* ) dip swap mapd ) dip eval
-  ) if
+[ any? ] ( zero swap do-find-from ) def
+[ all? ] ( negate any? not ) def
+[ none? ] ( any? not ) def
+[ in? ] ( ( = ) curry any? ) def
+[ equiv-in? ] ( ( == ) curry any? ) def
+
+[ any ] ( any? ) mk-if-when-unless
+[ all ] ( all? ) mk-if-when-unless
+[ none ] ( none? ) mk-if-when-unless
+[ in ] ( in? ) mk-if-when-unless
+[ equiv-in ] ( equiv-in? ) mk-if-when-unless
+
+#[ q1 q2 ... q3 ] n &&n applies each quote in a child stack on the top n items of the stack
+# and returns the original child stack and true if all the quotes returned true, false otherwise
+[ &&0 ] ( ( 2eval ) all? ) def
+[ &&1 ] ( ( eval keep ) all? ) def
+[ &&2 ] ( ( eval keep2 ) all? ) def
+[ &&3 ] ( ( eval keep3 ) all? ) def
+[ &&4 ] ( ( eval keep4 ) all? ) def
+[ &&n ] ( ( eval keepn ) [ 1 ] put all? ) def
+
+# similar but for at least one truth value
+[ ||0 ] ( ( 2eval ) any? ) def
+[ ||1 ] ( ( eval keep ) any? ) def
+[ ||2 ] ( ( eval keep2 ) any? ) def
+[ ||3 ] ( ( eval keep3 ) any? ) def
+[ ||4 ] ( ( eval keep4 ) any? ) def
+[ ||n ] ( ( eval ) take ( keepn ) compose any? ) def
+
+#'ncleave' operates on a stack with a=n, b=1, c=(# of quotes in child stack)
+#'nspread' operates on a stack with a=n, b=(# of quotes in child stack), c=1
+[ cleave ] ( ( keep ) each drop ) def
+[ 2cleave ] ( ( keep2 ) each drop2 ) def
+[ 3cleave ] ( ( keep3 ) each drop3 ) def
+[ 4cleave ] ( ( keep4 ) each drop4 ) def
+[ ncleave ] ( ( keepn ) ( curry each ) ( dropn ) bi ) def
+
+[ spread-operator ] ( 1split ( ( ( dip ) curry ) dig prepose ) each ) def
+[ 2spread-operator ] ( 1split ( ( ( 2dip ) curry ) dig prepose ) each ) def
+[ 3spread-operator ] ( 1split ( ( ( 3dip ) curry ) dig prepose ) each ) def
+[ 4spread-operator ] ( 1split ( ( ( 4dip ) curry ) dig prepose ) each ) def
+[ mspread-operator ] ( ( 1split ) dip ( ( ( mdip ) curry2 ) curry dig prepose ) curry each ) def
+[ spread ] ( spread-operator eval ) def
+[ 2spread ] ( 2spread-operator eval ) def
+[ 3spread ] ( 3spread-operator eval ) def
+[ 4spread ] ( 4spread-operator eval ) def
+[ nspread ] ( mspread-operator eval ) def
+
+#'[ l ] [ m ] call'    operates on a stack with a=1, b=l, c=m,
+#'[ l ] [ m ] [ n ] ncall' operates on a stack with a=n, b=l, c=m,
+[ call ] ( ( swap ) take ( ( cleave ) curryn push ) compose [ ] spin times spread ) def
+[ 2call ] ( ( swap ) take ( ( cleave2 ) curryn push ) compose [ ] spin times spread ) def
+[ 3call ] ( ( swap ) take ( ( cleave3 ) curryn push ) compose [ ] spin times spread ) def
+[ 4call ] ( ( swap ) take ( ( cleave4 ) curryn push ) compose [ ] spin times spread ) def
+[ ncall ] (
+  ( cleaven ) curry ( curryn push ) curry2 ( swap ) prepose
+  [ ] spin times spread
 ) def
 
-[ flip ] ( 0split ( prepose ) each ) def
+#'[ l ] [ m ] apply'    operates on a stack with a=1, b=l, c=m, and multiplies the set of quotes by l,
+#'[ l ] [ m ] [ n ] napply' operates on a stack with a=n, b=l, c=m, and multiplies the set of quotes by l.
+[ apply ] ( ( quoten ( cleave ) curry ) curry dip ( dupn ) keep quoten spread ) def
+[ 2apply ] ( ( quoten ( cleave2 ) curry ) curry dip ( dupn ) keep quoten spread ) def
+[ 3apply ] ( ( quoten ( cleave3 ) curry ) curry dip ( dupn ) keep quoten spread ) def
+[ 4apply ] ( ( quoten ( cleave4 ) curry ) curry dip ( dupn ) keep quoten spread ) def
+[ napply ] (
+  ( cleave ) curry ( quoten ) take ( curry ) compose
+  curry dip ( dupn ) keep quoten spread
+) def
+
+[ interleave ] (
+  ( empty? ) 3dig
+  ( drop3 ) ( swap dup ( compose ( 1split* ) dip swap mapd ) dip eval ) if
+) def
+
+[ flip ] ( [ ] ( swap compose ) reduce ) def
 [ sep ] ( size ( uncompose ) dip -- quoten ) def
-[ join ] ( [ ] -rot ( compose ) curry ( compose ) interleave swap prepose ) def
+[ join ] ( [ ] -rot ( compose ) ( curry ) ( interleave ) bi swap prepose ) def
 [ follow ] (
   [ ] (
     ( pick isword ( dup ) ( t ) if composed ) dig
@@ -346,23 +677,6 @@
     ) if
   ) if
 ) def
-
-
-
-
-
-
-
-
-# modified from factor
-[ map-reduce ] (
-  ( ( zeroth swap ) dip 2do ) dip
-  ( ( swap ) take ( dig ) compose ) dip compose
-  one each-from
-) def
-#[ 2map-reduce ]
-#...
-#[ nmap-reduce ]
 
 # example of combinator power: complete expand
 # (checks for definitions within child first without copying hashtables)
@@ -400,11 +714,12 @@
 #
 # with combinators:
 [ expand-unglue ] ( ( dup ( unglue ) when-def ) when-word ) def
-[ expand ] (
-  stack?
-  ( 0split ( compose cd expand-unglue pop expand-unglue ) \ map nip )
-  (( ( expand-unglue ) map )) if
+[ expand-stack-one ] ( cd expand-unglue pop expand-unglue ) def
+[ expand-unknown ] ( ( 0split push expand-stack-one nip ) ( expand-unglue ) if-stack ) def
+[ 2expand-unknown ] (
+  ( ( push expand-stack-one ) ( cd expand-unknown pop expand-unglue push ) if-word )
+  ( ( expand-unglue ) ( eval expand-unknown quote ) if-word )
+  if-stack
 ) def
-[ 2expand ] (( (( expand )) map )) def
-[ 3expand ] (( (( expand2 )) map )) def
-[ 4expand ] (( (( expand3 )) map )) def
+[ expand ] ( type swap (( expand-unknown )) map swap cast ) def
+[ 2expand ] ( type swap (( 2expand-unKown )) map swap cast ) def

@@ -1,16 +1,18 @@
 [ concat ] mkopn
 [ precat ] dup ( swap concat ) def mkopn
-[ unconcat ] mkopd
+[ unconcatd ] ( swap unconcat swap ) def
+[ unconcatt ] ( ( unconcatd ) dip ) def
+[ unconcatq ] ( ( unconcatt ) dip ) def
 
-[ substr ] ( ( swap ) dip cut drop swap cut swap drop ) def
-[ byte ] ( btoi ) def
-[ char ] ( itob ) def
+[ substr ] ( swapd cut drop swap cut nip ) def
+[ byte ] ( btoi ) defopd
+[ char ] ( itob ) defopd
 [ b+ ] ( swap byte + char ) def
 [ b- ] ( swap byte swap - char ) def
 [ b++ ] ( byte ++ char ) def
 [ b-- ] ( byte -- char ) def
 
-[ 0cut ] ( f swap ) def
+[ 0cut ] ( "" swap ) def
 [ 1cut ] ( one cut ) def
 [ 2cut ] ( two cut ) def
 [ 3cut ] ( three cut ) def
@@ -35,27 +37,33 @@
 [ stail ] ( cut nip ) def
 [ sleave ] ( cut* nip ) def
 [ sbut-last ] ( one strim ) def
-[ srest ] ( one shead ) def
+[ srest ] ( one stail ) def
 
+[ cnth ] ( cut nip srest ) def
+[ cdel ] ( cut srest concat ) def
 [ cpull ] ( cut 1cut swap concatd ) def
 [ set-cat ] ( swapd cut srest swapd concat2 ) def
-[ change-cat ] ( swapd cut 1cut ( swap ( swap eval ) dip swap ) dip concat2 ) def
+[ swap-cat ] ( swapd cut 1cut spind concat2 swap ) def
+[ change-cat ] ( ( dup ( cpull ) dip ) dip drill-operator dip insert ) def
 
-[ rejoin ] ( "" concat ) def
-[ combine ] ( join rejoin ) def
+[ rejoin ] ( "" concat ) defopd
+[ combine ] ( join rejoin ) defopd
 
-[ smap ] ( swap unconcat swap map rejoin ) def
-[ sfilter ] ( swap unconcat swap filter rejoin ) def
-[ sreduce ] ( swap unconcat swap reduce rejoin ) def
+[ seach ] ( unconcatd each ) def
+[ seach-index ] ( unconcatd each-index ) def
+[ smap ] ( unconcatd map rejoin ) def
+[ sfilter ] ( unconcatd filter rejoin ) def
+[ sreduce ] ( unconcatd reduce ) def
+[ smap-reduce ] ( unconcatt map-reduce ) def
 
-[ sfind-from ] ( unconcatd find-from ) def
-[ sfind-last-from ] ( unconcatd find-last-from ) def
-[ sfind ] ( unconcatd find ) def
-[ sfind-last ] ( unconcatd find-last ) def
-[ cindex-from ] ( unconcatd index-from ) def
-[ clast-index-from ] ( unconcatd last-index-from ) def
-[ cindex ] ( unconcatd index ) def
-[ clast-index ] ( unconcatd last-index ) def
+[ sfind-from ] ( unconcatt find-from rejoint ) def
+[ sfind-last-from ] ( unconcatt find-last-from rejoint ) def
+[ sfind ] ( unconcatd find rejoint ) def
+[ sfind-last ] ( unconcatd find-last rejoint ) def
+[ cindex-from ] ( unconcatt index-from rejoind ) def
+[ clast-index-from ] ( unconcatt last-index-from rejoind ) def
+[ cindex ] ( unconcatd index rejoind ) def
+[ clast-index ] ( unconcatd last-index rejoind ) def
 
 # better string prefix character
 [ strquote-escape ] ( (
@@ -65,7 +73,7 @@
       [ [ \ " ] ( [ \ " ] ) ]
       [ [ \ \ ] ( [ \ \ ] ) ]
       [ "r" ( cret ) ]
-      [ "INVALID STRING ESCAPE" ereturn ]
+      ( "INVALID STRING ESCAPE" ereturn )
     ] case concat over
   )
 ) def

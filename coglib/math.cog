@@ -4,6 +4,12 @@
 [ min ] ( ( < ) most ) def
 [ max ] ( ( > ) most )
 [ avg ] ( + two / ) def
+[ sq ] ( dup * ) def
+[ cube ] ( dup sq * ) def
+[ round ] ( one * ) def
+[ ceil ] ( dup ++ ( round ) bi@ max ) def
+[ floor ] ( dup -- ( round ) bi@ min ) def
+[ between? ] ( ( dupd > ) dip swapd < and ) def
 
 # used to be 'range'
 [ interval ] (
@@ -33,6 +39,8 @@
 [ e+ ] ( ) def # add 
 [ e- ] ( ) def # subtract 
 [ e^ ] ( ) def # power
+
+#[ roots ]
 
 # Matrix
 [ transpose ] (

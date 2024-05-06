@@ -157,22 +157,22 @@ def
 \ [  ( lquote-init
        [ ( dup \ ] = ( rquote-end0 ) ( lquote-body ) if ) ]
        [ ( dup \ ] = ( rquote-end1 ) ( lquote-body ) if ) ]
-       if dup stack lquote-end ) def
+       if dup [ ] lquote-end ) def
 
 \ (  ( lquote-init
        [ ( dup \ ) = ( rquote-end0 ) ( lquote-ebody ) if ) ]
        [ ( dup \ ) = ( rquote-end1 ) ( lquote-ebody ) if ) ]
-       if dup macro lquote-end ) def
+       if dup ( ) lquote-end ) def
 
 \ [[ ( lquote-init
        [ ( dup \ ]] = ( rquote-end0 ) ( lquote-ebody ) if ) ]
        [ ( dup \ ]] = ( rquote-end1 ) ( lquote-ebody ) if ) ]
-       if dup stack lquote-end ) def
+       if dup [ ] lquote-end ) def
 
 \ (( ( lquote-init
        [ ( dup \ )) = ( rquote-end0 ) ( lquote-body ) if ) ]
        [ ( dup \ )) = ( rquote-end1 ) ( lquote-body ) if ) ]
-       if dup macro lquote-end ) def
+       if dup ( ) lquote-end ) def
 
 \ {  ( lquote-init
        [ ( dup \ } = ( rquote-end0 ) ( lquote-body ) if ) ]
@@ -185,14 +185,14 @@ def
        if dup child lquote-end ) def
 
 # undefine no-longer-needed factors
-(( lquote-addon )) undef
-(( lquote-init )) undef
-(( rquote-end0 )) undef
-(( rquote-end1 )) undef
-(( lquote-prebody )) undef
-(( lquote-body )) undef
-(( lquote-ebody )) undef
-(( lquote-end )) undef
+[ lquote-addon ] undef
+[ lquote-init ] undef
+[ rquote-end0 ] undef
+[ rquote-end1 ] undef
+[ lquote-prebody ] undef
+[ lquote-body ] undef
+[ lquote-ebody ] undef
+[ lquote-end ] undef
 
 # better escape character (note: different behaviour inside quotes than before)
 \ \

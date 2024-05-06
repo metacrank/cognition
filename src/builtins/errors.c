@@ -1,6 +1,7 @@
 #include <builtins/errors.h>
 #include <builtinslib.h>
 #include <cognition.h>
+#include <strnum.h>
 #include <macros.h>
 
 extern stack_t *STACK;
@@ -100,6 +101,19 @@ void cog_err_push(value_t *v) {
   stack_push(estack, e);
 }
 
+void cog_err_drop(value_t *v) {
+  contain_t *cur = stack_peek(STACK);
+  stack_t *error_stack = cur->err_stack;
+  if (error_stack) {
+    value_t *e = stack_pop(error_stack);
+    if (e) {
+      value_free_safe(e);
+      return;
+    }
+  }
+  eval_error(U"NO ERRORS", v);
+}
+
 void cog_err_print(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   stack_t *error_stack = cur->err_stack;
@@ -110,9 +124,7 @@ void cog_err_print(value_t *v) {
       return;
     }
   }
-  printf("'");
-  print(v->str_word);
-  printf("':%sNO ERRORS%s\n", RED, COLOR_RESET);
+  eval_error(U"NO ERRORS", v);
 }
 
 void cog_err_show(value_t *v) {
@@ -162,12 +174,24 @@ void cog_err_throw(value_t *v) {
   stack_push(cur->err_stack, e);
 }
 
+void cog_err_size(value_t *v) {
+  contain_t *cur = stack_peek(STACK);
+  stack_t *error_stack = cur->err_stack;
+  value_t *sizeval = init_value(VWORD);
+  if (error_stack)
+    sizeval->str_word = int_to_string(error_stack->size);
+  else sizeval->str_word = int_to_string(0);
+  push_quoted(cur, sizeval);
+}
+
 void add_funcs_errors(ht_t *flit) {
   add_func(flit, cog_err_clean, U"eclean");
   add_func(flit, cog_err_peek, U"epeek");
   add_func(flit, cog_err_pop, U"epop");
   add_func(flit, cog_err_push, U"epush");
+  add_func(flit, cog_err_drop, U"edrop");
   add_func(flit, cog_err_print, U"eprint");
   add_func(flit, cog_err_show, U"eshow");
   add_func(flit, cog_err_throw, U"ethrow");
+  add_func(flit, cog_err_size, U"esize");
 }

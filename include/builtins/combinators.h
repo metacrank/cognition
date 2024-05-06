@@ -61,16 +61,6 @@ void cog_uncompose(value_t *v);
 void cog_size(value_t *v);
 
 
-
-/*current stack: x1...xn y1...yn q1 q2...qm
-let a be the number of values in each set of x,y etc., b be the number of such sets, and c be the number of quotes to apply on each set of values.
-let p be the numerical value of (bi/tri).*/
-
-/*
-then
-'m(bi/tri/quad)n'  operates on a stack with a=n, b=m, c=p,
-'m(bi/tri/quad)*n' operates on a stack with a=n, b=p, c=m,
-*/
 /* void cog_bi(value_t *v); */
 /* void cog_bi2(value_t *v); */
 /* void cog_bi3(value_t *v); */
