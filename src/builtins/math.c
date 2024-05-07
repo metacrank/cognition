@@ -939,6 +939,6 @@ void add_funcs_math(ht_t *flit) {
   add_func(flit, cog_and, U"and");
   add_func(flit, cog_or, U"or");
   add_func(flit, cog_not, U"not");
-  add_func(flit, cog_isfloat, U"isfloat");
-  add_func(flit, cog_isint, U"isint");
+  add_func(flit, cog_isfloat, U"float?");
+  add_func(flit, cog_isint, U"int?");
 }

@@ -128,14 +128,14 @@ def
       ( drop swap drop swap [ 1 ] swap metacrank swap crank quote compose ( dup ) dip swap )
       ( dup dup dup \ [ = swap \ ( = or swap \ \ = or
         ( eval )
-        ( dup isdef ( unglue ) [ ] if compose ( dup ) dip swap )
+        ( dup def? ( unglue ) [ ] if compose ( dup ) dip swap )
         if )
       if ) ]
   [ ( dup \ ) =
       ( drop swap drop swap [ 1 ] swap metacrank swap crank )
       ( dup dup dup \ [ = swap \ ( = or swap \ \ = or
         ( eval )
-        ( dup isdef ( unglue ) [ ] if compose ( dup ) dip swap )
+        ( dup def? ( unglue ) [ ] if compose ( dup ) dip swap )
         if )
       if ) ]
   if dup macro swap
@@ -149,7 +149,7 @@ def
 [ lquote-prebody ] ( dup dup dup dup dup dup dup dup dup
                      \ [ = swap \ ( = or swap \ \ = or swap \ [[ = or swap \ (( = or swap \ { = or swap \ {{ = or swap \ # = or swap \ " = or ) def
 [ lquote-body ] ( lquote-prebody ( eval ) ( lquote-addon ) if ) def
-[ lquote-ebody ] ( lquote-prebody ( eval ) ( dup isdef ( unglue ) ( ) if lquote-addon ) if ) def
+[ lquote-ebody ] ( lquote-prebody ( eval ) ( dup def? ( unglue ) ( ) if lquote-addon ) if ) def
 [ lquote-end ] ( swap [ 0 ] crank [ 1 ] [ 1 ] metacrank ) def
 
 # (re)define all quotes

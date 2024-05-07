@@ -382,7 +382,7 @@ void add_funcs_strings(ht_t *flit) {
   add_func(flit, cog_cat, U"cat");
   add_func(flit, cog_insert, U"insert");
   add_func(flit, cog_reverse, U"reverse");
-  add_func(flit, cog_isword, U"isword");
+  add_func(flit, cog_isword, U"word?");
   add_func(flit, cog_btoi, U"btoi");
   add_func(flit, cog_itob, U"itob");
 }

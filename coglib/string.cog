@@ -1,5 +1,5 @@
 [ concat ] mkopn
-[ precat ] dup ( swap concat ) def mkopn
+[ precat ] ( swap concat ) defopn
 [ unconcatd ] ( swap unconcat swap ) def
 [ unconcatt ] ( ( unconcatd ) dip ) def
 [ unconcatq ] ( ( unconcatt ) dip ) def

@@ -20,7 +20,7 @@
 #[ makeopn ] (
 #  dup dup dup dup
 #  [ "BAD ARGUMENT TYPE" ] over ( epush return ) curry curry quote
-#  ( ( epeek [ "isword" ] = ( [ "TOO FEW ARGUMENTS" ] = ( return ) when ) ( drop ) if ) if
+#  ( ( epeek [ "word?" ] = ( [ "TOO FEW ARGUMENTS" ] = ( return ) when ) ( drop ) if ) if
 #    [ 0 ] +
 #    dup [ 0 ] = ( drop return ) when
 #    dup [ 1 ] = ) compose
@@ -29,15 +29,15 @@
 #  ( when ) curry ( dup [ 0 ] < ) prepose compose
 #  take ( over concat dup isdef ( swap drop ) ) compose
 #  swap unglue ( compose ) curry ( roll times dupd def ) curry ( macro ) prepose
-#  ( if eval ) curry compose ( isword ) swap compose
+#  ( if eval ) curry compose ( word? ) swap compose
 #  ( [ "n" ] concat ) dip def
 #)
 #
 #[ curryn ] (
 #  # error handling
-#  isword
+#  word?
 #  ( [ "BAD ARGUMENT TYPE" ] [ "curryn" ] epush return )
-#  ( epeek [ "isword" ] = ( [ "TOO FEW ARGUMENTS" ] = ( return ) when ) ( drop ) if )
+#  ( epeek [ "word?" ] = ( [ "TOO FEW ARGUMENTS" ] = ( return ) when ) ( drop ) if )
 #  if
 #  # check for definition
 #  [ 0 ] +

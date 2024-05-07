@@ -269,7 +269,7 @@ void add_funcs_hashtable(ht_t *flit) {
   add_func(flit, cog_def, U"def");
   add_func(flit, cog_undef, U"undef");
   add_func(flit, cog_unglue, U"unglue");
-  add_func(flit, cog_isdef, U"isdef");
+  add_func(flit, cog_isdef, U"def?");
   add_func(flit, cog_wordlist, U"wordlist");
   add_func(flit, cog_bequeath, U"bequeath");
 }

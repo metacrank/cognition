@@ -8,7 +8,7 @@
 #  dup dup dup dup mkopd dup "d" concat dup dup mkopd "d" concat
 #  swap "3" concat mkopd "3d" concat swap "4" concat mkopd
 #) def (
-#  len [ 1 ] - cut dup isint
+#  len [ 1 ] - cut dup int?
 #  ( [ d-end ] swap quote def )
 #  ( [ d-end ] ( "" ) def concat )
 #  if mkopd
@@ -22,7 +22,7 @@
   swap "t" concat dup ( mkopd ) dip
   swap "q" concat mkopd
 ) def (
-  len [ 1 ] - cut dup isint
+  len [ 1 ] - cut dup int?
   ( [ d-end ] swap quote def )
   ( [ d-end ] ( "" ) def concat )
   if mkopd
@@ -41,7 +41,7 @@
 
 [ mkop-cur ] undef
 
-[ (mkopn-recurse-quote0) ] ( ( dup ) swap quote compose ( swap concat dup isdef ) compose ) def
+[ (mkopn-recurse-quote0) ] ( ( dup ) swap quote compose ( swap concat dup def? ) compose ) def
 [ (mkopn-recurse-quote1) ] (
   ( ( swap -- ip ) dip dup eval ) swap unglue quote compose
   ( compose dup ( def ) dip ) compose
@@ -92,7 +92,7 @@
 #  ip dup [ 1 ] >
 #  (
 #    (
-#      ( dup "op" swap concat dup isdef ) dip swap
+#      ( dup "op" swap concat dup def? ) dip swap
 #      ( drop swap drop unglue )
 #      ( ( swap -- ip ) dip dup eval ( op ) compose dup ( def ) dip )
 #      if
@@ -109,7 +109,7 @@
 #
 #quote could also be: (which won't cache intermediate words)
 #(
-#      ( dup "op" swap concat dup isdef ) dip swap
+#      ( dup "op" swap concat dup def? ) dip swap
 #      ( drop swap drop unglue )
 #      ( ( drop -- ip ) dip dup eval ( op ) compose )
 #      if

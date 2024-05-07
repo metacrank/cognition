@@ -1,6 +1,3 @@
-# Currying
-[ curry ] ( swap quote prepose ) defopn
-
 # Composition
 [ compose ] mkopn
 [ 2compose ] dup ( swap composed ) defopd ( ) "compose" ( 2compose ) ( -- composen 2compose ) mkbindopn-1
@@ -49,7 +46,9 @@
 [ 4drill ] ( ) "curry" ( 4dig ) ( curryn 4dig ) mkbindopn
 #[ mdrill ]
 
-# Currying extension
+# Currying
+[ curry ] ( swap quote prepose ) defopn
+
 [ with ] ( swap ) "curryd" ( swap ) ( swapd currydn swap ) mkbindopn
 [ 2with ] ( swap ) "withd" ( swap ) ( swapd withdn swap ) mkbindopn
 [ 3with ] ( swap ) "2withd" ( swap ) ( swapd 2withn swap ) mkbindopn
@@ -139,13 +138,13 @@
   ( mk-unless-unary ) keep ( mk-when-unary ) keep mk-if-unary
 ) def
 
-[ word ] ( isword ) mk-if-when-unless
+[ word ] ( word? ) mk-if-when-unless
 [ stack ] ( stack? ) mk-if-when-unless
 [ macro ] ( macro? ) mk-if-when-unless
 [ empty ] ( empty? ) mk-if-when-unless
-[ def ] ( isdef ) mk-if-when-unless
-[ int ] ( isint ) mk-if-when-unless
-[ float ] ( isint ) mk-if-when-unless
+[ def ] ( def? ) mk-if-when-unless
+[ int ] ( int? ) mk-if-when-unless
+[ float ] ( float? ) mk-if-when-unless
 [ pos ] ( pos? ) mk-if-when-unless
 [ neg ] ( neg? ) mk-if-when-unless
 [ non-neg ] ( non-neg? ) mk-if-when-unless
@@ -662,7 +661,7 @@
 [ join ] ( [ ] -rot ( compose ) ( curry ) ( interleave ) bi swap prepose ) def
 [ follow ] (
   [ ] (
-    ( pick isword ( dup ) ( t ) if composed ) dig
+    ( pick word? ( dup ) ( t ) if composed ) dig
     ( dot dup eval ) ( drop nip2 ) if
   ) dup eval but-last
 ) def
@@ -694,10 +693,10 @@
       if
     ) dup eval ( (
         one split (
-          isword (
-            compose cd dup isdef
+          word? (
+            compose cd dup def?
             ( unglue pop )
-            ( pop dup isdef ( unglue ) ( ) if )
+            ( pop dup def? ( unglue ) ( ) if )
             if
           ) ( ) if
           swapd compose swap
@@ -708,7 +707,7 @@
     ) dup eval
   ) ( (
       1split
-      ( isword ( dup isdef ( unglue ) ( ) if ) ( ) if compose ) dip
+      ( word? ( dup def? ( unglue ) ( ) if ) ( ) if compose ) dip
       size pos? ( 4pick eval ) ( ) if
     ) dup -rotd eval drop dropd
   ) if
