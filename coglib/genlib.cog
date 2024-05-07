@@ -132,7 +132,7 @@
 [ bindop-init ] (
   ( swap ) dip quote ( compose ) compose
   ( ( concat swap ) dip concat unglue ) swap compose
-  swap compose ( swap compose def ) compose
+  swap quote compose ( swap compose def ) compose
 ) def
 
 [ bindopn ] ( (
@@ -146,11 +146,12 @@
 ) def
 
 [ bindopn-1 ] ( (
-    3quote dup dip ( swap drop compose ( dup ) dip def ) dip eval
+    quote swap quote prepose swap quote prepose dup dip
+    ( swap drop compose ( dup ) dip def ) dip eval
     bindop-init
     ( swap compose dup dup dup uncompose "2" "" ) dip dup dip
     ( uncompose "3" "2" ) dip dup dip
-    ( uncompose "4" "3" ) dip dup dip
+    ( uncompose "4" "3" ) dip eval
     uncompose swap drop "n" concat
   ) dip def
 ) def
@@ -158,7 +159,7 @@
 [ bind234op ] (
   ( swap ) dip quote ( compose ) compose
   ( ( swap concat swap ) dip swap concat unglue ) swap compose
-  swap compose ( swap compose def ) compose
+  swap quote compose ( swap compose def ) compose
   ( swap compose dup dup dup uncompose "" "" ) dip dup dip
   ( uncompose "2" "2" ) dip dup dip
   ( uncompose "3" "3" ) dip dup dip
@@ -171,7 +172,7 @@
 [ mkbindopn-1 ] ( ( ( ( ( dup ) dip ) dip ) dip ) dip bindopn-1 mkopdn ) def
 [ mkbindnop ] ( ( ( ( ( dup ) dip ) dip ) dip bind234op dup "n" concat ) dip def mkopdn ) def
 
-[ aliasn ] ( dup "n" concat [ 0 ] swap bindopn ) def
+[ aliasn ] ( ( ) swap dup ( ) swap "n" concat bindopn ) def
 
 [ (mkopdn-case) ] undef
 [ bindop-init ] undef
@@ -183,14 +184,14 @@
   dup "n" concat undef
 ) def
 
-[ undefn ] (
+[ undefopn ] (
   dup "d" concat undef234n undef
   dup "t" concat undef234n undef
   dup "q" concat undef234n undef
   undef234n drop
 ) def
 
-[ undefd ] (
+[ undefopd ] (
   dup "d" concat undef
   dup "t" concat undef
   dup "q" concat undef

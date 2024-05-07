@@ -92,12 +92,13 @@ void fprint_value(FILE *f, value_t *v, void *e) {
     fprintf(f, ")");
     break;
   case VERR:
-    fprintf(f, "'");
-    if (v->error->str_word)
+    if (v->error->str_word) {
+      fprintf(f, "'");
       fprint(f, v->error->str_word);
-    else
+      fprintf(f, "'");
+    } else
       fprintf(f, "(none)");
-    fprintf(f, "':%s", RED);
+    fprintf(f, ":%s", RED);
     fprint(f, v->error->error);
     fprintf(f, "%s", COLOR_RESET);
     break;
@@ -106,7 +107,11 @@ void fprint_value(FILE *f, value_t *v, void *e) {
     c->printfunc(f, v->custom);
     break;
   case VCLIB:
-    fprintf(f, "CLIB");
+    if (v->str_word) {
+      fprint_str_formatted(f, v->str_word);
+    } else {
+      fprintf(f, "%sCLIB%s", HBLK, COLOR_RESET);
+    }
   }
   fprintf(f, "%s", end);
 }

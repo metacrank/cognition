@@ -872,7 +872,6 @@ bool gthan(string_t *m, string_t *n) {
 bool lthan(string_t *m, string_t *n) {
   double mf = string_to_double(m);
   double nf = string_to_double(n);
-  printf("%f, %f", mf, nf);
   if (mf < nf)
     return true;
   return false;

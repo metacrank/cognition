@@ -6,9 +6,8 @@
 [ avg ] ( + two / ) def
 [ sq ] ( dup * ) def
 [ cube ] ( dup sq * ) def
-[ round ] ( one * ) def
-[ ceil ] ( dup ++ ( round ) bi@ max ) def
-[ floor ] ( dup -- ( round ) bi@ min ) def
+[ ceil ] ( dup ++ ( ip ) bi@ max ) def
+[ floor ] ( dup -- ( ip ) bi@ min ) def
 [ between? ] ( ( dupd > ) dip swapd < and ) def
 
 # used to be 'range'

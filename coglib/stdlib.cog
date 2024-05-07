@@ -58,6 +58,7 @@
 [ drop ] mkopn
 [ swap ] mkopn
 [ dup ] mkopn
+[ clear ] mkopd
 
 [ nip ] ( swap drop ) defopn
 [ deep ] ( swap dip ) defopd
@@ -77,7 +78,7 @@
 #[ mrot ]
 [ -2rot ] ( swap ) defopn
 [ -3rot ] ( swap -2rotd ) defopn
-[ -4rot ] ( swap ) defopn
+[ -4rot ] ( swap -3rotd ) defopn
 #[ -mrot ]
 
 [ 1pick ] ( dup ) defopn
@@ -96,12 +97,12 @@
 [ evalq ] [ deept ] aliasn
 
 [ spin ] ( 3spin ) defopd
-[ rot ] ( 3rot ) defopn
-[ -rot ] ( -3rot ) defopn
-[ roll ] ( 4rot ) defopn
-[ -roll ] ( -4rot ) defopn
-[ pick ] ( 3pick ) defopn
-[ reach ] ( 4pick ) defopn
+[ rot ] dup [ 3rot ] aliasn mkopdn
+[ -rot ] dup [ -3rot ] aliasn mkopdn
+[ roll ] dup [ 4rot ] aliasn mkopdn
+[ -roll ] dup [ -4rot ] aliasn mkopdn
+[ pick ] dup [ 3pick ] aliasn mkopdn
+[ reach ] dup [ 4pick ] aliasn mkopdn
 
 # still needs some work
 [ eval2 ] ( evald eval ) defopn
@@ -150,8 +151,8 @@
 def2
 
 [ abs ] ( dup ( neg ) when-neg ) def
-[ factor? ] ( ( 1.0 * ) bi@ / isint ) def
-[ even? ] ( [ 2.0 ] factor? ) def
+[ factor? ] ( 1.0 * / ( ip ) ( == ) bi ) def
+[ even? ] ( [ 2 ] factor? ) def
 [ odd? ] ( even? not ) def
 
 [ even ] ( even? ) mk-if-when-unless
