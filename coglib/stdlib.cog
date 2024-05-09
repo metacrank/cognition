@@ -1,4 +1,4 @@
-2 crank quote.cog load
+2 crank stdquote.cog load
 # Cognition Standard Library
 # Apr. 2024
 
@@ -52,7 +52,7 @@
 [ empty? ] ( size zero? ) def
 
 # Generating words
-"genlib.cog" load
+"stdgenlib.cog" load
 
 # Stackops extension
 [ drop ] mkopn
@@ -92,9 +92,15 @@
 [ dropt ] [ nipd ] aliasn
 [ dropq ] [ nipt ] aliasn
 
-[ evald ] [ deep ] aliasn
-[ evalt ] [ deepd ] aliasn
-[ evalq ] [ deept ] aliasn
+[ evald ] ( deep ) def
+[ 2evald ] ( 2deep ) def
+[ 3evald ] ( 3deep ) def
+[ 4evald ] ( 4deep ) def
+#[ mevald ] ( mdeep ) def
+[ evalt ] ( deepd ) def
+#...
+[ evalq ] ( deept ) def
+#...
 
 [ spin ] ( 3spin ) defopd
 [ rot ] dup [ 3rot ] aliasn mkopdn
@@ -105,29 +111,31 @@
 [ reach ] dup [ 4pick ] aliasn mkopdn
 
 # still needs some work
-[ eval2 ] ( evald eval ) defopn
-[ eval3 ] ( evald2 eval ) def
-[ eval4 ] ( evald3 eval ) def
+[ eval2 ] ( evald eval ) defopd
+[ eval3 ] ( evald2 eval ) defopd
+[ eval4 ] ( evald3 eval ) defopd
 #[ evaln ]
 [ 2eval ] ( eval eval ) def
-[ 2eval2 ] ( 2evald 2eval ) def
-[ 2eval3 ] ( 2evald2 2eval ) def
-[ 2eval4 ] ( 2evald3 2eval ) def
+[ 2eval2 ] ( 2evald 2eval ) defopd
+[ 2eval3 ] ( 2evald2 2eval ) defopd
+[ 2eval4 ] ( 2evald3 2eval ) defopd
 #[ 2evaln ]
 [ 3eval ] ( 2eval eval ) def
-[ 3eval2 ] ( 3evald 3eval ) def
-[ 3eval3 ] ( 3evald2 3eval ) def
-[ 3eval4 ] ( 3evald3 3eval ) def
+[ 3eval2 ] ( 3evald 3eval ) defopd
+[ 3eval3 ] ( 3evald2 3eval ) defopd
+[ 3eval4 ] ( 3evald3 3eval ) defopd
 #[ 3evaln ]
 [ 4eval ] ( 3eval eval ) def
-[ 4eval2 ] ( 4evald 4eval ) def
-[ 4eval3 ] ( 4evald2 4eval ) def
-[ 4eval4 ] ( 4evald3 4eval ) def
+[ 4eval2 ] ( 4evald 4eval ) defopd
+[ 4eval3 ] ( 4evald2 4eval ) defopd
+[ 4eval4 ] ( 4evald3 4eval ) defopd
 #[ 4evaln ]
 #
 #[ -eval2 ] ( dip eval ) ?
 #[ -eval3 ] ( 2dip -eval2 ) ...
 
+[ deep2 ] ( evald2 ) def
+#...
 
 # Hashtable extension
 [ def ] mkopn
@@ -135,28 +143,11 @@
 [ unglue ] mkopn
 
 # Combinators extension
-"combinators.cog" load
+"stdcombinators.cog" load
 
 # Type-specific wordlists
 [ stack-wordlist ] ( wordlist ( unglue stack? nip ) filter ) def
 [ macro-wordlist ] ( wordlist ( unglue macro? nip ) filter ) def
 
 # Strings extension
-"string.cog" load
-
-# Math extension
-[ factorial ] dup
-( dup ( dup -- factorial * ) ( ++ ) if-pos )
-( [ 2 ] swap ++ interval [ 1 ] ( * ) reduce )
-def2
-
-[ ip ] [ ip? ] ( ( ip ) ( == ) bi ) ( def ) ( mk-if-when-else ) bi
-[ fp ] [ fp? ] ( ( fp ) ( == ) bi ) ( def ) ( mk-if-when-else ) bi
-
-[ abs ] ( dup ( neg ) when-neg ) def
-[ factor? ] ( 1.0 * / ip? ) def
-[ even? ] ( [ 2 ] factor? ) def
-[ odd? ] ( even? not ) def
-
-[ even ] ( even? ) mk-if-when-unless
-[ odd ] ( odd? ) mk-if-when-unless
+"stdstring.cog" load

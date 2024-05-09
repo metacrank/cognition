@@ -77,14 +77,19 @@
     ] case concat over
   )
 ) def
-[ strquote-end0 ] ( drop nip swap one swap metacrank swap crank swap s swap d swap i ) def
-[ strquote-end1 ] ( strquote-end push over ) def
+[ strquote-end0 ] ( drop nip swap one swap metacrank swap crank swap sets swap setd swap seti stgl ) def
+[ strquote-end1 ] ( strquote-end0 push over ) def
 [ \ " ] [ \ " ] (
-  geti getd gets "" d "" i "" s stgl
-  crankbase one metacrankbase dup one?
+  geti getd gets "" setd "" seti "" sets stgl
+  crankbase one metacrankbase dup zero?
   [ ( dup [ \ \ ] = ( strquote-escape ) ( dup [ \ " ] = ( strquote-end0 ) ( concat over ) if ) if ) ]
   [ ( dup [ \ \ ] = ( strquote-escape ) ( dup [ \ " ] = ( strquote-end1 ) ( concat over ) if ) if ) ]
   if dup "" swap halt one one metacrank
 ) def singlet
 
 [ strquote-escape strquote-end0 strquote-end1 ] ( undef ) each
+
+"hello" [ [ "hello" [ hello! . ] ] [ "maybe" [ ? ] ] ] case-find
+clear
+
+'[ m

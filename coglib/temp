@@ -1,0 +1,24 @@
+
+
+
+
+
+
+
+
+# Math extension
+[ factorial ] dup
+( dup ( dup -- factorial * ) ( ++ ) if-pos )
+( [ 2 ] swap ++ interval [ 1 ] ( * ) reduce )
+def2
+
+[ ip ] [ ip? ] ( ( ip ) ( == ) bi ) ( def ) ( mk-if-when-else ) bi
+[ fp ] [ fp? ] ( ( fp ) ( == ) bi ) ( def ) ( mk-if-when-else ) bi
+
+[ abs ] ( dup ( neg ) when-neg ) def
+[ factor? ] ( 1.0 * / ip? ) def
+[ even? ] ( [ 2 ] factor? ) def
+[ odd? ] ( even? not ) def
+
+[ even ] ( even? ) mk-if-when-unless
+[ odd ] ( odd? ) mk-if-when-unless

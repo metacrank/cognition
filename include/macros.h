@@ -75,7 +75,7 @@
 #define COLOR_RESET "\e[0m"
 
 /* Set defaults */
-#define DEFAULT_HT_SIZE 5000
+#define DEFAULT_HT_SIZE 10001
 #define DEFAULT_STACK_SIZE 10
 #define DEFAULT_NUMBER_BASE 10
 
