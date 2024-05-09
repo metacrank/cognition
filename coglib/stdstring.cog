@@ -88,8 +88,3 @@
 ) def singlet
 
 [ strquote-escape strquote-end0 strquote-end1 ] ( undef ) each
-
-"hello" [ [ "hello" [ hello! . ] ] [ "maybe" [ ? ] ] ] case-find
-clear
-
-'[ m
