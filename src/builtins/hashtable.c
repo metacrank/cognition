@@ -116,7 +116,7 @@ void cog_unglue(value_t *v) {
     stack_t *temp = wordc->container->stack;
     temp->size = 0;
     wordc->container->stack = NULL;
-    contain_free(wordc->container);
+    contain_def_stack_push(wordc->container);
     wordc->macro = temp;
     for (int i = 0; i < macro->size; i++) {
       stack_push(wordc->macro, value_copy(macro->items[i]));
@@ -129,12 +129,8 @@ void cog_unglue(value_t *v) {
     wordc->container = contain_copy(def, value_copy);
     return;
   }
-  contain_copy_attributes(def, wordc->container);
-  value_free_safe(wordval);
-  wordc->container->stack->size = 0;
-  for (int i = 0; i < def->stack->size; i++) {
-    stack_push(wordc->container->stack, value_copy(def->stack->items[i]));
-  }
+  contain_def_stack_push(wordc->container);
+  wordc->container = contain_copy(def, value_copy);
 }
 
 void cog_isdef(value_t *v) {
@@ -154,12 +150,12 @@ void cog_isdef(value_t *v) {
     eval_error(U"BAD ARGUMENT TYPE", v);
     return;
   }
-  bool exists = ht_defined(cur->word_table, wordval->str_word) || ht_defined(cur->flit, wordval->str_word);
-  wordval->str_word->length = 0;
-  wordval->str_word->value[0] = '\0';
-  if (exists) {
-    string_append(wordval->str_word, 't');
+  if (ht_defined(cur->word_table, wordval->str_word) || ht_defined(cur->flit, wordval->str_word)) {
+    if (wordval->str_word->length == 0)
+      string_append(wordval->str_word, U't');
+    return;
   }
+  wordval->str_word->length = 0;
 }
 
 void cog_wordlist(value_t *v) {

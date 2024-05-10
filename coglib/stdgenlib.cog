@@ -62,10 +62,11 @@
 [ (mkopn-recurse-single-caching) ] (
   mkopn-recurse-init (mkopn-recurse-quote1-single-caching) mkopn-recurse-end
 ) def
+[ (mkopdn-case) ] ( concat swap ( swap dip ) swap [ 1 ] put dup quote ( def ) dip ) def
 [ mkopn-init ] (
   dup mkop234
   # generate the definition of an opn word
-  dup "n" concat swap dup
+  dup dup "n" concat swap dup
   ( ip dup [ 1 ] > ) swap
 ) def
 [ mkopn-end ] (
@@ -74,6 +75,11 @@
   unglue ( drop ) prepose quote compose
   ( ( dup zero? ( drop ) ( drop "INDEX OUT OF RANGE" ereturn ) if ) if ) compose
   quote compose ( if ) compose def
+  dup dup dup "n" concat unglue quote
+  swap "dn" (mkopdn-case)
+  swap "tn" (mkopdn-case)
+  swap "qn" (mkopdn-case)
+  drop
 ) def
 [ mkopn ] ( mkopn-init (mkopn-recurse) mkopn-end ) def
 [ mkopn-single-caching ] ( mkopn-init (mkopn-recurse-single-caching) mkopn-end ) def
@@ -114,8 +120,6 @@
 #      ( ( drop -- ip ) dip dup eval ( op ) compose )
 #      if
 #    ) dup eval eval
-
-[ (mkopdn-case) ] ( concat swap ( swap dip ) swap [ 1 ] put dup quote ( def ) dip ) def
 
 [ mkopdn ] (
   dup mkopd
@@ -174,7 +178,7 @@
 [ mkbindopn-1 ] ( ( ( ( ( dup ) dip ) dip ) dip ) dip bindopn-1 mkopdn ) def
 [ mkbindnop ] ( ( ( ( ( dup ) dip ) dip ) dip ) dip bindnop mkopdn ) def
 
-[ aliasn ] ( ( ) swap dup ( ) swap "n" concat bindopn ) def
+[ aliasn ] ( ( ) swap dup ( ) swap "n" concat unglue bindopn ) def
 
 [ (mkopdn-case) ] undef
 [ bindop-init ] undef

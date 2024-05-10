@@ -60,6 +60,7 @@ void sll_add(sll_t *l, string_t *s, void *v, void (*freefunc)(void *)) {
   }
   node_t *n = init_node(s, v);
   cur->next = n;
+  l->size++;
 }
 
 void *sll_get(sll_t *l, string_t *k) {
@@ -80,8 +81,9 @@ void sll_delete(sll_t *l, string_t *k, void (*freefunc)(void *)) {
   if (cur == NULL)
     return;
   if (string_comp(cur->key, k) == 0) {
+    tmp = cur->next;
     node_free(cur, freefunc);
-    l->head = NULL;
+    l->head = tmp;
     return;
   }
   while (cur->next != NULL) {

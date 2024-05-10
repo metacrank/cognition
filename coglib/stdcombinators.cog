@@ -94,7 +94,7 @@
 # needs genlib.cog improvements and generalizations
 [ keep ] ( dupd dip ) defopd
 [ keep2 ] ( ( quote2 do ) dip dip eval ) defopd
-[ keep3 ] ( ( quote3 ? dup ? dip ? ) dip ? dip eval ) defopd
+[ keep3 ] ( ( quote3 dup dip ) dip dip eval ) defopd
 [ keep4 ] ( ( quote4 do ) dip dip eval ) defopd
 [ keepn ] ( ( quoten do ) curry dip dip eval ) defopd
 [ 2keep ] ( 2pickd dip ) defopd
@@ -468,7 +468,7 @@
 [ find-integer-from ] (
   ( ip ) 2dip
   2over < (
-    ? ( ? nip eval ? ) keep3 roll
+    ( nip eval ) keep3 roll
     ( drop2 ) ( ( ++ ) 2dip \ find-integer-from ) if
   ) ( drop3 f ) if
 ) def
@@ -707,7 +707,7 @@
 [ lquote-prebody ] (
   [ ( "[" = ) ( "(" = ) ( "[[" = ) ( "((" = ) ( "{" = ) ( "{{" = )
     ( "'[" = ) ( "'(" = ) ( "'[[" = ) ( "'((" = ) ( "'{" = ) ( "'{{" = )
-    ( [ \ \ ] = ) ( [ \ # ] = ) ( [ \ " ] = ) ] ? ||1 0 exit nip
+    ( [ \ \ ] = ) ( [ \ # ] = ) ( [ \ " ] = ) ] ||1 0 exit nip
 ) def
 [ lquote-body ] ( lquote-prebody ( eval ) ( compose over ) if ) def
 [ lquote-ebody ] ( lquote-prebody ( eval ) ( dup "_" != ( dup ( unglue ) when-def ) when compose over ) if ) def
