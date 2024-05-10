@@ -511,7 +511,21 @@ void cog_evalstr(value_t *v) {
     eval_error(U"TOO FEW ARGUMENTS", v);
     return;
   }
+  stack_t *strst = *value_stack(strc);
+  if (strst->size == 0) {
+    value_free_safe(strc);
+    return;
+  }
+  for (long i = 0; i < strst->size; i++) {
+    value_t *str = strst->items[i];
+    if (str->type != VWORD) {
+      stack_push(cur->stack, strc);
+      eval_error(U"BAD ARGUMENT TYPE", v);
+      return;
+    }
+  }
   if (FAMILY_RECURSION_DEPTH >= 13824) {
+    stack_push(cur->stack, strc);
     eval_error(U"MAXIMUM RECURSION DEPTH REACHED", v);
     return;
   }
@@ -521,8 +535,7 @@ void cog_evalstr(value_t *v) {
   else stack_push(FAMILY, NULL);
   string_append(FAMILY_IDX, FAMILY->size - 1);
   FAMILY_RECURSION_DEPTH++;
-  stack_t *strst = *value_stack(strc);
-  for (int i = 0; i < strst->size; i++) {
+  for (long i = 0; i < strst->size; i++) {
     value_t *str = strst->items[i];
     parser_t *parser = init_parser(str->str_word);
     while(1) {
