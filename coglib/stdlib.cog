@@ -37,8 +37,9 @@
 [ i? ] ( i == ) def
 
 # Metastack extension
-[ meta ] ( uncd quote cd reset ) def # ( qstack reset ) is less efficient but preserves root in chroots
+[ meta ] ( qstack reset ) def # ( uncd quote cd reset ) is more efficient but does not preserve root in chroots
 [ parent ] ( qstack [ 1 ] crank ) def # qstack halt in baremetal environments
+[ exit-chroot ] ( root popf ) def
 
 # Error extension
 [ ereturn ] ( ethrow return ) def
