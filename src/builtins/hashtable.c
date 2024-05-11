@@ -24,6 +24,7 @@ void cog_def(value_t *v) {
   }
   value_t *word = value_stack(wordc)[0]->items[0];
   if (word->type != VWORD) {
+    printf("nop\n");
     eval_error(U"BAD ARGUMENT TYPE", v);
     stack_push(stack, wordc);
     stack_push(stack, quot);

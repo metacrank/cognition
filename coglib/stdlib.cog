@@ -3,13 +3,9 @@
 # Apr. 2024
 
 # Parsing aliases
-[ setd ] ( d ) def
-[ seti ] ( i ) def
-[ sets ] ( s ) def
-
-[ d ] undef
-[ i ] undef
-[ s ] undef
+[ setd ] dup def? ( ) ( ( d ) def [ d ] undef ) if
+[ seti ] dup def? ( ) ( ( i ) def [ i ] undef ) if
+[ sets ] dup def? ( ) ( ( s ) def [ s ] undef ) if
 
 # Math extension
 [ && ] ( and ) def
@@ -37,7 +33,8 @@
 [ i? ] ( i == ) def
 
 # Metastack extension
-[ meta ] ( qstack reset ) def # ( uncd quote cd reset ) is more efficient but does not preserve root in chroots
+[ meta ] ( qstack reset ) def
+[ meta-unsafe ] ( uncd quote cd reset ) # more efficient in most cases but does not preserve root in chroots
 [ parent ] ( qstack [ 1 ] crank ) def # qstack halt in baremetal environments
 [ exit-chroot ] ( root popf ) def
 

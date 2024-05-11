@@ -57,18 +57,22 @@
 #[ mwith ]
 
 # needs fixing for deep versions
-[ quote ] mkopn
-[ mquote ] ( quoten ) def#opd
 [ quote ] ( quote ) "curry" ( ) ( swap quote swap -- curryn ) mkbindopn-1
 [ 2quote ] ( ) "quote" ( quote ) ( quoten quote ) mkbindopn
 [ 3quote ] ( ) "quote" ( 2quote ) ( quoten 2quote ) mkbindopn
 [ 4quote ] ( ) "quote" ( 3quote ) ( quoten 3quote ) mkbindopn
-[ mquote ] ( ) "quoted" ( -- mquote ) ( ( quoten ) drill -- mquote ) mkbindopn
+#[ mquote ] ( ) "quoted" ( -- mquote ) ( ( quoten ) drill -- mquote ) mkbindopn
 
-[ push ] ( ) "quote" ( compose ) ( quoten compose ) mkbindopn
-[ 2push ] ( ) "quote" ( 2compose ) ( quoten swap composed ) mkbindopn
-[ 3push ] ( ) "quote" ( 3compose ) ( quoten swap 2pushd ) mkbindopn
-[ 4push ] ( ) "quote" ( 4compose ) ( quoten swap 3pushd ) mkbindopn
+[ route ] ( ) "quote" ( >macro ) ( quoten >macro ) mkbindopn
+[ 2route ] ( ) "route" ( route ) ( routen route ) mkbindopn
+[ 3route ] ( ) "route" ( 2route ) ( routen 2route ) mkbindopn
+[ 4route ] ( ) "route" ( 3route ) ( routen 3route ) mkbindopn
+#[ mroute ] ( ) "routed" ( -- mroute ) ( ( routen ) drill -- mroute ) mkbindopn
+
+[ push ] ( ) "route" ( compose ) ( routen compose ) mkbindopn
+[ 2push ] ( ) "route" ( 2compose ) ( routen swap composed ) mkbindopn
+[ 3push ] ( ) "route" ( 3compose ) ( routen swap 2pushd ) mkbindopn
+[ 4push ] ( ) "route" ( 4compose ) ( routen swap 3pushd ) mkbindopn
 #[ mpush ] ( (  ) mdip )...
 
 [ take ] ( swap push ) defopn
@@ -93,36 +97,36 @@
 
 # needs genlib.cog improvements and generalizations
 [ keep ] ( dupd dip ) defopd
-[ keep2 ] ( ( quote2 do ) dip dip eval ) defopd
-[ keep3 ] ( ( quote3 dup dip ) dip dip eval ) defopd
-[ keep4 ] ( ( quote4 do ) dip dip eval ) defopd
-[ keepn ] ( ( quoten do ) curry dip dip eval ) defopd
+[ keep2 ] ( ( route2 do ) dip dip eval ) defopd
+[ keep3 ] ( ( route3 dup dip ) dip dip eval ) defopd
+[ keep4 ] ( ( route4 do ) dip dip eval ) defopd
+[ keepn ] ( ( routen do ) curry dip dip eval ) defopd
 [ 2keep ] ( 2pickd dip ) defopd
-[ 2keep2 ] ( ( quote2 do ) swap digd dip eval ) defopd
-[ 2keep3 ] ( ( quote3 do ) swap digd dip eval ) defopd
-[ 2keep4 ] ( ( quote4 do ) swap digd dip eval ) defopd
-[ 2keepn ] ( ( quoten do ) curry digd dip eval ) defopd
+[ 2keep2 ] ( ( route2 do ) swap digd dip eval ) defopd
+[ 2keep3 ] ( ( route3 do ) swap digd dip eval ) defopd
+[ 2keep4 ] ( ( route4 do ) swap digd dip eval ) defopd
+[ 2keepn ] ( ( routen do ) curry digd dip eval ) defopd
 [ 3keep ] ( 3pickd dip ) defopd
-[ 3keep2 ] ( ( quote2 do ) swap 2digd dip eval ) defopd
-[ 3keep3 ] ( ( quote3 do ) swap 2digd dip eval ) defopd
-[ 3keep4 ] ( ( quote4 do ) swap 2digd dip eval ) defopd
-[ 3keepn ] ( ( quoten do ) curry 2digd dip eval ) defopd
+[ 3keep2 ] ( ( route2 do ) swap 2digd dip eval ) defopd
+[ 3keep3 ] ( ( route3 do ) swap 2digd dip eval ) defopd
+[ 3keep4 ] ( ( route4 do ) swap 2digd dip eval ) defopd
+[ 3keepn ] ( ( routen do ) curry 2digd dip eval ) defopd
 [ 4keep ] ( 4pickd dip ) defopd
-[ 4keep2 ] ( ( quote2 do ) swap 3digd dip eval ) defopd
-[ 4keep3 ] ( ( quote3 do ) swap 3digd dip eval ) defopd
-[ 4keep4 ] ( ( quote4 do ) swap 3digd dip eval ) defopd
-[ 4keepn ] ( ( quoten do ) curry swap 3digd dip eval ) defopd
+[ 4keep2 ] ( ( route2 do ) swap 3digd dip eval ) defopd
+[ 4keep3 ] ( ( route3 do ) swap 3digd dip eval ) defopd
+[ 4keep4 ] ( ( route4 do ) swap 3digd dip eval ) defopd
+[ 4keepn ] ( ( routen do ) curry swap 3digd dip eval ) defopd
 
 # Stackops dup variants
-[ 2dup ] ( quote2 ) "do" ( eval ) ( ( quote2 ) dip don eval ) mkbindopn
+[ 2dup ] ( route2 ) "do" ( eval ) ( ( route2 ) dip don eval ) mkbindopn
 [ 2dup ] ( swap dup ( swap dup ) dip swap ) defopd # optimization
-[ 3dup ] ( quote3 ) "do" ( eval ) ( ( quote3 ) dip don eval ) mkbindopn
-[ 4dup ] ( quote4 ) "do" ( eval ) ( ( quote4 ) dip don eval ) mkbindopn
+[ 3dup ] ( route3 ) "do" ( eval ) ( ( route3 ) dip don eval ) mkbindopn
+[ 4dup ] ( route4 ) "do" ( eval ) ( ( route4 ) dip don eval ) mkbindopn
 
 [ over ] ( dupd swap ) defopd
 [ 2over ] ( ( ( swap dup ) dip swap ) do dip swap ) defopd
-[ 3over ] ( ( quote curry2 do ) dip swap eval ) defopd
-[ 4over ] ( ( quote curry3 do ) dip swap eval ) defopd
+[ 3over ] ( ( route curry2 do ) dip swap eval ) defopd
+[ 4over ] ( ( route curry3 do ) dip swap eval ) defopd
 
 # Conditionals
 [ negate ] ( ( not ) compose ) def
@@ -222,11 +226,11 @@
 [ vat-destruct ] ( f swap swap-vat ) def
 
 # Uncurrying
-[ uncurry ] ( ) "split" ( evald ) ( split evald ) mkbindnop
-[ uncurry ] ( 1split evald ) defopd
+[ uncurry ] ( ) "split" ( swap >macro dip ) ( split swap >macro dip ) mkbindnop
+[ uncurry ] ( 1split swap >macro dip ) defopd
 
-[ unpush ] ( ) "split*" ( eval ) ( split* eval ) mkbindnop
-[ unpush ] ( 1split* eval ) defopd
+[ unpush ] ( ) "split*" ( >macro eval ) ( split* >macro eval ) mkbindnop
+[ unpush ] ( 1split* >macro eval ) defopd
 #[ 2unpush ] ( ( 1split* ) dig eval ) def
 #[ 2unpush2 ] ( ( 2split* ) dig eval ) def
 #...
@@ -237,18 +241,18 @@
 #[ munpush2 ] ( ( 2split* ) swap mdig eval ) def
 #[ munpushn ] ( ( split* ) swap mdrill eval ) def
 
-[ unwith ] ( ) "split" ( dipd ) ( split dipd ) mkbindnop
-[ unwith ] ( 1split dipd ) defopd
-[ 2unwith ] ( ) "split" ( 2dipd ) ( split 2dipd ) mkbindnop
-[ 2unwith ] ( 1split 2dipd ) defopd
-[ 3unwith ] ( ) "split" ( 3dipd ) ( split 3dipd ) mkbindnop
-[ 3unwith ] ( 1split 3dipd ) defopd
-[ 4unwith ] ( ) "split" ( 4dipd ) ( split 4dipd ) mkbindnop
-[ 4unwith ] ( 1split 4dipd ) defopd
+[ unwith ] ( ) "split" ( ( >macro dip ) dip ) ( split ( >macro dip ) dip ) mkbindnop
+[ unwith ] ( 1split ( >macro dip ) dip ) defopd
+[ 2unwith ] ( ) "split" ( ( >macro 2dip ) dip ) ( split ( >macro 2dip ) dip ) mkbindnop
+[ 2unwith ] ( 1split ( >macro 2dip ) dip ) defopd
+[ 3unwith ] ( ) "split" ( ( >macro 3dip ) dip ) ( split ( >macro 3dip ) dip ) mkbindnop
+[ 3unwith ] ( 1split ( >macro 3dip ) dip ) defopd
+[ 4unwith ] ( ) "split" ( ( >macro 4dip ) dip ) ( split ( >macro 4dip ) dip ) mkbindnop
+[ 4unwith ] ( 1split ( >macro 4dip ) dip ) defopd
 #[ munwith ] ( ( 1split ) dip mdipd ) defopd
 #[ munwithn ] ( ( split ) curry dip mdipd ) defopd
 
-[ untake ] ( 1split* dip ) defopn
+[ untake ] ( 1split* >macro dip ) defopn
 [ 2untake ] ( swap ) "untaked" ( swap ) ( ( untaken ) drill2 ) mkbindopn
 [ 3untake ] ( swap ) "2untaked" ( swap ) ( ( 2untaken ) 2drill2 ) mkbindopn
 [ 4untake ] ( swap ) "3untaked" ( swap ) ( ( 3untaken ) 3drill2 ) mkbindopn
@@ -584,10 +588,10 @@
 [ find-last ] ( ( size -- ) dip find-last-from ) def
 #[ nfind ]
 
-[ index-from ] ( swap ( = ) curry find-from drop ) def
-[ last-index-from ] ( swap ( = ) curry find-last-from drop ) def
-[ index ] ( ( = ) curry find drop ) def
-[ last-index ] ( ( = ) curry find-last drop ) def
+[ index-from ] ( swap ( = ) curry ( ( drop f ) if-word ) curry find-from drop ) def
+[ last-index-from ] ( swap ( = ) curry ( ( drop f ) if-word ) curry find-last-from drop ) def
+[ index ] ( ( = ) curry ( ( drop f ) if-word ) curry find drop ) def
+[ last-index ] ( ( = ) curry ( ( drop f ) if-word ) curry find-last drop ) def
 
 [ cartesian-map ] ( swap-operator ( with map ) curry2 map ) def
 [ cartesian-each ] ( swap-operator ( with each ) curry2 each ) def
@@ -680,7 +684,7 @@
 
 [ flip ] ( [ ] ( swap compose ) reduce ) def
 [ sep ] ( size uncomposed quoten ) def
-[ unsep ] ( size evald -- composen ) def
+[ unsep ] ( size swap >macro dip -- composen ) def
 [ join ] ( [ ] -rot ( compose ) ( curry ) ( interleave ) bi swap prepose ) def
 [ follow ] (
   [ ] (
@@ -688,7 +692,7 @@
     ( dot dup eval ) ( drop nip2 ) if
   ) dup eval but-last
 ) def
-[ nweave ] ( ( quoten ) curry do dip ( join eval ) keep eval ) def
+[ nweave ] ( ( routen ) curry do dip ( join eval ) keep eval ) def
 
 
 # Fried quotes (similiar to fried quotations in Factor)
@@ -696,7 +700,7 @@
   "_" last-index dup (
     split rest curry-operator swap
     ( "_" last-index dup ) ( split rest prepose-curry-operator 2compose ) while
-    drop prepose-operator
+    drop prepose-operator compose
   ) ( drop quote >macro ) if
 ) def
 
@@ -705,9 +709,10 @@
 [ rquote-end0 ] ( rquote-end eval ) def
 [ rquote-end1 ] ( rquote-end compose over ) def
 [ lquote-prebody ] (
-  [ ( "[" = ) ( "(" = ) ( "[[" = ) ( "((" = ) ( "{" = ) ( "{{" = )
+  dup [ ( "[" = ) ( "(" = ) ( "[[" = ) ( "((" = ) ( "{" = ) ( "{{" = )
     ( "'[" = ) ( "'(" = ) ( "'[[" = ) ( "'((" = ) ( "'{" = ) ( "'{{" = )
-    ( [ \ \ ] = ) ( [ \ # ] = ) ( [ \ " ] = ) ] ||1 0 exit nip
+    ( [ \ \ ] = ) ( [ \ # ] = ) ( [ \ " ] = )
+  ] ||1 nip
 ) def
 [ lquote-body ] ( lquote-prebody ( eval ) ( compose over ) if ) def
 [ lquote-ebody ] ( lquote-prebody ( eval ) ( dup "_" != ( dup ( unglue ) when-def ) when compose over ) if ) def
@@ -758,28 +763,26 @@
 [ lquote-init rquote-end rquote-end1 rquote-end0 lquote-prebody
   lquote-body lquote-ebody lquote-end ] ( undef ) each
 
-
+# Case
 [ case-find ] (
-  swap ( 2eval swap ) take ( = dup ( nip ) unless ) compose
-)
-[ case-find2 ] (
-  swap '(  )
+  swap word? ( "BAD ARGUMENT TYPE" ereturn ) unless
+  '( 2eval drop ( "BAD CASE SPECIFIER TYPE" ereturn ) unless-word _ = )
+  find nipd
 )
 
 [ case ] (
-  unpush (
-    swap dup
-    ( ( eval drop ) take ( = ) compose find swap ) dig
-  ) dig
-  ( drop2 last nip 2eval ) (
-    size one?
-    ( nip dip drop ) (
-      nipd dip swapd =
-      ( eval ) ( drop2 "NO CASE" ethrow ) if
+  unpush ( ( case-find ) 2keep rot ) dig
+  ( drop2 eval rest eval ) (
+    size one? ( nip2 eval ) (
+      nipd dip rot ( "BAD CASE SPECIFIER TYPE" ereturn ) unless-word
+      = ( eval ) ( drop2 "NO CASE" ethrow ) if
     ) if
   ) if
 ) def
 
+[ cond-find ]
+
+[ cond ]
 
 # example of combinator power: complete expand
 # (checks for definitions within child first without copying hashtables)
