@@ -187,6 +187,46 @@ void cog_divide(value_t *v) {
   stack_push(stack, v1);
 }
 
+void cog_mod(value_t *v) {
+  contain_t *cur = stack_peek(STACK);
+  stack_t *stack = cur->stack;
+  if (stack->size < 2) {
+    eval_error(U"TOO FEW ARGUMENTS", v);
+    return;
+  }
+  value_t *v2 = stack_pop(stack);
+  if (value_stack(v2)[0]->size != 1) {
+    eval_error(U"BAD ARGUMENT TYPE", v);
+    stack_push(stack, v2);
+    return;
+  }
+  value_t *w2 = value_stack(v2)[0]->items[0];
+  if (w2->type != VWORD) {
+    eval_error(U"BAD ARGUMENT TYPE", v);
+    stack_push(stack, v2);
+    return;
+  }
+  value_t *v1 = stack_pop(stack);
+  if (value_stack(v1)[0]->size != 1) {
+    eval_error(U"BAD ARGUMENT TYPE", v);
+    stack_push(stack, v1);
+    stack_push(stack, v2);
+    return;
+  }
+  value_t *w1 = value_stack(v1)[0]->items[0];
+  if (w1->type != VWORD) {
+    eval_error(U"BAD ARGUMENT TYPE", v);
+    stack_push(stack, v1);
+    stack_push(stack, v2);
+    return;
+  }
+  string_t *stmp = mod(w1->str_word, w2->str_word);
+  string_free(w1->str_word);
+  w1->str_word = stmp;
+  value_free_safe(v2);
+  stack_push(stack, v1);
+}
+
 void cog_real(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   stack_t *stack = cur->stack;
@@ -919,6 +959,7 @@ void add_funcs_math(ht_t *flit) {
   add_func(flit, cog_subtract, U"-");
   add_func(flit, cog_multiply, U"*");
   add_func(flit, cog_divide, U"/");
+  add_func(flit, cog_mod, U"mod");
   add_func(flit, cog_neg, U"neg");
   add_func(flit, cog_sqrt, U"sqrt");
   add_func(flit, cog_pow, U"pow");

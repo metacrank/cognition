@@ -762,6 +762,12 @@ string_t *quotient(string_t *m, string_t *n) {
   return double_to_string(mf / nf, sf, (mf == creal(mf)) && (nf == creal(nf)));
 }
 
+string_t *mod(string_t *m, string_t *n) {
+  long mf = string_to_int(m);
+  long nf = string_to_int(n);
+  return int_to_string(mf % nf);
+}
+
 string_t *str_sqrt(string_t *m) {
   double complex mf = string_to_double(m);
   int mpr, mpi;

@@ -8,6 +8,7 @@
 [ sets ] dup def? ( ) ( ( s ) def [ s ] undef ) if
 
 # Math extension
+[ % ] ( mod ) def
 [ && ] ( and ) def
 [ || ] ( or ) def
 [ ++ ] ( [ 1 ] + ) def
@@ -34,7 +35,7 @@
 
 # Metastack extension
 [ meta ] ( qstack reset ) def
-[ meta-unsafe ] ( uncd quote cd reset ) # more efficient in most cases but does not preserve root in chroots
+[ meta-unsafe ] ( uncd quote cd reset ) def # more efficient in most cases but does not preserve root in chroots
 [ parent ] ( qstack [ 1 ] crank ) def # qstack halt in baremetal environments
 [ exit-chroot ] ( root popf ) def
 

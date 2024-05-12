@@ -5,23 +5,23 @@
 [ unconcatq ] ( ( unconcatt ) dip ) def
 
 [ substr ] ( swapd cut drop swap cut nip ) def
-[ byte ] ( btoi ) defopd
-[ char ] ( itob ) defopd
-[ b+ ] ( swap byte + char ) def
-[ b- ] ( swap byte swap - char ) def
-[ b++ ] ( byte ++ char ) def
-[ b-- ] ( byte -- char ) def
+[ >byte ] ( btoi ) defopd
+[ >char ] ( itob ) defopd
+[ b+ ] ( swap >byte + >char ) def
+[ b- ] ( swap >byte swap - >char ) def
+[ b++ ] ( >byte ++ >char ) def
+[ b-- ] ( >byte -- >char ) def
 
-[ 0cut ] ( "" swap ) def
-[ 1cut ] ( one cut ) def
-[ 2cut ] ( two cut ) def
-[ 3cut ] ( three cut ) def
-[ 4cut ] ( four cut ) def
+[ 0cut ] ( "" swap ) defopd
+[ 1cut ] ( one cut ) defopd
+[ 2cut ] ( two cut ) defopd
+[ 3cut ] ( three cut ) defopd
+[ 4cut ] ( four cut ) defopd
 [ cut* ] ( ( len ) dip - cut ) def
-[ 1cut* ] ( len -- cut ) def
-[ 2cut* ] ( len two - cut ) def
-[ 3cut* ] ( len three - cut ) def
-[ 4cut* ] ( len four - cut ) def
+[ 1cut* ] ( len -- cut ) defopd
+[ 2cut* ] ( len two - cut ) defopd
+[ 3cut* ] ( len three - cut ) defopd
+[ 4cut* ] ( len four - cut ) defopd
 
 [ cfirst ] ( one cat ) def
 [ csecond ] ( two cat ) def

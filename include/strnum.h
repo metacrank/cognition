@@ -49,6 +49,8 @@ string_t *product(string_t *m, string_t *n);
 
 string_t *quotient(string_t *m, string_t *n);
 
+string_t *mod(string_t *m, string_t *n);
+
 string_t *str_sqrt(string_t *m);
 
 string_t *gaussian(string_t *m);

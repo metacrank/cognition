@@ -768,6 +768,10 @@
   swap word? ( "BAD ARGUMENT TYPE" ereturn ) unless
   '( 2eval drop ( "BAD CASE SPECIFIER TYPE" ereturn ) unless-word _ = )
   find nipd
+) def
+[ case-find ] (
+  swap size one <= ( swap f return ) when
+  uncurry ( eval swap )
 )
 
 [ case ] (
@@ -780,9 +784,21 @@
   ) if
 ) def
 
-[ cond-find ]
+[ cond-find ] (
+  size one <= ( f return ) when
+  uncurry ( eval deep swap ) dig
+  ( drop eval t ) ( nip \ cond-find ) if
+) def
 
-[ cond ]
+[ cond ] (
+  \ cond-find (
+    size ( drop "NO CASE" ethrow ) (
+      eval size ( eval ) (
+        eval deep swap ( eval ) ( drop "NO CASE" ethrow ) if
+      ) if-one
+    ) if-zero
+  ) unless
+) def
 
 # example of combinator power: complete expand
 # (checks for definitions within child first without copying hashtables)
