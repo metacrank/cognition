@@ -806,10 +806,10 @@ void evalf(value_t *alias) {
   FAMILY_RECURSION_DEPTH++;
   if (v->type == VSTACK) {
     stack_push(FAMILY, v->container);
-    evalstack(v->container, NULL);
+    evalstack(v->container, NULL, true);
     stack_pop(FAMILY);
   } else if (v->type == VMACRO) {
-    evalmacro(v->macro, NULL);
+    evalmacro(v->macro, NULL, true);
   } else
     die("BAD VALUE TYPE ON STACK");
   inc_crank(cur);
@@ -842,22 +842,38 @@ void push_quoted(contain_t *cur, value_t *v) {
   stack_push(cur->stack, q);
 }
 
-void eval_value(contain_t *c, contain_t *cur, value_t *val, value_t *callword, bool always_evalf) {
-  switch (val->type) {
+void eval_value(contain_t *c, contain_t *cur, value_t **val, value_t *callword, bool always_evalf, bool destructive) {
+  value_t *vl = *val;
+  switch (vl->type) {
   case VWORD:
-    evalword(val, always_evalf);
+    evalword(vl, always_evalf);
     break;
   case VSTACK:
-    stack_push(cur->stack, value_copy(val));
+    if (destructive) {
+      stack_push(cur->stack, vl);
+      *val = NULL;
+    } else {
+      stack_push(cur->stack, value_copy(vl));
+    }
     break;
   case VMACRO:
-    stack_push(cur->stack, value_copy(val));
+    if (destructive) {
+      stack_push(cur->stack, vl);
+      *val = NULL;
+    } else {
+      stack_push(cur->stack, value_copy(vl));
+    }
     break;
   case VCLIB:
-    ((void (*)(value_t * v))(val->custom))(callword);
+    ((void (*)(value_t * v))(vl->custom))(callword);
     break;
   default:
-    push_quoted(cur, value_copy(val));
+    if (destructive) {
+      push_quoted(cur, vl);
+      *val = NULL;
+    } else {
+      push_quoted(cur, value_copy(vl));
+    }
   }
 }
 
@@ -892,7 +908,7 @@ bool return_function(void *stack, bool macro) {
   return false;
 }
 
-void evalstack(contain_t *c, value_t *callword) {
+void evalstack(contain_t *c, value_t *callword, bool destructive) {
   contain_t *cur = stack_peek(STACK);
   value_t *newval;
   bool evald = false;
@@ -900,7 +916,7 @@ void evalstack(contain_t *c, value_t *callword) {
     return;
   if (c->stack->size) {
     FAMILY->items[0] = cur;
-    eval_value(c, cur, c->stack->items[0], callword, true);
+    eval_value(c, cur, (value_t **)&c->stack->items[0], callword, true, destructive);
     if (return_function(c, false))
       return;
     int(*cr)[2];
@@ -915,14 +931,19 @@ void evalstack(contain_t *c, value_t *callword) {
       if (cur->cranks) {
         cr = cur->cranks->items[0];
         if (cr[0][0] == 0 && cr[0][1]) {
-          eval_value(c, cur, newval, callword, false);
+          eval_value(c, cur, (value_t **)&c->stack->items[i], callword, false, destructive);
           if (return_function(c, false))
             return;
           continue;
         }
       }
       if (newval->type != VWORD) {
-        push_quoted(cur, value_copy(newval));
+        if (destructive) {
+          push_quoted(cur, newval);
+          c->stack->items[i] = NULL;
+        } else {
+          push_quoted(cur, value_copy(newval));
+        }
         crank();
         dec_crank(cur);
         if (return_function(c, false))
@@ -958,7 +979,12 @@ void evalstack(contain_t *c, value_t *callword) {
       }
       stack_pop(FAMILY);
       if (!evald) {
-        push_quoted(cur, value_copy(newval));
+        if (destructive) {
+          push_quoted(cur, newval);
+          c->stack->items[i] = NULL;
+        } else {
+          push_quoted(cur, value_copy(newval));
+        }
         crank();
         dec_crank(cur);
       }
@@ -968,7 +994,7 @@ void evalstack(contain_t *c, value_t *callword) {
   }
 }
 
-void evalmacro(stack_t *macro, value_t *word) {
+void evalmacro(stack_t *macro, value_t *word, bool destructive) {
   contain_t *old = stack_peek(STACK);
   value_t *v;
   for (int i = 0; i < macro->size; i++) {
@@ -980,17 +1006,32 @@ void evalmacro(stack_t *macro, value_t *word) {
       ((void (*)(value_t *))(v->custom))(word);
       break;
     case VSTACK:
-      stack_push(cur->stack, value_copy(v));
+      if (destructive) {
+        stack_push(cur->stack, v);
+        macro->items[i] = NULL;
+      } else {
+        stack_push(cur->stack, value_copy(v));
+      }
       break;
     case VMACRO:
-      stack_push(cur->stack, value_copy(v));
+      if (destructive) {
+        stack_push(cur->stack, v);
+        macro->items[i] = NULL;
+      } else {
+        stack_push(cur->stack, value_copy(v));
+      }
       break;
     case VWORD:
       //evalword(v, i == 0);
       evalword(v, true);
       break;
     default:
-      push_quoted(cur, value_copy(v));
+      if (destructive) {
+        push_quoted(cur, v);
+        macro->items[i] = NULL;
+      } else {
+        push_quoted(cur, value_copy(v));
+      }
       break;
     }
     if (return_function(macro, true))
@@ -1024,10 +1065,10 @@ void evalword(value_t *v, bool always_evalf) {
       FAMILY_RECURSION_DEPTH++;
       if (i == 0) {
         stack_push(CONTAINERS, parent);
-        evalmacro(macro, v);
+        evalmacro(macro, v, false);
         stack_pop(CONTAINERS);
       } else {
-        evalmacro(macro, v);
+        evalmacro(macro, v, false);
       }
       FAMILY_RECURSION_DEPTH--;
       stack_pop(MACROS);
@@ -1047,10 +1088,10 @@ void evalword(value_t *v, bool always_evalf) {
       FAMILY_RECURSION_DEPTH++;
       if (i == 0) {
         stack_push(CONTAINERS, parent);
-        evalstack(expand, v);
+        evalstack(expand, v, false);
         stack_pop(CONTAINERS);
       } else {
-        evalstack(expand, v);
+        evalstack(expand, v, false);
       }
       FAMILY_RECURSION_DEPTH--;
       stack_pop(CONTAINERS);
@@ -1111,10 +1152,10 @@ void crank() {
     FAMILY_RECURSION_DEPTH++;
     if (needseval->type == VSTACK) {
       stack_push(FAMILY, needseval->container);
-      evalstack(needseval->container, NULL);
+      evalstack(needseval->container, NULL, true);
       stack_pop(FAMILY);
     } else if (needseval->type == VMACRO) {
-      evalmacro(needseval->macro, NULL);
+      evalmacro(needseval->macro, NULL, true);
     } else
       die("BAD VALUE ON STACK");
     inc_crank(cur);

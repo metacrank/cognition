@@ -25,8 +25,8 @@ _concat_swap_dup_i d swap d quote
 2crank ing 0 crank
 2crank ing 2 crank addon undef
 2crank ing 0 crank
-2crank ing 1 crank stack
-2crank ing 2 crank repl bequeath ccd bequeath repl compose repl undef
+2crank ing 0 crank repl
+2crank ing 2 crank repl bequeath repl undef
 2crank ing 0 crank
 2crank ing 2 crank 1 quote crank unglue evalstr unglue
 2crank ing 1 crank compose compose VMACRO cast
