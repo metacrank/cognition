@@ -118,7 +118,7 @@ typedef struct {
 
   stack_t *containstack;
   stack_t *htstack;
-  stack_t *errstack;
+  stack_t *verrstack;
 } pool_t;
 
 enum {
@@ -133,7 +133,7 @@ enum {
   POOL_HT,
   POOL_WT,
   POOL_FLIT,
-  POOL_ERR,
+  POOL_VERR,
   POOL_VALUE
 };
 

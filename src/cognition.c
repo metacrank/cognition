@@ -76,7 +76,7 @@ void *paw_alloc(size_t nmemb, size_t size) {
     if (!(OBJ_POOL->strstack || OBJ_POOL->vwordstack || OBJ_POOL->vstackstack
            || OBJ_POOL->vmacrostack || OBJ_POOL->vcustomstack || OBJ_POOL->vclibstack
            || OBJ_POOL->stackstack || OBJ_POOL->containstack->size != 0
-           || OBJ_POOL->htstack->size != 0 || OBJ_POOL->errstack->size != 0))
+           || OBJ_POOL->htstack->size != 0 || OBJ_POOL->verrstack->size != 0))
       die("paw_alloc out of memory");
     pool_gc(OBJ_POOL);
     c = calloc(nmemb, size);
@@ -175,7 +175,7 @@ void pool_gcall(pool_t *pool) {
 
   stack_free(pool->vcustomstack, value_free);
   stack_free(pool->htstack, empty_ht_free);
-  stack_free(pool->errstack, error_free);
+  stack_free(pool->verrstack, error_free);
 }
 
 void empty_bst(bst_t *bst, pool_t *pool, byte_t type) {
@@ -190,7 +190,7 @@ void empty_bst(bst_t *bst, pool_t *pool, byte_t type) {
 void pool_empty_contain(pool_t *pool, contain_t *c) {
   if (c->err_stack) {
     for (int i = 0; i < c->err_stack->size; i++) {
-      pool_add(pool, POOL_ERR, c->err_stack->items[i]);
+      pool_add(pool, POOL_VERR, c->err_stack->items[i]);
       c->err_stack->items[i] = NULL;
     }
     c->err_stack->size = 0;
@@ -278,8 +278,8 @@ void pool_add(pool_t *pool, byte_t type, void *value) {
       }
       stack_push(pool->htstack, flit);
       break;
-    case POOL_ERR:;
-      stack_push(pool->errstack, value);
+    case POOL_VERR:;
+      stack_push(pool->verrstack, value);
       break;
     case POOL_VALUE:;
       value_t *val = value;
@@ -294,8 +294,7 @@ void pool_add(pool_t *pool, byte_t type, void *value) {
           pool_add(pool, POOL_VMACRO, val);
           break;
         case VERR:
-          printf("MYSTERIOUS UCCURENCE OF VERR\n");
-          exit(-1);
+          pool_add(pool, POOL_VERR, val);
           break;
         case VCUSTOM:
           pool_add(pool, POOL_VCUSTOM, val);
@@ -370,8 +369,8 @@ void *pool_get(pool_t *pool, long bufsize, byte_t type) {
       return contain;
     case POOL_HT:;
       return stack_pop(pool->htstack);
-    case POOL_ERR:;
-      return stack_pop(pool->errstack);
+    case POOL_VERR:;
+      return stack_pop(pool->verrstack);
   }
 }
 
@@ -416,8 +415,10 @@ void *pool_req(long bufsize, byte_t type) {
         return contain;
       case POOL_HT:
         return init_ht(DEFAULT_HT_SIZE);
-      case POOL_ERR:
-        return calloc(1, sizeof(error_t));
+      case POOL_VERR:;
+        value_t *verr = init_value(VERR);
+        verr->error = calloc(1, sizeof(error_t));
+        return verr;
       default:
         return NULL;
     }

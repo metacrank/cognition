@@ -55,7 +55,6 @@ void cog_err_pop(value_t *v) {
 
 void cog_err_push(value_t *v) {
   contain_t *cur = stack_peek(STACK);
-  stack_t *estack = cur->err_stack;
   stack_t *stack = cur->stack;
   if (stack->size < 2) {
     eval_error(U"TOO FEW ARGUMENTS", v);
@@ -95,10 +94,10 @@ void cog_err_push(value_t *v) {
   w1->str_word = NULL;
   value_free_safe(v1);
   value_free_safe(v2);
-  if (!estack) {
+  if (!cur->err_stack) {
     cur->err_stack = init_stack(DEFAULT_STACK_SIZE);
   }
-  stack_push(estack, e);
+  stack_push(cur->err_stack, e);
 }
 
 void cog_err_drop(value_t *v) {
