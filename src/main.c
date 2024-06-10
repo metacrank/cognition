@@ -32,6 +32,10 @@ extern string_t **CAST_ARGS;
 extern bool RETURNED;
 extern stack_t *ARGS;
 
+void pool_checker() {
+
+}
+
 /*! prints usage then exits */
 void usage(int e) {
   math_free();
@@ -155,6 +159,11 @@ int main(int argc, char **argv) {
   value_t *v;
   size_t len = 0;
   char *locale = setlocale(LC_ALL, "");
+
+  if (strcmp(argv[1], "pool_checker") == 0) {
+    pool_checker();
+    return 0;
+  }
 
   init_math();
 

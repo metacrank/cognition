@@ -38,7 +38,10 @@ char32_t utf8_to_utf32(byte_t *const buf);
 /* analagous to strcmp for better_string */
 int string_comp(string_t *s1, string_t *s2);
 
-/* returns an identical string with the bufsize 'size' */
+/* returns a blank string of length l */
+string_t *alloc_string(size_t l);
+
+/* makes an identical string with the bufsize 'size' */
 void realloc_string(string_t *s, size_t size);
 
 /* ensures there is space to put n characters in the string by reallocing if necessary */

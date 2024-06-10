@@ -33,7 +33,7 @@ typedef struct BST_STRUCT {
   union {
     /*! @brief stores the hash table key */
     string_t *key;
-    int ikey;
+    long ikey;
   };
   /*! @brief stores the hash table value */
   void *value;
@@ -75,6 +75,9 @@ ht_t *ht_copy(ht_t *h, void *(*copyfunc)(void *));
 /*! Frees hash table */
 void ht_free(ht_t *h, void (*freefunc)(void *));
 
+/* frees empty hash table */
+void empty_ht_free(void *h);
+
 /* frees with 'free' */
 void ht_free_free(void *h);
 
@@ -114,17 +117,17 @@ bst_t *init_bst();
 
 /*! inserts key value pair into BST */
 void *bst_add(bst_t *bst, string_t *key, void *value, void (*freefunc)(void *));
-void *bst_addi(bst_t *bst, int i, void *value, void (*freefunc)(void *));
+void *bst_addi(bst_t *bst, long i, void *value, void (*freefunc)(void *));
 
 /*! deletes node from BST by key */
 void *bst_del(bst_t *bst, string_t *key, void (*freefunc)(void *));
-void *bst_deli(bst_t *bst, int i, void (*freefunc)(void *));
+void *bst_deli(bst_t *bst, long i, void (*freefunc)(void *));
 
 void print_integer_bst(bst_t *bst);
 
 /*! gets value from BST by key */
 void *bst_get(bst_t *bst, string_t *key);
-void *bst_geti(bst_t *bst, int i);
+void *bst_geti(bst_t *bst, long i);
 
 /*! Copies BST tree recursively */
 bst_t *bst_copy(bst_t *bst, void *(*copyfunc)(void *));

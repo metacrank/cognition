@@ -179,7 +179,7 @@ void *bst_add(bst_t *bst, string_t *key, void *value, void (*freefunc)(void *)) 
   return bst;
 }
 
-void *bst_addi(bst_t *bst, int i, void *value, void (*freefunc)(void *)) {
+void *bst_addi(bst_t *bst, long i, void *value, void (*freefunc)(void *)) {
   if (!bst) {
     bst = init_bst();
     bst->ikey = i;
@@ -283,7 +283,7 @@ void *bst_del(bst_t *bst, string_t *key, void (*freefunc)(void *)) {
   return bst;
 }
 
-void *bst_deli(bst_t *bst, int i, void (*freefunc)(void *)) {
+void *bst_deli(bst_t *bst, long i, void (*freefunc)(void *)) {
   if (!bst)
     return NULL;
   bst_t *parent = NULL;
@@ -361,7 +361,7 @@ void *bst_get(bst_t *bst, string_t *key) {
     return bst->value;
 }
 
-void *bst_geti(bst_t *bst, int i) {
+void *bst_geti(bst_t *bst, long i) {
   if (!bst)
     return NULL;
   long l = i - bst->ikey;
@@ -495,6 +495,14 @@ void ht_free(ht_t *h, void (*func)(void *)) {
   }
   free(h->buckets);
   free(h);
+}
+
+void empty_ht_free(void *h) {
+  if (h == NULL)
+    return;
+  ht_t *ht = h;
+  free(ht->buckets);
+  free(ht);
 }
 
 void ht_free_free(void *h) {

@@ -191,3 +191,10 @@ void macro_def_stack_push(void *m) {
   if (m)
     stack_push(MACRO_DEF_STACK, m);
 }
+
+void list_bst_keys(bst_t *bst, stack_t *list) {
+  if (!bst) return;
+  list_bst_keys(bst->left, list);
+  stack_push(list, bst->value);
+  list_bst_keys(bst->right, list);
+}

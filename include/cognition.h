@@ -109,37 +109,40 @@ struct CONTAINER_STRUCT {
 
 typedef struct {
   bst_t *strstack;
-  bst_t *containstack;
+  bst_t *vwordstack;
+  bst_t *vstackstack;
+  bst_t *vmacrostack;
+  bst_t *vcustomstack;
+  bst_t *vclibstack;
   bst_t *stackstack;
-  bst_t *valuestack;
-  bst_t *macrostack;
-  bst_t *wordstack;
 
+  stack_t *containstack;
   stack_t *htstack;
   stack_t *errstack;
 } pool_t;
 
 enum {
-  POOL_STACK,
-  POOL_CONTAIN,
   POOL_STRING,
-  POOL_VALUE,
-  POOL_HT,
-  POOL_ERR,
   POOL_VWORD,
   POOL_VSTACK,
   POOL_VMACRO,
+  POOL_VCUSTOM,
   POOL_VCLIB,
+  POOL_STACK,
+  POOL_CONTAIN,
+  POOL_HT,
+  POOL_WT,
+  POOL_FLIT,
+  POOL_ERR,
+  POOL_VALUE
 };
 
 /*! Useless function that is only used in order to be passed into a hash table.
  */
 void func_free(void *f);
 
-
-//for debugging
+// for debugging
 void print_crank(char prefix[]);
-
 
 /* push error to error stack */
 void eval_error(char32_t *s, value_t *w);
@@ -150,8 +153,17 @@ void pool_gc(pool_t *pool);
 /*! pool-aware allocation -- collects garbage if fails */
 void *paw_alloc(size_t nmemb, size_t size);
 
+/*! adds value to stack in bst */
+bst_t *bst_stack_add(bst_t *bst, long i, void *value);
+
 /*! adds value to pool */
 void pool_add(pool_t *pool, byte_t type, void *value);
+
+/*! gets value from pool */
+void *pool_get(pool_t *pool, long bufsize, byte_t type);
+
+/*! gets value from OBJ_POOL, allocating on failure */
+void *pool_req(long bufsize, byte_t type);
 
 /*! frees pool */
 void pool_free(pool_t *pool);
@@ -271,18 +283,11 @@ bool isignore(char32_t c);
 /* returns true if p is a delimiter character */
 bool isdelim(char32_t c);
 
-
 /* checks if a value_t is an falias in a container */
 bool isfaliasin(contain_t *c, value_t *v);
 
 /* checks if a value_t is an falias */
 bool isfalias(value_t *v);
-
-/* /\* expands a stack as much as possible (i.e. before def'ing it) *\/ */
-/* void expandstack(stack_t *s, stack_t *new, stack_t *family); */
-
-/* /\* similarly for a single word *\/ */
-/* bool expandword(value_t *v, stack_t *new, stack_t *family); */
 
 /* crankless evaluation on the stack */
 void evalf(value_t *alias);

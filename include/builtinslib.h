@@ -28,4 +28,6 @@ void contain_def_stack_push(void *v);
 
 void macro_def_stack_push(void *v);
 
+void list_bst_keys(bst_t *bst, stack_t *list);
+
 #endif // BUILTINSLIB_H_

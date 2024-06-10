@@ -98,6 +98,14 @@ int string_comp(string_t *s1, string_t *s2) {
   return 0;
 }
 
+string_t *alloc_string(size_t size) {
+  string_t *newstr = malloc(sizeof(string_t));
+  newstr->bufsize = size;
+  newstr->value = malloc(size * sizeof(char32_t));
+  newstr->length = 0;
+  return newstr;
+}
+
 void realloc_string(string_t *s, size_t size) {
   //fetch from pool
   string_t *newstr = malloc(sizeof(string_t));
@@ -129,7 +137,7 @@ string_t *init_string(char32_t *a) {
   if (!a) return NULL;
   string_t *s = malloc(sizeof(string_t));
   s->length = 0;
-  s->bufsize = 24;
+  s->bufsize = DEFAULT_STRING_LENGTH;
   // replace with pool access later
   s->value = malloc(s->bufsize * sizeof(char32_t));
   while (*a != '\0') {

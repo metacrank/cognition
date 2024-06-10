@@ -159,38 +159,60 @@ void cog_isdef(value_t *v) {
   wordval->str_word->length = 0;
 }
 
+/* void cog_wordlist(value_t *v) { */
+/*   contain_t *cur = stack_peek(STACK); */
+/*   ht_t *h = cur->word_table; */
+/*   contain_t *listc = init_contain(NULL, NULL, NULL); */
+/*   stack_t *list = listc->stack; */
+/*   if (h) { */
+/*     for (int i = 0; i < h->size; i++) { */
+/*       sll_t *l = h->buckets[i]; */
+/*       for (node_t *n = l->head; n != NULL; n = n->next) { */
+/*         if (n->value) { */
+/*           value_t *word = init_value(VWORD); */
+/*           word->str_word = string_copy(n->key); */
+/*           stack_push(list, word); */
+/*         } */
+/*       } */
+/*     } */
+/*   } */
+/*   h = cur->flit; */
+/*   if (h) { */
+/*     for (int i = 0; i < h->size; i++) { */
+/*       sll_t *l = h->buckets[i]; */
+/*       for (node_t *n = l->head; n != NULL; n = n->next) { */
+/*         if (n->value) { */
+/*           value_t *word = init_value(VWORD); */
+/*           word->str_word = string_copy(n->key); */
+/*           stack_push(list, word); */
+/*         } */
+/*       } */
+/*     } */
+/*   } */
+/*   value_t *listval = init_value(VSTACK); */
+/*   listval->container = listc; */
+/*   stack_push(cur->stack, listval); */
+/* } */
+
 void cog_wordlist(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   ht_t *h = cur->word_table;
-  contain_t *listc = init_contain(NULL, NULL, NULL);
-  stack_t *list = listc->stack;
+  value_t *listval = init_value(VSTACK);
+  listval->container = init_contain(NULL, NULL, NULL);
+  stack_t *list = listval->container->stack;
   if (h) {
     for (int i = 0; i < h->size; i++) {
-      sll_t *l = h->buckets[i];
-      for (node_t *n = l->head; n != NULL; n = n->next) {
-        if (n->value) {
-          value_t *word = init_value(VWORD);
-          word->str_word = string_copy(n->key);
-          stack_push(list, word);
-        }
-      }
+      bst_t *bst = h->buckets[i];
+      list_bst_keys(bst, list);
     }
   }
   h = cur->flit;
   if (h) {
     for (int i = 0; i < h->size; i++) {
-      sll_t *l = h->buckets[i];
-      for (node_t *n = l->head; n != NULL; n = n->next) {
-        if (n->value) {
-          value_t *word = init_value(VWORD);
-          word->str_word = string_copy(n->key);
-          stack_push(list, word);
-        }
-      }
+      bst_t *bst = h->buckets[i];
+      list_bst_keys(bst, list);
     }
   }
-  value_t *listval = init_value(VSTACK);
-  listval->container = listc;
   stack_push(cur->stack, listval);
 }
 

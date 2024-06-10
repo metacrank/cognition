@@ -77,6 +77,7 @@
 /* Set defaults */
 #define DEFAULT_HT_SIZE 10000
 #define DEFAULT_STACK_SIZE 10
+#define DEFAULT_STRING_LENGTH 24
 #define DEFAULT_NUMBER_BASE 10
 
 #define CURRENT_ROOT OBJ_TABLE_REF_STACK->items[ROOT->value[ROOT->length - 1]]
