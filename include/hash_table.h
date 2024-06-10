@@ -123,8 +123,6 @@ void *bst_addi(bst_t *bst, long i, void *value, void (*freefunc)(void *));
 void *bst_del(bst_t *bst, string_t *key, void (*freefunc)(void *));
 void *bst_deli(bst_t *bst, long i, void (*freefunc)(void *));
 
-void print_integer_bst(bst_t *bst);
-
 /*! gets value from BST by key */
 void *bst_get(bst_t *bst, string_t *key);
 void *bst_geti(bst_t *bst, long i);

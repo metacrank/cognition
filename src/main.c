@@ -4,6 +4,7 @@
 #include <cognition.h>
 #include <hash_table.h>
 #include <strnum.h>
+#include <pool.h>
 #include <dlfcn.h>
 #include <locale.h>
 #include <macros.h>
@@ -31,9 +32,41 @@ extern bool EXITED;
 extern string_t **CAST_ARGS;
 extern bool RETURNED;
 extern stack_t *ARGS;
+extern pool_t *OBJ_POOL;
 
 void pool_checker() {
+  OBJ_POOL = init_pool();
 
+  value_t *v = init_value(VERR);
+  v->error = malloc(sizeof(error_t));
+  v->error->error = init_string(U"ERROR");
+  v->error->str_word = init_string(U"STR_WORD");
+
+  printf("%p\n", v);
+
+  show_pool();
+  printf("\n-------------\n\n");
+  pool_add(OBJ_POOL, POOL_VERR, v);
+
+  show_pool();
+  printf("\n-------------\n\n");
+
+  pool_gc(OBJ_POOL);
+
+  show_pool();
+  printf("\n-------------\n\n");
+
+  value_t *vget = pool_req(0, POOL_VERR);
+
+  show_pool();
+  printf("%p\n", vget);
+
+  vget->error->error = pool_req(5, POOL_STRING);
+  vget->error->str_word = pool_req(8, POOL_STRING);
+
+  pool_add(OBJ_POOL, POOL_VALUE, vget);
+
+  pool_free(OBJ_POOL);
 }
 
 /*! prints usage then exits */
@@ -153,6 +186,7 @@ void global_free() {
   }
   free(CAST_ARGS);
   math_free();
+  pool_free(OBJ_POOL);
 }
 
 int main(int argc, char **argv) {
@@ -277,6 +311,7 @@ int main(int argc, char **argv) {
   CAST_ARGS[1] = init_string(U"0");
   CAST_ARGS[2] = init_string(U"VMACRO");
   CAST_ARGS[3] = init_string(U"1");
+  OBJ_POOL = init_pool();
 
   /* initialise environment */
   contain_t *stack =

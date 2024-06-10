@@ -167,6 +167,13 @@ string_t *string_copy(string_t *s) {
   return cp;
 }
 
+void string_copy_buffer(string_t *s, string_t *buf) {
+  if (s == NULL)
+    return;
+  memcpy(buf->value, s->value, s->length * sizeof(char32_t));
+  buf->length = s->length;
+}
+
 void string_concat(string_t *s1, string_t *s2) {
   string_ensure_space(s1, s2->length);
   for (long i = 0; i < s2->length; i++) {

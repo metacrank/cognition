@@ -53,6 +53,9 @@ string_t *init_string(char32_t *value);
 /*! Copies string to another string */
 string_t *string_copy(string_t *s);
 
+/*! Copies value of s into value of buf (dangerous) */
+void string_copy_buffer(string_t *s, string_t *buf);
+
 /*! Concatenates a string_t type and a char * type */
 void string_concat(string_t *s1, string_t *s2);
 

@@ -107,36 +107,6 @@ struct CONTAINER_STRUCT {
   bool sflag;
 };
 
-typedef struct {
-  bst_t *strstack;
-  bst_t *vwordstack;
-  bst_t *vstackstack;
-  bst_t *vmacrostack;
-  bst_t *vcustomstack;
-  bst_t *vclibstack;
-  bst_t *stackstack;
-
-  stack_t *containstack;
-  stack_t *htstack;
-  stack_t *verrstack;
-} pool_t;
-
-enum {
-  POOL_STRING,
-  POOL_VWORD,
-  POOL_VSTACK,
-  POOL_VMACRO,
-  POOL_VCUSTOM,
-  POOL_VCLIB,
-  POOL_STACK,
-  POOL_CONTAIN,
-  POOL_HT,
-  POOL_WT,
-  POOL_FLIT,
-  POOL_VERR,
-  POOL_VALUE
-};
-
 /*! Useless function that is only used in order to be passed into a hash table.
  */
 void func_free(void *f);
@@ -146,27 +116,6 @@ void print_crank(char prefix[]);
 
 /* push error to error stack */
 void eval_error(char32_t *s, value_t *w);
-
-/*! trims all bottom nodes of all data structures once */
-void pool_gc(pool_t *pool);
-
-/*! pool-aware allocation -- collects garbage if fails */
-void *paw_alloc(size_t nmemb, size_t size);
-
-/*! adds value to stack in bst */
-bst_t *bst_stack_add(bst_t *bst, long i, void *value);
-
-/*! adds value to pool */
-void pool_add(pool_t *pool, byte_t type, void *value);
-
-/*! gets value from pool */
-void *pool_get(pool_t *pool, long bufsize, byte_t type);
-
-/*! gets value from OBJ_POOL, allocating on failure */
-void *pool_req(long bufsize, byte_t type);
-
-/*! frees pool */
-void pool_free(pool_t *pool);
 
 /*! Allocates memory for new stack */
 stack_t *init_stack(size_t size);
