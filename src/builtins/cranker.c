@@ -1,6 +1,7 @@
 #include <cognition.h>
 #include <builtins/cranker.h>
 #include <builtinslib.h>
+#include <pool.h>
 #include <macros.h>
 #include <math.h>
 #include <stdio.h>
@@ -59,10 +60,11 @@ void cog_metacrank(value_t *v) {
     stack_push(stack, tmp);
     return;
   }
-  if (cur->cranks == NULL) cur->cranks = init_stack(DEFAULT_STACK_SIZE);
+  if (cur->cranks == NULL)
+    cur->cranks = pool_req(DEFAULT_STACK_SIZE, POOL_STACK);
   stack_t *cranks = cur->cranks;
   while (cranks->size <= v1val) {
-    int(*arr)[2] = malloc(sizeof(int[2]));
+    int(*arr)[2] = paw_alloc(1, sizeof(int[2]));
     arr[0][0] = 0;
     arr[0][1] = 0;
     stack_push(cranks, arr);
@@ -100,10 +102,11 @@ void cog_crank(value_t *v) {
     stack_push(stack, tmp);
     return;
   }
-  if (cur->cranks == NULL) cur->cranks = init_stack(DEFAULT_STACK_SIZE);
+  if (cur->cranks == NULL)
+    cur->cranks = pool_req(DEFAULT_STACK_SIZE, POOL_STACK);
   stack_t *cranks = cur->cranks;
   if (cranks->size == 0) {
-    int(*arr)[2] = malloc(sizeof(int[2]));
+    int(*arr)[2] = paw_alloc(1, sizeof(int[2]));
     arr[0][0] = 0;
     arr[0][1] = 0;
     stack_push(cranks, arr);
@@ -170,12 +173,13 @@ void cog_crank(value_t *v) {
 
 void cog_halt(value_t *v) {
   contain_t *cur = stack_peek(STACK);
-  stack_free(cur->cranks, free);
+  stack_empty(cur->cranks, free);
+  pool_addobj(POOL_STACK, cur->cranks);
   cur->cranks = NULL;
 }
 
 void cog_crankbase(value_t *v) {
-  value_t *v1 = init_value(VWORD);
+  value_t *v1 = pool_req(DEFAULT_STRING_LENGTH, POOL_VWORD);
   contain_t *cur = stack_peek(STACK);
   int base = 0;
   if (cur->cranks) {
@@ -184,12 +188,12 @@ void cog_crankbase(value_t *v) {
       base = cr[0][1];
     }
   }
-  v1->str_word = int_to_string(base);
+  int_to_string_buf(base, v1->str_word);
   push_quoted(cur, v1);
 }
 
 void cog_modcrank(value_t *v) {
-  value_t *v1 = init_value(VWORD);
+  value_t *v1 = pool_req(DEFAULT_STRING_LENGTH, POOL_VWORD);
   contain_t *cur = stack_peek(STACK);
   int mod = 0;
   if (cur->cranks) {
@@ -198,7 +202,7 @@ void cog_modcrank(value_t *v) {
       mod = cr[0][0];
     }
   }
-  v1->str_word = int_to_string(mod);
+  int_to_string_buf(mod, v1->str_word);
   push_quoted(cur, v1);
 }
 
@@ -218,7 +222,7 @@ void cog_metacrankbase(value_t *v) {
     eval_error(U"BAD ARGUMENT TYPE", v);
     return;
   }
-  size_t idx = string_to_int(idxval->str_word);
+  long idx = string_to_int(idxval->str_word);
   if (idx < 0) {
     eval_error(U"INDEX OUT OF RANGE", v);
     return;
@@ -234,8 +238,7 @@ void cog_metacrankbase(value_t *v) {
       base = cr[0][1];
     }
   }
-  string_free(idxval->str_word);
-  idxval->str_word = int_to_string(base);
+  int_to_string_buf(base, idxval->str_word);
 }
 
 void cog_metamodcrank(value_t *v) {
@@ -254,7 +257,7 @@ void cog_metamodcrank(value_t *v) {
     eval_error(U"BAD ARGUMENT TYPE", v);
     return;
   }
-  size_t idx = string_to_int(idxval->str_word);
+  long idx = string_to_int(idxval->str_word);
   if (idx < 0) {
     eval_error(U"INDEX OUT OF RANGE", v);
     return;
@@ -270,8 +273,7 @@ void cog_metamodcrank(value_t *v) {
       mod = cr[0][0];
     }
   }
-  string_free(idxval->str_word);
-  idxval->str_word = int_to_string(mod);
+  int_to_string_buf(mod, idxval->str_word);
 }
 
 void add_funcs_cranker(ht_t *flit) {

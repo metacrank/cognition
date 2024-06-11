@@ -33,6 +33,8 @@ extern string_t **CAST_ARGS;
 extern bool RETURNED;
 extern stack_t *ARGS;
 extern pool_t *OBJ_POOL;
+extern string_t *F;
+extern string_t *ING;
 
 void pool_checker() {
   OBJ_POOL = init_pool();
@@ -72,12 +74,14 @@ void pool_checker() {
 /*! prints usage then exits */
 void usage(int e) {
   math_free();
+  pool_free(OBJ_POOL);
   printf("Usage: crank [-hqsv] [file...] [arg...]\n");
   exit(e);
 }
 
 void help() {
   math_free();
+  pool_free(OBJ_POOL);
   printf("Usage: crank [-hqsv] [file...] [arg...]\n\n");
   printf(" -h    --help            print this help message\n");
   printf(" -q    --quiet           don't show stack information at program end\n");
@@ -89,6 +93,7 @@ void help() {
 /*! prints version and exits */
 void version() {
   math_free();
+  pool_free(OBJ_POOL);
   printf("Authors: Preston Pan, Matthew Hinton, MIT License 2024\n");
   printf("cognition, version 1.0 alpha\n");
   exit(0);
@@ -185,6 +190,8 @@ void global_free() {
     string_free(CAST_ARGS[i]);
   }
   free(CAST_ARGS);
+  string_free(F);
+  string_free(ING);
   math_free();
   pool_free(OBJ_POOL);
 }
@@ -199,6 +206,7 @@ int main(int argc, char **argv) {
     return 0;
   }
 
+  OBJ_POOL = init_pool();
   init_math();
 
   /* Parsing arguments */
@@ -251,12 +259,13 @@ int main(int argc, char **argv) {
         break;
       }
       args.s = string_to_int(str);
-      string_free(str);
+      pool_addobj(POOL_STRING, str);
     } else {
       fileidx = i;
       if (fileidx + args.s > argc) {
         printf("Missing filename\n");
         math_free();
+        pool_free(OBJ_POOL);
         return 3;
         break;
       }
@@ -278,8 +287,8 @@ int main(int argc, char **argv) {
   }
 
   /* Set up global variables */
-  ARGS = init_stack(DEFAULT_STACK_SIZE);
-  stack_push(ARGS, init_value(VWORD));
+  ARGS = pool_req(DEFAULT_STACK_SIZE, POOL_STACK);
+  stack_push(ARGS, pool_req(DEFAULT_STRING_LENGTH, POOL_VWORD));
   for (int i = fileidx + args.s; i < argc; i++) {
     value_t *argword = init_value(VWORD);
     argword->str_word = init_string(U"");
@@ -289,36 +298,37 @@ int main(int argc, char **argv) {
     stack_push(ARGS, argword);
   }
   PARSER = init_parser(NULL);
-  STACK = init_stack(DEFAULT_STACK_SIZE);
-  CONTAIN_DEF_STACK = init_stack(DEFAULT_STACK_SIZE);
-  MACRO_DEF_STACK = init_stack(DEFAULT_STACK_SIZE);
-  EVAL_CONTAIN_TRASH = init_stack(DEFAULT_STACK_SIZE);
-  FAMILY = init_stack(DEFAULT_STACK_SIZE);
+  STACK = pool_req(DEFAULT_STACK_SIZE, POOL_STACK);
+  CONTAIN_DEF_STACK = pool_req(DEFAULT_STACK_SIZE, POOL_STACK);
+  MACRO_DEF_STACK = pool_req(DEFAULT_STACK_SIZE, POOL_STACK);
+  EVAL_CONTAIN_TRASH = pool_req(DEFAULT_STACK_SIZE, POOL_STACK);
+  FAMILY = pool_req(DEFAULT_STACK_SIZE, POOL_STACK);
   stack_push(FAMILY, NULL);
-  FAMILY_IDX = init_string(U"");
-  CONTAINERS = init_stack(DEFAULT_STACK_SIZE);
-  MACROS = init_stack(DEFAULT_STACK_SIZE);
-  OBJ_TABLE_REF_STACK = init_stack(DEFAULT_STACK_SIZE);
-  OBJ_TABLE_STACK = init_stack(DEFAULT_STACK_SIZE);
-  stack_push(OBJ_TABLE_STACK, init_ht(DEFAULT_HT_SIZE));
-  ROOT = init_string(U"");
+  FAMILY_IDX = pool_req(DEFAULT_STRING_LENGTH, POOL_STRING);
+  CONTAINERS = pool_req(DEFAULT_STACK_SIZE, POOL_STACK);
+  MACROS = pool_req(DEFAULT_STACK_SIZE, POOL_STACK);
+  OBJ_TABLE_REF_STACK = pool_req(DEFAULT_STACK_SIZE, POOL_STACK);
+  OBJ_TABLE_STACK = pool_req(DEFAULT_STACK_SIZE, POOL_STACK);
+  stack_push(OBJ_TABLE_STACK, pool_req(0, POOL_HT));
+  ROOT = pool_req(DEFAULT_STRING_LENGTH, POOL_STRING);
   EXIT_CODE = NULL;
   FAMILY_RECURSION_DEPTH = 0;
-  EVAL_CONTAINERS = init_stack(DEFAULT_STACK_SIZE);
+  EVAL_CONTAINERS = pool_req(DEFAULT_STACK_SIZE, POOL_STACK);
   RETURNED = false;
-  CAST_ARGS = malloc(4 * sizeof(string_t*));
+  CAST_ARGS = paw_alloc(4, sizeof(string_t*));
   CAST_ARGS[0] = init_string(U"VSTACK");
   CAST_ARGS[1] = init_string(U"0");
   CAST_ARGS[2] = init_string(U"VMACRO");
   CAST_ARGS[3] = init_string(U"1");
-  OBJ_POOL = init_pool();
+  F = init_string(U"f");
+  ING = init_string(U"ing");
 
   /* initialise environment */
   contain_t *stack =
-      init_contain(init_ht(DEFAULT_HT_SIZE), init_ht(DEFAULT_HT_SIZE), NULL);
+      init_contain(pool_req(0, POOL_HT), pool_req(0, POOL_HT), NULL);
   stack->faliases = init_stack(DEFAULT_STACK_SIZE);
-  stack_push(stack->faliases, init_string(U"f"));
-  stack_push(stack->faliases, init_string(U"ing"));
+  stack_push(stack->faliases, string_copy(F));
+  stack_push(stack->faliases, string_copy(ING));
   add_funcs(stack->flit);
   stack_push(STACK, stack);
   stack_push(OBJ_TABLE_REF_STACK, stack);
@@ -334,7 +344,6 @@ int main(int argc, char **argv) {
       return 4;
     }
     value_t *argword = ARGS->items[0];
-    argword->str_word = init_string(U"");
     for (int c = 0; argv[fileidx + i][c] != '\0'; c++) {
       string_append(argword->str_word, argv[fileidx + i][c]);
     }
@@ -354,8 +363,7 @@ int main(int argc, char **argv) {
         break;
     }
     string_free(PARSER->source);
-    string_free(argword->str_word);
-    argword->str_word = NULL;
+    argword->str_word->length = 0;
   }
 
 

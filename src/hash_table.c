@@ -1,6 +1,7 @@
 #include <hash_table.h>
 #include <macros.h>
 #include <better_string.h>
+#include <pool.h>
 #include <string.h>
 
 /* node_t *init_node(string_t *key, void *value) { */
@@ -135,7 +136,7 @@
 /*   free(l); */
 /* } */
 
-bst_t *init_bst() { return calloc(1, sizeof(bst_t)); }
+bst_t *init_bst() { return paw_alloc(1, sizeof(bst_t)); }
 
 void *bst_add(bst_t *bst, string_t *key, void *value, void (*freefunc)(void *)) {
   if (!key)
@@ -425,25 +426,31 @@ void bst_free_ikey(bst_t *bst, void (*freefunc)(void *)) {
 }
 
 ht_t *init_ht(size_t size) {
-  ht_t *h = calloc(1, sizeof(ht_t));
-  if (!h)
-    die("calloc on hash table");
+  ht_t *h = paw_alloc(1, sizeof(ht_t));
   h->size = size;
-  h->buckets = calloc(h->size, sizeof(bst_t *));
-  if (!h->buckets)
-    die("calloc on hash table stack");
+  h->buckets = paw_alloc(h->size, sizeof(bst_t *));
   return h;
 }
+
+/* ht_t *ht_copy(ht_t *h, void *(*copyfunc)(void *)) { */
+/*   if (h == NULL) */
+/*     return NULL; */
+/*   ht_t *ht = calloc(1, sizeof(ht_t)); */
+/*   ht->buckets = calloc(h->size, sizeof(bst_t *)); */
+/*   for (int i = 0; i < h->size; i++) { */
+/*     ht->buckets[i] = bst_copy(h->buckets[i], copyfunc); */
+/*   } */
+/*   ht->size = h->size; */
+/*   return ht; */
+/* } */
 
 ht_t *ht_copy(ht_t *h, void *(*copyfunc)(void *)) {
   if (h == NULL)
     return NULL;
-  ht_t *ht = calloc(1, sizeof(ht_t));
-  ht->buckets = calloc(h->size, sizeof(bst_t *));
-  for (int i = 0; i < h->size; i++) {
+  ht_t *ht = pool_req(0, POOL_HT);
+  for (int i = 0; i < DEFAULT_HT_SIZE; i++) {
     ht->buckets[i] = bst_copy(h->buckets[i], copyfunc);
   }
-  ht->size = h->size;
   return ht;
 }
 

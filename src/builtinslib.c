@@ -3,6 +3,7 @@
 #include <macros.h>
 #include <stdio.h>
 #include <string.h>
+#include <pool.h>
 
 extern stack_t *OBJ_TABLE_STACK;
 extern string_t *ROOT;
@@ -19,7 +20,6 @@ stack_t **value_stack(value_t *v) {
     return &v->container->stack;
   else if (v->type == VMACRO)
     return &v->macro;
-  printf("value_stack error\n");
   die("BAD VALUE ON STACK");
   return NULL;
 }
@@ -118,7 +118,7 @@ void fprint_value(FILE *f, value_t *v, void *e) {
 
 string_t *get_line(FILE *f) {
   if (!f) return NULL;
-  string_t *s = init_string(U"");
+  string_t *s = pool_req(DEFAULT_STRING_LENGTH, POOL_STRING);
   byte_t b;
   int c;
   char32_t utf32;
@@ -160,26 +160,33 @@ void nop(void *v) {}
 void value_free_safe(void *vtmp) {
   if (vtmp == NULL)
     return;
-  value_t *v = (value_t *)vtmp;
-  if (v == NULL)
-    return;
-  if (v->type == VWORD || v->type == VCLIB || v->type == VCUSTOM) {
-    string_free(v->str_word);
+  value_t *v = vtmp;
+  switch (v->type) {
+    case VWORD:
+      if (!v->str_word)
+        v->str_word = pool_req(DEFAULT_STRING_LENGTH, POOL_STRING);
+      pool_addobj(POOL_VWORD, v);
+      break;
+    case VSTACK:
+      stack_push(CONTAIN_DEF_STACK, v->container);
+      v->container = pool_req(DEFAULT_STACK_SIZE, POOL_CONTAIN);
+      pool_addobj(POOL_VSTACK, v);
+      break;
+    case VMACRO:
+      stack_push(MACRO_DEF_STACK, v->macro);
+      v->macro = pool_req(DEFAULT_STACK_SIZE, POOL_STACK);
+      pool_addobj(POOL_VMACRO, v);
+      break;
+    case VERR:
+      pool_addobj(POOL_VERR, v);
+      break;
+    case VCUSTOM:
+      pool_addobj(POOL_VCUSTOM, v);
+      break;
+    case VCLIB:
+      pool_addobj(POOL_VCLIB, v);
+      break;
   }
-  if (v->type == VSTACK) {
-    stack_push(CONTAIN_DEF_STACK, v->container);
-  }
-  if (v->type == VMACRO) {
-    stack_push(MACRO_DEF_STACK, v->macro);
-  }
-  if (v->type == VERR) {
-    error_free(v->error);
-  }
-  if (v->type == VCUSTOM) {
-    custom_t *cstm = ht_get(OBJ_TABLE, v->str_word);
-    cstm->freefunc(v->custom);
-  }
-  free(v);
 }
 
 void contain_def_stack_push(void *c) {

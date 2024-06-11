@@ -51,38 +51,44 @@ void print_crank(char prefix[]) {
 void func_free(void *f) {}
 
 void eval_error(char32_t *s, value_t *w) {
-  value_t *v = init_value(VERR);
-  v->error = calloc(1, sizeof(error_t));
+  value_t *v = pool_req(0, POOL_VERR);
   if (w)
     v->error->str_word = string_copy(w->str_word);
   else
     v->error->str_word = NULL;
-  v->error->error = init_string(s);
+  v->error->error = pool_req(DEFAULT_STRING_LENGTH, POOL_STRING);
+  string_append_all(v->error->error, s);
   contain_t *cur = stack_peek(STACK);
   if (cur->err_stack == NULL)
-    cur->err_stack = init_stack(DEFAULT_STACK_SIZE);
+    cur->err_stack = pool_req(DEFAULT_STACK_SIZE, POOL_STACK);
   stack_push(cur->err_stack, v);
 }
 
 stack_t *init_stack(size_t size) {
-  stack_t *a = calloc(1, sizeof(stack_t));
-  if (!a)
-    die("calloc on stack");
+  stack_t *a = paw_alloc(1, sizeof(stack_t));
   a->size = 0;
   a->capacity = size;
-  a->items = calloc(a->capacity, sizeof(value_t *));
-  if (!a->items)
-    die("calloc on a->items");
+  a->items = paw_alloc(a->capacity, sizeof(value_t *));
   return a;
+}
+
+void realloc_stack(stack_t *a, size_t capacity) {
+  stack_t *s = pool_req(capacity, POOL_STACK);
+  memcpy(s->items, a->items, a->size * sizeof(value_t *));
+  void *items = a->items;
+  a->items = s->items;
+  s->items = items;
+  size_t cap = a->capacity;
+  a->capacity = s->capacity;
+  s->capacity = cap;
+  pool_addobj(POOL_STACK, s);
 }
 
 void stack_push(stack_t *a, void *v) {
   if (a == NULL)
     return;
-  if (a->size >= a->capacity - 2) {
-    a->capacity = a->capacity * 2;
-    a->items = realloc(a->items, a->capacity * sizeof(value_t *));
-  }
+  if (a->size >= a->capacity - 2)
+    realloc_stack(a, a->capacity * 2);
   a->items[a->size] = v;
   a->size++;
 }
@@ -176,19 +182,15 @@ void stack_free(void *a, void (*freefunc)(void *)) {
 
 void value_stack_free(void *a) { stack_free(a, value_free); }
 
+void value_stack_pool_add(void *a) { pool_addobj(POOL_STACK, a); }
+
 void *stack_copy(void *a, void *(*copyfunc)(void *)) {
   if (a == NULL) {
     return NULL;
   }
-  stack_t *b = calloc(1, sizeof(stack_t));
-  if (!b)
-    die("calloc on stack");
   stack_t *s = a;
+  stack_t *b = pool_req(s->size, POOL_STACK);
   b->size = s->size;
-  b->capacity = s->capacity;
-  b->items = calloc(b->capacity, sizeof(value_t *));
-  if (!b->items)
-    die("calloc on b->items");
   for (int i = 0; i < s->size; i++) {
     b->items[i] = copyfunc(s->items[i]);
   }
@@ -198,9 +200,7 @@ void *stack_copy(void *a, void *(*copyfunc)(void *)) {
 void *value_stack_copy(void *a) { return stack_copy(a, value_copy); }
 
 value_t *init_value(int type) {
-  value_t *v = calloc(1, sizeof(value_t));
-  if (!v)
-    die("calloc on value");
+  value_t *v = paw_alloc(1, sizeof(value_t));
   v->type = type;
   return v;
 }
@@ -209,23 +209,29 @@ void *value_copy(void *v) {
   if (v == NULL)
     return NULL;
   value_t *v1 = v;
-  contain_t *container = stack_peek(STACK);
-  value_t *a = init_value(v1->type);
-  if (v1->type == VWORD) {
-    a->str_word = string_copy(v1->str_word);
+  value_t *a;
+  if (v1->type == VWORD || v1->type == VCLIB || v1->type == VCUSTOM) {
+    a = pool_req(v1->str_word->length, val2pool_type(v));
+    string_copy_buffer(v1->str_word, a->str_word);
+    if (v1->type == VCLIB)
+      a->custom = v1->custom;
+    else if (v1->type == VCUSTOM) {
+      custom_t *c = ht_get(OBJ_TABLE, v1->str_word);
+      a->custom = c->copyfunc(v1->custom);
+    }
   } else if (v1->type == VSTACK) {
-    a->container = contain_copy(v1->container, value_copy);
+    a = pool_req(v1->container->stack->size, POOL_VSTACK);
+    contain_clone(v1->container, a->container);
   } else if (v1->type == VMACRO) {
-    a->macro = value_stack_copy(v1->macro);
-  } else if (v1->type == VERR) {
-    a->error = error_copy(v1->error);
-  }else if (v1->type == VCLIB) {
-    a->str_word = string_copy(v1->str_word);
-    a->custom = v1->custom;
-  } else if (v1->type == VCUSTOM) {
-    custom_t *c = ht_get(OBJ_TABLE, v1->str_word);
-    a->custom = c->copyfunc(v1->custom);
-    a->str_word = string_copy(v1->str_word);
+    a = pool_req(v1->macro->size, POOL_VMACRO);
+    for (long i = 0; i < v1->macro->size; i++) {
+      a->macro->items[i] = value_copy(v1->macro->items[i]);
+    }
+    a->macro->size = v1->macro->size;
+  } else {
+    a = pool_req(0, POOL_VERR);
+    a->error->str_word = string_copy(v1->error->str_word);
+    a->error->error = string_copy(v1->error->error);
   }
   return a;
 }
@@ -268,7 +274,7 @@ error_t *error_copy(void *err) {
   if (err == NULL)
     return NULL;
   error_t *e = err;
-  error_t *en = calloc(1, sizeof(error_t));
+  error_t *en = paw_alloc(1, sizeof(error_t));
   en->str_word = string_copy(e->str_word);
   en->error = string_copy(e->error);
   return en;
@@ -276,9 +282,7 @@ error_t *error_copy(void *err) {
 
 custom_t *init_custom(void (*printfunc)(FILE *, void *), void (*freefunc)(void *),
                       void *(*copyfunc)(void *)) {
-  custom_t *c = calloc(1, sizeof(custom_t));
-  if (!c)
-    die("calloc on custom");
+  custom_t *c = paw_alloc(1, sizeof(custom_t));
   c->printfunc = printfunc;
   c->freefunc = freefunc;
   c->copyfunc = copyfunc;
@@ -288,16 +292,16 @@ custom_t *init_custom(void (*printfunc)(FILE *, void *), void (*freefunc)(void *
 void custom_free(void *c) { free(c); }
 
 void add_func(ht_t *h, void (*func)(value_t *), char32_t *key) {
-  stack_t *macro = init_stack(DEFAULT_STACK_SIZE);
-  value_t *v = init_value(VCLIB);
-  v->str_word = init_string(key);
+  stack_t *macro = pool_req(DEFAULT_STACK_SIZE, POOL_STACK);
+  value_t *v = pool_req(DEFAULT_STRING_LENGTH, POOL_VCLIB);
+  string_append_all(v->str_word, key);
   v->custom = func;
   stack_push(macro, v);
-  ht_add(h, init_string(key), macro, value_stack_free);
+  ht_add(h, init_string(key), macro, value_stack_pool_add);
 }
 
 void add_macro(ht_t *h, stack_t *macro, char32_t *key) {
-  ht_add(h, init_string(key), macro, value_stack_free);
+  ht_add(h, init_string(key), macro, value_stack_pool_add);
 }
 
 void add_obj(ht_t *h, void (*printfunc)(FILE *, void *), void (*freefunc)(void *),
@@ -308,8 +312,8 @@ void add_obj(ht_t *h, void (*printfunc)(FILE *, void *), void (*freefunc)(void *
 }
 
 contain_t *init_contain(ht_t *h, ht_t *flit, stack_t *cranks) {
-  contain_t *c = calloc(1, sizeof(contain_t));
-  c->stack = init_stack(DEFAULT_STACK_SIZE);
+  contain_t *c = paw_alloc(1, sizeof(contain_t));
+  c->stack = pool_req(DEFAULT_STACK_SIZE, POOL_STACK);
   c->err_stack = NULL;
   c->flit = flit;
   c->word_table = h;
@@ -340,6 +344,12 @@ void contain_free(void *con) {
   free(c);
 }
 
+void contain_pool_add(void *con) {
+  if (con == NULL)
+    return;
+  pool_addobj(POOL_CONTAIN, con);
+}
+
 void *contain_value_copy(void *c) { return contain_copy(c, value_copy); }
 
 void *falias_copy(void *f) { return string_copy(f); }
@@ -348,7 +358,7 @@ contain_t *contain_copy(contain_t *c, void *(*copyfunc)(void *)) {
   if (c == NULL) {
     return NULL;
   }
-  contain_t *contain = calloc(1, sizeof(contain_t));
+  contain_t *contain = paw_alloc(1, sizeof(contain_t));
   contain->word_table = ht_copy(c->word_table, contain_value_copy);
   contain->flit = ht_copy(c->flit, value_stack_copy);
   contain->cranks = stack_copy(c->cranks, cranks_copy);
@@ -364,10 +374,44 @@ contain_t *contain_copy(contain_t *c, void *(*copyfunc)(void *)) {
   return contain;
 }
 
+void *contain_new_clone(void *c) {
+  if (c == NULL)
+    return NULL;
+  contain_t *con = c;
+  contain_t *newc = pool_req(con->stack->size, POOL_CONTAIN);
+  contain_clone(con, newc);
+  return newc;
+}
+
+void contain_clone(contain_t *c, contain_t *newc) {
+  if (c == NULL)
+    return;
+  newc->word_table = ht_copy(c->word_table, contain_new_clone);
+  newc->flit = ht_copy(c->flit, value_stack_copy);
+  newc->cranks = stack_copy(c->cranks, cranks_copy);
+  if (newc->err_stack && c->err_stack)
+    for (long i = 0; i < c->err_stack->size; i++)
+      stack_push(newc->err_stack, value_copy(c->err_stack->items[i]));
+  else if (c->err_stack)
+    newc->err_stack = stack_copy(c->err_stack, value_copy);
+  for (long i = 0; i < c->stack->size; i++) {
+    newc->stack->items[i] = value_copy(c->stack->items[i]);
+  }
+  newc->stack->size = c->stack->size;
+  if (newc->faliases && c->faliases) {
+    for (long i = 0; i < c->faliases->size; i++)
+      stack_push(newc->faliases, string_copy(c->faliases->items[i]));
+  }
+  newc->delims = string_copy(c->delims);
+  newc->singlets = string_copy(c->singlets);
+  newc->ignored = string_copy(c->ignored);
+  newc->dflag = c->dflag;
+  newc->iflag = c->iflag;
+  newc->sflag = c->sflag;
+}
+
 parser_t *init_parser(string_t *source) {
-  parser_t *p = calloc(1, sizeof(parser_t));
-  if (!p)
-    die("calloc on parser");
+  parser_t *p = paw_alloc(1, sizeof(parser_t));
   p->i = 0;
   p->source = source;
   if (source)
@@ -397,9 +441,8 @@ bool parser_on(parser_t *p) {
 }
 
 value_t *parse_word(parser_t *p, bool skipped) {
-  string_t *strval = init_string(U"");
-  value_t *retval = init_value(VWORD);
-  retval->str_word = strval;
+  value_t *retval = pool_req(DEFAULT_STRING_LENGTH, POOL_VWORD);
+  string_t *strval = retval->str_word;
   if (issinglet(p->c)) {
     string_append(strval, p->c);
     parser_move(p);
@@ -586,15 +629,14 @@ void *func_copy(void *funcs) { return NULL; }
 
 void *cranks_copy(void *cranks) {
   int(*cr)[2] = cranks;
-  int(*arr)[2] = malloc(sizeof(int[2]));
+  int(*arr)[2] = paw_alloc(1, sizeof(int[2]));
   arr[0][0] = cr[0][0];
   arr[0][1] = cr[0][1];
   return arr;
 }
 
 void push_quoted(contain_t *cur, value_t *v) {
-  value_t *q = init_value(VSTACK);
-  q->container = init_contain(NULL, NULL, NULL);
+  value_t *q = pool_req(DEFAULT_STACK_SIZE, POOL_VSTACK);
   stack_push(q->container->stack, v);
   stack_push(cur->stack, q);
 }
@@ -647,7 +689,7 @@ bool return_function(void *stack, bool macro) {
     if (stack_exists(MACRO_DEF_STACK, stack)) {
       return true;
     }
-  } else if (stack_exists(CONTAIN_DEF_STACK, stack)) {
+  } else if (stack_exists(CONTAIN_DEF_STACK, stack)) { // && stack->def == true
     return true;
   }
   for (int i = 0; i < CONTAIN_DEF_STACK->size; i++) {
@@ -660,8 +702,9 @@ bool return_function(void *stack, bool macro) {
       return true;
     }
   }
+  //TODO: successfully implement contain_pool_add here
   stack_empty(CONTAIN_DEF_STACK, contain_free);
-  stack_empty(MACRO_DEF_STACK, value_stack_free);
+  stack_empty(MACRO_DEF_STACK, value_stack_pool_add);
   return false;
 }
 
@@ -920,7 +963,7 @@ void crank() {
     stack_pop(EVAL_CONTAINERS);
     for (int i = 0; i < EVAL_CONTAIN_TRASH->size; i++) {
       if (!stack_exists(EVAL_CONTAINERS, EVAL_CONTAIN_TRASH->items[i])) {
-        contain_free(stack_popdeep(EVAL_CONTAIN_TRASH, i));
+        contain_pool_add(stack_popdeep(EVAL_CONTAIN_TRASH, i));
         i--;
       }
     }
@@ -938,21 +981,21 @@ void eval(value_t *v) {
   if (isfalias(v)) {
     if (!cur->cranks) {
       evalf(v);
-      value_free(v);
+      pool_addobj(POOL_VWORD, v);
       return;
     }
     if (cur->cranks->size == 0) {
       evalf(v);
-      value_free(v);
+      pool_addobj(POOL_VWORD, v);
       return;
     }
     int(*crank)[2] = cur->cranks->items[0];
     if ((crank[0][0] != 1 || crank[0][1] == 0) && crank[0][1] != 1) {
       evalf(v);
-      value_free(v);
+      pool_addobj(POOL_VWORD, v);
       return;
     }
-    value_free(v);
+    pool_addobj(POOL_VWORD, v);
     return;
   }
   push_quoted(cur, v);

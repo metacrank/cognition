@@ -1,5 +1,6 @@
 #include <better_string.h>
 #include <macros.h>
+#include <pool.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -7,6 +8,7 @@
 #include <stdarg.h>
 
 byte_t print_buffer[5];
+extern pool_t *OBJ_POOL;
 
 int sizeof_utf8(byte_t *b) {
   if (*b < 0xC0) {
@@ -99,18 +101,15 @@ int string_comp(string_t *s1, string_t *s2) {
 }
 
 string_t *alloc_string(size_t size) {
-  string_t *newstr = malloc(sizeof(string_t));
+  string_t *newstr = paw_alloc(1, sizeof(string_t));
   newstr->bufsize = size;
-  newstr->value = malloc(size * sizeof(char32_t));
+  newstr->value = paw_alloc(size, sizeof(char32_t));
   newstr->length = 0;
   return newstr;
 }
 
 void realloc_string(string_t *s, size_t size) {
-  //fetch from pool
-  string_t *newstr = malloc(sizeof(string_t));
-  newstr->bufsize = size;
-  newstr->value = malloc(size * sizeof(char32_t));
+  string_t *newstr = pool_req(size, POOL_STRING);
 
   char32_t *val = newstr->value;
   size_t bs = newstr->bufsize;
@@ -120,8 +119,7 @@ void realloc_string(string_t *s, size_t size) {
   s->bufsize = bs;
 
   memcpy(s->value, newstr->value, s->length * sizeof(char32_t));
-  //add to pool
-  string_free(newstr);
+  pool_addobj(POOL_STRING, newstr);
 }
 
 void string_ensure_space(string_t *s, size_t n) {
@@ -135,11 +133,8 @@ void string_ensure_space(string_t *s, size_t n) {
 
 string_t *init_string(char32_t *a) {
   if (!a) return NULL;
-  string_t *s = malloc(sizeof(string_t));
-  s->length = 0;
-  s->bufsize = DEFAULT_STRING_LENGTH;
-  // replace with pool access later
-  s->value = malloc(s->bufsize * sizeof(char32_t));
+  string_t *s = pool_req(DEFAULT_STRING_LENGTH, POOL_STRING);
+
   while (*a != '\0') {
     string_ensure_space(s, 1);
     s->value[s->length] = *a;
@@ -153,14 +148,11 @@ string_t *string_copy(string_t *s) {
   if (s == NULL)
     return NULL;
   if (s->length > s->bufsize) {
-    printf("catastrophic string management failure\n");
-    return NULL;
+    die("catastrophic string management failure\n");
   }
-  // fetch from pool
-  string_t *cp = malloc(sizeof(string_t));
-  cp->bufsize = s->bufsize;
+  string_t *cp = pool_req(s->bufsize, POOL_STRING);
   cp->length = s->length;
-  cp->value = malloc(cp->bufsize * sizeof(char32_t));
+
   for (long i = 0; i < s->length; i++) {
     cp->value[i] = s->value[i];
   }
@@ -186,6 +178,17 @@ void string_append(string_t *s, char32_t c) {
   string_ensure_space(s, 1);
   s->value[s->length] = c;
   s->length++;
+}
+
+void string_append_all(string_t *s, char32_t *a) {
+  if (!(s && a))
+    return;
+  while (*a != '\0') {
+    string_ensure_space(s, 1);
+    s->value[s->length] = *a;
+    s->length++;
+    a++;
+  }
 }
 
 void string_reverse(string_t *s) {

@@ -61,6 +61,9 @@ void *pool_req(long bufsize, byte_t type);
 /*! frees pool */
 void pool_free(pool_t *pool);
 
+/*! converts value type to pool type */
+byte_t val2pool_type(value_t *v);
+
 /*! diplays a bst, printing '()' if bst == NULL && f */
 void print_pool_bst(bst_t *bst, bool f);
 

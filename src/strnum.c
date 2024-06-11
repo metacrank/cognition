@@ -1,6 +1,7 @@
 #include <strnum.h>
 #include <better_string.h>
 #include <macros.h>
+#include <pool.h>
 #include <ctype.h>
 #include <string.h>
 #include <stdio.h>
@@ -377,19 +378,17 @@ double complex string_to_double(string_t *s) {
   }
   dim = dim / pow(BASE, r);
   double complex cd = d + dim * I;
-  string_free(sre);
-  string_free(sim);
+  pool_addobj(POOL_STRING, sre);
+  pool_addobj(POOL_STRING, sim);
   return cd;
 }
 
-string_t *int_to_string(long d) {
+void int_to_string_buf(long d, string_t *s) {
+  s->length = 0;
   if (d == 0) {
-    string_t *s = init_string(U"");
     string_append(s, digits[0]);
-    return s;
+    return;
   }
-  // get from pool;
-  string_t *s = init_string(U"");
   int offset = (1 - (d < 0) * 2) * 0.001;
   long abs_d = d * ((d >= 0) * 2 - 1);
   int power = log10(abs_d) / log10(BASE) + 1;
@@ -417,6 +416,11 @@ string_t *int_to_string(long d) {
       }
     }
   }
+}
+
+string_t *int_to_string(long d) {
+  string_t *s = pool_req(DEFAULT_STRING_LENGTH, POOL_STRING);
+  int_to_string_buf(d, s);
   return s;
 }
 
@@ -465,7 +469,7 @@ string_t *double_to_string(double complex f, unsigned precision, bool isreal) {
   }
   string_append(sre, ',');
   string_concat(sre, sim);
-  string_free(sim);
+  pool_addobj(POOL_STRING, sim);
   return sre;
 }
 
@@ -502,7 +506,7 @@ string_t *fp(string_t *s) {
 }
 
 string_t *real(string_t *s) {
-  string_t *re = init_string(U"");
+  string_t *re = pool_req(DEFAULT_STRING_LENGTH, POOL_STRING);
   for (long i = 0; i < s->length; i++) {
     if (s->value[i] == ',') break;
     string_append(re, s->value[i]);
@@ -511,7 +515,7 @@ string_t *real(string_t *s) {
 }
 
 string_t *imaginary(string_t *s) {
-  string_t *im = init_string(U"");
+  string_t *im = pool_req(DEFAULT_STRING_LENGTH, POOL_STRING);
   long i;
   for (i = 0; i < s->length; i++) {
     if (s->value[i] == ',') break;
@@ -597,8 +601,7 @@ string_t *sum_real(string_t *m, string_t *n, char32_t *m_radix, char32_t *n_radi
     }
   }
 
-  //TODO: get from pool
-  string_t *s = init_string(U"");
+  string_t *s = pool_req(DEFAULT_STRING_LENGTH, POOL_STRING);
 
   char32_t *pm = m_end - 1;
   char32_t *pn = n_end - 1;
@@ -716,15 +719,15 @@ string_t *sum(string_t *m, string_t *n, char32_t *m_radix, char32_t *n_radix,
   string_t *nim = imaginary(n);
   string_t *rsum = sum_real(mre, nre, NULL, NULL, NULL, NULL);
   string_t *isum = sum_real(mim, nim, NULL, NULL, NULL, NULL);
-  string_free(mim);
-  string_free(nim);
-  string_free(nre);
-  string_free(mre);
+  pool_addobj(POOL_STRING, mim);
+  pool_addobj(POOL_STRING, nim);
+  pool_addobj(POOL_STRING, nre);
+  pool_addobj(POOL_STRING, mre);
   if (isum->length) {
     string_append(rsum, ',');
     string_concat(rsum, isum);
   }
-  string_free(isum);
+  pool_addobj(POOL_STRING, isum);
   return rsum;
 }
 
@@ -807,9 +810,9 @@ string_t *str_ln(string_t *m) {
 string_t *str_pow(string_t *m, string_t *n) {
   string_t *mln = str_ln(m);
   string_t *pr = product(mln, n);
-  string_free(mln);
+  pool_addobj(POOL_STRING, mln);
   string_t *exps = str_exp(pr);
-  string_free(pr);
+  pool_addobj(POOL_STRING, pr);
   return exps;
 }
 

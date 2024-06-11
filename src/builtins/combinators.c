@@ -1,6 +1,7 @@
 #include <builtins/combinators.h>
 #include <builtinslib.h>
 #include <macros.h>
+#include <pool.h>
 #include <string.h>
 #include <stdio.h>
 #include <strnum.h>
@@ -8,6 +9,8 @@
 extern stack_t *STACK;
 extern stack_t *EVAL_STACK;
 string_t **CAST_ARGS;
+string_t *F;
+string_t *ING;
 
 extern void add_funcs(ht_t *flit);
 
@@ -31,35 +34,32 @@ void cog_eval(value_t *v) {
 
 void cog_child(value_t *v) {
   contain_t *cur = stack_peek(STACK);
-  value_t *v1 = init_value(VSTACK);
-  v1->container = calloc(1, sizeof(contain_t));
+  value_t *v1 = pool_req(DEFAULT_STACK_SIZE, POOL_VSTACK);
   contain_copy_attributes(cur, v1->container);
-  v1->container->err_stack = stack_copy(cur->err_stack, value_copy);
-  v1->container->stack = init_stack(DEFAULT_STACK_SIZE);
+  if (v1->container->err_stack)
+    for (long i = 0; i < cur->err_stack->size; i++)
+      stack_push(v1->container->err_stack, value_copy(cur->err_stack->items[i]));
+  else
+    v1->container->err_stack = stack_copy(cur->err_stack, value_copy);
   stack_push(cur->stack, v1);
 }
 
 void cog_stack(value_t *v) {
   contain_t *cur = stack_peek(STACK);
-  value_t *v1 = init_value(VSTACK);
-  v1->container = calloc(1, sizeof(contain_t));
-  v1->container->err_stack = init_stack(DEFAULT_STACK_SIZE);
-  v1->container->stack = init_stack(DEFAULT_STACK_SIZE);
-  v1->container->faliases = init_stack(DEFAULT_STACK_SIZE);
+  value_t *v1 = pool_req(DEFAULT_STACK_SIZE, POOL_VSTACK);
   v1->container->delims = string_copy(cur->delims);
   v1->container->singlets = string_copy(cur->singlets);
   v1->container->ignored = string_copy(cur->ignored);
   v1->container->dflag = cur->dflag;
-  v1->container->iflag = cur->iflag;
   v1->container->sflag = cur->sflag;
+  v1->container->iflag = cur->iflag;
   stack_push(cur->stack, v1);
 }
 
 
 void cog_macro(value_t *v) {
   contain_t *cur = stack_peek(STACK);
-  value_t *v1 = init_value(VMACRO);
-  v1->macro = init_stack(DEFAULT_STACK_SIZE);
+  value_t *v1 = pool_req(DEFAULT_STACK_SIZE, POOL_VMACRO);
   stack_push(cur->stack, v1);
 }
 
@@ -112,11 +112,12 @@ void cog_cast(value_t *v) {
 
 void cog_sub(value_t *v) {
   contain_t *cur = stack_peek(STACK);
-  value_t *v1 = init_value(VSTACK);
-  v1->container = init_contain(NULL, init_ht(DEFAULT_HT_SIZE), NULL);
-  v1->container->faliases = init_stack(DEFAULT_STACK_SIZE);
-  stack_push(v1->container->faliases, init_string(U"f"));
-  stack_push(v1->container->faliases, init_string(U"ing"));
+  value_t *v1 = pool_req(DEFAULT_STACK_SIZE, POOL_VSTACK);
+  v1->container->flit = pool_req(0, POOL_HT);
+  if (!v1->container->faliases)
+    v1->container->faliases = pool_req(DEFAULT_STACK_SIZE, POOL_STACK);
+  stack_push(v1->container->faliases, string_copy(F));
+  stack_push(v1->container->faliases, string_copy(ING));
   add_funcs(v1->container->flit);
   stack_push(cur->stack, v1);
 }
@@ -292,16 +293,17 @@ void cog_split(value_t *v) {
     eval_error(U"INDEX OUT OF RANGE", v);
     return;
   }
-  value_t *q2 = init_value(q->type);
+  value_t *q2 = pool_req(qstack->size - n, val2pool_type(q));
   stack_t *q2stack;
   if (q->type == VSTACK) {
-    q2->container = calloc(1, sizeof(contain_t));
-    q2->container->stack = init_stack(DEFAULT_STACK_SIZE);
-    q2->container->err_stack = stack_copy(q->container->err_stack, value_copy);
+    if (q2->container->err_stack)
+      for (long i = 0; i < q->container->err_stack->size; i++)
+        stack_push(q2->container->err_stack, value_copy(q->container->err_stack->items[i]));
+    else
+      q2->container->err_stack = stack_copy(q->container->err_stack, value_copy);
     contain_copy_attributes(q->container, q2->container);
     q2stack = q2->container->stack;
   } else {
-    q2->macro = init_stack(DEFAULT_STACK_SIZE);
     q2stack = q2->macro;
   }
   for (long i = n; i < qstack->size; i++) {
@@ -461,8 +463,8 @@ void cog_size(value_t *v) {
     return;
   }
   size_t size = value_stack(v1)[0]->size;
-  value_t *sizeval = init_value(VWORD);
-  sizeval->str_word = int_to_string(size);
+  value_t *sizeval = pool_req(DEFAULT_STRING_LENGTH, POOL_VWORD);
+  int_to_string_buf(size, sizeval->str_word);
   push_quoted(cur, sizeval);
 }
 
@@ -474,11 +476,11 @@ void cog_type(value_t *v) {
     eval_error(U"TOO FEW ARGUMENTS", v);
     return;
   }
-  value_t *typeval = init_value(VWORD);
+  value_t *typeval = pool_req(DEFAULT_STRING_LENGTH, POOL_VWORD);
   if (v1->type == VSTACK)
-    typeval->str_word = string_copy(CAST_ARGS[0]);
+    string_copy_buffer(CAST_ARGS[0], typeval->str_word);
   else if (v1->type == VMACRO)
-    typeval->str_word = string_copy(CAST_ARGS[2]);
+    string_copy_buffer(CAST_ARGS[2], typeval->str_word);
   else die("BAD VALUE ON STACK");
   push_quoted(cur, typeval);
 }

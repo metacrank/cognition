@@ -73,15 +73,16 @@ bst_t *bst_stack_add(bst_t *bst, long i, void *value) {
       return bst;
     }
   }
+  stack_t *s = pool_req(DEFAULT_STACK_SIZE, POOL_STACK);
   if (isleft) {
     parent->left = init_bst();
     parent->left->ikey = i;
-    parent->left->value = pool_req(DEFAULT_STACK_SIZE, POOL_STACK);
+    parent->left->value = s;
     stack_push(parent->left->value, value);
   } else {
     parent->right = init_bst();
     parent->right->ikey = i;
-    parent->right->value = pool_req(DEFAULT_STACK_SIZE, POOL_STACK);
+    parent->right->value = s;
     stack_push(parent->right->value, value);
   }
   return bst;
@@ -157,6 +158,13 @@ void pool_empty_contain(pool_t *pool, contain_t *c) {
     }
     c->err_stack->size = 0;
   }
+  if (c->faliases) {
+    for (int i = 0; i < c->faliases->size; i++) {
+      pool_add(pool, POOL_STRING, c->faliases->items[i]);
+      c->faliases->items[i] = NULL;
+    }
+    c->faliases->size = 0;
+  }
   if (c->delims) {
     pool_add(pool, POOL_STRING, c->delims);
     c->delims = NULL;
@@ -183,6 +191,9 @@ void pool_empty_contain(pool_t *pool, contain_t *c) {
     }
     c->cranks->size = 0;
   }
+  c->dflag = false;
+  c->iflag = true;
+  c->sflag = true;
 }
 
 void pool_add(pool_t *pool, byte_t type, void *value) {
@@ -193,7 +204,10 @@ void pool_add(pool_t *pool, byte_t type, void *value) {
       break;
     case POOL_VWORD:;
       value_t *vword = value;
-      pool->vwordstack = bst_stack_add(pool->vwordstack, vword->str_word->bufsize, vword);
+      if (vword->str_word)
+        pool->vwordstack = bst_stack_add(pool->vwordstack, vword->str_word->bufsize, vword);
+      else
+        pool->vwordstack = bst_stack_add(pool->vwordstack, DEFAULT_STRING_LENGTH, vword);
       break;
     case POOL_VSTACK:;
       value_t *vstack = value;
@@ -220,8 +234,8 @@ void pool_add(pool_t *pool, byte_t type, void *value) {
       break;
     case POOL_CONTAIN:;
       contain_t *c = value;
-      pool_empty_contain(pool, c);
-      pool->stackstack = bst_stack_add(pool->stackstack, c->stack->capacity, c->stack);
+      if (c->stack)
+        pool->stackstack = bst_stack_add(pool->stackstack, c->stack->capacity, c->stack);
       stack_push(pool->containstack, c);
       break;
     case POOL_WT:;
@@ -269,6 +283,10 @@ void pool_add(pool_t *pool, byte_t type, void *value) {
   }
 }
 
+void pool_addobj(byte_t type, void *value) {
+  pool_add(OBJ_POOL, type, value);
+}
+
 void *bst_pop_min(pool_t *pool, bst_t **bst, long i) {
   bst_t *b = *bst;
   if (!b)
@@ -279,7 +297,7 @@ void *bst_pop_min(pool_t *pool, bst_t **bst, long i) {
       return leftmin;
     stack_t *s = b->value;
     if (b->ikey >= i) {
-      if (s->size == 1) {
+      if (s->size == 1 && false) {
         void *retval = stack_pop(s);
         *bst = bst_deli(b, b->ikey, func_free);
         pool_add(pool, POOL_STACK, s);
@@ -294,9 +312,10 @@ void *bst_pop_min(pool_t *pool, bst_t **bst, long i) {
 }
 
 void pool_empty_stack(pool_t *pool, stack_t *stack) {
-  for (long i = 0; i < stack->size; i++)
+  for (long i = 0; i < stack->size; i++) {
     if (stack->items[i])
       pool_add(pool, POOL_VALUE, stack->items[i]);
+  }
   stack->size = 0;
 }
 
@@ -308,7 +327,12 @@ void *pool_get(pool_t *pool, long bufsize, byte_t type) {
       return str;
     case POOL_VWORD:;
       value_t *vword = bst_pop_min(pool, &pool->vwordstack, bufsize);
-      if (vword) vword->str_word->length = 0;
+      if (vword) {
+        if (vword->str_word)
+          vword->str_word->length = 0;
+        else
+          vword->str_word = pool_req(bufsize, POOL_STRING);
+      }
       return vword;
     case POOL_VSTACK:;
       value_t *vstack = bst_pop_min(pool, &pool->vstackstack, bufsize);
@@ -318,6 +342,7 @@ void *pool_get(pool_t *pool, long bufsize, byte_t type) {
       }
       return vstack;
     case POOL_VMACRO:;
+      return NULL;
       value_t *vmacro = bst_pop_min(pool, &pool->vmacrostack, bufsize);
       if (vmacro) pool_empty_stack(pool, vmacro->macro);
       return vmacro;
@@ -384,7 +409,7 @@ void *pool_req(long bufsize, byte_t type) {
       case POOL_VMACRO:;
         value_t *vmacro = init_value(VMACRO);
         vmacro->macro = pool_req(bufsize, POOL_STACK);
-        return vstack;
+        return vmacro;
       case POOL_VCUSTOM:;
         value_t *vcustom = init_value(VCUSTOM);
         vcustom->str_word = pool_req(bufsize, POOL_STRING);
@@ -399,14 +424,16 @@ void *pool_req(long bufsize, byte_t type) {
           buf *= 2;
         return init_stack(buf);
       case POOL_CONTAIN:;
-        contain_t *contain = calloc(1, sizeof(contain_t));
+        contain_t *contain = paw_alloc(1, sizeof(contain_t));
         contain->stack = pool_req(bufsize, POOL_STACK);
+        contain->iflag = true;
+        contain->sflag = true;
         return contain;
       case POOL_HT:
         return init_ht(DEFAULT_HT_SIZE);
       case POOL_VERR:;
         value_t *verr = init_value(VERR);
-        verr->error = malloc(sizeof(error_t));
+        verr->error = paw_alloc(1, sizeof(error_t));
         return verr;
       default:
         return NULL;
@@ -427,6 +454,23 @@ void *pool_req(long bufsize, byte_t type) {
 void pool_free(pool_t *pool) {
   pool_gcall(pool);
   free(pool);
+}
+
+byte_t val2pool_type(value_t *v) {
+  switch (v->type) {
+    case VWORD:
+      return POOL_VWORD;
+    case VSTACK:
+      return POOL_VSTACK;
+    case VMACRO:
+      return POOL_VMACRO;
+    case VERR:
+      return POOL_VERR;
+    case VCUSTOM:
+      return POOL_VCUSTOM;
+    case VCLIB:
+      return POOL_VCLIB;
+  }
 }
 
 void print_pool_bst(bst_t *bst, bool f) {

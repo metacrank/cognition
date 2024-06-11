@@ -19,6 +19,8 @@ long string_to_int(string_t *s);
 
 double complex string_to_double(string_t *s);
 
+void int_to_string_buf(long d, string_t *s);
+
 string_t *int_to_string(long d);
 
 string_t *double_to_string(double complex f, unsigned precision, bool isreal);

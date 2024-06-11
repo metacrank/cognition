@@ -62,6 +62,9 @@ void string_concat(string_t *s1, string_t *s2);
 /*! Appends single characters */
 void string_append(string_t *s, char32_t c);
 
+/*! Appends byte array to string */
+void string_append_all(string_t *s, char32_t *a);
+
 /* reverse order of characters of a string */
 void string_reverse(string_t *s);
 

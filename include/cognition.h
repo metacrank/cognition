@@ -141,6 +141,9 @@ void *stack_copy(void *a, void *(*copyfunc)(void *));
 /* free stacks with value_t's in them */
 void value_stack_free(void *a);
 
+/* adds value stack to pool */
+void value_stack_pool_add(void *a);
+
 /* copy stacks with value_t's in them */
 void *value_stack_copy(void *a);
 
@@ -199,8 +202,17 @@ contain_t *contain_copy(contain_t *c, void *(*copyfunc)(void *));
 /* Copies a container containing value_t */
 void *contain_value_copy(void *c);
 
+/* Copies a container into a new blank container */
+void contain_clone(contain_t *c, contain_t *newc);
+
+/* Clones a container (containing value_t) using the pool */
+void *contain_new_clone(void *c);
+
 /*! Allocates memory for new container */
 void contain_free(void *con);
+
+/* Adds container back to pool */
+void contain_pool_add(void *con);
 
 /* copies faliases */
 void *falias_copy(void *f);
