@@ -1,6 +1,6 @@
 #include <builtins/math.h>
 #include <builtinslib.h>
-#include <math.h>
+#include <pool.h>
 #include <stdio.h>
 #include <string.h>
 #include <strnum.h>
@@ -61,7 +61,7 @@ void cog_add(value_t *v) {
     return;
   }
   string_t *stmp = sum(w1->str_word, w2->str_word, NULL, NULL, NULL, NULL);
-  string_free(w1->str_word);
+  pool_addobj(POOL_STRING, w1->str_word);
   w1->str_word = stmp;
   value_free_safe(v2);
   stack_push(stack, v1);
@@ -101,7 +101,7 @@ void cog_subtract(value_t *v) {
     return;
   }
   string_t *stmp = diff(w1->str_word, w2->str_word);
-  string_free(w1->str_word);
+  pool_addobj(POOL_STRING, w1->str_word);
   w1->str_word = stmp;
   value_free_safe(v2);
   stack_push(stack, v1);
@@ -141,7 +141,7 @@ void cog_multiply(value_t *v) {
     return;
   }
   string_t *stmp = product(w1->str_word, w2->str_word);
-  string_free(w1->str_word);
+  pool_addobj(POOL_STRING, w1->str_word);
   w1->str_word = stmp;
   value_free_safe(v2);
   stack_push(stack, v1);
@@ -181,7 +181,7 @@ void cog_divide(value_t *v) {
     return;
   }
   string_t *stmp = quotient(w1->str_word, w2->str_word);
-  string_free(w1->str_word);
+  pool_addobj(POOL_STRING, w1->str_word);
   w1->str_word = stmp;
   value_free_safe(v2);
   stack_push(stack, v1);
@@ -221,7 +221,7 @@ void cog_mod(value_t *v) {
     return;
   }
   string_t *stmp = mod(w1->str_word, w2->str_word);
-  string_free(w1->str_word);
+  pool_addobj(POOL_STRING, w1->str_word);
   w1->str_word = stmp;
   value_free_safe(v2);
   stack_push(stack, v1);
@@ -247,7 +247,7 @@ void cog_real(value_t *v) {
     return;
   }
   string_t *stmp = real(w1->str_word);
-  string_free(w1->str_word);
+  pool_addobj(POOL_STRING, w1->str_word);
   w1->str_word = stmp;
   stack_push(stack, v1);
 }
@@ -272,7 +272,7 @@ void cog_imaginary(value_t *v) {
     return;
   }
   string_t *stmp = imaginary(w1->str_word);
-  string_free(w1->str_word);
+  pool_addobj(POOL_STRING, w1->str_word);
   w1->str_word = stmp;
   stack_push(stack, v1);
 }
@@ -297,7 +297,7 @@ void cog_sqrt(value_t *v) {
     return;
   }
   string_t *stmp = str_sqrt(w1->str_word);
-  string_free(w1->str_word);
+  pool_addobj(POOL_STRING, w1->str_word);
   w1->str_word = stmp;
   stack_push(stack, v1);
 }
@@ -336,7 +336,7 @@ void cog_pow(value_t *v) {
     return;
   }
   string_t *stmp = str_pow(w1->str_word, w2->str_word);
-  string_free(w1->str_word);
+  pool_addobj(POOL_STRING, w1->str_word);
   w1->str_word = stmp;
   value_free_safe(v2);
   stack_push(stack, v1);
@@ -362,7 +362,7 @@ void cog_exp(value_t *v) {
     return;
   }
   string_t *stmp = str_exp(w1->str_word);
-  string_free(w1->str_word);
+  pool_addobj(POOL_STRING, w1->str_word);
   w1->str_word = stmp;
   stack_push(stack, v1);
 }
@@ -387,7 +387,7 @@ void cog_sin(value_t *v) {
     return;
   }
   string_t *stmp = str_sin(w1->str_word);
-  string_free(w1->str_word);
+  pool_addobj(POOL_STRING, w1->str_word);
   w1->str_word = stmp;
   stack_push(stack, v1);
 }
@@ -412,7 +412,7 @@ void cog_cos(value_t *v) {
     return;
   }
   string_t *stmp = str_cos(w1->str_word);
-  string_free(w1->str_word);
+  pool_addobj(POOL_STRING, w1->str_word);
   w1->str_word = stmp;
   stack_push(stack, v1);
 }
@@ -437,7 +437,7 @@ void cog_ln(value_t *v) {
     return;
   }
   string_t *stmp = str_ln(w1->str_word);
-  string_free(w1->str_word);
+  pool_addobj(POOL_STRING, w1->str_word);
   w1->str_word = stmp;
   stack_push(stack, v1);
 }
@@ -462,7 +462,7 @@ void cog_floor(value_t *v) {
     return;
   }
   string_t *stmp = str_floor(w1->str_word);
-  string_free(w1->str_word);
+  pool_addobj(POOL_STRING, w1->str_word);
   w1->str_word = stmp;
   stack_push(stack, v1);
 }
@@ -487,7 +487,7 @@ void cog_ceil(value_t *v) {
     return;
   }
   string_t *stmp = str_ceil(w1->str_word);
-  string_free(w1->str_word);
+  pool_addobj(POOL_STRING, w1->str_word);
   w1->str_word = stmp;
   stack_push(stack, v1);
 }

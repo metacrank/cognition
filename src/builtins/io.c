@@ -2,6 +2,7 @@
 #include <builtinslib.h>
 #include <stdio.h>
 #include <macros.h>
+#include <pool.h>
 #include <string.h>
 
 extern stack_t *STACK;
@@ -57,8 +58,8 @@ void cog_print(value_t *v) {
 
 void cog_read(value_t *v) {
   contain_t *cur = stack_peek(STACK);
-  value_t *strval = init_value(VWORD);
-  strval->str_word = get_line(stdin);
+  value_t *strval = pool_req(DEFAULT_STRING_LENGTH, POOL_VWORD);
+  read_line(stdin, strval->str_word);
   push_quoted(cur, strval);
 }
 
@@ -86,7 +87,7 @@ void cog_fquestionmark(value_t *v) {
     utf32_to_utf8(print_buffer, filename->value[i]);
     strlength += sizeof_utf8(print_buffer);
   }
-  char *buf = malloc((strlength + 1) * sizeof(char));
+  char *buf = paw_alloc(strlength + 1, sizeof(char));
   strlength = 0;
   for (long i = 0; i < filename->length; i++) {
     utf32_to_utf8(print_buffer, filename->value[i]);
@@ -133,7 +134,7 @@ void cog_fperiod(value_t *v) {
     utf32_to_utf8(print_buffer, filename->value[i]);
     strlength += sizeof_utf8(print_buffer);
   }
-  char *buf = malloc((strlength + 1) * sizeof(char));
+  char *buf = paw_alloc(strlength + 1, sizeof(char));
   strlength = 0;
   for (long i = 0; i < filename->length; i++) {
     utf32_to_utf8(print_buffer, filename->value[i]);
@@ -157,7 +158,7 @@ void cog_fperiod(value_t *v) {
 
 void cog_fread(value_t *v) {
   contain_t *cur = stack_peek(STACK);
-  value_t *fileq = stack_pop(cur->stack);
+  value_t *fileq = stack_peek(cur->stack);
   if (!fileq) {
     eval_error(U"TOO FEW ARGUMENTS", v);
     return;
@@ -179,7 +180,7 @@ void cog_fread(value_t *v) {
     utf32_to_utf8(print_buffer, filename->value[i]);
     strlength += sizeof_utf8(print_buffer);
   }
-  char *buf = malloc((strlength + 1) * sizeof(char));
+  char *buf = paw_alloc(strlength + 1, sizeof(char));
   strlength = 0;
   for (long i = 0; i < filename->length; i++) {
     utf32_to_utf8(print_buffer, filename->value[i]);
@@ -194,11 +195,8 @@ void cog_fread(value_t *v) {
     stack_push(cur->stack, fileq);
     return;
   }
-  value_t *fileread = init_value(VWORD);
-  fileread->str_word = file_read(f);
+  file_read2buf(f, fileword->str_word);
   fclose(f);
-  value_free_safe(fileq);
-  push_quoted(cur, fileread);
 }
 
 void cog_fwrite(value_t *v) {
@@ -229,7 +227,7 @@ void cog_fwrite(value_t *v) {
     utf32_to_utf8(print_buffer, filename->value[i]);
     strlength += sizeof_utf8(print_buffer);
   }
-  char *buf = malloc((strlength + 1) * sizeof(char));
+  char *buf = paw_alloc(strlength + 1, sizeof(char));
   strlength = 0;
   for (long i = 0; i < filename->length; i++) {
     utf32_to_utf8(print_buffer, filename->value[i]);
@@ -279,7 +277,7 @@ void cog_fprint(value_t *v) {
     utf32_to_utf8(print_buffer, filename->value[i]);
     strlength += sizeof_utf8(print_buffer);
   }
-  char *buf = malloc((strlength + 1) * sizeof(char));
+  char *buf = paw_alloc(strlength + 1, sizeof(char));
   strlength = 0;
   for (long i = 0; i < filename->length; i++) {
     utf32_to_utf8(print_buffer, filename->value[i]);

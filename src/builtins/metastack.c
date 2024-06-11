@@ -1,6 +1,7 @@
 #include <builtins/metastack.h>
 #include <builtinslib.h>
 #include <macros.h>
+#include <pool.h>
 
 extern stack_t *STACK;
 extern stack_t *CONTAIN_DEF_STACK;
@@ -27,8 +28,7 @@ void cog_cd(value_t *v) {
   for (int i = 0; i < cur->stack->size; i++) {
     value_t *val = cur->stack->items[i];
     if (val->type != VSTACK && val->type != VMACRO) {
-      value_t *newval = init_value(VSTACK);
-      newval->container = init_contain(NULL, NULL, NULL);
+      value_t *newval = pool_req(DEFAULT_STACK_SIZE, POOL_VSTACK);
       stack_push(newval->container->stack, val);
       cur->stack->items[i] = newval;
     }
@@ -71,8 +71,7 @@ void cog_ccd(value_t *v) {
   for (int i = 0; i < cur->stack->size; i++) {
     value_t *val = cur->stack->items[i];
     if (val->type != VSTACK && val->type != VMACRO) {
-      value_t *newval = init_value(VSTACK);
-      newval->container = init_contain(NULL, NULL, NULL);
+      value_t *newval = pool_req(DEFAULT_STACK_SIZE, POOL_VSTACK);
       stack_push(newval->container->stack, val);
       cur->stack->items[i] = newval;
     }
@@ -133,21 +132,19 @@ void cog_qstack(value_t *v) {
   contain_t *oldc = stack_pop(STACK);
   contain_t *cur = stack_peek(STACK);
   if (!cur) {
-    value_t *oldval = init_value(VSTACK);
+
+    value_t *oldval = pool_req(DEFAULT_STACK_SIZE, POOL_VSTACK);
+    contain_t *new = oldval->container;
     oldval->container = oldc;
-    contain_t *new = calloc(1, sizeof(contain_t));
     contain_copy_attributes(oldc, new);
-    new->stack = init_stack(DEFAULT_STACK_SIZE);
     stack_push(new->stack, oldval);
     stack_push(STACK, new);
     CURRENT_ROOT = new;
     return;
   }
   value_t *oldval = stack_pop(cur->stack);
-  value_t *new = init_value(VSTACK);
-  new->container = calloc(1, sizeof(contain_t));
+  value_t *new = pool_req(DEFAULT_STACK_SIZE, POOL_VSTACK);
   contain_copy_attributes(oldval->container, new->container);
-  new->container->stack = init_stack(DEFAULT_STACK_SIZE);
   stack_push(new->container->stack, oldval);
   stack_push(cur->stack, new);
   if (CURRENT_ROOT == oldc)
@@ -180,7 +177,7 @@ void cog_chroot(value_t *v) {
     }
   }
   stack_push(OBJ_TABLE_REF_STACK, cur);
-  stack_push(OBJ_TABLE_STACK, init_ht(DEFAULT_HT_SIZE));
+  stack_push(OBJ_TABLE_STACK, pool_req(0, POOL_HT));
   char32_t index = OBJ_TABLE_REF_STACK->size - 1;
   string_append(ROOT, index);
 }

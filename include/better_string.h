@@ -79,6 +79,9 @@ void fprint_utf32(FILE *, int, ...);
 void print(string_t *s);
 void fprint(FILE *f, string_t *s);
 
+/* reads a utf8 file into given string */
+void file_read2buf(FILE *FP, string_t *s);
+
 /* reads a utf8 file into string_t */
 string_t *file_read(FILE *FP);
 

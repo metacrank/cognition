@@ -29,9 +29,17 @@ void contain_copy_attributes(contain_t *c, contain_t *newc) {
     return;
   }
   newc->flit = ht_copy(c->flit, value_stack_copy);
-  newc->word_table = ht_copy(c->word_table, contain_value_copy);
-  newc->cranks = stack_copy(c->cranks, cranks_copy);
-  newc->faliases = stack_copy(c->faliases, falias_copy);
+  newc->word_table = ht_copy(c->word_table, contain_new_clone);
+  if (newc->cranks && c->cranks)
+    for (long i = 0; i < c->cranks->size; i++)
+      stack_push(newc->cranks, cranks_copy(c->cranks->items[i]));
+  else if (c->cranks)
+    newc->cranks = stack_copy(c->cranks, cranks_copy);
+  if (newc->faliases && c->faliases)
+    for (long i = 0; i < c->faliases->size; i++)
+      stack_push(newc->faliases, falias_copy(c->faliases->items[i]));
+  else if (c->faliases)
+    newc->faliases = stack_copy(c->faliases, falias_copy);
   newc->delims = string_copy(c->delims);
   newc->ignored = string_copy(c->ignored);
   newc->singlets = string_copy(c->singlets);
@@ -116,9 +124,7 @@ void fprint_value(FILE *f, value_t *v, void *e) {
   fprintf(f, "%s", end);
 }
 
-string_t *get_line(FILE *f) {
-  if (!f) return NULL;
-  string_t *s = pool_req(DEFAULT_STRING_LENGTH, POOL_STRING);
+void read_line(FILE *f, string_t *s) {
   byte_t b;
   int c;
   char32_t utf32;
@@ -131,27 +137,33 @@ string_t *get_line(FILE *f) {
       case 2:
         utf32 = b - 0xC0;
         utf32 *= 0x40;
-        if ((c = fgetc(f)) == EOF) return s;
+        if ((c = fgetc(f)) == EOF);
         utf32 += c - 0x80;
         break;
       case 3:
         utf32 = b - 0xE0;
         for (int _ = 0; _ < 2; _++) {
           utf32 *= 0x40;
-          if ((c = fgetc(f)) == EOF) return s;
+          if ((c = fgetc(f)) == EOF) return;
           utf32 += c - 0x80;
         }
       case 4:
         utf32 = b - 0xF0;
         for (int _ = 0; _ < 3; _++) {
           utf32 *= 0x40;
-          if ((c = fgetc(f)) == EOF) return s;
+          if ((c = fgetc(f)) == EOF) return;
           utf32 += c - 0x80;
         }
         break;
     }
     string_append(s, utf32);
   }
+}
+
+string_t *get_line(FILE *f) {
+  if (!f) return NULL;
+  string_t *s = pool_req(DEFAULT_STRING_LENGTH, POOL_STRING);
+  read_line(f, s);
   return s;
 }
 

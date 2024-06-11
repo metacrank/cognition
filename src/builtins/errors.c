@@ -3,6 +3,7 @@
 #include <cognition.h>
 #include <strnum.h>
 #include <macros.h>
+#include <pool.h>
 
 extern stack_t *STACK;
 
@@ -11,7 +12,7 @@ void cog_err_clean(value_t *v) {
   stack_t *estack = cur->err_stack;
   if (!estack) return;
   for (int i = 0; i < estack->size; i ++) {
-    value_free(estack->items[i]);
+    pool_addobj(POOL_VERR, estack->items[i]);
   }
   estack->size = 0;
 }
@@ -20,37 +21,40 @@ void cog_err_peek(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   stack_t *estack = cur->err_stack;
   value_t *v1 = stack_peek(estack);
-  value_t *r1 = init_value(VWORD);
-  value_t *r2 = init_value(VWORD);
+
   if (v1) {
-    r1->str_word = string_copy(v1->error->error);
-    r2->str_word = string_copy(v1->error->str_word);
-  } else {
-    r1->str_word = init_string(U"NO ERRORS");
-    r2->str_word = string_copy(v->str_word);
+    value_t *r1 = pool_req(v1->error->error->length, POOL_VWORD);
+    value_t *r2 = pool_req(v1->error->str_word->length, POOL_VWORD);
+    string_copy_buffer(v1->error->error, r1->str_word);
+    string_copy_buffer(v1->error->str_word, r2->str_word);
+    push_quoted(cur, r1);
+    push_quoted(cur, r2);
+    return;
   }
-  push_quoted(cur, r1);
-  push_quoted(cur, r2);
+  eval_error(U"NO ERRORS", v);
+  cog_err_pop(v);
 }
 
 void cog_err_pop(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   stack_t *estack = cur->err_stack;
   value_t *v1 = stack_pop(estack);
-  value_t *r1 = init_value(VWORD);
-  value_t *r2 = init_value(VWORD);
   if (v1) {
+    value_t *r1 = pool_req(DEFAULT_STRING_LENGTH, POOL_VWORD);
+    pool_addobj(POOL_STRING, r1->str_word);
+    value_t *r2 = pool_req(DEFAULT_STRING_LENGTH, POOL_VWORD);
+    pool_addobj(POOL_STRING, r2->str_word);
     r1->str_word = v1->error->error;
     r2->str_word = v1->error->str_word;
     v1->error->str_word = NULL;
     v1->error->error = NULL;
-  } else {
-    r1->str_word = init_string(U"NO ERRORS");
-    r2->str_word = string_copy(v->str_word);
+    push_quoted(cur, r1);
+    push_quoted(cur, r2);
+    pool_addobj(POOL_VERR, v1);
+    return;
   }
-  push_quoted(cur, r1);
-  push_quoted(cur, r2);
-  value_free(v1);
+  eval_error(U"NO ERRORS", v);
+  cog_err_pop(v);
 }
 
 void cog_err_push(value_t *v) {
@@ -86,16 +90,16 @@ void cog_err_push(value_t *v) {
     stack_push(stack, v2);
     return;
   }
-  value_t *e = init_value(VERR);
-  e->error = calloc(1, sizeof(error_t));
+  value_t *e = pool_req(0, POOL_VERR);
+
   e->error->str_word = w2->str_word;
   e->error->error = w1->str_word;
   w2->str_word = NULL;
   w1->str_word = NULL;
-  value_free_safe(v1);
-  value_free_safe(v2);
+  pool_addobj(POOL_VWORD, v1);
+  pool_addobj(POOL_VWORD, v2);
   if (!cur->err_stack) {
-    cur->err_stack = init_stack(DEFAULT_STACK_SIZE);
+    cur->err_stack = pool_req(DEFAULT_STACK_SIZE, POOL_STACK);
   }
   stack_push(cur->err_stack, e);
 }
@@ -159,8 +163,7 @@ void cog_err_throw(value_t *v) {
     stack_push(cur->stack, errc);
     return;
   }
-  value_t *e = init_value(VERR);
-  e->error = calloc(1, sizeof(error_t));
+  value_t *e = pool_req(0, POOL_VERR);
   if (v)
     e->error->str_word = string_copy(v->str_word);
   else
@@ -169,17 +172,18 @@ void cog_err_throw(value_t *v) {
   errval->str_word = NULL;
   value_free_safe(errc);
   if (cur->err_stack == NULL)
-    cur->err_stack = init_stack(DEFAULT_STACK_SIZE);
+    cur->err_stack = pool_req(DEFAULT_STACK_SIZE, POOL_STACK);
   stack_push(cur->err_stack, e);
 }
 
 void cog_err_size(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   stack_t *error_stack = cur->err_stack;
-  value_t *sizeval = init_value(VWORD);
+  value_t *sizeval = pool_req(DEFAULT_STRING_LENGTH, POOL_VWORD);
   if (error_stack)
-    sizeval->str_word = int_to_string(error_stack->size);
-  else sizeval->str_word = int_to_string(0);
+    int_to_string_buf(error_stack->size, sizeval->str_word);
+  else
+    int_to_string_buf(0, sizeval->str_word);
   push_quoted(cur, sizeval);
 }
 

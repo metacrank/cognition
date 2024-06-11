@@ -1,6 +1,7 @@
 #include <builtins/stackops.h>
 #include <builtinslib.h>
 #include <strnum.h>
+#include <pool.h>
 
 extern stack_t *STACK;
 
@@ -54,8 +55,8 @@ void cog_ssize(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   stack_t *stack = cur->stack;
   size_t size = stack->size;
-  value_t *sizeval = init_value(VWORD);
-  sizeval->str_word = int_to_string(size);
+  value_t *sizeval = pool_req(DEFAULT_STRING_LENGTH, POOL_VWORD);
+  int_to_string_buf(size, sizeval->str_word);
   push_quoted(cur, sizeval);
 }
 

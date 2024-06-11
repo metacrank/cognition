@@ -1,6 +1,7 @@
 #include <builtins/hashtable.h>
 #include <builtinslib.h>
 #include <macros.h>
+#include <pool.h>
 #include <string.h>
 
 extern stack_t *STACK;
@@ -197,8 +198,7 @@ void cog_isdef(value_t *v) {
 void cog_wordlist(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   ht_t *h = cur->word_table;
-  value_t *listval = init_value(VSTACK);
-  listval->container = init_contain(NULL, NULL, NULL);
+  value_t *listval = pool_req(DEFAULT_STACK_SIZE, POOL_VSTACK);
   stack_t *list = listval->container->stack;
   if (h) {
     for (int i = 0; i < h->size; i++) {
@@ -262,21 +262,21 @@ void cog_bequeath(value_t *v) {
     value_t *wordval = value_stack(wordc)[0]->items[i];
     if (defs[i]) {
       if (!child->container->word_table)
-        child->container->word_table = init_ht(DEFAULT_HT_SIZE);
+        child->container->word_table = pool_req(0, POOL_HT);
       ht_add(child->container->word_table,
              string_copy(wordval->str_word),
-             contain_value_copy(defs[i]),
+             contain_new_clone(defs[i]),
              contain_def_stack_push);
     } else if (aliases[i]) {
       if (!child->container->flit)
-        child->container->flit = init_ht(DEFAULT_HT_SIZE);
+        child->container->flit = pool_req(0, POOL_HT);
       ht_add(child->container->flit,
              string_copy(wordval->str_word),
              value_stack_copy(aliases[i]),
              macro_def_stack_push);
     } else {
       if (child->container->faliases == NULL)
-        child->container->faliases = init_stack(DEFAULT_STACK_SIZE);
+        child->container->faliases = pool_req(0, POOL_HT);
       stack_push(child->container->faliases, wordval->str_word);
       wordval->str_word = NULL;
     }

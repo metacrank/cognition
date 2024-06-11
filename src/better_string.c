@@ -239,9 +239,8 @@ void fprint_utf32(FILE *f, int num, ...) {
   }
 }
 
-string_t *file_read(FILE *FP) {
-  if (!FP) return NULL;
-  string_t *s = init_string(U"");
+void file_read2buf(FILE *FP, string_t *s) {
+  s->length = 0;
   byte_t b;
   int c;
   char32_t utf32;
@@ -254,27 +253,33 @@ string_t *file_read(FILE *FP) {
       case 2:
         utf32 = b - 0xC0;
         utf32 *= 0x40;
-        if ((c = fgetc(FP)) == EOF) return s;
+        if ((c = fgetc(FP)) == EOF) return;
         utf32 += c - 0x80;
         break;
       case 3:
         utf32 = b - 0xE0;
         for (int _ = 0; _ < 2; _++) {
           utf32 *= 0x40;
-          if ((c = fgetc(FP)) == EOF) return s;
+          if ((c = fgetc(FP)) == EOF) return;
           utf32 += c - 0x80;
         }
       case 4:
         utf32 = b - 0xF0;
         for (int _ = 0; _ < 3; _++) {
           utf32 *= 0x40;
-          if ((c = fgetc(FP)) == EOF) return s;
+          if ((c = fgetc(FP)) == EOF) return;
           utf32 += c - 0x80;
         }
         break;
     }
     string_append(s, utf32);
   }
+}
+
+string_t *file_read(FILE *FP) {
+  if (!FP) return NULL;
+  string_t *s = pool_req(DEFAULT_STRING_LENGTH, POOL_STRING);
+  file_read2buf(FP, s);
   return s;
 }
 

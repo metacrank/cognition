@@ -18,6 +18,8 @@ void print_value(value_t *v, void *e);
 
 void fprint_value(FILE *f, value_t *v, void *e);
 
+void read_line(FILE *f, string_t *s);
+
 string_t *get_line(FILE *f);
 
 void nop(void *v);

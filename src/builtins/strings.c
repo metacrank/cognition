@@ -2,6 +2,7 @@
 #include <builtinslib.h>
 #include <better_string.h>
 #include <strnum.h>
+#include <pool.h>
 
 extern stack_t *STACK;
 
@@ -74,16 +75,14 @@ void cog_unconcat(value_t *v) {
       return;
     }
   }
-  stack_t *newstack = init_stack(DEFAULT_STACK_SIZE);
+  stack_t *newstack = pool_req(DEFAULT_STACK_SIZE, POOL_STACK);
   string_t *newstring;
   value_t *newval;
   for (long i = 0; i < strstack->size; i++) {
     strval = strstack->items[i];
     for (long i = 0; i < strval->str_word->length; i++) {
-      newstring = init_string(U"");
-      string_append(newstring, strval->str_word->value[i]);
-      newval = init_value(VWORD);
-      newval->str_word = newstring;
+      newval = pool_req(DEFAULT_STRING_LENGTH, POOL_VWORD);
+      string_append(newval->str_word, strval->str_word->value[i]);
       stack_push(newstack, newval);
     }
   }
@@ -158,8 +157,8 @@ void cog_len(value_t *v) {
     eval_error(U"BAD ARGUMENT TYPE", v);
     return;
   }
-  value_t *r1 = init_value(VWORD);
-  r1->str_word = int_to_string(w1->str_word->length);
+  value_t *r1 = pool_req(DEFAULT_STRING_LENGTH, POOL_VWORD);
+  int_to_string_buf(w1->str_word->length, r1->str_word);
   push_quoted(cur, r1);
 }
 
@@ -306,17 +305,12 @@ void cog_isword(value_t *v) {
     eval_error(U"TOO FEW ARGUMENTS", v);
     return;
   }
-  value_t *ret = init_value(VWORD);
+  value_t *ret = pool_req(DEFAULT_STRING_LENGTH, POOL_VWORD);
   stack_t *strstack = *value_stack(strval);
-  if (strstack->size != 1) {
-    ret->str_word = init_string(U"");
-  } else {
+  if (strstack->size == 1) {
     value_t *val = strstack->items[0];
-    if (val->type == VWORD) {
-      ret->str_word = init_string(U"t");
-    } else {
-      ret->str_word = init_string(U"");
-    }
+    if (val->type == VWORD)
+      string_append(ret->str_word, U't');
   }
   push_quoted(cur, ret);
 }
@@ -344,8 +338,7 @@ void cog_btoi(value_t *v) {
     return;
   }
   int byte = bytestr->value[0];
-  string_free(bytestr);
-  str->str_word = int_to_string(byte);
+  int_to_string_buf(byte, str->str_word);
 }
 
 void cog_itob(value_t *v) {

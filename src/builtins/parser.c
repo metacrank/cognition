@@ -1,6 +1,7 @@
 #include <builtins/parser.h>
 #include <builtinslib.h>
 #include <macros.h>
+#include <pool.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -12,15 +13,19 @@ extern bool EXITED;
 
 void cog_getf(value_t *v) {
   contain_t *cur = stack_peek(STACK);
-  value_t *list = init_value(VSTACK);
-  list->container = init_contain(NULL, NULL, NULL);
-  stack_push(cur->stack, list);
-  if (cur->faliases == NULL) return;
-  for (int i = 0; i < cur->faliases->size; i++) {
-    value_t *entry = init_value(VWORD);
-    entry->str_word = string_copy(cur->faliases->items[i]);
-    stack_push(list->container->stack, entry);
+  if (cur->faliases == NULL) {
+    value_t *list = pool_req(DEFAULT_STACK_SIZE, POOL_VSTACK);
+    stack_push(cur->stack, list);
   }
+  value_t *list = pool_req(cur->faliases->size, POOL_VSTACK);
+  for (int i = 0; i < cur->faliases->size; i++) {
+    string_t *falias = cur->faliases->items[i];
+    value_t *entry = pool_req(falias->length, POOL_VWORD);
+    string_copy_buffer(falias, entry->str_word);
+    list->container->stack->items[i] = entry;
+  }
+  list->container->stack->size = cur->faliases->size;
+  stack_push(cur->stack, list);
 }
 
 void cog_setf(value_t *v) {
@@ -46,7 +51,7 @@ void cog_setf(value_t *v) {
     }
   }
   if (cur->faliases == NULL)
-    cur->faliases = init_stack(DEFAULT_STACK_SIZE);
+    cur->faliases = pool_req(DEFAULT_STACK_SIZE, POOL_STACK);
   for (int i = 0; i < cur->stack->size; i++) {
     string_free(cur->faliases->items[i]);
   }
@@ -82,7 +87,7 @@ void cog_aliasf(value_t *v) {
     }
   }
   if (cur->faliases == NULL)
-    cur->faliases = init_stack(DEFAULT_STACK_SIZE);
+    cur->faliases = pool_req(DEFAULT_STACK_SIZE, POOL_STACK);
   for (int i = 0; i < lstack->size; i++) {
     value_t *val = lstack->items[i];
     if (!isfalias(val)) {
@@ -208,29 +213,38 @@ void cog_stgl(value_t *v) {
 }
 
 void cog_geti(value_t *v) {
-  value_t *list = init_value(VWORD);
   contain_t *cur = stack_peek(STACK);
-  list->str_word = string_copy(cur->ignored);
-  if (list->str_word == NULL)
-    list->str_word = init_string(U"");
+  if (cur->ignored) {
+    value_t *list = pool_req(cur->ignored->length, POOL_VWORD);
+    string_copy_buffer(cur->ignored, list->str_word);
+    push_quoted(cur, list);
+    return;
+  }
+  value_t *list = pool_req(DEFAULT_STRING_LENGTH, POOL_VWORD);
   push_quoted(cur, list);
 }
 
 void cog_getd(value_t *v) {
-  value_t *list = init_value(VWORD);
   contain_t *cur = stack_peek(STACK);
-  list->str_word = string_copy(cur->delims);
-  if (list->str_word == NULL)
-    list->str_word = init_string(U"");
+  if (cur->delims) {
+    value_t *list = pool_req(cur->delims->length, POOL_VWORD);
+    string_copy_buffer(cur->delims, list->str_word);
+    push_quoted(cur, list);
+    return;
+  }
+  value_t *list = pool_req(DEFAULT_STRING_LENGTH, POOL_VWORD);
   push_quoted(cur, list);
 }
 
 void cog_gets(value_t *v) {
-  value_t *list = init_value(VWORD);
   contain_t *cur = stack_peek(STACK);
-  list->str_word = string_copy(cur->singlets);
-  if (list->str_word == NULL)
-    list->str_word = init_string(U"");
+  if (cur->singlets) {
+    value_t *list = pool_req(cur->singlets->length, POOL_VWORD);
+    string_copy_buffer(cur->singlets, list->str_word);
+    push_quoted(cur, list);
+    return;
+  }
+  value_t *list = pool_req(DEFAULT_STRING_LENGTH, POOL_VWORD);
   push_quoted(cur, list);
 }
 
@@ -257,7 +271,7 @@ void cog_delim(value_t *v) {
     return;
   }
   if (!cur->delims) {
-    cur->delims = init_string(U"");
+    cur->delims = pool_req(DEFAULT_STRING_LENGTH, POOL_STRING);
   }
   for (int i = 0; i < strv->str_word->length; i++) {
     if (!isdelim(strv->str_word->value[i])) {
@@ -302,7 +316,7 @@ void cog_ignore(value_t *v) {
     return;
   }
   if (!cur->ignored) {
-    cur->ignored = init_string(U"");
+    cur->ignored = pool_req(DEFAULT_STRING_LENGTH, POOL_STRING);
   }
   for (int i = 0; i < strv->str_word->length; i++) {
     if (!isignore(strv->str_word->value[i])) {
@@ -347,7 +361,7 @@ void cog_singlet(value_t *v) {
     return;
   }
   if (!cur->singlets) {
-    cur->singlets = init_string(U"");
+    cur->singlets = pool_req(DEFAULT_STRING_LENGTH, POOL_STRING);
   }
   for (int i = 0; i < strv->str_word->length; i++) {
     if (!issinglet(strv->str_word->value[i])) {
@@ -392,7 +406,7 @@ void cog_undelim(value_t *v) {
     return;
   }
   if (!cur->delims) {
-    cur->delims = init_string(U"");
+    cur->delims = pool_req(DEFAULT_STRING_LENGTH, POOL_STRING);
   }
   for (int i = 0; i < strv->str_word->length; i++) {
     if (isdelim(strv->str_word->value[i])) {
@@ -437,7 +451,7 @@ void cog_unignore(value_t *v) {
     return;
   }
   if (!cur->ignored) {
-    cur->ignored = init_string(U"");
+    cur->ignored = pool_req(DEFAULT_STRING_LENGTH, POOL_STRING);
   }
   for (int i = 0; i < strv->str_word->length; i++) {
     if (isignore(strv->str_word->value[i])) {
@@ -482,7 +496,7 @@ void cog_unsinglet(value_t *v) {
     return;
   }
   if (!cur->singlets) {
-    cur->singlets = init_string(U"");
+    cur->singlets = pool_req(DEFAULT_STRING_LENGTH, POOL_STRING);
   }
   for (int i = 0; i < strv->str_word->length; i++) {
     if (issinglet(strv->str_word->value[i])) {
@@ -562,8 +576,7 @@ void cog_strstack(value_t *v) {
     eval_error(U"TOO FEW ARGUMENTS", v);
     return;
   }
-  value_t *quot = init_value(VSTACK);
-  quot->container = init_contain(NULL, NULL, NULL);
+  value_t *quot = pool_req(DEFAULT_STACK_SIZE, POOL_VSTACK);
   stack_t *qstack = quot->container->stack;
   for (int i = 0; i < value_stack(strc)[0]->size; i++) {
     value_t *str = value_stack(strc)[0]->items[i];

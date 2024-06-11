@@ -2,6 +2,7 @@
 #include <macros.h>
 #include <builtins.h>
 #include <builtinslib.h>
+#include <pool.h>
 #include <dlfcn.h>
 #include <stdlib.h>
 #include <string.h>
@@ -12,19 +13,22 @@ extern string_t *ROOT;
 extern bool RETURNED;
 extern stack_t *ARGS;
 extern byte_t print_buffer[5];
+extern string_t *F;
+extern string_t *ING;
 
 void cog_reset(value_t *v) {
   contain_t *cur = stack_peek(STACK);
   ht_free(cur->word_table, contain_def_stack_push);
   ht_free(cur->flit, macro_def_stack_push);
-  cur->word_table = init_ht(DEFAULT_HT_SIZE);
-  cur->flit = init_ht(DEFAULT_HT_SIZE);
+  cur->word_table = pool_req(0, POOL_HT);
+  cur->flit = pool_req(0, POOL_HT);
   add_funcs(cur->flit);
   string_t *str;
   while((str = stack_pop(cur->faliases))) {
     string_free(str);
   }
-  stack_push(cur->faliases, init_string(U"f"));
+  stack_push(cur->faliases, string_copy(F));
+  stack_push(cur->faliases, string_copy(ING));
   stack_free(cur->cranks, free);
   cur->cranks = NULL;
   stack_free(cur->err_stack, value_free_safe);
@@ -63,7 +67,7 @@ void cog_clib(value_t *v) {
     utf32_to_utf8(print_buffer, str->value[i]);
     strlength += sizeof_utf8(print_buffer);
   }
-  char *buf = malloc((strlength + 1) * sizeof(char));
+  char *buf = paw_alloc(strlength + 1, sizeof(char));
   strlength = 0;
   for (long i = 0; i < str->length; i++) {
     utf32_to_utf8(print_buffer, str->value[i]);
@@ -102,12 +106,10 @@ void cog_return(value_t *v) {
 
 void cog_getargs(value_t *v) {
   contain_t *cur = stack_peek(STACK);
-  contain_t *argc = calloc(1, sizeof(contain_t));
-  argc->stack = value_stack_copy(ARGS);
-  argc->iflag = true;
-  argc->sflag = true;
-  value_t *argv = init_value(VSTACK);
-  argv->container = argc;
+  value_t *argv = pool_req(ARGS->size, POOL_VSTACK);
+  for (long i = 0; i < ARGS->size; i++)
+    argv->container->stack->items[i] = value_copy(ARGS->items[i]);
+  argv->container->stack->size = ARGS->size;
   stack_push(cur->stack, argv);
 }
 
