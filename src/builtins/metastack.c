@@ -97,32 +97,35 @@ void cog_uncdf(value_t *v) {
 }
 
 void cog_pop(value_t *v) {
-  contain_t *old = stack_pop(STACK);
+  contain_t *old = stack_peek(STACK);
   value_t *popval = stack_pop(old->stack);
   if (!popval) {
     eval_error(U"TOO FEW ARGUMENTS", v);
     stack_push(old->stack, popval);
-    stack_push(STACK, old);
+    return;
   }
   if (old == CURRENT_ROOT) {
     cog_qstack(v);
+  } else {
+    stack_pop(STACK);
   }
   contain_t *newc = stack_peek(STACK);
   stack_push(newc->stack, popval);
 }
 
 void cog_popf(value_t *v) {
-  contain_t *old = stack_pop(STACK);
+  contain_t *old = stack_peek(STACK);
   value_t *popval = stack_pop(old->stack);
   if (!popval) {
     eval_error(U"TOO FEW ARGUMENTS", v);
     stack_push(old->stack, popval);
-    stack_push(STACK, old);
+    return;
   }
-  if (STACK->size == 0) {
+  if (STACK->size == 1) {
     cog_qstack(v);
   } else if (CURRENT_ROOT == old) {
     ROOT->length--;
+    stack_pop(STACK);
   }
   contain_t *newc = stack_peek(STACK);
   stack_push(newc->stack, popval);
