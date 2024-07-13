@@ -24,6 +24,11 @@ void cog_err_peek(value_t *v) {
 
   if (v1) {
     value_t *r1 = pool_req(v1->error->error->length, POOL_VWORD);
+    size_t l;
+    if (v1->error->str_word)
+      l = v1->error->str_word->length;
+    else
+      l = DEFAULT_STRING_LENGTH;
     value_t *r2 = pool_req(v1->error->str_word->length, POOL_VWORD);
     string_copy_buffer(v1->error->error, r1->str_word);
     string_copy_buffer(v1->error->str_word, r2->str_word);
