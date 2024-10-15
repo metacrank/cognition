@@ -729,12 +729,14 @@ void evalstack(contain_t *c, value_t *callword, bool destructive) {
       FAMILY->items[0] = cur;
       newval = c->stack->items[i];
       if (cur->cranks) {
-        cr = cur->cranks->items[0];
-        if (cr[0][0] == 0 && cr[0][1]) {
-          eval_value(c, cur, (value_t **)&c->stack->items[i], callword, false, destructive);
-          if (return_function(c, false))
-            return;
-          continue;
+        if (cur->cranks->size) {
+          cr = cur->cranks->items[0];
+          if (cr[0][0] == 0 && cr[0][1]) {
+            eval_value(c, cur, (value_t **)&c->stack->items[i], callword, false, destructive);
+            if (return_function(c, false))
+              return;
+            continue;
+          }
         }
       }
       if (newval->type != VWORD) {
