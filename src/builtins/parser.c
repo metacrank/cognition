@@ -16,6 +16,7 @@ void cog_getf(value_t *v) {
   if (cur->faliases == NULL) {
     value_t *list = pool_req(DEFAULT_STACK_SIZE, POOL_VSTACK);
     stack_push(cur->stack, list);
+    return;
   }
   value_t *list = pool_req(cur->faliases->size, POOL_VSTACK);
   for (int i = 0; i < cur->faliases->size; i++) {
